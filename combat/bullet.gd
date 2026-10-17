@@ -1,0 +1,43 @@
+class_name Bullet
+extends Area3D
+## Simple projectile. `pierces_shield` bullets damage HP directly.
+
+var velocity := Vector3.ZERO
+var damage := 8.0
+var pierces_shield := false
+var lifetime := 6.0
+var accel := 0.0          ## speed change per second (0 = constant)
+
+func _ready() -> void:
+	collision_layer = 1 << 3   # layer 4: bullet
+	collision_mask = 1 << 1    # detect player
+	var s := SphereShape3D.new()
+	s.radius = 0.28
+	var cs := CollisionShape3D.new()
+	cs.shape = s
+	add_child(cs)
+	var m := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.28
+	sm.height = 0.56
+	m.mesh = sm
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
+	m.material_override = mat
+	add_child(m)
+	body_entered.connect(_on_body)
+
+func _physics_process(delta: float) -> void:
+	if accel != 0.0:
+		var spd := maxf(0.0, velocity.length() + accel * delta)
+		velocity = velocity.normalized() * spd
+	global_position += velocity * delta
+	lifetime -= delta
+	if lifetime <= 0.0:
+		queue_free()
+
+func _on_body(body: Node3D) -> void:
+	if body is Player:
+		(body as Player).hit(damage, pierces_shield)
+		queue_free()
