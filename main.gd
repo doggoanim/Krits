@@ -22,9 +22,7 @@ func _ready() -> void:
 
 	encounters = EncounterManager.new()
 	add_child(encounters)
-	var transition := ScreenTransition.new()
-	add_child(transition)
-	encounters.setup(player, level, transition, _env)
+	encounters.setup(player, level, _env)
 	for e in get_tree().get_nodes_in_group(&"world_enemies"):
 		encounters.register_world_enemy(e)
 

@@ -13,12 +13,14 @@ dive or long-jump into a wall = wall bounce (can dive again, chain it).
 ## Layout
 - core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera, visual
-- combat/    EncounterManager (float -> dissolve -> square stage -> return) -> Arena (orbs, combo, walls), Enemy/EnemyData,
-             Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
+- combat/    EncounterManager (float -> world dissolves -> square stage -> return) -> Arena (orbs, combo,
+             walls, stage_root for its dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
-- world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, TestLevel blockout
-- ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader
+- world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, TestLevel blockout,
+             WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
+- ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader (screen-space
+             fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
 
 ## Extending
 - New move: add a `states/xxx_state.gd` extending PlayerState, register it in Player._ready.

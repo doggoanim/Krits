@@ -25,6 +25,8 @@ var player: Player
 var enemies: Array[Enemy] = []
 var orbs: Array[Orb] = []
 var xp_reward := 0
+var stage_root: Node3D   ## holds only the floor/walls/border, so WorldDissolver can
+                          ## target the stage geometry without touching enemies/orbs
 var _over := false
 
 static func half_for(enemy_count: int) -> float:
@@ -150,6 +152,8 @@ func _end(victory: bool) -> void:
 # ---------------------------------------------------------------- stage geometry
 
 func _build_stage() -> void:
+	stage_root = Node3D.new()
+	add_child(stage_root)
 	var side := half * 2.0
 	# Floor (top surface at local y = 0)
 	_slab(Vector3(0, -0.5, 0), Vector3(side + 2.0, 1.0, side + 2.0), Color(0.07, 0.09, 0.16), 1, 0.0)
@@ -174,12 +178,12 @@ func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, tra
 	cs.shape = shape
 	body.add_child(cs)
 	body.add_child(_mesh(size, col, emit, translucent))
-	add_child(body)
+	stage_root.add_child(body)
 
 func _decor(pos: Vector3, size: Vector3, col: Color, emit: float) -> void:
 	var m := _mesh(size, col, emit, false)
 	m.position = pos
-	add_child(m)
+	stage_root.add_child(m)
 
 func _mesh(size: Vector3, col: Color, emit: float, translucent: bool) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
