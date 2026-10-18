@@ -1,17 +1,19 @@
 class_name EncounterManager
 extends Node
 ## Runs the full encounter sequence:
-##   touch -> everyone floats -> the world map dissolves into a square stage ->
-##   fight -> the stage dissolves back into the world map (or respawn on defeat).
+##   touch -> everyone floats -> one crossfade (world dissolves out, stage dissolves
+##   in) -> fight -> the reverse crossfade back to the world map (or respawn on defeat).
 ## Nearby overworld enemies are pulled into the same fight (bigger arena).
 ## "Dissolving" means the actual level/stage geometry crumbles into noise and
-## reforms (see WorldDissolver) — there is no screen overlay involved.
+## reforms (see WorldDissolver) — there is no screen overlay involved. The fade-out
+## and fade-in are two halves of one timed beat (see CROSSFADE_TIME), not two
+## separate full-length dissolves played back to back.
 
 const MERGE_DISTANCE := 14.0
 const STAGE_ORIGIN := Vector3(0.0, 400.0, 0.0)   ## stage floats high above the world
 const FLOAT_HEIGHT := 2.2
 const FLOAT_TIME := 0.9
-const DISSOLVE_TIME := 0.9
+const CROSSFADE_TIME := 0.9   ## total time for world-out+stage-in as ONE beat (each half gets CROSSFADE_TIME * 0.5)
 const POST_FIGHT_PAUSE := 0.8
 const GRACE_TIME := 2.0                           ## no new encounters right after returning
 
@@ -70,34 +72,36 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	if not world_enemies.is_empty():
 		await _float(world_enemies)
 
-	# 2) the world map dissolves away (terrain + overworld enemies, player stays solid)
+	# 2) one crossfade, not two separate full dissolves: the world fades out and,
+	# the instant it's gone, the stage fades in to take its place. Each half gets
+	# half the time, so the whole beat reads as a single continuous transition.
+	var half := CROSSFADE_TIME * 0.5
 	_world_dissolver.begin(world_root)
-	await _tween_progress(_world_dissolver, 1.0, DISSOLVE_TIME)
+	await _tween_progress(_world_dissolver, 1.0, half)
 	world_root.visible = false
 	_set_stage_environment(true)
 
-	# 3) build the arena and let its stage dissolve in
 	var arena := Arena.new()
 	active_arena = arena
 	get_parent().add_child(arena)
 	arena.begin(player, STAGE_ORIGIN, roster)
 	_arena_dissolver.begin(arena.stage_root)
 	_arena_dissolver.set_progress(1.0)
-	await _tween_progress(_arena_dissolver, 0.0, DISSOLVE_TIME)
+	await _tween_progress(_arena_dissolver, 0.0, half)
 	_arena_dissolver.finish()
 	Game.input_locked = false
 	arena.start_fight()
 
-	# 4) fight
+	# 3) fight
 	var victory: bool = await arena.finished
 	Game.input_locked = true
 	var cancelled := arena.cancelled
 	if not cancelled:
 		await get_tree().create_timer(POST_FIGHT_PAUSE).timeout
 
-	# 5) the stage dissolves away
+	# 4) the reverse crossfade: stage fades out, then world fades back in
 	_arena_dissolver.begin(arena.stage_root)
-	await _tween_progress(_arena_dissolver, 1.0, DISSOLVE_TIME)
+	await _tween_progress(_arena_dissolver, 1.0, half)
 	arena.queue_free()
 	active_arena = null
 	_set_stage_environment(false)
@@ -119,8 +123,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 		player.camera_rig.snap()
 	Events.encounter_returned.emit(player_defeated)   # Main respawns the player on defeat
 
-	# 6) the world map dissolves back in
-	await _tween_progress(_world_dissolver, 0.0, DISSOLVE_TIME)
+	await _tween_progress(_world_dissolver, 0.0, half)
 	_world_dissolver.finish()
 
 	_grace = GRACE_TIME
