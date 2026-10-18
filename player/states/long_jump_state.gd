@@ -1,5 +1,7 @@
 class_name LongJumpState
 extends PlayerState
+## Roll + jump. Can cancel into a dive (consumes can_dive like any other air dive)
+## or a ground pound, and wall-bounces re-grant the dive just like a normal jump.
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.visual.set_pose(&"long_jump")
@@ -9,6 +11,9 @@ func exit(_next: StringName) -> void:
 
 func physics_update(delta: float) -> void:
 	var p := player
+	if Input.is_action_just_pressed(&"roll_dive") and p.can_dive:
+		machine.transition_to(&"Dive")
+		return
 	if Input.is_action_just_pressed(&"crouch_pound"):
 		machine.transition_to(&"Pound")
 		return

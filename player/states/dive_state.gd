@@ -20,7 +20,8 @@ func exit(_next: StringName) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	if Input.is_action_just_pressed(&"jump"):
-		p.start_jump(p.config.dive_cancel_velocity, false)
+		p.set_hvel(Vector3.ZERO)   # cancel all momentum, same clean pop as an orb bounce
+		p.start_jump(p.config.dive_cancel_velocity)
 		return
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()

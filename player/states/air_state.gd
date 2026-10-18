@@ -1,10 +1,7 @@
 class_name AirState
 extends PlayerState
 
-var _cuttable := false
-
-func enter(_prev: StringName, msg: Dictionary = {}) -> void:
-	_cuttable = msg.get("cuttable", false)
+func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
 		player.set_crouching(false)
 
@@ -26,9 +23,6 @@ func physics_update(delta: float) -> void:
 	if input.length() > 0.1:
 		p.face(input, delta)
 	p.apply_gravity(delta)
-	if _cuttable and p.velocity.y > 0.0 and not Input.is_action_pressed(&"jump"):
-		p.velocity.y *= c.jump_cut
-		_cuttable = false
 	p.move_and_slide()
 	if p.is_on_floor():
 		machine.transition_to(&"Ground")

@@ -17,8 +17,7 @@ extends Resource
 @export var air_accel := 22.0
 @export var air_steer_rate := 2.2          ## rad/s steering while carrying extra momentum
 @export var momentum_drag := 1.5           ## speed lost per second above air_speed
-@export var jump_velocity := 12.0
-@export var jump_cut := 0.5                ## velocity multiplier when jump released early
+@export var jump_velocity := 12.0          ## fixed height every jump — no variable height from holding
 @export var coyote_time := 0.1
 @export var jump_buffer := 0.12
 

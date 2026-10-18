@@ -151,11 +151,13 @@ func air_control(delta: float) -> void:
 
 # ---------------------------------------------------------------- actions
 
-func start_jump(vel: float, cuttable := true) -> void:
+## Every jump is a fixed, snappy height — no variable height from holding the
+## button, so the timing always feels the same regardless of how long jump is held.
+func start_jump(vel: float) -> void:
 	velocity.y = vel
 	coyote = 0.0
 	jump_buffer_t = 0.0
-	machine.transition_to(&"Air", {"cuttable": cuttable})
+	machine.transition_to(&"Air")
 
 func bounce_off_orb() -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive

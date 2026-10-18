@@ -14,7 +14,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	if p.jump_buffer_t > 0.0:
-		p.start_jump(p.config.pound_jump_velocity, false)
+		p.start_jump(p.config.pound_jump_velocity)
 		return
 	p.velocity = Vector3(0.0, -1.0, 0.0)
 	p.move_and_slide()
