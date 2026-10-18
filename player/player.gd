@@ -84,8 +84,13 @@ func _update_lean(delta: float) -> void:
 	var target_bank := 0.0
 	if is_on_floor():
 		var speed_ratio := clampf(get_hvel().length() / config.walk_speed, 0.0, 1.6)
-		target_pitch = speed_ratio * LEAN_PITCH_MAX
-		target_bank = clampf(-yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
+		# Facing is -Z, so tipping the body's +Y axis toward -Z (lean forward,
+		# into the movement) is a NEGATIVE rotation.x — positive would lean back.
+		target_pitch = -speed_ratio * LEAN_PITCH_MAX
+		# yaw increases when turning left (see face()/atan2 convention below), and
+		# a positive rotation.z already tips the body toward -X (the character's
+		# left), so banking into the turn means matching yaw_rate's sign directly.
+		target_bank = clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
 
 	visual.set_lean(target_pitch, target_bank, LEAN_SMOOTH, delta)
 
@@ -153,6 +158,7 @@ func start_jump(vel: float, cuttable := true) -> void:
 	machine.transition_to(&"Air", {"cuttable": cuttable})
 
 func bounce_off_orb() -> void:
+	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
 	can_dive = true
 	machine.transition_to(&"Air")
@@ -175,6 +181,11 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool) -> bool:
 	face(n)
 	if regrants_dive:
 		can_dive = true
+	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure
+	# a leftover buffered jump / coyote window can't immediately re-fire a second,
+	# different jump on top of it the moment AirState ticks next frame.
+	coyote = 0.0
+	jump_buffer_t = 0.0
 	machine.transition_to(&"Air")
 	return true
 
