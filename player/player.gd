@@ -22,9 +22,15 @@ var jump_buffer_t := 0.0
 var invuln := 0.0
 var roll_cd := 0.0
 
+const LEAN_PITCH_MAX := 0.18     ## ~10 degrees, forward/back lean at full speed
+const LEAN_BANK_MAX := 0.28      ## ~16 degrees, side bank at the fastest turns
+const LEAN_TURN_SCALE := 0.12    ## how much yaw rate (rad/s) converts into bank (rad)
+const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
+
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
 var _was_on_floor := true
+var _prev_facing_yaw := 0.0
 
 func _ready() -> void:
 	collision_layer = 1 << 1   # layer 2: player
@@ -64,6 +70,24 @@ func _physics_process(delta: float) -> void:
 		can_dive = true
 		Events.player_landed.emit()
 	_was_on_floor = is_on_floor()
+	_update_lean(delta)
+
+## Arcade-style motion lean: pitch forward with ground speed, bank into turns.
+## Grounded only — cinematic poses (dive/pound/long jump) already claim `_body`'s
+## own rotation, and fading this out in the air keeps the two from ever mixing.
+func _update_lean(delta: float) -> void:
+	var yaw := atan2(-facing.x, -facing.z)
+	var yaw_rate := wrapf(yaw - _prev_facing_yaw, -PI, PI) / maxf(delta, 0.0001)
+	_prev_facing_yaw = yaw
+
+	var target_pitch := 0.0
+	var target_bank := 0.0
+	if is_on_floor():
+		var speed_ratio := clampf(get_hvel().length() / config.walk_speed, 0.0, 1.6)
+		target_pitch = speed_ratio * LEAN_PITCH_MAX
+		target_bank = clampf(-yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
+
+	visual.set_lean(target_pitch, target_bank, LEAN_SMOOTH, delta)
 
 func _update_timers(delta: float) -> void:
 	coyote = config.coyote_time if is_on_floor() else maxf(0.0, coyote - delta)

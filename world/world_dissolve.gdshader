@@ -48,11 +48,14 @@ float vnoise(vec3 p) {
 void fragment() {
 	vec3 cell = floor(world_pos / cell_size);
 	float n = 0.65 * vnoise(cell * 0.18) + 0.35 * hash(cell);
+	// progress 0: th = 0, nothing discarded (n is always >= 0).
+	// progress 1: th = 1 + edge_width, which exceeds every possible n, so every
+	// cell is past its discard point and the mesh is fully gone — no leftover
+	// undissolved pixels flashing back once the tween reaches 1.0.
 	float th = progress * (1.0 + edge_width);
-	if (n > th) {
+	if (n < th - edge_width) {
 		discard;
-	}
-	if (n > th - edge_width) {
+	} else if (n < th) {
 		ALBEDO = edge_color.rgb;
 		EMISSION = edge_color.rgb * 2.0;
 	} else {

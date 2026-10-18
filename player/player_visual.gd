@@ -2,6 +2,11 @@ class_name PlayerVisual
 extends Node3D
 ## Placeholder body built from primitives, tinted by the active outfit.
 ## Swap the meshes for a real model later; the public API stays the same.
+##
+## Rotation is split across two layers so they never fight each other:
+##   - this node (PlayerVisual) owns facing (rotation.y, set by Player.face) and
+##     the movement lean (rotation.x pitch / rotation.z bank, set by set_lean).
+##   - `_body`, a child, owns pose rotation.x (dive/long_jump/pound/roll spin).
 
 var _body: MeshInstance3D
 var _head: MeshInstance3D
@@ -9,6 +14,8 @@ var _mat := StandardMaterial3D.new()
 var _flash_t := 0.0
 var _rolling := false
 var _outfit: OutfitData
+var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
+var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
 
 func _ready() -> void:
 	var capsule := CapsuleMesh.new()
@@ -54,6 +61,15 @@ func set_pose(pose: StringName) -> void:
 
 func flash() -> void:
 	_flash_t = 0.25
+
+## Smoothly lean this node toward `pitch` (forward/back, rad) and `bank` (side-to-
+## side, rad). Call every physics frame with a target of 0 to relax back upright.
+func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void:
+	var t := clampf(smoothing * delta, 0.0, 1.0)
+	_lean_pitch = lerpf(_lean_pitch, pitch, t)
+	_lean_bank = lerpf(_lean_bank, bank, t)
+	rotation.x = _lean_pitch
+	rotation.z = _lean_bank
 
 func _process(delta: float) -> void:
 	if _rolling:
