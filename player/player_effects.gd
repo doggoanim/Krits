@@ -1,9 +1,9 @@
 class_name PlayerEffects
 extends Node3D
-## Procedural movement particle effects — dust, dirt, smoke. Everything here
-## (the soft circle sprite, every ParticleProcessMaterial) is built in code,
-## no external textures or imported particle scenes, same philosophy as the
-## rest of this project.
+## Movement particle effects — dust, dirt, smoke. Every ParticleProcessMaterial
+## is built in code, but the sprite each particle wears is one of two hand-
+## drawn textures (assets/sprites/): dirt_texture.png for anything dust/dirt,
+## smoke_puff.png for anything smoke/air.
 ##
 ## Two kinds of emitter:
 ## - Persistent, toggled on/off for as long as a move lasts (running dust,
@@ -27,8 +27,11 @@ const SMOKE_RAMP := [
 	Color(0.8, 0.8, 0.85, 0.0),
 ]
 
-var _dust_texture: GradientTexture2D
-var _quad: QuadMesh
+const DUST_TEXTURE_PATH := "res://assets/sprites/dirt_texture.png"
+const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
+
+var _dust_quad: QuadMesh
+var _smoke_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
 var _smoke_ramp_tex: GradientTexture1D
@@ -38,17 +41,17 @@ var _dive_trail: GPUParticles3D
 var _long_jump_trail: GPUParticles3D
 
 func _ready() -> void:
-	_dust_texture = SoftCircleTexture.make()
-	_quad = _make_quad_mesh()
+	_dust_quad = _make_quad_mesh(load(DUST_TEXTURE_PATH))
+	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
 
-	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false)
+	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
 	add_child(_run_dust)
-	_dive_trail = _build_emitter(_smoke_material(1.5, -1.5, 0.7, 1.6), 18, 0.8, false)
+	_dive_trail = _build_emitter(_smoke_material(1.5, -1.5, 0.7, 1.6), 18, 0.8, false, _smoke_quad)
 	add_child(_dive_trail)
-	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false)
+	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false, _dust_quad)
 	add_child(_long_jump_trail)
 
 # ---------------------------------------------------------------- continuous
@@ -65,35 +68,36 @@ func set_long_jump_trail(active: bool) -> void:
 # ---------------------------------------------------------------- one-shot bursts
 
 func burst_jump_dust() -> void:
-	_burst(global_position, Vector3.UP, 35.0, _dust_material(4.0, 7.0, 0.3, 0.75), 8, 0.35)
+	_burst(global_position, Vector3.UP, 35.0, _dust_material(4.0, 7.0, 0.3, 0.75), 8, 0.35, _dust_quad)
 
 func burst_land_dust() -> void:
-	_burst(global_position, Vector3.UP, 60.0, _dust_material(5.5, 9.0, 0.5, 1.2), 16, 0.45)
+	_burst(global_position, Vector3.UP, 60.0, _dust_material(5.5, 9.0, 0.5, 1.2), 16, 0.45, _dust_quad)
 
 ## `normal` points away from the wall — the airborne dive/long-jump bounce,
 ## a softer puff of air/smoke since nothing solid hit the ground.
 func burst_wall_impact(pos: Vector3, normal: Vector3) -> void:
-	_burst(pos, normal, 55.0, _smoke_material(4.0, 0.0, 0.5, 1.1), 12, 0.4)
+	_burst(pos, normal, 55.0, _smoke_material(4.0, 0.0, 0.5, 1.1), 12, 0.4, _smoke_quad)
 
 ## Rolling into a wall on the ground — a punchier, dirtier burst than the
 ## airborne wall bounce above.
 func burst_roll_collision(pos: Vector3, normal: Vector3) -> void:
-	_burst(pos, normal, 60.0, _dust_material(6.0, 10.0, 0.55, 1.3), 18, 0.45)
+	_burst(pos, normal, 60.0, _dust_material(6.0, 10.0, 0.55, 1.3), 18, 0.45, _dust_quad)
 
 # ---------------------------------------------------------------- building blocks
 
 func _burst(pos: Vector3, direction: Vector3, spread_deg: float, mat: ParticleProcessMaterial,
-		amount: int, lifetime: float) -> void:
+		amount: int, lifetime: float, quad: QuadMesh) -> void:
 	mat.direction = direction.normalized() if direction.length() > 0.01 else Vector3.UP
 	mat.spread = spread_deg
-	var p := _build_emitter(mat, amount, lifetime, true)
+	var p := _build_emitter(mat, amount, lifetime, true, quad)
 	add_child(p)
 	p.global_position = pos
 	p.emitting = true
 	p.restart()
 	get_tree().create_timer(lifetime + 0.3).timeout.connect(p.queue_free)
 
-func _build_emitter(mat: ParticleProcessMaterial, amount: int, lifetime: float, one_shot: bool) -> GPUParticles3D:
+func _build_emitter(mat: ParticleProcessMaterial, amount: int, lifetime: float, one_shot: bool,
+		quad: QuadMesh) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
 	p.amount = amount
 	p.lifetime = lifetime
@@ -101,12 +105,12 @@ func _build_emitter(mat: ParticleProcessMaterial, amount: int, lifetime: float, 
 	p.explosiveness = 0.9 if one_shot else 0.0
 	p.randomness = 0.4
 	p.local_coords = false
-	p.draw_pass_1 = _quad
+	p.draw_pass_1 = quad
 	p.process_material = mat
 	p.emitting = false   # continuous emitters wait for set_*(true); bursts are started explicitly below
 	return p
 
-func _make_quad_mesh() -> QuadMesh:
+func _make_quad_mesh(texture: Texture2D) -> QuadMesh:
 	var q := QuadMesh.new()
 	q.size = Vector2(0.4, 0.4)
 	var m := StandardMaterial3D.new()
@@ -114,7 +118,7 @@ func _make_quad_mesh() -> QuadMesh:
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.vertex_color_use_as_albedo = true   # lets each particle's process-material color tint this
-	m.albedo_texture = _dust_texture
+	m.albedo_texture = texture
 	q.material = m
 	return q
 
