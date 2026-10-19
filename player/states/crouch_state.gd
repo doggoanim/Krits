@@ -4,6 +4,13 @@ extends PlayerState
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.set_crouching(true)
 
+## A little bounce when standing back up normally — not when chaining into a
+## roll or falling off a ledge, where the uncrouch pose would just get
+## overridden by that state's own animation a frame later anyway.
+func exit(next: StringName) -> void:
+	if next == &"Ground":
+		player.visual.squash_stretch(player.visual.uncrouch_bounce_y, player.visual.uncrouch_bounce_xz)
+
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config

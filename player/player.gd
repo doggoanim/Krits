@@ -68,6 +68,7 @@ func _physics_process(delta: float) -> void:
 	machine.physics_update(delta)
 	if is_on_floor() and not _was_on_floor:
 		can_dive = true
+		visual.squash_stretch(visual.land_squash_y, visual.land_squash_xz)
 		Events.player_landed.emit()
 	_was_on_floor = is_on_floor()
 	_update_lean(delta)
@@ -158,6 +159,7 @@ func start_jump(vel: float) -> void:
 	velocity.y = vel
 	coyote = 0.0
 	jump_buffer_t = 0.0
+	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
 	machine.transition_to(&"Air")
 
 func bounce_off_orb() -> void:

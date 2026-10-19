@@ -53,6 +53,20 @@ var _held_anim := &""    ## the anim play_hold() is currently protecting
 @export var outline_thickness_ratio := 0.006   ## outline thickness, as a fraction of the character's height
 @export var outline_color := Color.BLACK
 
+## Squash & stretch pops. All code-driven (scale the whole model, not the
+## skeleton), independent of whatever animation clip is playing, so they
+## layer on top of jump_start/falling/idle/etc. instead of replacing them.
+@export_group("Squash & Stretch")
+@export var jump_stretch_y := 1.22      ## taller/thinner at the instant of launch
+@export var jump_stretch_xz := 0.88
+@export var land_squash_y := 0.78       ## shorter/wider at the instant of landing impact
+@export var land_squash_xz := 1.14
+@export var uncrouch_bounce_y := 1.12   ## small stretchy "pop" when standing back up
+@export var uncrouch_bounce_xz := 0.94
+@export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes
+
+var _squash_tween: Tween
+
 ## Clips meant to play on repeat for as long as their state lasts, rather than
 ## play once and hold a final frame. glTF import defaults every clip to
 ## non-looping, so without this a sustained roll (or just standing still past
@@ -179,6 +193,25 @@ func play_hold(anim_name: StringName, duration: float) -> void:
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
 	return _hold_t > 0.0
+
+## Code-driven squash/stretch "pop": immediately pushes the whole model's
+## scale away from its normal rest size — `y_scale` vertically, `xz_scale`
+## horizontally (pick values on opposite sides of 1.0, e.g. tall+thin for a
+## stretch or short+wide for a squash, so it still reads as the same
+## character rather than literally growing/shrinking) — then eases back to
+## normal over `duration` with a springy overshoot. Safe to call again
+## mid-pop (a new call cancels and replaces whatever pop is still settling).
+## `duration < 0` (the default) uses `squash_stretch_time` — can't reference
+## that exported var directly as the default since GDScript requires default
+## argument values to be constant expressions.
+func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
+	var dur := duration if duration >= 0.0 else squash_stretch_time
+	if _squash_tween and _squash_tween.is_valid():
+		_squash_tween.kill()
+	_model.scale = Vector3(_base_scale * xz_scale, _base_scale * y_scale, _base_scale * xz_scale)
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 ## Smoothly lean this node toward `pitch` (forward/back, rad) and `bank` (side-to-
 ## side, rad). Call every physics frame with a target of 0 to relax back upright.
