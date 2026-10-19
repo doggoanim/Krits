@@ -258,9 +258,19 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 		can_dive = true
 	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure
 	# a leftover buffered jump / coyote window can't immediately re-fire a second,
-	# different jump on top of it the moment AirState ticks next frame.
+	# different jump on top of it the moment AirState ticks next frame. But a
+	# jump pressed on this exact same frame is left alone instead of wiped —
+	# Dive/LongJump check this every frame unconditionally (unlike Roll, which
+	# checks jump first and returns before it can reach this call), so a jump
+	# press that happens to land on the same frame as a wall bounce (clipping
+	# a wall mid-dive/long-jump, say) was getting silently eaten here instead
+	# of carrying through to the landing it was actually meant for. coyote is
+	# still zeroed below, so AirState's own coyote gate already blocks it from
+	# immediately re-firing on top of the bounce — it only takes effect once
+	# the player genuinely lands within the buffer's own short window.
 	coyote = 0.0
-	jump_buffer_t = 0.0
+	if jump_buffer_t < config.jump_buffer:
+		jump_buffer_t = 0.0
 	machine.transition_to(&"Air")
 	return true
 
