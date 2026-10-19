@@ -115,13 +115,15 @@ func _collect_materials(n: Node) -> void:
 			var mat := mi.get_active_material(i)
 			if mat is BaseMaterial3D:
 				var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
-				# Unshaded: the character's colors are drawn exactly as authored,
-				# regardless of sun angle, ambient light color/strength, or shadows
-				# falling on it. Keeps the model reading as a consistent, flat
-				# cartoony color instead of shifting with the world's lighting.
-				# (Screen-wide color grading/saturation in EnvironmentConfig still
-				# applies on top, same as everything else on screen.)
-				dup.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				# Toon ramp: lighting still reaches the character (so it gets a
+				# shaded side and a lit side, and still reads as part of the
+				# scene), but in a few hard-edged bands instead of a smooth PBR
+				# gradient — the classic cel-shaded look — and with no shiny
+				# specular highlight. Colors stay close to their authored albedo
+				# rather than washing out with strong light.
+				dup.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+				dup.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+				dup.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 				mi.set_surface_override_material(i, dup)
 				_materials.append(dup)
 				_base_colors[dup] = dup.albedo_color
