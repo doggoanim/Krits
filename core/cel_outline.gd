@@ -22,7 +22,9 @@ static func apply(mi: MeshInstance3D, thickness: float, color := Color.BLACK) ->
 	return outline
 
 static func _outline_material(thickness: float, color: Color) -> BaseMaterial3D:
-	var m := BaseMaterial3D.new()
+	# BaseMaterial3D is abstract — StandardMaterial3D is the concrete class
+	# that actually implements it.
+	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = color
 	m.cull_mode = BaseMaterial3D.CULL_FRONT
