@@ -18,7 +18,8 @@ extends Resource
 ## see GroundState's _slide_is_turn) does this instead of a plain jump —
 ## Mario 64's side somersault: a higher arc, launched toward the new
 ## direction instead of straight up.
-@export var side_flip_jump_velocity := 14.0   ## higher than a plain jump (jump_velocity)
+@export var side_flip_jump_velocity := 18.0   ## higher than a plain jump (jump_velocity), 2 less
+                                               ## than pound_jump_velocity
 @export var side_flip_speed := 10.0           ## horizontal speed toward the new direction
 @export var side_flip_hold_time := 0.6        ## how long side_jump plays before air control resumes
                                                ## (shorter than the clip's own ~1.25s so a mistimed

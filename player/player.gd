@@ -208,7 +208,9 @@ func start_side_flip(dir: Vector3) -> void:
 	coyote = 0.0
 	jump_buffer_t = 0.0
 	can_dive = true
-	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time)
+	# side_jump's keyframes come out of the model reversed — played
+	# back-to-front (speed -1) instead of literally reversing it.
+	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
 	machine.transition_to(&"Air")
 

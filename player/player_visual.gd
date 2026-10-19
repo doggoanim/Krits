@@ -133,7 +133,10 @@ func apply_outfit(o: OutfitData) -> void:
 ## that same clip — so a state's regular per-frame animation driver (Ground's
 ## run/idle, Air's jump/fall, ...) can keep calling this every frame without
 ## needing to know a reaction pose is in progress.
-func play(anim_name: StringName, blend := 0.15) -> void:
+## `speed` < 0 plays the clip back-to-front (starting from its last frame) —
+## for a clip whose own keyframes were authored/exported in reverse, this is
+## what makes it read correctly in-game instead of literally reversing.
+func play(anim_name: StringName, blend := 0.15, speed := 1.0) -> void:
 	if _hold_t > 0.0 and anim_name != _held_anim:
 		return
 	if _anim == null:
@@ -143,7 +146,7 @@ func play(anim_name: StringName, blend := 0.15) -> void:
 		return
 	if _anim.current_animation == anim_name and _anim.is_playing():
 		return
-	_anim.play(anim_name, blend)
+	_anim.play(anim_name, blend, speed, speed < 0.0)
 
 func flash() -> void:
 	_flash_t = 0.25
@@ -158,11 +161,11 @@ func set_slimed(active: bool) -> void:
 ## being overridden by a state's regular per-frame play() calls for
 ## `duration` seconds. Whoever triggered it is responsible for playing
 ## whatever comes next once that window has passed (is_holding() tells you
-## when it's safe to).
-func play_hold(anim_name: StringName, duration: float) -> void:
+## when it's safe to). `speed` is forwarded to play() as-is (see its doc).
+func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
 	_hold_t = duration
 	_held_anim = anim_name
-	play(anim_name)
+	play(anim_name, 0.15, speed)
 
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
