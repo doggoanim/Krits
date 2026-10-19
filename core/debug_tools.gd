@@ -3,8 +3,9 @@ extends Node
 ## Dev shortcuts for testing fights quickly. Only active in debug builds.
 ##  F1 green slime  F2 spinner  F3 piercer  F4 trio  F5 big group (6)
 ##  F6 cancel fight  F7 god mode  F8 level up  F9 full heal
+##  F10 respawn defeated overworld enemies  F11 delete save
 
-const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 Level up  F9 Heal"
+const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 Level up  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save"
 
 var player: Player
 var encounters: EncounterManager
@@ -41,6 +42,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_update_label()
 		KEY_F8: Game.stats.add_xp(Game.stats.xp_to_next())
 		KEY_F9: Game.stats.full_heal()
+		KEY_F10:
+			Game.reset_cleared_enemies()
+			get_tree().reload_current_scene()
+		KEY_F11:
+			Game.delete_save()
+			get_tree().reload_current_scene()
 
 func _cancel() -> void:
 	if encounters.active_arena:

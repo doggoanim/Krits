@@ -34,6 +34,27 @@ func set_outfit(id: StringName) -> void:
 		outfit = id
 		Events.outfit_changed.emit(id)
 
+## Clears every "cleared_<id>" world-enemy flag (leaves other story flags
+## alone), so already-defeated overworld enemies count as undefeated again.
+## Debug-only (see DebugTools). Doesn't bring back an enemy already
+## queue_free()'d this session by itself — the caller reloads the scene too.
+func reset_cleared_enemies() -> void:
+	for key in story_flags.keys().duplicate():
+		if String(key).begins_with("cleared_"):
+			story_flags.erase(key)
+
+## Wipes the save file from disk and resets all in-memory progress to a
+## fresh-save state. Debug-only (see DebugTools).
+func delete_save() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+	stats = PlayerStats.new()
+	story_flags.clear()
+	unlocked_spawns.clear()
+	last_spawn = &""
+	outfit = &"default"
+	unlocked_outfits = [&"default"]
+
 func save() -> void:
 	var data := {
 		"stats": stats.to_dict(), "flags": story_flags,

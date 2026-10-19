@@ -7,7 +7,7 @@ below for hand-building levels visually in the editor, which works fine.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·
-Ctrl crouch (ground) / ground pound (air) · F1-F9 debug fight tools · Tab stats · M fast travel · O outfits · Esc free mouse
+Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · O outfits · Esc free mouse
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
 dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
