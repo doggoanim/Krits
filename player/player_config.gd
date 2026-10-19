@@ -9,6 +9,7 @@ extends Resource
 @export var turn_speed := 18.0
 @export var crouch_speed := 3.0
 @export var slide_min_speed := 4.0         ## must be moving at least this fast to trigger a slide
+@export var slide_min_move_time := 0.8     ## must have been moving continuously this long first
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
 
