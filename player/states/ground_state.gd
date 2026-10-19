@@ -15,6 +15,9 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.can_dive = true
 	_move_t = 0.0
 
+func exit(_next: StringName) -> void:
+	player.effects.set_running_dust(false)
+
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
@@ -62,6 +65,7 @@ func physics_update(delta: float) -> void:
 	if moving and not was_sliding:
 		p.face(input, delta)
 	p.visual.play(PlayerVisual.ANIM_RUN if moving else PlayerVisual.ANIM_IDLE)
+	p.effects.set_running_dust(moving and not was_sliding)
 	p.velocity.y = -1.0
 	p.move_and_slide()
 	if not p.is_on_floor():

@@ -12,6 +12,7 @@ const HIT_INVULN := 0.8
 
 var camera_rig: CameraRig
 var visual: PlayerVisual
+var effects: PlayerEffects
 var machine: StateMachine
 
 var facing := Vector3.FORWARD
@@ -50,6 +51,9 @@ func _ready() -> void:
 	visual = PlayerVisual.new()
 	add_child(visual)
 
+	effects = PlayerEffects.new()
+	add_child(effects)
+
 	machine = StateMachine.new()
 	machine.name = "StateMachine"
 	add_child(machine)
@@ -74,6 +78,7 @@ func _physics_process(delta: float) -> void:
 		# (slopes/stairs/small bumps toggling is_on_floor() during plain walking).
 		if _air_t >= config.min_air_time_for_land_squash:
 			visual.squash_stretch(visual.land_squash_y, visual.land_squash_xz)
+			effects.burst_land_dust()
 		Events.player_landed.emit()
 	_air_t = 0.0 if on_floor else _air_t + delta
 	_was_on_floor = on_floor
@@ -166,6 +171,7 @@ func start_jump(vel: float) -> void:
 	coyote = 0.0
 	jump_buffer_t = 0.0
 	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	effects.burst_jump_dust()
 	machine.transition_to(&"Air")
 
 func bounce_off_orb() -> void:
@@ -199,6 +205,11 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 	velocity.y = config.wall_bounce_up
 	face(n)
 	visual.play_hold(bounce_anim, bounce_time)
+	var impact_pos := global_position + n * RADIUS + Vector3.UP * (STAND_HEIGHT * 0.5)
+	if bounce_anim == PlayerVisual.ANIM_ROLL_COLLISION:
+		effects.burst_roll_collision(impact_pos, n)
+	else:
+		effects.burst_wall_impact(impact_pos, n)
 	if regrants_dive:
 		can_dive = true
 	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure
