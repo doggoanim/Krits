@@ -2,13 +2,21 @@ class_name EnemyLibrary
 extends RefCounted
 ## Code-defined enemy templates. Move to .tres resources when content grows.
 
-static func grunt() -> EnemyData:
+const GREEN_SLIME_MODEL := preload("res://assets/enemies/green_slime.glb")
+
+static func green_slime() -> EnemyData:
 	var d := EnemyData.new()
-	d.id = &"grunt"
-	d.display_name = "Grunt"
+	d.id = &"green_slime"
+	d.display_name = "Green Slime"
 	d.max_hp = 60.0
 	d.xp = 20
-	d.color = Color(0.85, 0.25, 0.25)
+	d.color = Color(0.3, 0.75, 0.3)
+	d.model = GREEN_SLIME_MODEL
+	d.model_height = 1.1
+	# Clip names baked into green_slime.glb: Idle, Moving, Death.
+	d.anim_idle = &"Idle"
+	d.anim_move = &"Moving"
+	d.anim_death = &"Death"
 	var a := AimedPattern.new()
 	a.interval = 1.6
 	a.count = 3

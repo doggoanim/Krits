@@ -19,7 +19,8 @@ var _solid := false          ## true once the pop-in finished; only then can it 
 var _home := Vector3.ZERO
 var _dest := Vector3.ZERO
 var _wait := 0.0
-var _visual: Node3D
+var _visual: Node3D         ## pop-in/sleep wrapper (scaled 0..1 by _wake/_sleep)
+var _model_visual: EnemyVisual   ## set only when data.model is used, for idle/move animation
 var _contact: Area3D
 var _player: Player
 var _tween: Tween
@@ -43,26 +44,34 @@ func _ready() -> void:
 
 	_visual = Node3D.new()
 	add_child(_visual)
-	var mi := MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = 0.7 * data.size
-	sm.height = 1.4 * data.size
-	mi.mesh = sm
-	mi.position.y = 0.7 * data.size
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = data.color
-	mat.emission_enabled = true
-	mat.emission = data.color
-	mat.emission_energy_multiplier = 0.4
-	# Cel-shaded to match the character: hard light/shadow bands, no shiny highlight.
-	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	mi.material_override = mat
-	_visual.add_child(mi)
-	CelOutline.apply(mi, data.size * 0.08)
+	var label_height: float
+	if data.model:
+		_model_visual = EnemyVisual.new()
+		_visual.add_child(_model_visual)
+		_model_visual.setup(data)
+		label_height = data.model_height * 1.3
+	else:
+		var mi := MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = 0.7 * data.size
+		sm.height = 1.4 * data.size
+		mi.mesh = sm
+		mi.position.y = 0.7 * data.size
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = data.color
+		mat.emission_enabled = true
+		mat.emission = data.color
+		mat.emission_energy_multiplier = 0.4
+		# Cel-shaded to match the character: hard light/shadow bands, no shiny highlight.
+		mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+		mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		mi.material_override = mat
+		_visual.add_child(mi)
+		CelOutline.apply(mi, data.size * 0.08)
+		label_height = 1.4 * data.size
 	var lbl := Label3D.new()
 	lbl.text = data.display_name
-	lbl.position.y = 1.8 * data.size
+	lbl.position.y = label_height
 	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_visual.add_child(lbl)
 
@@ -120,15 +129,21 @@ func _wander(delta: float) -> void:
 		_wait -= delta
 		velocity.x = 0.0
 		velocity.z = 0.0
+		if _model_visual:
+			_model_visual.play_idle()
 	elif flat.length() < 0.5:
 		_wait = randf_range(0.6, 2.0)
 		var a := randf() * TAU
 		_dest = _home + Vector3(cos(a), 0.0, sin(a)) * randf_range(1.0, wander_radius)
+		if _model_visual:
+			_model_visual.play_idle()
 	else:
 		var dir := flat.normalized()
 		velocity.x = dir.x * data.move_speed * 0.6
 		velocity.z = dir.z * data.move_speed * 0.6
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), minf(1.0, 8.0 * delta))
+		if _model_visual:
+			_model_visual.play_move()
 	velocity.y = -1.0 if is_on_floor() else velocity.y - gravity * delta
 	move_and_slide()
 

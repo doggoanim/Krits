@@ -43,9 +43,7 @@ var _flash_t := 0.0
 var _outfit: OutfitData
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
-var _fit_aabb := AABB()
-var _fit_has_box := false
-var _base_scale := 1.0   ## uniform scale from _fit_model_height
+var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 
@@ -79,8 +77,15 @@ func _ready() -> void:
 	add_child(_model)
 	_model.rotation.y = MODEL_FACING_OFFSET
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	_fit_model_height()   # before _collect_materials: outline thickness is sized off _fit_aabb
-	_collect_materials(_model)
+	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
+	_base_scale = _model.scale.x
+	var height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
+	ModelUtil.apply_cel_shading(_model, height * outline_thickness_ratio if outline_enabled else 0.0,
+			outline_color, _materials)
+	for m in _materials:
+		_base_colors[m] = m.albedo_color
+		if m.resource_name in OUTFIT_SLOTS:
+			_outfit_materials.append(m)
 	_force_looping_clips()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
@@ -97,61 +102,6 @@ func _force_looping_clips() -> void:
 	for anim_name in LOOPING_ANIMS:
 		if _anim.has_animation(anim_name):
 			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
-
-## Scales the whole model uniformly so its rest-pose height matches the
-## player's actual capsule height, whatever units it was exported in — a
-## cm-vs-m mismatch is the usual reason an import comes in 100x too big (or
-## too small). Assumes the model's own origin already sits at its feet, same
-## as Player's origin, so only a uniform scale is needed, no repositioning.
-func _fit_model_height() -> void:
-	_fit_has_box = false
-	_fit_aabb = AABB()
-	_accumulate_aabb(_model, Transform3D.IDENTITY)
-	if not _fit_has_box or _fit_aabb.size.y <= 0.001:
-		return
-	_base_scale = Player.STAND_HEIGHT / _fit_aabb.size.y
-	_model.scale = Vector3.ONE * _base_scale
-
-func _accumulate_aabb(n: Node, parent_xform: Transform3D) -> void:
-	var xform := parent_xform
-	if n is Node3D:
-		xform = parent_xform * (n as Node3D).transform
-	if n is MeshInstance3D and (n as MeshInstance3D).mesh:
-		var box: AABB = xform * (n as MeshInstance3D).mesh.get_aabb()
-		if _fit_has_box:
-			_fit_aabb = _fit_aabb.merge(box)
-		else:
-			_fit_aabb = box
-			_fit_has_box = true
-	for c in n.get_children():
-		_accumulate_aabb(c, xform)
-
-func _collect_materials(n: Node) -> void:
-	if n is MeshInstance3D:
-		var mi := n as MeshInstance3D
-		for i in mi.mesh.get_surface_count() if mi.mesh else 0:
-			var mat := mi.get_active_material(i)
-			if mat is BaseMaterial3D:
-				var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
-				# Toon ramp: lighting still reaches the character (so it gets a
-				# shaded side and a lit side, and still reads as part of the
-				# scene), but in a few hard-edged bands instead of a smooth PBR
-				# gradient — the classic cel-shaded look — and with no shiny
-				# specular highlight. Colors stay close to their authored albedo
-				# rather than washing out with strong light.
-				dup.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-				dup.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-				dup.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-				mi.set_surface_override_material(i, dup)
-				_materials.append(dup)
-				_base_colors[dup] = dup.albedo_color
-				if dup.resource_name in OUTFIT_SLOTS:
-					_outfit_materials.append(dup)
-		if outline_enabled:
-			var height := _fit_aabb.size.y if _fit_has_box else Player.STAND_HEIGHT
-			CelOutline.apply(mi, height * outline_thickness_ratio, outline_color)
-	for c in n.get_children():
-		_collect_materials(c)
 
 func apply_outfit(o: OutfitData) -> void:
 	_outfit = o
