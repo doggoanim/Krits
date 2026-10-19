@@ -41,17 +41,21 @@ func _ready() -> void:
 	# (an Area3D) owns the CollisionShape3D above, and the physics server
 	# can't invert a zero-scale transform, which a scale-0 Area3D would hand
 	# it the instant this spawns.
+	#
+	# A real flat CylinderMesh instead of a textured quad: its edge is the
+	# actual geometric rim of the circle, not a soft alpha falloff baked into
+	# a texture — so the puddle reads as one solid flat color with a crisp
+	# boundary, no gradient or blur.
 	_mesh = MeshInstance3D.new()
-	var q := QuadMesh.new()
-	q.size = Vector2(radius, radius) * 2.0
-	_mesh.mesh = q
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = radius
+	cyl.bottom_radius = radius
+	cyl.height = 0.02
+	_mesh.mesh = cyl
 	_mesh.position.y = GROUND_CLEARANCE
-	_mesh.rotation_degrees = Vector3(-90.0, 0.0, 0.0)   # lie flat, facing up
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = color
-	mat.albedo_texture = SoftCircleTexture.make()
 	_mesh.material_override = mat
 	add_child(_mesh)
 

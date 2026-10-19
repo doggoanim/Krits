@@ -96,6 +96,17 @@ func _face(dir: Vector3, delta: float) -> void:
 	var target := atan2(-dir.x, -dir.z)
 	rotation.y = lerp_angle(rotation.y, target, minf(1.0, FACE_TURN_SPEED * delta))
 
+## Snaps (no lerp) to face a world point — used for the burst-shoot volley,
+## which fires fast enough that a smoothed turn would visibly lag behind.
+## Only looks at the horizontal direction, so it works the same whether the
+## enemy happens to be grounded or airborne.
+func _face_point_instant(point: Vector3) -> void:
+	var dir := point - global_position
+	dir.y = 0.0
+	if dir.length_squared() < 0.0001:
+		return
+	rotation.y = atan2(-dir.x, -dir.z)
+
 func _shoot(delta: float) -> void:
 	if not armed:
 		return
@@ -246,6 +257,7 @@ func _do_burst_shoot() -> void:
 	for _i in count:
 		if _dying or not is_instance_valid(target):
 			return
+		_face_point_instant(target.global_position)
 		if _visual:
 			_visual.play_shoot()
 		_fire_slime_ball()
