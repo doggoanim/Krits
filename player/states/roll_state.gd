@@ -9,7 +9,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_elapsed = 0.0
 	p.set_crouching(true)
-	p.visual.set_roll(true)
+	p.visual.play(PlayerVisual.ANIM_ROLL)
 	var dir := p.input_dir()
 	if dir.length() < 0.1:
 		dir = p.facing
@@ -18,11 +18,13 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 
 func exit(_next: StringName) -> void:
 	player.roll_cd = player.config.roll_cooldown
-	player.visual.set_roll(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
+	# A no-op once already rolling; resumes the loop on its own once a
+	# wall-collision reaction pose (play_hold, below) has run its course.
+	p.visual.play(PlayerVisual.ANIM_ROLL)
 	# Roll + jump = long jump (works at any point of the roll).
 	if p.jump_buffer_t > 0.0 and p.can_stand():
 		var dir := p.get_hvel()
@@ -43,7 +45,18 @@ func physics_update(delta: float) -> void:
 	p.set_hvel(h)
 	p.face(h, delta)
 	p.velocity.y = -1.0
+	var prev_h := p.get_hvel()
 	p.move_and_slide()
+
+	if p.is_on_wall() and prev_h.length() >= c.wall_min_speed:
+		var n := p.get_wall_normal()
+		n.y = 0.0
+		if n.length() > 0.1:
+			n = n.normalized()
+			var bounced := prev_h.bounce(n) * c.roll_wall_bounce_mult
+			p.set_hvel(bounced)
+			p.face(bounced)
+			p.visual.play_hold(PlayerVisual.ANIM_ROLL_COLLISION, c.roll_collision_time)
 
 	if not p.is_on_floor():
 		machine.transition_to(&"Air")

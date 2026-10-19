@@ -8,14 +8,17 @@ WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) 
 Ctrl crouch (ground) / ground pound (air) · F1-F9 debug fight tools · Tab stats · M fast travel · O outfits · Esc free mouse
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
-dive or long-jump into a wall = wall bounce (can dive again, chain it).
+dive or long-jump into a wall = wall bounce (can dive again, chain it) ·
+rolling into a wall bounces you off it too · ground pound works out of a dive ·
+sharply reversing direction on the ground gets a quick slide reaction.
 
 ## Layout
 - core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
              PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start, falling, air_dive,
-             roll_loop, long_jump, ground_pound). Re-export over this file to update the model/animations.
+             roll_loop, long_jump, ground_pound, crouch_idle, crouch_walk, roll_collision, slide).
+             Re-export over this file to update the model/animations.
 - combat/    EncounterManager (float -> world dissolves -> square stage -> return) -> Arena (orbs, combo,
              walls, stage_root for its dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)

@@ -3,11 +3,6 @@ extends PlayerState
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.set_crouching(true)
-	player.visual.play(PlayerVisual.ANIM_IDLE)   ## no dedicated crouch clip yet
-	player.visual.set_crouch(true)               ## so the squash placeholder is this state's alone
-
-func exit(_next: StringName) -> void:
-	player.visual.set_crouch(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -27,6 +22,7 @@ func physics_update(delta: float) -> void:
 	p.set_hvel(p.get_hvel().move_toward(input * c.crouch_speed, (c.ground_accel if moving else c.ground_decel) * delta))
 	if moving:
 		p.face(input, delta)
+	p.visual.play(PlayerVisual.ANIM_CROUCH_WALK if moving else PlayerVisual.ANIM_CROUCH_IDLE)
 	p.velocity.y = -1.0
 	p.move_and_slide()
 	if not p.is_on_floor():

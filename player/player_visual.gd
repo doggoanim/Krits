@@ -17,17 +17,14 @@ const ANIM_ROLL := &"roll_loop"
 const ANIM_DIVE := &"air_dive"
 const ANIM_LONG_JUMP := &"long_jump"
 const ANIM_POUND := &"ground_pound"
+const ANIM_CROUCH_IDLE := &"crouch_idle"
+const ANIM_CROUCH_WALK := &"crouch_walk"
+const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
+const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
 
 ## Material slots (named in the model) that get tinted by the active outfit.
 ## Skin/hair/face stay as authored — outfits only recolor the "clothing" parts.
 const OUTFIT_SLOTS := [&"Body", &"Pants", &"Shoes"]
-const CROUCH_SCALE := 0.65
-
-## The "roll_loop" clip is just a held pose, not an actual spin, so the tumble
-## itself is still done procedurally on the model's own rotation.x — same
-## trick the old placeholder capsule used, just applied to the real model
-## instead of a second body node.
-const ROLL_SPIN_SPEED := 18.0   ## rad/s
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,
@@ -48,9 +45,9 @@ var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node'
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
 var _fit_aabb := AABB()
 var _fit_has_box := false
-var _base_scale := 1.0   ## uniform scale from _fit_model_height; set_crouch multiplies onto this
-var _rolling := false     ## true while the model should be spinning on rotation.x
-var _roll_burst_t := 0.0  ## >0 while a timed roll (e.g. wall bounce) is still running
+var _base_scale := 1.0   ## uniform scale from _fit_model_height
+var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
+var _held_anim := &""    ## the anim play_hold() is currently protecting
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
@@ -114,48 +111,36 @@ func apply_outfit(o: OutfitData) -> void:
 		_base_colors[m] = o.color
 
 ## Plays `anim_name` if it isn't already the one running. Safe to call every
-## frame — the common case (state hasn't changed) is a cheap no-op.
+## frame — the common case (state hasn't changed) is a cheap no-op. Does
+## nothing while a play_hold() reaction pose is still protected, unless it's
+## that same clip — so a state's regular per-frame animation driver (Ground's
+## run/idle, Air's jump/fall, ...) can keep calling this every frame without
+## needing to know a reaction pose is in progress.
 func play(anim_name: StringName, blend := 0.15) -> void:
+	if _hold_t > 0.0 and anim_name != _held_anim:
+		return
 	if _anim == null or not _anim.has_animation(anim_name):
 		return
 	if _anim.current_animation == anim_name and _anim.is_playing():
 		return
 	_anim.play(anim_name, blend)
 
-## Placeholder squash until the rig has a real crouch pose: just scales the
-## model down a bit on top of the height-fit scale. The actual crouch
-## collision height is handled separately by Player.set_crouching.
-func set_crouch(c: bool) -> void:
-	if _model:
-		_model.scale.y = _base_scale * (CROUCH_SCALE if c else 1.0)
-
 func flash() -> void:
 	_flash_t = 0.25
 
-## Holds the roll pose and spin on for as long as `active` is true — used by
-## RollState, which starts it on enter and stops it on exit (ground rolling
-## lasts however long the player holds the button).
-func set_roll(active: bool) -> void:
-	_rolling = active
-	_roll_burst_t = 0.0   # an explicit call always overrides a running burst
-	if active:
-		play(ANIM_ROLL)
-	else:
-		_model.rotation.x = 0.0
+## Plays a one-off reaction pose (a wall collision, say) and protects it from
+## being overridden by a state's regular per-frame play() calls for
+## `duration` seconds. Whoever triggered it is responsible for playing
+## whatever comes next once that window has passed (is_holding() tells you
+## when it's safe to).
+func play_hold(anim_name: StringName, duration: float) -> void:
+	_hold_t = duration
+	_held_anim = anim_name
+	play(anim_name)
 
-## A short, self-expiring tumble for flourishes that don't have their own
-## state to call set_roll(false) when they're done — e.g. a wall bounce,
-## which just lands back in AirState.
-func play_roll_burst(duration: float) -> void:
-	_rolling = true
-	_roll_burst_t = duration
-	play(ANIM_ROLL)
-
-## True while the model is mid-spin (held roll or a timed burst). Other states
-## check this before calling play() of their own, so they don't cut the roll
-## pose short.
-func is_rolling() -> bool:
-	return _rolling
+## True while a play_hold() reaction pose is still protected.
+func is_holding() -> bool:
+	return _hold_t > 0.0
 
 ## Smoothly lean this node toward `pitch` (forward/back, rad) and `bank` (side-to-
 ## side, rad). Call every physics frame with a target of 0 to relax back upright.
@@ -167,16 +152,8 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 	rotation.z = _lean_bank
 
 func _process(delta: float) -> void:
-	if _roll_burst_t > 0.0:
-		_roll_burst_t -= delta
-		if _roll_burst_t <= 0.0:
-			_rolling = false
-			_model.rotation.x = 0.0
-	if _rolling:
-		# Sign is flipped relative to the old placeholder body: the 180-degree
-		# MODEL_FACING_OFFSET turn also flips which way "forward tumble" reads
-		# on this node's local X axis.
-		_model.rotation.x += delta * ROLL_SPIN_SPEED
+	if _hold_t > 0.0:
+		_hold_t = maxf(0.0, _hold_t - delta)
 	if _flash_t > 0.0:
 		_flash_t -= delta
 		var white := int(_flash_t * 30.0) % 2 == 0

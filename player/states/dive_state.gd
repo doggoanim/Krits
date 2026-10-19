@@ -20,6 +20,9 @@ func physics_update(delta: float) -> void:
 		p.set_hvel(Vector3.ZERO)   # cancel all momentum, same clean pop as an orb bounce
 		p.start_jump(p.config.dive_cancel_velocity)
 		return
+	if Input.is_action_just_pressed(&"crouch_pound"):
+		machine.transition_to(&"Pound")
+		return
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
 	p.move_and_slide()

@@ -21,7 +21,13 @@ func physics_update(delta: float) -> void:
 
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
-	var h := p.get_hvel().move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
+	var prev_h := p.get_hvel()
+	# A sharp enough reversal at speed gets a brief slide reaction before the
+	# usual run/idle pose takes back over (play_hold protects it meanwhile).
+	if moving and prev_h.length() >= c.slide_min_speed \
+			and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot:
+		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
+	var h := prev_h.move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
 	p.set_hvel(h)
 	if moving:
 		p.face(input, delta)

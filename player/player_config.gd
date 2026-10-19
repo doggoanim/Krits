@@ -8,6 +8,9 @@ extends Resource
 @export var ground_decel := 90.0
 @export var turn_speed := 18.0
 @export var crouch_speed := 3.0
+@export var slide_min_speed := 4.0         ## must be moving at least this fast to trigger a slide
+@export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
+@export var slide_time := 0.25             ## how long the slide reaction pose plays
 
 @export_group("Air")
 @export var gravity := 32.0
@@ -28,6 +31,8 @@ extends Resource
 @export var roll_stop_speed := 3.0         ## roll ends (stand up) below this speed
 @export var roll_cooldown := 0.6           ## after a roll ends, before the next
 @export var roll_steer := 3.0
+@export var roll_wall_bounce_mult := 0.6   ## speed kept after bouncing off a wall mid-roll
+@export var roll_collision_time := 0.35    ## how long the roll_collision reaction pose plays
 @export var long_jump_speed := 18.0
 @export var long_jump_velocity := 8.5
 @export var long_jump_gravity_mult := 0.8
@@ -39,7 +44,7 @@ extends Resource
 @export var wall_bounce_up := 12.5
 @export var wall_bounce_push := 7.0
 @export var wall_min_speed := 6.0
-@export var wall_bounce_roll_time := 0.4   ## how long the tumble animation plays after a wall bounce
+@export var wall_bounce_roll_time := 0.4   ## how long the roll_collision reaction pose plays after a wall bounce
 
 @export_group("Ground Pound")
 @export var pound_windup := 0.22
