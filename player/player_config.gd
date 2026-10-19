@@ -20,10 +20,17 @@ extends Resource
 ## direction instead of straight up.
 @export var side_flip_jump_velocity := 18.0   ## higher than a plain jump (jump_velocity), 2 less
                                                ## than pound_jump_velocity
-@export var side_flip_speed := 10.0           ## horizontal speed toward the new direction
+@export var side_flip_speed := 6.5            ## horizontal speed toward the new direction — tuned
+                                               ## down from an earlier 10.0, which carried the arc
+                                               ## too far forward for the jump's height
 @export var side_flip_hold_time := 0.6        ## how long side_jump plays before air control resumes
                                                ## (shorter than the clip's own ~1.25s so a mistimed
                                                ## trick doesn't strand you mid-air with no steering)
+@export var side_flip_input_window := 0.4     ## grace window (from the moment a turn-skid starts)
+                                               ## during which a buffered jump still triggers the
+                                               ## side flip — independent of the slide pose's own
+                                               ## (shorter) animation-hold duration, so a jump press
+                                               ## that lands a beat late still catches the trick
 
 @export_group("Air")
 @export var gravity := 32.0

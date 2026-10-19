@@ -9,6 +9,10 @@ var _slide_dir := Vector3.ZERO
 var _slide_start_speed := 0.0
 var _slide_is_turn := false   ## true when the current/most recent skid came from reversing
                                ## direction rather than just stopping — gates the side-flip trick
+var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid starts; the side-flip's
+                           ## own jump-buffer-style timer, independent of the slide pose's animation
+                           ## hold (see physics_update) so the trick doesn't depend on exact frame
+                           ## timing between the two
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
@@ -27,6 +31,7 @@ func physics_update(delta: float) -> void:
 	var moving := input.length() > 0.1
 	var prev_h := p.get_hvel()
 	var was_sliding := p.visual.is_holding()
+	_turn_flip_t = maxf(0.0, _turn_flip_t - delta)
 
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
 	# the stop case is gated by slide_min_move_time (a quick stick tap
@@ -39,11 +44,17 @@ func physics_update(delta: float) -> void:
 	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing)
 	if starting_slide:
 		_slide_is_turn = reversing
+		if reversing:
+			_turn_flip_t = c.side_flip_input_window
 
 	# Jumping out of a skid-turn (reversing, not just stopping) does a Mario
 	# 64-style side flip toward the new direction instead of a plain jump.
+	# Gated by _turn_flip_t rather than the slide pose's own animation hold —
+	# a dedicated grace window, same idiom as jump_buffer_t/coyote, so the
+	# trick doesn't depend on landing the jump press on the exact frames the
+	# slide animation happens to still be playing.
 	if p.jump_buffer_t > 0.0:
-		if (was_sliding or starting_slide) and _slide_is_turn:
+		if _turn_flip_t > 0.0 and _slide_is_turn:
 			p.start_side_flip(input)
 		else:
 			p.start_jump(c.jump_velocity)
