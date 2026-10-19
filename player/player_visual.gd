@@ -64,6 +64,10 @@ func _ready() -> void:
 	_collect_materials(_model)
 	_fit_model_height()
 	_force_looping_clips()
+	if _anim == null:
+		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
+	else:
+		print("PlayerVisual: clips found in model = ", _anim.get_animation_list())
 
 	Events.outfit_changed.connect(func(id: StringName): apply_outfit(OutfitLibrary.get_outfit(id)))
 	apply_outfit(OutfitLibrary.get_outfit(Game.outfit))
@@ -134,7 +138,10 @@ func apply_outfit(o: OutfitData) -> void:
 func play(anim_name: StringName, blend := 0.15) -> void:
 	if _hold_t > 0.0 and anim_name != _held_anim:
 		return
-	if _anim == null or not _anim.has_animation(anim_name):
+	if _anim == null:
+		return
+	if not _anim.has_animation(anim_name):
+		push_warning("PlayerVisual.play(): no clip named '%s' in this model" % anim_name)
 		return
 	if _anim.current_animation == anim_name and _anim.is_playing():
 		return
