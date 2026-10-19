@@ -50,7 +50,7 @@ var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interru
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 
 @export var outline_enabled := true
-@export var outline_thickness_ratio := 0.006   ## outline thickness, as a fraction of the character's height
+@export var outline_thickness_ratio := 0.011   ## outline thickness, as a fraction of the character's height
 @export var outline_color := Color.BLACK
 
 ## Squash & stretch pops. All code-driven (scale the whole model, not the
