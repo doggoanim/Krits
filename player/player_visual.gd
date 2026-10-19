@@ -173,7 +173,10 @@ func _process(delta: float) -> void:
 			_rolling = false
 			_model.rotation.x = 0.0
 	if _rolling:
-		_model.rotation.x -= delta * ROLL_SPIN_SPEED
+		# Sign is flipped relative to the old placeholder body: the 180-degree
+		# MODEL_FACING_OFFSET turn also flips which way "forward tumble" reads
+		# on this node's local X axis.
+		_model.rotation.x += delta * ROLL_SPIN_SPEED
 	if _flash_t > 0.0:
 		_flash_t -= delta
 		var white := int(_flash_t * 30.0) % 2 == 0

@@ -4,6 +4,10 @@ extends PlayerState
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.set_crouching(true)
 	player.visual.play(PlayerVisual.ANIM_IDLE)   ## no dedicated crouch clip yet
+	player.visual.set_crouch(true)               ## so the squash placeholder is this state's alone
+
+func exit(_next: StringName) -> void:
+	player.visual.set_crouch(false)
 
 func physics_update(delta: float) -> void:
 	var p := player

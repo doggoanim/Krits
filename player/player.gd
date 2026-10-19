@@ -193,12 +193,15 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool) -> bool:
 	machine.transition_to(&"Air")
 	return true
 
+## Collision only — shrinks the capsule to CROUCH_HEIGHT. Several states use
+## the smaller capsule for reasons that have nothing to do with the crouch
+## pose (Roll wants to duck under things while rolling, for instance), so the
+## visual squash is a separate, explicit call (visual.set_crouch) that only
+## CrouchState makes, rather than something this always drags along with it.
 func set_crouching(c: bool) -> void:
 	var h := CROUCH_HEIGHT if c else STAND_HEIGHT
 	_shape.height = h
 	_shape_node.position.y = h * 0.5
-	if visual:
-		visual.set_crouch(c)
 
 func can_stand() -> bool:
 	return not test_move(global_transform, Vector3.UP * (STAND_HEIGHT - CROUCH_HEIGHT))
