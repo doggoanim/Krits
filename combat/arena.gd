@@ -74,7 +74,11 @@ func _spawn_enemy(d: EnemyData) -> void:
 	var e := Enemy.new()
 	e.setup(d, self, player)
 	add_child(e)
-	e.global_position = random_point(0.6) + Vector3.UP * 0.9
+	# The placeholder sphere's pivot is at its own center, so it needs lifting
+	# to sit on the floor; an animated model's origin is at its feet (same
+	# convention as the player), so it needs no extra lift at all.
+	var lift := 0.9 if d.model == null else 0.0
+	e.global_position = random_point(0.6) + Vector3.UP * lift
 	e.defeated.connect(_on_enemy_defeated)
 	enemies.append(e)
 

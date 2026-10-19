@@ -34,6 +34,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		yaw -= event.relative.x * mouse_sensitivity
 		pitch = clampf(pitch - event.relative.y * mouse_sensitivity, pitch_limits.x, pitch_limits.y)
 
+func get_camera() -> Camera3D:
+	return _cam
+
 func snap() -> void:
 	if target:
 		global_position = target.global_position + Vector3.UP * 1.4

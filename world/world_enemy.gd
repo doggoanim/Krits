@@ -44,12 +44,10 @@ func _ready() -> void:
 
 	_visual = Node3D.new()
 	add_child(_visual)
-	var label_height: float
 	if data.model:
 		_model_visual = EnemyVisual.new()
 		_visual.add_child(_model_visual)
 		_model_visual.setup(data)
-		label_height = data.model_height * 1.3
 	else:
 		var mi := MeshInstance3D.new()
 		var sm := SphereMesh.new()
@@ -67,12 +65,6 @@ func _ready() -> void:
 		mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		mi.material_override = mat
 		_visual.add_child(mi)
-		label_height = 1.4 * data.size
-	var lbl := Label3D.new()
-	lbl.text = data.display_name
-	lbl.position.y = label_height
-	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_visual.add_child(lbl)
 
 	_contact = Area3D.new()
 	_contact.collision_layer = 0

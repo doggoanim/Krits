@@ -103,6 +103,12 @@ func _force_looping_clips() -> void:
 		if _anim.has_animation(anim_name):
 			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
 
+## The loaded model's root node — used by PlayerXray to build see-through
+## duplicates of the same meshes (sharing the same skeleton, so they
+## animate in sync automatically).
+func get_model() -> Node3D:
+	return _model
+
 func apply_outfit(o: OutfitData) -> void:
 	_outfit = o
 	for m in _outfit_materials:
