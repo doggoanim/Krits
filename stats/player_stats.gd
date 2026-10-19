@@ -5,7 +5,8 @@ extends RefCounted
 
 const BASE_HP := 100.0
 const BASE_SHIELD := 50.0
-const BASE_DAMAGE := 10.0
+const BASE_DAMAGE := 1.0   ## orb hits are the only thing that uses this — combo scaling
+                           ## (see Arena.COMBO_BONUS) still ramps up from here as normal
 const HP_PER_POINT := 20.0
 const SHIELD_PER_POINT := 15.0
 const DAMAGE_PER_POINT := 3.0
