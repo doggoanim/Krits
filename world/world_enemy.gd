@@ -12,7 +12,15 @@ signal touched(enemy: WorldEnemy)
 @export var wander_radius := 8.0
 @export var gravity := 30.0
 
-var frozen := false   ## set by the encounter sequence
+## Set by the encounter sequence. Also hides this actor for the duration: the
+## fight itself plays out nearby using a freshly-spawned Enemy inside the
+## Arena, so this original would otherwise just stand there frozen in plain
+## sight next to (or far from) the real fight, looking like a stray duplicate.
+var frozen := false:
+	set(value):
+		frozen = value
+		if _visual:
+			_visual.visible = _awake and not value
 
 var _awake := false
 var _solid := false          ## true once the pop-in finished; only then can it be touched

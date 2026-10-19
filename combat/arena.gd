@@ -28,6 +28,11 @@ const COMBO_BONUS := 0.25      ## +25% damage per combo step
 const INTRO_DELAY := 1.0       ## enemies hold fire for this long after the reveal
 const GROUND_PROBE_UP := 6.0    ## how far above a candidate point the ground raycast starts
 const GROUND_PROBE_DOWN := 50.0 ## how far down it's willing to look
+const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this above/below the
+                                    ## arena's own base height — stops a spot that happens to
+                                    ## land on a disconnected nearby platform (or a gap with no
+                                    ## floor) from reading as part of this fight
+const RANDOM_POINT_ATTEMPTS := 8
 
 var radius := BASE_RADIUS
 var combo := 0
@@ -79,13 +84,27 @@ func cancel() -> void:
 ## A uniformly-sampled point on the ground within `fraction` of the arena's
 ## radius, centred on the arena. "On the ground" is found with a raycast —
 ## the terrain under an arena is real world geometry, not a flat floor, so it
-## may slope or step within the circle.
+## may slope or step within the circle. A candidate whose ground is wildly
+## above/below the arena's own base height is rejected and resampled — it's
+## almost always a separate platform or a gap that just happens to fall
+## inside the circle's footprint, not actually part of this fight's floor.
 func random_point(fraction := 1.0) -> Vector3:
+	for _i in RANDOM_POINT_ATTEMPTS:
+		var pos := _sample_disk(fraction)
+		var h := _ground_height(pos)
+		if absf(h - global_position.y) <= MAX_GROUND_DEVIATION:
+			pos.y = h
+			return pos
+	# Every attempt landed somewhere disconnected — flat at the arena's own
+	# base height beats spawning on unrelated terrain.
+	var pos := _sample_disk(fraction)
+	pos.y = global_position.y
+	return pos
+
+func _sample_disk(fraction: float) -> Vector3:
 	var r := radius * fraction * sqrt(randf())   # sqrt: uniform over the disk's area, not biased to the centre
 	var ang := randf_range(0.0, TAU)
-	var pos := global_position + Vector3(cos(ang), 0.0, sin(ang)) * r
-	pos.y = _ground_height(pos)
-	return pos
+	return global_position + Vector3(cos(ang), 0.0, sin(ang)) * r
 
 func _spawn_enemy(d: EnemyData) -> void:
 	var e := Enemy.new()
@@ -199,6 +218,8 @@ func _build_barrier() -> void:
 		var dir := Vector3(cos(ang), 0.0, sin(ang))
 		var ground_pos := global_position + dir * radius
 		var ground_y := _ground_height(ground_pos)
+		if absf(ground_y - global_position.y) > MAX_GROUND_DEVIATION:
+			ground_y = global_position.y   # a disconnected platform/gap, not this fight's floor
 		var rot_y := PI * 0.5 - ang   # faces tangent to the circle at this angle
 
 		var wall_pos := ground_pos
