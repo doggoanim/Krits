@@ -2,29 +2,29 @@ class_name CameraRig
 extends Node3D
 ## Third-person orbit camera. Top-level node: follows `target` without inheriting rotation.
 ##
-## Wall avoidance is a manual raycast + smoothed distance rather than
-## SpringArm3D, which snaps its collision-shortened length instantly with
-## no smoothing of its own — that reads as the camera abruptly "zooming in"
-## the moment you brush past a wall. Pulling in uses a faster smoothing rate
-## than easing back out, so it still never visibly clips through geometry
-## (tiny risk of a one-frame clip on a very fast approach, which reads as
-## nothing next to a jarring zoom-snap), while the common case — walking
-## near and away from walls — feels smooth both ways.
+## Wall avoidance: SpringArm3D is kept purely as a sensor (never holds the
+## camera, so its own automatic child-repositioning never fires) — each
+## frame we read get_hit_length() for the safe distance and smooth our own
+## `_distance` toward it before moving the actual Camera3D. Consuming the
+## sensed distance this way, instead of letting SpringArm3D reposition its
+## children directly, is what adds the smoothing: SpringArm3D's own
+## collision shortening is otherwise instant, which reads as the camera
+## abruptly "zooming in" the moment you brush past a wall.
 
 @export var mouse_sensitivity := 0.003
 @export var follow_speed := 14.0
 @export var base_distance := 6.0
 @export var pitch_limits := Vector2(-1.2, 0.5)
-@export var wall_margin := 0.3        ## stop this far short of whatever's behind the camera
 @export var min_distance := 0.8       ## never pull in closer than this, even against a wall
-@export var pull_in_speed := 16.0     ## smoothing rate when a wall is closer than the current distance
-@export var ease_out_speed := 5.0     ## smoothing rate when pulling back out to base_distance
+@export var pull_in_speed := 16.0     ## smoothing rate when the wall is closer than the current distance
+@export var ease_out_speed := 5.0     ## smoothing rate when pulling back out toward base_distance
 
 var target: Node3D
 var yaw := 0.0
 var pitch := -0.35
 var extra_distance := 0.0   ## set by the arena to frame the whole fight
 
+var _arm: SpringArm3D   ## sensor only — not a parent of _cam, never positions anything itself
 var _cam: Camera3D
 var _shake := 0.0
 var _distance := 0.0
@@ -32,6 +32,10 @@ var _distance := 0.0
 func _ready() -> void:
 	top_level = true
 	_distance = base_distance
+	_arm = SpringArm3D.new()
+	_arm.collision_mask = 1
+	_arm.margin = 0.3
+	add_child(_arm)
 	_cam = Camera3D.new()
 	_cam.current = true
 	_cam.fov = 70.0
@@ -59,18 +63,10 @@ func _process(delta: float) -> void:
 	rotation = Vector3(pitch, yaw, 0.0)
 
 	var desired := base_distance + extra_distance
-	var probe := to_global(Vector3(0.0, 0.0, -desired))
-	var target_distance := desired
-	if is_inside_tree():
-		var query := PhysicsRayQueryParameters3D.create(global_position, probe, 1)
-		if target is CollisionObject3D:
-			query.exclude = [(target as CollisionObject3D).get_rid()]
-		var hit := get_world_3d().direct_space_state.intersect_ray(query)
-		if not hit.is_empty():
-			target_distance = global_position.distance_to(hit.position) - wall_margin
-	target_distance = clampf(target_distance, min_distance, desired)
-	var rate := pull_in_speed if target_distance < _distance else ease_out_speed
-	_distance = lerpf(_distance, target_distance, 1.0 - exp(-rate * delta))
+	_arm.spring_length = desired
+	var safe := clampf(_arm.get_hit_length(), min_distance, desired)
+	var rate := pull_in_speed if safe < _distance else ease_out_speed
+	_distance = lerpf(_distance, safe, 1.0 - exp(-rate * delta))
 	_cam.position = Vector3(0.0, 0.0, -_distance)
 
 	if _shake > 0.0:
