@@ -56,6 +56,10 @@ extends Resource
 
 @export_group("Orbs")
 @export var orb_bounce_velocity := 13.5
-@export var orb_attack_hold_time := 0.3    ## how long the orb-hit attack pose protects
-                                            ## itself before air control resumes — short on
-                                            ## purpose so it doesn't stall an orb-combo chain
+@export var orb_attack_hold_mult := 1.15   ## the orb-hit attack pose holds for this fraction of
+                                            ## the bounce's own time-to-apex (orb_bounce_velocity /
+                                            ## gravity), not a flat duration — so it always covers
+                                            ## the rise and lets go right around the peak, instead
+                                            ## of a fixed time that can cut off early (still rising,
+                                            ## jarring jump to a falling pose) or run long (stalls
+                                            ## an orb-combo chain waiting on a pose that's done)

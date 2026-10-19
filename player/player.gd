@@ -199,7 +199,10 @@ func bounce_off_orb() -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
 	can_dive = true
-	visual.play_random_attack(config.orb_attack_hold_time)
+	# Hold the attack pose for roughly as long as the bounce takes to reach its
+	# apex, not a flat duration — so the falling pose never pops in mid-rise.
+	var rise_time := config.orb_bounce_velocity / config.gravity
+	visual.play_random_attack(rise_time * config.orb_attack_hold_mult)
 	machine.transition_to(&"Air")
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move
