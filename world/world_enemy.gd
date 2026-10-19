@@ -54,6 +54,9 @@ func _ready() -> void:
 	mat.emission_enabled = true
 	mat.emission = data.color
 	mat.emission_energy_multiplier = 0.4
+	# Cel-shaded to match the character: hard light/shadow bands, no shiny highlight.
+	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	mi.material_override = mat
 	_visual.add_child(mi)
 	var lbl := Label3D.new()

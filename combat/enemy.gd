@@ -35,6 +35,9 @@ func _ready() -> void:
 	_mesh = MeshInstance3D.new()
 	_mesh.mesh = sm
 	_mat.albedo_color = data.color
+	# Cel-shaded to match the character: hard light/shadow bands, no shiny highlight.
+	_mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+	_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	_mesh.material_override = _mat
 	add_child(_mesh)
 	_label = Label3D.new()
