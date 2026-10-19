@@ -1,12 +1,36 @@
 class_name Orb
 extends Area3D
 ## Floating bounce target. Emits `hit` once, then waits to be relocated by the arena.
+## Visual is a small glowing core (with the game's usual black cel outline) inside a
+## tilted halo ring that spins continuously — reads as a distinct "magic" pickup
+## rather than a plain sphere, and the spin/pulse alone sell "active" at a glance
+## even before the player's close enough to see the color change.
 
 signal hit(orb: Orb)
 
+const CORE_RADIUS := 0.4
+const RING_INNER_RADIUS := 0.5
+const RING_OUTER_RADIUS := 0.62
+const RING_TILT := 55.0   ## degrees off horizontal
+const OUTLINE_THICKNESS := 0.03
+const BOB_SPEED := 2.0
+const BOB_HEIGHT := 0.15
+const PULSE_SPEED := 3.1       ## faster than the bob so the two don't lock in sync
+const PULSE_AMOUNT := 0.06     ## fraction of scale the core breathes by
+const RING_SPIN_SPEED := 1.6   ## rad/s while active
+const RING_SPIN_SPEED_IDLE := 0.4   ## slow idle spin while waiting to respawn
+const ACTIVE_CORE_COLOR := Color(0.2, 0.9, 1.0)
+const ACTIVE_RING_COLOR := Color(0.85, 1.0, 1.0)
+const INACTIVE_COLOR := Color(0.25, 0.3, 0.35, 0.3)
+
 var active := true
 var _mesh: MeshInstance3D
-var _mat := StandardMaterial3D.new()
+var _mesh_outline: MeshInstance3D
+var _ring: MeshInstance3D
+var _core_mat := StandardMaterial3D.new()
+var _ring_mat := StandardMaterial3D.new()
+var _base_scale := 1.0   ## target scale from _refresh() (1.0 active, 0.5 inactive); the
+                          ## per-frame breathing pulse multiplies on top of this
 var _t := randf() * TAU
 
 func _ready() -> void:
@@ -17,19 +41,46 @@ func _ready() -> void:
 	var cs := CollisionShape3D.new()
 	cs.shape = s
 	add_child(cs)
+
 	var sm := SphereMesh.new()
-	sm.radius = 0.5
-	sm.height = 1.0
+	sm.radius = CORE_RADIUS
+	sm.height = CORE_RADIUS * 2.0
 	_mesh = MeshInstance3D.new()
 	_mesh.mesh = sm
-	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_mesh.material_override = _mat
+	_core_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_mesh.material_override = _core_mat
 	add_child(_mesh)
+	_mesh_outline = CelOutline.apply(_mesh, OUTLINE_THICKNESS)
+
+	var tm := TorusMesh.new()
+	tm.inner_radius = RING_INNER_RADIUS
+	tm.outer_radius = RING_OUTER_RADIUS
+	_ring = MeshInstance3D.new()
+	_ring.mesh = tm
+	_ring.rotation.x = deg_to_rad(RING_TILT)
+	_ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_ring.material_override = _ring_mat
+	add_child(_ring)
+
 	_refresh()
 
 func _physics_process(delta: float) -> void:
-	_t += delta * 2.0
-	_mesh.position.y = sin(_t) * 0.15
+	_t += delta * BOB_SPEED
+	var bob := sin(_t) * BOB_HEIGHT
+	_mesh.position.y = bob
+	_ring.position.y = bob
+	# The outline is a one-off duplicate sibling (see CelOutline), not a child of
+	# _mesh, so it needs its own position kept in sync with the bob by hand.
+	if _mesh_outline:
+		_mesh_outline.position.y = bob
+
+	var pulse := 1.0 + sin(_t * PULSE_SPEED) * PULSE_AMOUNT
+	_mesh.scale = Vector3.ONE * (_base_scale * pulse)
+	if _mesh_outline:
+		_mesh_outline.scale = _mesh.scale
+	_ring.scale = Vector3.ONE * _base_scale
+	_ring.rotate_y(delta * (RING_SPIN_SPEED if active else RING_SPIN_SPEED_IDLE))
+
 	if active:
 		for b in get_overlapping_bodies():
 			_try(b)
@@ -50,6 +101,8 @@ func relocate(pos: Vector3) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	_mat.albedo_color = Color(0.2, 0.9, 1.0) if active else Color(0.25, 0.3, 0.35, 0.3)
-	_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
-	_mesh.scale = Vector3.ONE if active else Vector3.ONE * 0.5
+	_core_mat.albedo_color = ACTIVE_CORE_COLOR if active else INACTIVE_COLOR
+	_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
+	_ring_mat.albedo_color = ACTIVE_RING_COLOR if active else INACTIVE_COLOR
+	_ring_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
+	_base_scale = 1.0 if active else 0.5
