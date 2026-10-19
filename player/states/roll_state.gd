@@ -9,7 +9,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_elapsed = 0.0
 	p.set_crouching(true)
-	p.visual.set_roll(true)
+	p.visual.play(PlayerVisual.ANIM_ROLL)
 	var dir := p.input_dir()
 	if dir.length() < 0.1:
 		dir = p.facing
@@ -17,7 +17,6 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.set_hvel(dir.normalized() * p.config.roll_speed)
 
 func exit(_next: StringName) -> void:
-	player.visual.set_roll(false)
 	player.roll_cd = player.config.roll_cooldown
 
 func physics_update(delta: float) -> void:

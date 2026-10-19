@@ -3,6 +3,7 @@ extends PlayerState
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.set_crouching(true)
+	player.visual.play(PlayerVisual.ANIM_IDLE)   ## no dedicated crouch clip yet
 
 func physics_update(delta: float) -> void:
 	var p := player

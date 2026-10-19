@@ -4,10 +4,7 @@ extends PlayerState
 ## or a ground pound, and wall-bounces re-grant the dive just like a normal jump.
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
-	player.visual.set_pose(&"long_jump")
-
-func exit(_next: StringName) -> void:
-	player.visual.set_pose(&"")
+	player.visual.play(PlayerVisual.ANIM_LONG_JUMP)
 
 func physics_update(delta: float) -> void:
 	var p := player

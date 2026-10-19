@@ -23,6 +23,7 @@ func physics_update(delta: float) -> void:
 	if input.length() > 0.1:
 		p.face(input, delta)
 	p.apply_gravity(delta)
+	p.visual.play(PlayerVisual.ANIM_JUMP_START if p.velocity.y > 0.0 else PlayerVisual.ANIM_FALLING)
 	p.move_and_slide()
 	if p.is_on_floor():
 		machine.transition_to(&"Ground")

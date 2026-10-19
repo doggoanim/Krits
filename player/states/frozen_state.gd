@@ -5,5 +5,4 @@ extends PlayerState
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.velocity = Vector3.ZERO
 	player.set_crouching(false)
-	player.visual.set_pose(&"")
-	player.visual.set_roll(false)
+	player.visual.play(PlayerVisual.ANIM_IDLE)

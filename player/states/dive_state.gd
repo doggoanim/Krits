@@ -12,10 +12,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.face(dir)
 	p.set_hvel(dir * p.config.dive_speed)
 	p.velocity.y = p.config.dive_up
-	p.visual.set_pose(&"dive")
-
-func exit(_next: StringName) -> void:
-	player.visual.set_pose(&"")
+	p.visual.play(PlayerVisual.ANIM_DIVE)
 
 func physics_update(delta: float) -> void:
 	var p := player

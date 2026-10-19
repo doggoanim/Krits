@@ -73,8 +73,9 @@ func _physics_process(delta: float) -> void:
 	_update_lean(delta)
 
 ## Arcade-style motion lean: pitch forward with ground speed, bank into turns.
-## Grounded only — cinematic poses (dive/pound/long jump) already claim `_body`'s
-## own rotation, and fading this out in the air keeps the two from ever mixing.
+## Only during plain ground locomotion (Ground/Crouch) — every other state
+## (dive/pound/long jump/roll) already has its own baked animation, and
+## layering a lean on top of those would fight the authored pose.
 func _update_lean(delta: float) -> void:
 	var yaw := atan2(-facing.x, -facing.z)
 	var yaw_rate := wrapf(yaw - _prev_facing_yaw, -PI, PI) / maxf(delta, 0.0001)
@@ -82,7 +83,7 @@ func _update_lean(delta: float) -> void:
 
 	var target_pitch := 0.0
 	var target_bank := 0.0
-	if is_on_floor():
+	if machine.current_name == &"Ground" or machine.current_name == &"Crouch":
 		var speed_ratio := clampf(get_hvel().length() / config.walk_speed, 0.0, 1.6)
 		# Facing is -Z, so tipping the body's +Y axis toward -Z (lean forward,
 		# into the movement) is a NEGATIVE rotation.x — positive would lean back.

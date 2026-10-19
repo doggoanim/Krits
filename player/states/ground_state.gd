@@ -25,6 +25,7 @@ func physics_update(delta: float) -> void:
 	p.set_hvel(h)
 	if moving:
 		p.face(input, delta)
+	p.visual.play(PlayerVisual.ANIM_RUN if moving else PlayerVisual.ANIM_IDLE)
 	p.velocity.y = -1.0
 	p.move_and_slide()
 	if not p.is_on_floor():

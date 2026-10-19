@@ -8,10 +8,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_t = player.config.pound_windup
 	_slamming = false
 	player.velocity = Vector3.ZERO
-	player.visual.set_pose(&"pound")
-
-func exit(_next: StringName) -> void:
-	player.visual.set_pose(&"")
+	player.visual.play(PlayerVisual.ANIM_POUND)
 
 func physics_update(delta: float) -> void:
 	var p := player
