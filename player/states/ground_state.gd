@@ -59,12 +59,17 @@ func physics_update(delta: float) -> void:
 		else:
 			p.start_jump(c.jump_velocity)
 		return
-	if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
-		machine.transition_to(&"Roll")
-		return
-	if Input.is_action_pressed(&"crouch_pound"):
-		machine.transition_to(&"Crouch")
-		return
+	# Locked out while the slide pose plays — same "carried along, no input
+	# but jump" rule as steering/accelerating below. Roll (and by extension
+	# the roll-into-jump long jump, which only starts from Roll) and the
+	# crouch/pound both need their own footing, not a skid in progress.
+	if not (was_sliding or starting_slide):
+		if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
+			machine.transition_to(&"Roll")
+			return
+		if Input.is_action_pressed(&"crouch_pound"):
+			machine.transition_to(&"Crouch")
+			return
 
 	# While the slide plays (play_hold protects the pose) you can't steer or
 	# accelerate, just carry your existing momentum forward along an easing curve.
