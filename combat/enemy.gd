@@ -27,6 +27,7 @@ var _busy_with_special := false ## true while a leap or burst-shoot is actually 
 var _puddle_t := 0.0
 
 const FACE_TURN_SPEED := 8.0   ## rad/s, how fast an enemy turns to face its movement
+const SPHERE_OUTLINE_RATIO := 0.08   ## placeholder-sphere outline thickness, as a fraction of its radius
 
 func setup(d: EnemyData, a: Arena, t: Node3D) -> void:
 	data = d
@@ -45,8 +46,9 @@ func _ready() -> void:
 		add_child(_visual)
 		_visual.setup(data)
 	else:
+		var sphere_radius := 0.7 * data.size
 		var sm := SphereMesh.new()
-		sm.radius = 0.7 * data.size
+		sm.radius = sphere_radius
 		sm.height = 1.4 * data.size
 		_mesh = MeshInstance3D.new()
 		_mesh.mesh = sm
@@ -56,6 +58,7 @@ func _ready() -> void:
 		_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		_mesh.material_override = _mat
 		add_child(_mesh)
+		CelOutline.apply(_mesh, sphere_radius * SPHERE_OUTLINE_RATIO)
 	_dest = global_position
 
 func _physics_process(delta: float) -> void:

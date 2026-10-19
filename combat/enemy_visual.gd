@@ -6,7 +6,7 @@ extends Node3D
 ## a target height, cel-shaded, outlined — so an animated enemy reads as
 ## part of the same cast as the player, not a different art style bolted on.
 
-const OUTLINE_THICKNESS_RATIO := 0.0   ## outline removed; raise above 0 to bring it back
+const OUTLINE_THICKNESS_RATIO := 0.015   ## black inverted-hull outline, as a fraction of the model's height
 
 var _anim: AnimationPlayer
 var _model: Node3D

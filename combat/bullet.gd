@@ -2,6 +2,8 @@ class_name Bullet
 extends Area3D
 ## Simple projectile. `pierces_shield` bullets damage HP directly.
 
+const OUTLINE_THICKNESS := 0.05   ## black inverted-hull outline, see CelOutline
+
 var velocity := Vector3.ZERO
 var damage := 8.0
 var pierces_shield := false
@@ -33,6 +35,7 @@ func _ready() -> void:
 		mat.albedo_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
 	m.material_override = mat
 	add_child(m)
+	CelOutline.apply(m, OUTLINE_THICKNESS)
 	body_entered.connect(_on_body)
 
 func _physics_process(delta: float) -> void:
