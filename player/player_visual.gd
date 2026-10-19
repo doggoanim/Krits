@@ -18,6 +18,12 @@ const ANIM_JUMP_START_VARIANTS: Array[StringName] = [&"jump_start1", &"jump_star
 ## play_random_attack()).
 const ANIM_ATTACK_VARIANTS: Array[StringName] = [&"attack1", &"attack2", &"attack3"]
 const ANIM_FALLING := &"falling"
+## Falling gets its own, longer cross-blend than play()'s default 0.15 — it's
+## reached from several different, often fast-moving poses (a jump's rising
+## pose, an orb-hit attack, a wall bounce's reaction pose) and a quick cut
+## into it reads as an abrupt snap. Pass this explicitly wherever ANIM_FALLING
+## is played; everything else keeps the default blend.
+const FALLING_BLEND := 0.4
 const ANIM_ROLL := &"roll"
 const ANIM_DIVE := &"air_dive"
 const ANIM_LONG_JUMP := &"long_jump"

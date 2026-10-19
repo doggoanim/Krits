@@ -28,7 +28,10 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta)
 	# A wall-bounce collision pose protects itself via play_hold — this call
 	# is simply ignored for the moment and takes back over once it expires.
-	p.visual.play(p.visual.jump_start_anim() if p.velocity.y > 0.0 else PlayerVisual.ANIM_FALLING)
+	if p.velocity.y > 0.0:
+		p.visual.play(p.visual.jump_start_anim())
+	else:
+		p.visual.play(PlayerVisual.ANIM_FALLING, PlayerVisual.FALLING_BLEND)
 	p.move_and_slide()
 	if p.is_on_floor():
 		machine.transition_to(&"Ground")
