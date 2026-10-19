@@ -13,7 +13,10 @@ Tricks: roll+jump = long jump · jump right after a pound = high jump ·
 dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
 dive/long-jump can chain another dive, rolling into one launches you off the
 ground) · ground pound works out of a dive · stopping or sharply reversing
-direction on the ground skids into a brief slide — no steering until it ends.
+direction on the ground skids into a brief slide — no steering until it ends ·
+jumping out of a skid caused by reversing direction (not just stopping) does
+a Mario 64-style side flip instead of a plain jump — higher arc, launches
+toward the new direction.
 
 ## Layout
 - core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup,
@@ -22,8 +25,9 @@ direction on the ground skids into a brief slide — no steering until it ends.
              PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
              air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
-             crouch_walk, roll_collision, slide, attack1/2/3). jump_start and attack each have
-             3 interchangeable variants, picked at random per jump / per orb hit (PlayerVisual).
+             crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack
+             each have 3 interchangeable variants, picked at random per jump / per orb hit
+             (PlayerVisual).
              Re-export over this file to update the model/animations.
 - combat/    EncounterManager (a circular barrier dissolves into place right where the fight starts,
              nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its

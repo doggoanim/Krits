@@ -7,6 +7,8 @@ extends PlayerState
 var _slide_t := 0.0
 var _slide_dir := Vector3.ZERO
 var _slide_start_speed := 0.0
+var _slide_is_turn := false   ## true when the current/most recent skid came from reversing
+                               ## direction rather than just stopping — gates the side-flip trick
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
@@ -21,16 +23,6 @@ func exit(_next: StringName) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
-	if p.jump_buffer_t > 0.0:
-		p.start_jump(c.jump_velocity)
-		return
-	if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
-		machine.transition_to(&"Roll")
-		return
-	if Input.is_action_pressed(&"crouch_pound"):
-		machine.transition_to(&"Crouch")
-		return
-
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
 	var prev_h := p.get_hvel()
@@ -39,12 +31,33 @@ func physics_update(delta: float) -> void:
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
 	# the stop case is gated by slide_min_move_time (a quick stick tap
 	# shouldn't skid to a stop) — a sharp direction change slides regardless
-	# of how long you'd been moving, same as before. While it plays
-	# (play_hold protects the pose) you can't steer or accelerate, just carry
-	# your existing momentum forward along an easing curve.
+	# of how long you'd been moving, same as before. Checked here (before the
+	# jump branch below) so a jump pressed on the very frame the skid starts
+	# still sees it.
 	var stopping := not moving and _move_t >= c.slide_min_move_time
 	var reversing := moving and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
-	if not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing):
+	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing)
+	if starting_slide:
+		_slide_is_turn = reversing
+
+	# Jumping out of a skid-turn (reversing, not just stopping) does a Mario
+	# 64-style side flip toward the new direction instead of a plain jump.
+	if p.jump_buffer_t > 0.0:
+		if (was_sliding or starting_slide) and _slide_is_turn:
+			p.start_side_flip(input)
+		else:
+			p.start_jump(c.jump_velocity)
+		return
+	if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
+		machine.transition_to(&"Roll")
+		return
+	if Input.is_action_pressed(&"crouch_pound"):
+		machine.transition_to(&"Crouch")
+		return
+
+	# While the slide plays (play_hold protects the pose) you can't steer or
+	# accelerate, just carry your existing momentum forward along an easing curve.
+	if starting_slide:
 		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
 		was_sliding = true
 		_slide_t = 0.0

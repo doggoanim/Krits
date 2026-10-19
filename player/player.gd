@@ -195,6 +195,23 @@ func start_jump(vel: float) -> void:
 	effects.burst_jump_dust()
 	machine.transition_to(&"Air")
 
+## Mario 64-style skid-turn trick: jumping while skidding from a sharp
+## direction reversal (see GroundState's slide/_slide_is_turn) launches a
+## higher-arcing side flip toward `dir` instead of a plain vertical jump.
+func start_side_flip(dir: Vector3) -> void:
+	if is_slimed():
+		jump_buffer_t = 0.0   # see start_jump()'s identical guard for why
+		return
+	set_hvel(dir.normalized() * config.side_flip_speed)
+	velocity.y = config.side_flip_jump_velocity
+	face(dir)
+	coyote = 0.0
+	jump_buffer_t = 0.0
+	can_dive = true
+	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time)
+	effects.burst_jump_dust()
+	machine.transition_to(&"Air")
+
 func bounce_off_orb() -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity

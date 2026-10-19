@@ -27,6 +27,7 @@ const ANIM_CROUCH_IDLE := &"crouch_idle"
 const ANIM_CROUCH_WALK := &"crouch_walk"
 const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
 const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
+const ANIM_SIDE_JUMP := &"side_jump"             ## Mario 64-style skid-turn trick jump
 
 ## Material slots (named in the model) that get tinted by the active outfit.
 ## Skin/hair/face stay as authored — outfits only recolor the "clothing" parts.

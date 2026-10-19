@@ -13,6 +13,17 @@ extends Resource
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
 
+@export_group("Side Flip")
+## Jumping while skidding from a sharp direction reversal (a "skid turn",
+## see GroundState's _slide_is_turn) does this instead of a plain jump —
+## Mario 64's side somersault: a higher arc, launched toward the new
+## direction instead of straight up.
+@export var side_flip_jump_velocity := 14.0   ## higher than a plain jump (jump_velocity)
+@export var side_flip_speed := 10.0           ## horizontal speed toward the new direction
+@export var side_flip_hold_time := 0.6        ## how long side_jump plays before air control resumes
+                                               ## (shorter than the clip's own ~1.25s so a mistimed
+                                               ## trick doesn't strand you mid-air with no steering)
+
 @export_group("Air")
 @export var gravity := 32.0
 @export var fall_gravity_mult := 1.35
