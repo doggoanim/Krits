@@ -5,6 +5,10 @@ extends PlayerState
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.visual.play(PlayerVisual.ANIM_LONG_JUMP)
+	player.effects.set_long_jump_trail(true)
+
+func exit(_next: StringName) -> void:
+	player.effects.set_long_jump_trail(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
