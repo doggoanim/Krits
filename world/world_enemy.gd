@@ -59,6 +59,7 @@ func _ready() -> void:
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	mi.material_override = mat
 	_visual.add_child(mi)
+	CelOutline.apply(mi, data.size * 0.05)
 	var lbl := Label3D.new()
 	lbl.text = data.display_name
 	lbl.position.y = 1.8 * data.size

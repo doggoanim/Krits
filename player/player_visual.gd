@@ -49,6 +49,10 @@ var _base_scale := 1.0   ## uniform scale from _fit_model_height
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 
+@export var outline_enabled := true
+@export var outline_thickness_ratio := 0.006   ## outline thickness, as a fraction of the character's height
+@export var outline_color := Color.BLACK
+
 ## Clips meant to play on repeat for as long as their state lasts, rather than
 ## play once and hold a final frame. glTF import defaults every clip to
 ## non-looping, so without this a sustained roll (or just standing still past
@@ -61,8 +65,8 @@ func _ready() -> void:
 	add_child(_model)
 	_model.rotation.y = MODEL_FACING_OFFSET
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_fit_model_height()   # before _collect_materials: outline thickness is sized off _fit_aabb
 	_collect_materials(_model)
-	_fit_model_height()
 	_force_looping_clips()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
@@ -129,6 +133,9 @@ func _collect_materials(n: Node) -> void:
 				_base_colors[dup] = dup.albedo_color
 				if dup.resource_name in OUTFIT_SLOTS:
 					_outfit_materials.append(dup)
+		if outline_enabled:
+			var height := _fit_aabb.size.y if _fit_has_box else Player.STAND_HEIGHT
+			CelOutline.apply(mi, height * outline_thickness_ratio, outline_color)
 	for c in n.get_children():
 		_collect_materials(c)
 
