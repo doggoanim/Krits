@@ -1,16 +1,18 @@
 class_name GroundShadow
 extends MeshInstance3D
-## A small soft circle marker on the ground directly below the player — a
-## depth-perception aid. Airborne (jumping, diving, falling) it's otherwise
-## easy to lose track of exactly how high up you are or where you'll land;
-## this always points straight down to the spot you'd land on, shrinking
-## and fading the higher up you are so it also hints at *how* high.
+## A small white ring marker on the ground directly below the player —
+## hollow, transparent center, just a soft outline — a depth-perception
+## aid. Airborne (jumping, diving, falling) it's otherwise easy to lose
+## track of exactly how high up you are or where you'll land; this always
+## points straight down to the spot you'd land on, shrinking and fading
+## the higher up you are so it also hints at *how* high.
 
 const SIZE := 0.6                ## marker diameter at ground level (meters)
 const RAY_LENGTH := 60.0
 const MAX_FADE_HEIGHT := 10.0    ## fully shrunk/faded by this far above the ground
 const MIN_SCALE := 0.35          ## never shrinks smaller than this fraction of SIZE
-const MIN_ALPHA := 0.15
+const BASE_ALPHA := 0.8
+const MIN_ALPHA := 0.25
 
 var player: Player
 var _mat: StandardMaterial3D
@@ -25,8 +27,8 @@ func setup(p: Player) -> void:
 	_mat = StandardMaterial3D.new()
 	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_mat.albedo_color = Color(0, 0, 0, 0.55)
-	_mat.albedo_texture = SoftCircleTexture.make()
+	_mat.albedo_color = Color(1, 1, 1, 0.8)
+	_mat.albedo_texture = SoftCircleTexture.make_ring()
 	_mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
 	material_override = _mat
 
@@ -48,4 +50,4 @@ func _physics_process(_delta: float) -> void:
 	var t := clampf(height / MAX_FADE_HEIGHT, 0.0, 1.0)
 	var s := lerpf(1.0, MIN_SCALE, t)
 	scale = Vector3(s, 1.0, s)
-	_mat.albedo_color.a = lerpf(0.55, MIN_ALPHA, t)
+	_mat.albedo_color.a = lerpf(BASE_ALPHA, MIN_ALPHA, t)

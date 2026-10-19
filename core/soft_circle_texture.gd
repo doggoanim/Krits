@@ -17,3 +17,26 @@ static func make(size := 32) -> GradientTexture2D:
 	t.fill_from = Vector2(0.5, 0.5)
 	t.fill_to = Vector2(1.0, 0.5)
 	return t
+
+## A thin ring — transparent center, a soft white band near the edge,
+## transparent again past it. Same radial-gradient trick as make(), just
+## with extra stops carving out the hollow middle.
+static func make_ring(size := 32) -> GradientTexture2D:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.55, 0.68, 0.8, 0.92, 1.0])
+	g.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0),
+		Color(1, 1, 1, 0.0),
+		Color(1, 1, 1, 0.95),
+		Color(1, 1, 1, 0.95),
+		Color(1, 1, 1, 0.0),
+		Color(1, 1, 1, 0.0),
+	])
+	var t := GradientTexture2D.new()
+	t.gradient = g
+	t.width = size
+	t.height = size
+	t.fill = GradientTexture2D.FILL_RADIAL
+	t.fill_from = Vector2(0.5, 0.5)
+	t.fill_to = Vector2(1.0, 0.5)
+	return t
