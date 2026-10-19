@@ -197,6 +197,9 @@ func _end(victory: bool) -> void:
 	for c in get_children():
 		if c is Bullet:
 			c.queue_free()
+	for o in orbs:
+		if is_instance_valid(o):
+			o.break_apart()   # any orbs still unclaimed break instead of just vanishing
 	if player.camera_rig:
 		player.camera_rig.extra_distance = 0.0
 	if victory:
