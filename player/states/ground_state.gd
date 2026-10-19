@@ -1,6 +1,13 @@
 class_name GroundState
 extends PlayerState
 
+## Slide state — carries you forward on an eased-out curve (holds speed
+## early, sheds most of it near the end) rather than a flat deceleration, so
+## it reads as a real skid instead of an instant brake.
+var _slide_t := 0.0
+var _slide_dir := Vector3.ZERO
+var _slide_start_speed := 0.0
+
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
 		player.set_crouching(false)
@@ -26,16 +33,22 @@ func physics_update(delta: float) -> void:
 
 	# Fast enough stop or sharp enough reversal triggers a brief slide — while
 	# it plays (play_hold protects the pose) you can't steer or accelerate,
-	# just skid to a stop on whatever momentum you already had.
+	# just carry your existing momentum forward along an easing curve.
 	if not was_sliding and prev_h.length() >= c.slide_min_speed and \
 			(not moving or prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot):
 		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
 		was_sliding = true
+		_slide_t = 0.0
+		_slide_dir = prev_h.normalized()
+		_slide_start_speed = prev_h.length()
 
 	var h: Vector3
 	if was_sliding:
-		var spd := maxf(0.0, prev_h.length() - c.ground_decel * delta)
-		h = prev_h.normalized() * spd if spd > 0.0 else Vector3.ZERO
+		_slide_t += delta
+		# Ease-out: barely slows at first, sheds most of its speed in the
+		# last stretch — 1 - frac^2 so the deceleration rate itself ramps up.
+		var frac := clampf(_slide_t / c.slide_time, 0.0, 1.0)
+		h = _slide_dir * (_slide_start_speed * (1.0 - frac * frac))
 	else:
 		h = prev_h.move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
 	p.set_hvel(h)
