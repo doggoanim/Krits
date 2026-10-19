@@ -21,7 +21,8 @@ const MAX_RADIUS := 24.0
 const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
                                  ## collides with it so the camera can't peek through the
                                  ## barrier during a fight
-const WALL_HEIGHT := 14.0
+const WALL_HEIGHT := 90.0       ## tall enough that there's no realistic camera angle
+                                 ## (even zoomed out mid-fight) that sees over it
 const WALL_SEGMENTS := 28       ## faceted approximation of a circle
 const ORBS_BASE := 5
 const ORBS_PER_ENEMY := 2

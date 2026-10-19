@@ -21,6 +21,15 @@ func _ready() -> void:
 	_arm = SpringArm3D.new()
 	_arm.spring_length = base_distance
 	_arm.margin = 0.3
+	# A sphere, not SpringArm3D's default bare raycast: a ray only tests the
+	# exact center line out to the camera, so geometry near the edge of what
+	# the camera actually sees (floors at a steep downward pitch, the arena
+	# wall seen at a glancing angle) could still clip into frame even while
+	# the center line itself read clear. Shape-casting a sphere the rough
+	# size of the camera's near plane catches that.
+	var probe := SphereShape3D.new()
+	probe.radius = 0.35
+	_arm.shape = probe
 	# Only the ground/world layer and the arena's own circular wall push the
 	# camera in — everything else (ordinary walls, props, enemies) the camera
 	# clips straight through, so it never gets shoved in close to the player
