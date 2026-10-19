@@ -28,6 +28,11 @@ static func _outline_material(thickness: float, color: Color) -> BaseMaterial3D:
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = color
 	m.cull_mode = BaseMaterial3D.CULL_FRONT
-	m.grow_enabled = true
-	m.grow = thickness
+	# NOTE: BaseMaterial3D's actual property names here are `grow` (bool,
+	# enables it) and `grow_amount` (float, how far) — not `grow_enabled`/
+	# `grow` as the inspector's "Grow > Amount" layout makes it tempting to
+	# assume. Getting this wrong doesn't error, it just silently never grows
+	# the mesh, so the outline never has anything to show.
+	m.grow = true
+	m.grow_amount = thickness
 	return m
