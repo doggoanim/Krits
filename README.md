@@ -16,7 +16,8 @@ ground) · ground pound works out of a dive · stopping or sharply reversing
 direction on the ground skids into a brief slide — no steering until it ends.
 
 ## Layout
-- core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup
+- core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup,
+             VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
              PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start, falling, air_dive,

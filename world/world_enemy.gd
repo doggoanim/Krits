@@ -152,8 +152,11 @@ func _wake() -> void:
 	_contact.monitoring = true
 	_kill_tween()
 	_visual.scale = Vector3.ZERO
+	VFX.smoke_puff(self, global_position + Vector3.UP * (0.7 * data.size), data.size)
 	_tween = create_tween()
-	_tween.tween_property(_visual, "scale", Vector3.ONE, 0.55) \
+	# Quick pop with a snappy overshoot — much shorter than before, the same
+	# TRANS_BACK/EASE_OUT curve just lands fast instead of drifting in.
+	_tween.tween_property(_visual, "scale", Vector3.ONE, 0.22) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_tween.tween_callback(func(): _solid = true)
 
