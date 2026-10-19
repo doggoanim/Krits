@@ -55,10 +55,10 @@ var _held_anim := &""    ## the anim play_hold() is currently protecting
 ## skeleton), independent of whatever animation clip is playing, so they
 ## layer on top of jump_start/falling/idle/etc. instead of replacing them.
 @export_group("Squash & Stretch")
-@export var jump_stretch_y := 1.22      ## taller/thinner at the instant of launch
+@export var jump_stretch_y := 1.4      ## taller/thinner at the instant of launch
 @export var jump_stretch_xz := 0.88
 @export var land_squash_y := 0.78       ## shorter/wider at the instant of landing impact
-@export var land_squash_xz := 1.14
+@export var land_squash_xz := 1.3
 @export var uncrouch_bounce_y := 1.12   ## small stretchy "pop" when standing back up
 @export var uncrouch_bounce_xz := 0.94
 @export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes

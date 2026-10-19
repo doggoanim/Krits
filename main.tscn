@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cffimd14ylxxl"]
 
-[ext_resource type="Script" path="res://main.gd" id="1"]
+[ext_resource type="Script" uid="uid://cejoqhktwxh7w" path="res://main.gd" id="1"]
+[ext_resource type="Resource" uid="uid://cxq5uev4mffcc" path="res://world/grass_biome_lighting.tres" id="2_0xm2m"]
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=1201764531]
 script = ExtResource("1")
+env_config = ExtResource("2_0xm2m")

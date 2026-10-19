@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://cxq5uev4mffcc"]
+
+[ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="1_v032n"]
+
+[resource]
+script = ExtResource("1_v032n")
+brightness = 0.83
+contrast = 1.12
