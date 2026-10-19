@@ -216,20 +216,24 @@ func _build_barrier() -> void:
 	for i in WALL_SEGMENTS:
 		var ang := TAU * float(i) / float(WALL_SEGMENTS)
 		var dir := Vector3(cos(ang), 0.0, sin(ang))
-		var ground_pos := global_position + dir * radius
-		var ground_y := _ground_height(ground_pos)
+		var local_pos := dir * radius              # relative to the arena's own origin
+		var world_pos := global_position + local_pos   # only needed to aim the ground raycast
+		var ground_y := _ground_height(world_pos)
 		if absf(ground_y - global_position.y) > MAX_GROUND_DEVIATION:
 			ground_y = global_position.y   # a disconnected platform/gap, not this fight's floor
+		var local_ground_y := ground_y - global_position.y   # back to arena-local height
 		var rot_y := PI * 0.5 - ang   # faces tangent to the circle at this angle
 
-		var wall_pos := ground_pos
-		wall_pos.y = ground_y + WALL_HEIGHT * 0.5
+		var wall_pos := local_pos
+		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
 		_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, wall_layer, 0.0, true, rot_y)
 
-		var ring_pos := ground_pos
-		ring_pos.y = ground_y + 0.03   # avoid z-fighting with the ground
+		var ring_pos := local_pos
+		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
 		_decor(ring_pos, Vector3(seg_len, 0.06, 0.4), glow_col, 1.0, rot_y)
 
+## `pos` is local to stage_root (i.e. relative to the arena's own origin),
+## not a world-space coordinate — callers must not fold in global_position.
 func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false, rot_y := 0.0) -> void:
 	var body := StaticBody3D.new()
 	body.collision_layer = layer
