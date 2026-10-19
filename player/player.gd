@@ -9,6 +9,7 @@ const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.0
 const RADIUS := 0.4
 const HIT_INVULN := 0.8
+const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime puddle
 
 var camera_rig: CameraRig
 var visual: PlayerVisual
@@ -35,6 +36,7 @@ var _shape_node: CollisionShape3D
 var _was_on_floor := true
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
+var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
 
 func _ready() -> void:
 	collision_layer = 1 << 1   # layer 2: player
@@ -177,6 +179,14 @@ func air_control(delta: float) -> void:
 ## Every jump is a fixed, snappy height — no variable height from holding the
 ## button, so the timing always feels the same regardless of how long jump is held.
 func start_jump(vel: float) -> void:
+	if is_slimed():
+		# Still consume the buffered jump so a held/mashed jump input doesn't
+		# keep re-triggering this no-op every frame — each caller returns
+		# immediately after calling start_jump(), assuming a jump happened,
+		# so leaving jump_buffer_t set would stall ground movement each of
+		# those frames until the buffer window expired on its own.
+		jump_buffer_t = 0.0
+		return
 	velocity.y = vel
 	coyote = 0.0
 	jump_buffer_t = 0.0
@@ -253,6 +263,26 @@ func teleport(pos: Vector3) -> void:
 	dead = false
 	set_crouching(false)
 	machine.transition_to(&"Ground")
+
+# ---------------------------------------------------------------- slime puddles
+
+## Called by SlimePuddle while the player is standing in it. A counter, not a
+## flag, since overlapping puddles must not cancel each other's effect out
+## the moment just one of them is left.
+func enter_slime_puddle() -> void:
+	_slime_overlaps += 1
+	if _slime_overlaps == 1:
+		visual.set_slimed(true)
+		effects.set_slime_drip(true)
+
+func exit_slime_puddle() -> void:
+	_slime_overlaps = maxi(0, _slime_overlaps - 1)
+	if _slime_overlaps == 0:
+		visual.set_slimed(false)
+		effects.set_slime_drip(false)
+
+func is_slimed() -> bool:
+	return _slime_overlaps > 0
 
 # ---------------------------------------------------------------- damage
 

@@ -7,6 +7,10 @@ var damage := 8.0
 var pierces_shield := false
 var lifetime := 6.0
 var accel := 0.0          ## speed change per second (0 = constant)
+## Optional per-shot color (e.g. a slime ball). Leave at the default (alpha 0)
+## to keep the usual pierces_shield-based magenta/orange — most patterns
+## don't need to think about color at all.
+var color_override := Color(0.0, 0.0, 0.0, 0.0)
 
 func _ready() -> void:
 	collision_layer = 1 << 3   # layer 4: bullet
@@ -23,7 +27,10 @@ func _ready() -> void:
 	m.mesh = sm
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
+	if color_override.a > 0.0:
+		mat.albedo_color = color_override
+	else:
+		mat.albedo_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
 	m.material_override = mat
 	add_child(m)
 	body_entered.connect(_on_body)

@@ -91,7 +91,7 @@ func cancel() -> void:
 func random_point(fraction := 1.0) -> Vector3:
 	for _i in RANDOM_POINT_ATTEMPTS:
 		var pos := _sample_disk(fraction)
-		var h := _ground_height(pos)
+		var h := ground_height(pos)
 		if absf(h - global_position.y) <= MAX_GROUND_DEVIATION:
 			pos.y = h
 			return pos
@@ -146,7 +146,8 @@ func _free_orb_position() -> Vector3:
 ## Casts straight down from above `pos` to find the real terrain height there
 ## (world geometry is collision layer 1). Falls back to the arena's own
 ## ground level if nothing is hit, e.g. a candidate point over a gap/ledge.
-func _ground_height(pos: Vector3) -> float:
+## Public: Enemy also uses this to land a leap attack on real ground.
+func ground_height(pos: Vector3) -> float:
 	var from := pos + Vector3.UP * GROUND_PROBE_UP
 	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * GROUND_PROBE_DOWN, 1)
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
@@ -218,7 +219,7 @@ func _build_barrier() -> void:
 		var dir := Vector3(cos(ang), 0.0, sin(ang))
 		var local_pos := dir * radius              # relative to the arena's own origin
 		var world_pos := global_position + local_pos   # only needed to aim the ground raycast
-		var ground_y := _ground_height(world_pos)
+		var ground_y := ground_height(world_pos)
 		if absf(ground_y - global_position.y) > MAX_GROUND_DEVIATION:
 			ground_y = global_position.y   # a disconnected platform/gap, not this fight's floor
 		var local_ground_y := ground_y - global_position.y   # back to arena-local height

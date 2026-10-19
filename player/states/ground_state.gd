@@ -60,7 +60,8 @@ func physics_update(delta: float) -> void:
 		var frac := clampf(_slide_t / c.slide_time, 0.0, 1.0)
 		h = _slide_dir * (_slide_start_speed * (1.0 - frac * frac))
 	else:
-		h = prev_h.move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
+		var speed := c.walk_speed * (Player.SLIME_SPEED_MULT if p.is_slimed() else 1.0)
+		h = prev_h.move_toward(input * speed, (c.ground_accel if moving else c.ground_decel) * delta)
 	p.set_hvel(h)
 	if moving and not was_sliding:
 		p.face(input, delta)

@@ -10,20 +10,40 @@ static func green_slime() -> EnemyData:
 	d.display_name = "Green Slime"
 	d.max_hp = 60.0
 	d.xp = 20
-	d.color = Color(0.3, 0.75, 0.3)
+	d.color = Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)   # also the puddle/slime-ball tint
 	d.model = GREEN_SLIME_MODEL
 	d.model_height = 1.1
-	# Clip names baked into green_slime.glb: Idle, Moving, Death.
+	# Clip names baked into green_slime.glb: Idle, Moving, Death, leap_ready, leap, shoot.
 	d.anim_idle = &"Idle"
 	d.anim_move = &"Moving"
 	d.anim_death = &"Death"
-	var a := AimedPattern.new()
-	a.interval = 1.6
-	a.count = 3
-	var r := RadialPattern.new()
-	r.interval = 3.0
-	r.count = 10
-	d.patterns.assign([a, r])
+
+	d.leap_min_cooldown = 3.0
+	d.leap_max_cooldown = 5.5
+	d.leap_ready_time = 1.0
+	d.leap_travel_time = 0.6
+	d.leap_height = 3.0
+	d.leap_damage = 14.0
+	d.leap_radius = 2.0
+	d.anim_leap_ready = &"leap_ready"
+	d.anim_leap = &"leap"
+
+	d.shoot_min_cooldown = 2.5
+	d.shoot_max_cooldown = 4.5
+	d.shoot_count_min = 1
+	d.shoot_count_max = 10
+	d.shoot_interval = 0.12
+	d.shoot_speed = 10.0
+	d.shoot_damage = 5.0
+	d.anim_shoot = &"shoot"
+
+	d.leaves_puddle_trail = true
+	d.puddle_interval = 0.5
+	d.puddle_radius = 1.3
+	d.puddle_lifetime = 5.0
+	d.puddle_damage = 4.0
+	d.puddle_tick_interval = 0.9
+	d.puddle_landing_radius_mult = 1.6
 	return d
 
 static func spinner() -> EnemyData:

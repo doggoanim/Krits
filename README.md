@@ -24,7 +24,10 @@ direction on the ground skids into a brief slide — no steering until it ends.
              Re-export over this file to update the model/animations.
 - combat/    EncounterManager (a circular barrier dissolves into place right where the fight starts,
              nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its
-             dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
+             dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield`
+             flag), SlimePuddle (damage/slow/no-jump ground hazard). EnemyData also supports an optional
+             telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
+             an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based

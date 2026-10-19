@@ -46,6 +46,10 @@ var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node'
 var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
+var _slimed := false     ## standing in a slime puddle — tints the character green (see set_slimed)
+
+const SLIME_TINT_COLOR := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
+const SLIME_TINT_STRENGTH := 0.6
 
 @export var outline_enabled := false
 @export var outline_thickness_ratio := 0.011   ## outline thickness, as a fraction of the character's height
@@ -136,6 +140,12 @@ func play(anim_name: StringName, blend := 0.15) -> void:
 func flash() -> void:
 	_flash_t = 0.25
 
+## Standing in a slime puddle: tints the character green for as long as this
+## stays true (the dripping particles are PlayerEffects.set_slime_drip,
+## driven alongside this from Player.enter_slime_puddle/exit_slime_puddle).
+func set_slimed(active: bool) -> void:
+	_slimed = active
+
 ## Plays a one-off reaction pose (a wall collision, say) and protects it from
 ## being overridden by a state's regular per-frame play() calls for
 ## `duration` seconds. Whoever triggered it is responsible for playing
@@ -186,6 +196,9 @@ func _process(delta: float) -> void:
 		var white := int(_flash_t * 30.0) % 2 == 0
 		for m in _materials:
 			m.albedo_color = Color.WHITE if white else _base_colors.get(m, m.albedo_color)
+	elif _slimed:
+		for m in _materials:
+			m.albedo_color = _base_colors.get(m, m.albedo_color).lerp(SLIME_TINT_COLOR, SLIME_TINT_STRENGTH)
 	else:
 		for m in _materials:
 			if m.albedo_color != _base_colors.get(m, m.albedo_color):

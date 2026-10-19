@@ -26,6 +26,11 @@ const SMOKE_RAMP := [
 	Color(0.8, 0.8, 0.85, 0.4),
 	Color(0.8, 0.8, 0.85, 0.0),
 ]
+const SLIME_DRIP_RAMP := [
+	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.9),
+	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.6),
+	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.0),
+]
 
 const DUST_TEXTURE_PATH := "res://assets/sprites/dirt_texture.png"
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
@@ -35,10 +40,12 @@ var _smoke_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
 var _smoke_ramp_tex: GradientTexture1D
+var _slime_drip_ramp_tex: GradientTexture1D
 
 var _run_dust: GPUParticles3D
 var _dive_trail: GPUParticles3D
 var _long_jump_trail: GPUParticles3D
+var _slime_drip: GPUParticles3D
 
 func _ready() -> void:
 	_dust_quad = _make_quad_mesh(load(DUST_TEXTURE_PATH))
@@ -46,6 +53,7 @@ func _ready() -> void:
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
+	_slime_drip_ramp_tex = _make_ramp(SLIME_DRIP_RAMP)
 
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
 	add_child(_run_dust)
@@ -53,6 +61,9 @@ func _ready() -> void:
 	add_child(_dive_trail)
 	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false, _dust_quad)
 	add_child(_long_jump_trail)
+	_slime_drip = _build_emitter(_slime_drip_material(), 10, 0.6, false, _dust_quad)
+	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
+	add_child(_slime_drip)
 
 # ---------------------------------------------------------------- continuous
 
@@ -64,6 +75,12 @@ func set_dive_trail(active: bool) -> void:
 
 func set_long_jump_trail(active: bool) -> void:
 	_long_jump_trail.emitting = active
+
+## Driven by Player.enter_slime_puddle/exit_slime_puddle, alongside
+## PlayerVisual.set_slimed — the green tint and the drip particles always
+## turn on and off together.
+func set_slime_drip(active: bool) -> void:
+	_slime_drip.emitting = active
 
 # ---------------------------------------------------------------- one-shot bursts
 
@@ -169,4 +186,24 @@ func _material(speed: float, gravity_y: float, scale_min: float, scale_max: floa
 	m.color_ramp = ramp
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.15
+	return m
+
+## Small green droplets falling straight down off the body — unlike every
+## other emitter here (all UP-biased, dust kicked up or smoke rising), this
+## one needs its own direction, so it doesn't go through _material() above.
+func _slime_drip_material() -> ParticleProcessMaterial:
+	var m := ParticleProcessMaterial.new()
+	m.direction = Vector3.DOWN
+	m.spread = 20.0
+	m.initial_velocity_min = 0.3
+	m.initial_velocity_max = 0.8
+	m.gravity = Vector3(0.0, -4.0, 0.0)
+	m.damping_min = 0.5
+	m.damping_max = 1.5
+	m.scale_min = 0.25
+	m.scale_max = 0.5
+	m.scale_curve = _growth_curve
+	m.color_ramp = _slime_drip_ramp_tex
+	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	m.emission_sphere_radius = 0.35
 	return m

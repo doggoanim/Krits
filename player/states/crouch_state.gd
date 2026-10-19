@@ -26,7 +26,8 @@ func physics_update(delta: float) -> void:
 
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
-	p.set_hvel(p.get_hvel().move_toward(input * c.crouch_speed, (c.ground_accel if moving else c.ground_decel) * delta))
+	var speed := c.crouch_speed * (Player.SLIME_SPEED_MULT if p.is_slimed() else 1.0)
+	p.set_hvel(p.get_hvel().move_toward(input * speed, (c.ground_accel if moving else c.ground_decel) * delta))
 	if moving:
 		p.face(input, delta)
 	p.visual.play(PlayerVisual.ANIM_CROUCH_WALK if moving else PlayerVisual.ANIM_CROUCH_IDLE)

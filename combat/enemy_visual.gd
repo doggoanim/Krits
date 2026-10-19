@@ -16,6 +16,9 @@ var _flash_t := 0.0
 var _anim_idle: StringName
 var _anim_move: StringName
 var _anim_death: StringName
+var _anim_leap_ready: StringName
+var _anim_leap: StringName
+var _anim_shoot: StringName
 
 ## `data` supplies the model scene, target height and clip names (see
 ## EnemyData) — kept data-driven rather than hardcoded constants since,
@@ -24,6 +27,9 @@ func setup(data: EnemyData) -> void:
 	_anim_idle = data.anim_idle
 	_anim_move = data.anim_move
 	_anim_death = data.anim_death
+	_anim_leap_ready = data.anim_leap_ready
+	_anim_leap = data.anim_leap
+	_anim_shoot = data.anim_shoot
 	_model = data.model.instantiate()
 	add_child(_model)
 	_model.rotation.y = data.model_facing_offset
@@ -45,6 +51,18 @@ func play_idle() -> void:
 func play_move() -> void:
 	_play(_anim_move)
 
+func play_leap_ready() -> void:
+	_play(_anim_leap_ready)
+
+func play_leap() -> void:
+	_play(_anim_leap)
+
+## Restarts every call (unlike the others) — a burst fires several shots in a
+## row and each one should re-trigger the pose, not just hold whatever frame
+## the previous shot's playback happened to be on.
+func play_shoot() -> void:
+	_play(_anim_shoot, true)
+
 ## Plays the death clip, if any, and reports back how long it runs for (so
 ## the caller can delay removing the enemy until it's finished instead of
 ## cutting the animation off instantly). Returns 0.0 if there's no clip.
@@ -57,10 +75,10 @@ func play_death() -> float:
 func flash() -> void:
 	_flash_t = 0.12
 
-func _play(anim_name: StringName) -> void:
+func _play(anim_name: StringName, restart := false) -> void:
 	if _anim == null or anim_name == &"" or not _anim.has_animation(anim_name):
 		return
-	if _anim.current_animation == anim_name and _anim.is_playing():
+	if not restart and _anim.current_animation == anim_name and _anim.is_playing():
 		return
 	_anim.play(anim_name)
 
