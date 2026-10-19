@@ -111,5 +111,7 @@ func take_damage(amount: float) -> void:
 				return
 		queue_free()
 
+## HP only, no name — there's nowhere else on screen showing an enemy's
+## remaining health during a fight, so this stays, just without the label.
 func _update_label() -> void:
-	_label.text = "%s  %d" % [data.display_name, maxi(0, ceili(hp))]
+	_label.text = str(maxi(0, ceili(hp)))

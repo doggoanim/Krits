@@ -13,6 +13,8 @@ const HIT_INVULN := 0.8
 var camera_rig: CameraRig
 var visual: PlayerVisual
 var effects: PlayerEffects
+var xray: PlayerXray
+var ground_shadow: GroundShadow
 var machine: StateMachine
 
 var facing := Vector3.FORWARD
@@ -53,6 +55,14 @@ func _ready() -> void:
 
 	effects = PlayerEffects.new()
 	add_child(effects)
+
+	xray = PlayerXray.new()
+	add_child(xray)
+	xray.setup(self)
+
+	ground_shadow = GroundShadow.new()
+	add_child(ground_shadow)
+	ground_shadow.setup(self)
 
 	machine = StateMachine.new()
 	machine.name = "StateMachine"

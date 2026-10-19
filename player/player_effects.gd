@@ -38,7 +38,7 @@ var _dive_trail: GPUParticles3D
 var _long_jump_trail: GPUParticles3D
 
 func _ready() -> void:
-	_dust_texture = _make_soft_circle_texture()
+	_dust_texture = SoftCircleTexture.make()
 	_quad = _make_quad_mesh()
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
@@ -117,21 +117,6 @@ func _make_quad_mesh() -> QuadMesh:
 	m.albedo_texture = _dust_texture
 	q.material = m
 	return q
-
-## A soft white circle, fading to transparent at the edge — built with a
-## radial GradientTexture2D instead of an image file.
-func _make_soft_circle_texture(size := 32) -> GradientTexture2D:
-	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 1.0])
-	g.colors = PackedColorArray([Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.0)])
-	var t := GradientTexture2D.new()
-	t.gradient = g
-	t.width = size
-	t.height = size
-	t.fill = GradientTexture2D.FILL_RADIAL
-	t.fill_from = Vector2(0.5, 0.5)
-	t.fill_to = Vector2(1.0, 0.5)
-	return t
 
 ## Particles grow slightly over their lifetime instead of starting at full
 ## size — reads as dust/smoke expanding rather than a static sprite.
