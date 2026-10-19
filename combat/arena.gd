@@ -18,6 +18,9 @@ signal finished(victory: bool)
 const BASE_RADIUS := 11.0
 const RADIUS_PER_ENEMY := 1.6
 const MAX_RADIUS := 24.0
+const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
+                                 ## collides with it so the camera can't peek through the
+                                 ## barrier during a fight
 const WALL_HEIGHT := 14.0
 const WALL_SEGMENTS := 28       ## faceted approximation of a circle
 const ORBS_BASE := 5
@@ -210,7 +213,6 @@ func _end(victory: bool) -> void:
 func _build_barrier() -> void:
 	stage_root = Node3D.new()
 	add_child(stage_root)
-	var wall_layer := 1 << 6   # blocks the player, not the camera
 	var wall_col := Color(1.0, 1.0, 1.0, 0.05)
 	var glow_col := Color(1.0, 1.0, 1.0)
 	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
@@ -227,7 +229,7 @@ func _build_barrier() -> void:
 
 		var wall_pos := local_pos
 		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
-		_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, wall_layer, 0.0, true, rot_y)
+		_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y)
 
 		var ring_pos := local_pos
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground

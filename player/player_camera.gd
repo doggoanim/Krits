@@ -20,9 +20,15 @@ func _ready() -> void:
 	top_level = true
 	_arm = SpringArm3D.new()
 	_arm.spring_length = base_distance
-	_arm.collision_mask = 0   ## no collision: let the camera clip through walls instead of
-	                          ## getting pushed in close to the player (the x-ray silhouette
-	                          ## keeps the player visible through geometry instead)
+	_arm.margin = 0.3
+	# Only the ground/world layer and the arena's own circular wall push the
+	# camera in — everything else (ordinary walls, props, enemies) the camera
+	# clips straight through, so it never gets shoved in close to the player
+	# (the x-ray silhouette keeps the player visible through that geometry
+	# instead). Colliding with the world layer stops the camera dipping below
+	# the floor; colliding with the arena wall stops it peeking outside the
+	# fight's barrier.
+	_arm.collision_mask = 1 | Arena.WALL_LAYER
 	add_child(_arm)
 	_cam = Camera3D.new()
 	_cam.current = true
