@@ -47,7 +47,7 @@ var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back a
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 
-@export var outline_enabled := true
+@export var outline_enabled := false
 @export var outline_thickness_ratio := 0.011   ## outline thickness, as a fraction of the character's height
 @export var outline_color := Color.BLACK
 

@@ -6,7 +6,7 @@ extends Node3D
 ## a target height, cel-shaded, outlined — so an animated enemy reads as
 ## part of the same cast as the player, not a different art style bolted on.
 
-const OUTLINE_THICKNESS_RATIO := 0.012
+const OUTLINE_THICKNESS_RATIO := 0.0   ## outline removed; raise above 0 to bring it back
 
 var _anim: AnimationPlayer
 var _model: Node3D
@@ -26,6 +26,7 @@ func setup(data: EnemyData) -> void:
 	_anim_death = data.anim_death
 	_model = data.model.instantiate()
 	add_child(_model)
+	_model.rotation.y = data.model_facing_offset
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	var fit_box := ModelUtil.fit_height(_model, data.model_height)
 	var height := fit_box.size.y if fit_box.size.y > 0.001 else data.model_height

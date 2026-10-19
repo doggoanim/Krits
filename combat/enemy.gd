@@ -49,7 +49,6 @@ func _ready() -> void:
 		_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		_mesh.material_override = _mat
 		add_child(_mesh)
-		CelOutline.apply(_mesh, data.size * 0.08)
 		label_height = 1.4 * data.size
 	_label = Label3D.new()
 	_label.position.y = label_height
