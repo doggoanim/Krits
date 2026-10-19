@@ -93,7 +93,7 @@ func _build_environment() -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_energy = cfg.ambient_energy
 
-	env.tone_mapper = cfg.tonemap_mode
+	env.tonemap_mode = cfg.tonemap_mode
 	env.tonemap_exposure = cfg.exposure
 	env.tonemap_white = cfg.white_point
 
