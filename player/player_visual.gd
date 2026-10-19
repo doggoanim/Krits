@@ -49,6 +49,13 @@ var _base_scale := 1.0   ## uniform scale from _fit_model_height
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 
+## Clips meant to play on repeat for as long as their state lasts, rather than
+## play once and hold a final frame. glTF import defaults every clip to
+## non-looping, so without this a sustained roll (or just standing still past
+## idle's own length) would play a fraction of a second then freeze — forcing
+## it here means the actual loop behavior never depends on import settings.
+const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK]
+
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
 	add_child(_model)
@@ -56,10 +63,18 @@ func _ready() -> void:
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_collect_materials(_model)
 	_fit_model_height()
+	_force_looping_clips()
 
 	Events.outfit_changed.connect(func(id: StringName): apply_outfit(OutfitLibrary.get_outfit(id)))
 	apply_outfit(OutfitLibrary.get_outfit(Game.outfit))
 	play(ANIM_IDLE)
+
+func _force_looping_clips() -> void:
+	if _anim == null:
+		return
+	for anim_name in LOOPING_ANIMS:
+		if _anim.has_animation(anim_name):
+			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
 
 ## Scales the whole model uniformly so its rest-pose height matches the
 ## player's actual capsule height, whatever units it was exported in — a
