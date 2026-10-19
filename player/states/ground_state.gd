@@ -13,6 +13,9 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
                            ## own jump-buffer-style timer, independent of the slide pose's animation
                            ## hold (see physics_update) so the trick doesn't depend on exact frame
                            ## timing between the two
+var _turn_buffer_t := 0.0 ## >0 for a short window after ANY sharp reversal is detected, even one
+                           ## that can't start a skid the instant it happens (e.g. still mid-hold
+                           ## from the slide pose itself) — see physics_update's starting_slide
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
@@ -32,6 +35,7 @@ func physics_update(delta: float) -> void:
 	var prev_h := p.get_hvel()
 	var was_sliding := p.visual.is_holding()
 	_turn_flip_t = maxf(0.0, _turn_flip_t - delta)
+	_turn_buffer_t = maxf(0.0, _turn_buffer_t - delta)
 
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
 	# the stop case is gated by slide_min_move_time (a quick stick tap
@@ -41,10 +45,20 @@ func physics_update(delta: float) -> void:
 	# still sees it.
 	var stopping := not moving and _move_t >= c.slide_min_move_time
 	var reversing := moving and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
-	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing)
+	# A reversal is buffered the instant it's detected, regardless of whether
+	# a skid can start this exact frame — e.g. still mid-hold from the
+	# previous skid's own pose. Without this, a second sharp flick thrown in
+	# right after the first could line up on a frame where was_sliding is
+	# still true and get silently dropped instead of starting the next skid
+	# the moment the first one's hold clears.
+	if reversing:
+		_turn_buffer_t = c.turn_input_buffer
+	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed \
+			and (stopping or reversing or _turn_buffer_t > 0.0)
 	if starting_slide:
-		_slide_is_turn = reversing
-		if reversing:
+		_slide_is_turn = reversing or _turn_buffer_t > 0.0
+		_turn_buffer_t = 0.0   # consumed
+		if _slide_is_turn:
 			_turn_flip_t = c.side_flip_input_window
 
 	# Jumping out of a skid-turn (reversing, not just stopping) does a Mario
