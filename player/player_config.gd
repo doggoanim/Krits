@@ -39,6 +39,7 @@ extends Resource
 @export var wall_bounce_up := 12.5
 @export var wall_bounce_push := 7.0
 @export var wall_min_speed := 6.0
+@export var wall_bounce_roll_time := 0.4   ## how long the tumble animation plays after a wall bounce
 
 @export_group("Ground Pound")
 @export var pound_windup := 0.22

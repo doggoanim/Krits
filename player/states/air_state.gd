@@ -23,7 +23,10 @@ func physics_update(delta: float) -> void:
 	if input.length() > 0.1:
 		p.face(input, delta)
 	p.apply_gravity(delta)
-	p.visual.play(PlayerVisual.ANIM_JUMP_START if p.velocity.y > 0.0 else PlayerVisual.ANIM_FALLING)
+	# A wall-bounce roll burst is still playing itself out — don't cut it short
+	# with the normal jump/fall pose.
+	if not p.visual.is_rolling():
+		p.visual.play(PlayerVisual.ANIM_JUMP_START if p.velocity.y > 0.0 else PlayerVisual.ANIM_FALLING)
 	p.move_and_slide()
 	if p.is_on_floor():
 		machine.transition_to(&"Ground")

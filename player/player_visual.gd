@@ -23,6 +23,12 @@ const ANIM_POUND := &"ground_pound"
 const OUTFIT_SLOTS := [&"Body", &"Pants", &"Shoes"]
 const CROUCH_SCALE := 0.65
 
+## The "roll_loop" clip is just a held pose, not an actual spin, so the tumble
+## itself is still done procedurally on the model's own rotation.x — same
+## trick the old placeholder capsule used, just applied to the real model
+## instead of a second body node.
+const ROLL_SPIN_SPEED := 18.0   ## rad/s
+
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,
 ## which makes every animation look reversed (the character appears to run
@@ -43,6 +49,8 @@ var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node'
 var _fit_aabb := AABB()
 var _fit_has_box := false
 var _base_scale := 1.0   ## uniform scale from _fit_model_height; set_crouch multiplies onto this
+var _rolling := false     ## true while the model should be spinning on rotation.x
+var _roll_burst_t := 0.0  ## >0 while a timed roll (e.g. wall bounce) is still running
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
@@ -124,6 +132,31 @@ func set_crouch(c: bool) -> void:
 func flash() -> void:
 	_flash_t = 0.25
 
+## Holds the roll pose and spin on for as long as `active` is true — used by
+## RollState, which starts it on enter and stops it on exit (ground rolling
+## lasts however long the player holds the button).
+func set_roll(active: bool) -> void:
+	_rolling = active
+	_roll_burst_t = 0.0   # an explicit call always overrides a running burst
+	if active:
+		play(ANIM_ROLL)
+	else:
+		_model.rotation.x = 0.0
+
+## A short, self-expiring tumble for flourishes that don't have their own
+## state to call set_roll(false) when they're done — e.g. a wall bounce,
+## which just lands back in AirState.
+func play_roll_burst(duration: float) -> void:
+	_rolling = true
+	_roll_burst_t = duration
+	play(ANIM_ROLL)
+
+## True while the model is mid-spin (held roll or a timed burst). Other states
+## check this before calling play() of their own, so they don't cut the roll
+## pose short.
+func is_rolling() -> bool:
+	return _rolling
+
 ## Smoothly lean this node toward `pitch` (forward/back, rad) and `bank` (side-to-
 ## side, rad). Call every physics frame with a target of 0 to relax back upright.
 func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void:
@@ -134,6 +167,13 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 	rotation.z = _lean_bank
 
 func _process(delta: float) -> void:
+	if _roll_burst_t > 0.0:
+		_roll_burst_t -= delta
+		if _roll_burst_t <= 0.0:
+			_rolling = false
+			_model.rotation.x = 0.0
+	if _rolling:
+		_model.rotation.x -= delta * ROLL_SPIN_SPEED
 	if _flash_t > 0.0:
 		_flash_t -= delta
 		var white := int(_flash_t * 30.0) % 2 == 0

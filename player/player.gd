@@ -182,6 +182,7 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool) -> bool:
 	velocity = n * config.wall_bounce_push
 	velocity.y = config.wall_bounce_up
 	face(n)
+	visual.play_roll_burst(config.wall_bounce_roll_time)
 	if regrants_dive:
 		can_dive = true
 	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure
