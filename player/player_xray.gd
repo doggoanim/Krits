@@ -14,7 +14,7 @@ extends Node3D
 
 const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
-const SAMPLE_HEIGHTS := [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
+const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
 
 var player: Player
 var _copies: Array[MeshInstance3D] = []
@@ -58,8 +58,8 @@ func _is_occluded() -> bool:
 		return false
 	var from := cam.global_position
 	var space := player.get_world_3d().direct_space_state
-	for h in SAMPLE_HEIGHTS:
-		var to := player.global_position + Vector3.UP * (Player.STAND_HEIGHT * h)
+	for h: float in SAMPLE_HEIGHTS:
+		var to: Vector3 = player.global_position + Vector3.UP * (Player.STAND_HEIGHT * h)
 		if from.distance_squared_to(to) < 0.01:
 			return false
 		var query := PhysicsRayQueryParameters3D.create(from, to, 1)   # world geometry only
