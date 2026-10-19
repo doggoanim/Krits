@@ -17,6 +17,11 @@ extends Resource
 @export_group("Model")
 @export var model: PackedScene
 @export var model_height := 1.4      ## target world-space height when a model is set
+## Blender's glTF export doesn't always agree with Godot's -Z-forward
+## convention, so an enemy can end up visually facing backward relative to
+## its movement direction — same issue PlayerVisual had, same fix: a
+## 180-degree turn. Set to 0.0 if a particular model's export already faces -Z.
+@export var model_facing_offset := PI
 @export var anim_idle: StringName = &"Idle"
 @export var anim_move: StringName = &"Moving"
 @export var anim_death: StringName = &"Death"
