@@ -7,11 +7,14 @@ extends Node3D
 ## than a flat transparent fill. Built from duplicates of the player's own
 ## model meshes (sharing the same skeleton as the original, via
 ## MeshInstance3D.duplicate(), so they follow the animation automatically
-## with no per-frame work needed), toggled visible only while a raycast
-## from the camera to the player is actually blocked.
+## with no per-frame work needed), toggled visible only while the camera's
+## view of the player is fully blocked — sampling several heights (feet,
+## waist, head) rather than one point, so a sliver of the character still
+## peeking over/around cover counts as visible, not occluded.
 
 const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
+const SAMPLE_HEIGHTS := [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
 
 var player: Player
 var _copies: Array[MeshInstance3D] = []
@@ -54,10 +57,14 @@ func _is_occluded() -> bool:
 	if cam == null:
 		return false
 	var from := cam.global_position
-	var to := player.global_position + Vector3.UP * (Player.STAND_HEIGHT * 0.5)
-	if from.distance_squared_to(to) < 0.01:
-		return false
-	var query := PhysicsRayQueryParameters3D.create(from, to, 1)   # world geometry only
-	query.exclude = [player.get_rid()]
-	var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
-	return not hit.is_empty()
+	var space := player.get_world_3d().direct_space_state
+	for h in SAMPLE_HEIGHTS:
+		var to := player.global_position + Vector3.UP * (Player.STAND_HEIGHT * h)
+		if from.distance_squared_to(to) < 0.01:
+			return false
+		var query := PhysicsRayQueryParameters3D.create(from, to, 1)   # world geometry only
+		query.exclude = [player.get_rid()]
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			return false   # this point is visible — not fully obstructed
+	return true
