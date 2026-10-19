@@ -17,6 +17,7 @@ const ANIM_ROLL := &"roll"
 const ANIM_DIVE := &"air_dive"
 const ANIM_LONG_JUMP := &"long_jump"
 const ANIM_POUND := &"ground_pound"
+const ANIM_POUND_LAND := &"ground_pound_land"   ## held recovery pose after the slam impacts
 const ANIM_CROUCH_IDLE := &"crouch_idle"
 const ANIM_CROUCH_WALK := &"crouch_walk"
 const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
