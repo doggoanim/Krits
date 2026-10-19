@@ -28,8 +28,8 @@ direction on the ground skids into a brief slide — no steering until it ends.
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
              visibility culling for a region), WorldGate (blocks a path until a story flag is set),
-             TestLevel blockout, WorldDissolver + world_dissolve.gdshader (world-space noise dissolve
-             used by encounters)
+             EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), TestLevel blockout,
+             WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
 - ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader (screen-space
              fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
 
@@ -44,6 +44,8 @@ direction on the ground skids into a brief slide — no steering until it ends.
 - Encounters: place a WorldEnemy (enemy_id + EnemyData). Enemies within 14m of the touched one join the fight and enlarge the stage.
 - Large map performance: wrap a region's geometry in a WorldChunk (see "Building your own map" below).
 - Progression blockers: a WorldGate with `required_flag` set opens itself once that story flag is set.
+- Lighting / color grading: duplicate world/environment_config.gd's defaults as a `.tres`, tweak it, and
+  assign it to Main's `env_config` in main.tscn — see "Lighting and color grading" below.
 
 Not tested in-engine (no Godot binary was available while writing): expect to tune
 PlayerConfig values and fix any small typing errors on first run.
@@ -100,3 +102,37 @@ scene loading involved. A separate scene-per-zone setup (loading a new scene
 when the player crosses a boundary) is a different, heavier approach for
 when a single scene gets too large to keep open at once — not needed yet,
 and we can build it later if the map grows to that scale.
+
+## Lighting and color grading
+All of this lived as a handful of hardcoded lines in `main.gd` before (one flat
+sun, default sky colors, no tonemapping or color correction) — it's now a single
+tunable resource, `world/environment_config.gd` (`EnvironmentConfig`), covering:
+
+- **Sun**: color, brightness, angle, shadows on/off.
+- **Sky**: top/horizon/ground colors (a `ProceduralSkyMaterial` under the hood —
+  swap in an HDRI `PanoramaSkyMaterial` yourself later if you want a photo sky
+  instead), ambient light strength.
+- **Tonemap/exposure**: `tonemap_mode` defaults to Filmic (rolls off highlights
+  instead of clipping them white) — ACES is the other common pick if Filmic
+  looks too flat; exposure and white point adjust overall brightness/contrast
+  of that curve.
+- **Glow**: a soft bloom on bright areas — intensity/bloom/threshold.
+- **Ambient occlusion (SSAO)**: contact shadows in corners/crevices, mostly
+  what makes geometry stop looking flat.
+- **Color grading**: brightness/contrast/saturation sliders for a quick grade,
+  or drop in a LUT texture (`color_correction_lut`) for anyone using a real
+  color-grading tool (e.g. exported from DaVinci Resolve/Photoshop as a
+  256x16 PNG) for a fully custom look.
+
+To use it: duplicate an `EnvironmentConfig` resource (`Resource > New Resource`
+in the editor, search "EnvironmentConfig", save as a `.tres`), tweak its fields
+in the Inspector, then open `main.tscn`, select "Main", and set its `env_config`
+field to that `.tres`. Leaving it unset uses the defaults in the script, which
+are reasonable but generic — the whole point of pulling this into a resource is
+so you can iterate on the look without touching code, and keep a few different
+presets (day/night, a moodier dungeon area, etc.) as separate `.tres` files if
+you want per-region lighting later.
+
+This only covers the one global `WorldEnvironment` — EncounterManager swaps a
+couple of its fields (background/ambient) temporarily during a fight and
+restores them after, so whatever look you set here carries into combat too.

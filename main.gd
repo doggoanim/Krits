@@ -9,6 +9,12 @@ extends Node3D
 ## for a worked example of all three, and README.md for the full contract.
 @export var level_scene: PackedScene
 
+## Sun/sky/tonemap/glow/color-grading, all in one place — see
+## world/environment_config.gd. Leave unset to use its defaults; duplicate
+## that resource as a .tres and assign it here to try a different look
+## without touching code.
+@export var env_config: EnvironmentConfig
+
 var player: Player
 var cam: CameraRig
 var encounters: EncounterManager
@@ -65,16 +71,48 @@ func _unhandled_input(event: InputEvent) -> void:
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 
 func _build_environment() -> void:
+	var cfg := env_config if env_config else EnvironmentConfig.new()
+
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-50, 30, 0)
-	sun.shadow_enabled = true
+	sun.rotation_degrees = cfg.sun_rotation_degrees
+	sun.light_color = cfg.sun_color
+	sun.light_energy = cfg.sun_energy
+	sun.shadow_enabled = cfg.sun_shadows
 	add_child(sun)
+
 	_env = Environment.new()
 	var env := _env
 	env.background_mode = Environment.BG_SKY
 	env.sky = Sky.new()
-	env.sky.sky_material = ProceduralSkyMaterial.new()
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = cfg.sky_top_color
+	sky_mat.sky_horizon_color = cfg.sky_horizon_color
+	sky_mat.ground_bottom_color = cfg.ground_bottom_color
+	sky_mat.ground_horizon_color = cfg.ground_horizon_color
+	env.sky.sky_material = sky_mat
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_energy = cfg.ambient_energy
+
+	env.tone_mapper = cfg.tonemap_mode
+	env.tonemap_exposure = cfg.exposure
+	env.tonemap_white = cfg.white_point
+
+	env.glow_enabled = cfg.glow_enabled
+	env.glow_intensity = cfg.glow_intensity
+	env.glow_bloom = cfg.glow_bloom
+	env.glow_hdr_threshold = cfg.glow_hdr_threshold
+
+	env.ssao_enabled = cfg.ssao_enabled
+	env.ssao_intensity = cfg.ssao_intensity
+	env.ssao_radius = cfg.ssao_radius
+
+	env.adjustment_enabled = cfg.adjustment_enabled
+	env.adjustment_brightness = cfg.brightness
+	env.adjustment_contrast = cfg.contrast
+	env.adjustment_saturation = cfg.saturation
+	if cfg.color_correction_lut:
+		env.adjustment_color_correction = cfg.color_correction_lut
+
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
