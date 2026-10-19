@@ -1,10 +1,10 @@
 class_name DebugTools
 extends Node
 ## Dev shortcuts for testing fights quickly. Only active in debug builds.
-##  F1 grunt  F2 spinner  F3 piercer  F4 trio  F5 big group (6)
+##  F1 green slime  F2 spinner  F3 piercer  F4 trio  F5 big group (6)
 ##  F6 cancel fight  F7 god mode  F8 level up  F9 full heal
 
-const HELP := "F1 Grunt  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 Level up  F9 Heal"
+const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 Level up  F9 Heal"
 
 var player: Player
 var encounters: EncounterManager
@@ -29,11 +29,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	match event.physical_keycode:
-		KEY_F1: _fight([EnemyLibrary.grunt()])
+		KEY_F1: _fight([EnemyLibrary.green_slime()])
 		KEY_F2: _fight([EnemyLibrary.spinner()])
 		KEY_F3: _fight([EnemyLibrary.piercer()])
-		KEY_F4: _fight([EnemyLibrary.grunt(), EnemyLibrary.spinner(), EnemyLibrary.piercer()])
-		KEY_F5: _fight([EnemyLibrary.grunt(), EnemyLibrary.grunt(), EnemyLibrary.spinner(),
+		KEY_F4: _fight([EnemyLibrary.green_slime(), EnemyLibrary.spinner(), EnemyLibrary.piercer()])
+		KEY_F5: _fight([EnemyLibrary.green_slime(), EnemyLibrary.green_slime(), EnemyLibrary.spinner(),
 				EnemyLibrary.spinner(), EnemyLibrary.piercer(), EnemyLibrary.piercer()])
 		KEY_F6: _cancel()
 		KEY_F7:

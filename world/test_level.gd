@@ -23,12 +23,12 @@ func _ready() -> void:
 	_spawn(&"far", "Far Platform", Vector3(0, 1.0, 40), &"crimson")
 
 	# Overworld enemies: they pop in when you approach and wander. Touch one to fight.
-	_enemy(&"grunt_solo", Vector3(-25, 0.2, 10), EnemyLibrary.grunt())
+	_enemy(&"slime_solo", Vector3(-25, 0.2, 10), EnemyLibrary.green_slime())
 	_enemy(&"piercer_solo", Vector3(-30, 0.2, -30), EnemyLibrary.piercer())
 	# Two close together merge into one bigger fight, three even bigger.
 	_enemy(&"pair_a", Vector3(25, 0.2, -25), EnemyLibrary.spinner())
-	_enemy(&"pair_b", Vector3(31, 0.2, -25), EnemyLibrary.grunt())
-	_enemy(&"pack_a", Vector3(-5, 0.2, -50), EnemyLibrary.grunt())
+	_enemy(&"pair_b", Vector3(31, 0.2, -25), EnemyLibrary.green_slime())
+	_enemy(&"pack_a", Vector3(-5, 0.2, -50), EnemyLibrary.green_slime())
 	_enemy(&"pack_b", Vector3(0, 0.2, -52), EnemyLibrary.spinner())
 	_enemy(&"pack_c", Vector3(5, 0.2, -50), EnemyLibrary.piercer())
 
