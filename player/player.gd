@@ -190,6 +190,14 @@ func start_jump(vel: float) -> void:
 	velocity.y = vel
 	coyote = 0.0
 	jump_buffer_t = 0.0
+	# Unlike start_side_flip() below (which calls play_hold() itself, forcing
+	# its own pose in immediately), this jump's pose only ever gets played by
+	# AirState's regular per-frame play() call next frame — which silently
+	# refuses to play anything while an earlier hold (a side flip's pose,
+	# say) is still protected. Without this, jumping again shortly after a
+	# side flip (or any other held pose) could look like the jump did
+	# nothing at all, even though it physically happened.
+	visual.cancel_hold()
 	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
 	visual.roll_jump_start()
 	effects.burst_jump_dust()

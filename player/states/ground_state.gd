@@ -30,7 +30,13 @@ func physics_update(delta: float) -> void:
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
 	var prev_h := p.get_hvel()
-	var was_sliding := p.visual.is_holding()
+	# Specifically the slide pose, not just "some hold is active" — a side
+	# flip's own (longer) hold can still be running when it lands here, and
+	# that isn't a skid in progress; treating it as one corrupted ground
+	# movement with a stale _slide_dir/_slide_start_speed left over from
+	# whatever the last real skid was, and locked out roll/pound for
+	# however long the side-flip's pose happened to still have left.
+	var was_sliding := p.visual.is_holding_anim(PlayerVisual.ANIM_SLIDE)
 	_turn_flip_t = maxf(0.0, _turn_flip_t - delta)
 
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only

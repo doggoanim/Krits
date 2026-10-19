@@ -171,6 +171,14 @@ func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
 func is_holding() -> bool:
 	return _hold_t > 0.0
 
+## True while a play_hold() reaction pose is still protected AND it's
+## specifically `anim_name` — for callers that need to tell one held pose
+## apart from another (e.g. GroundState's skid pose vs. a side-flip's pose
+## that's still playing out after landing), rather than treating any hold
+## at all as "this specific thing is happening".
+func is_holding_anim(anim_name: StringName) -> bool:
+	return _hold_t > 0.0 and _held_anim == anim_name
+
 ## Immediately ends whatever play_hold() reaction pose is still protected, if
 ## any — for a move that should always take over right away regardless of
 ## what was playing before (air dive, say), rather than waiting out someone
