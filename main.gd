@@ -78,6 +78,7 @@ func _build_environment() -> void:
 	sun.light_color = cfg.sun_color
 	sun.light_energy = cfg.sun_energy
 	sun.shadow_enabled = cfg.sun_shadows
+	sun.shadow_blur = cfg.sun_shadow_blur
 	add_child(sun)
 
 	_env = Environment.new()
