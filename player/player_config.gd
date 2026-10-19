@@ -41,9 +41,9 @@ extends Resource
 @export var air_steer_rate := 2.2          ## rad/s steering while carrying extra momentum
 @export var momentum_drag := 1.5           ## speed lost per second above air_speed
 @export var jump_velocity := 12.0          ## fixed height every jump — no variable height from holding
-@export var fall_pose_velocity := -6.0     ## AirState only switches to the falling pose once velocity.y
+@export var fall_pose_velocity := -14.0    ## AirState only switches to the falling pose once velocity.y
                                             ## drops below this, not simply the instant it goes negative
-                                            ## at the jump's apex — holds the rising pose a bit into the
+                                            ## at the jump's apex — holds the rising pose well into the
                                             ## descent so falling doesn't flip in too early/abruptly
 @export var coyote_time := 0.1
 @export var jump_buffer := 0.12
