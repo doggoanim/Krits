@@ -20,8 +20,9 @@ func _ready() -> void:
 	top_level = true
 	_arm = SpringArm3D.new()
 	_arm.spring_length = base_distance
-	_arm.collision_mask = 1
-	_arm.margin = 0.3
+	_arm.collision_mask = 0   ## no collision: let the camera clip through walls instead of
+	                          ## getting pushed in close to the player (the x-ray silhouette
+	                          ## keeps the player visible through geometry instead)
 	add_child(_arm)
 	_cam = Camera3D.new()
 	_cam.current = true
