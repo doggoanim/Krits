@@ -18,7 +18,6 @@ extends Node3D
 var player: Player
 var cam: CameraRig
 var encounters: EncounterManager
-var _env: Environment
 
 func _ready() -> void:
 	Game.load_game()
@@ -36,7 +35,7 @@ func _ready() -> void:
 
 	encounters = EncounterManager.new()
 	add_child(encounters)
-	encounters.setup(player, level, _env)
+	encounters.setup(player, level)
 	for e in get_tree().get_nodes_in_group(&"world_enemies"):
 		encounters.register_world_enemy(e)
 
@@ -81,8 +80,7 @@ func _build_environment() -> void:
 	sun.shadow_blur = cfg.sun_shadow_blur
 	add_child(sun)
 
-	_env = Environment.new()
-	var env := _env
+	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = Sky.new()
 	var sky_mat := ProceduralSkyMaterial.new()

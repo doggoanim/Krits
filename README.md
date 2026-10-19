@@ -22,8 +22,9 @@ direction on the ground skids into a brief slide — no steering until it ends.
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start, falling, air_dive,
              roll_loop, long_jump, ground_pound, crouch_idle, crouch_walk, roll_collision, slide).
              Re-export over this file to update the model/animations.
-- combat/    EncounterManager (float -> world dissolves -> square stage -> return) -> Arena (orbs, combo,
-             walls, stage_root for its dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
+- combat/    EncounterManager (a circular barrier dissolves into place right where the fight starts,
+             nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its
+             dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
