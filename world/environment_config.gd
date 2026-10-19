@@ -25,6 +25,8 @@ extends Resource
 @export var ground_bottom_color := Color(0.28, 0.24, 0.19)
 @export var ground_horizon_color := Color(0.55, 0.5, 0.4)
 @export var ambient_energy := 0.9                    ## fill light so shadows stay soft, without washing everything out
+@export var ambient_color := Color(0.92, 0.92, 0.95)      ## near-neutral; kept separate from the sky's blue so it
+                                                            ## doesn't tint the character/props — only the sky itself is blue
 
 @export_group("Tonemap / Exposure")
 @export var tonemap_mode: Environment.ToneMapper = Environment.TONE_MAPPER_FILMIC

@@ -91,7 +91,10 @@ func _build_environment() -> void:
 	sky_mat.ground_bottom_color = cfg.ground_bottom_color
 	sky_mat.ground_horizon_color = cfg.ground_horizon_color
 	env.sky.sky_material = sky_mat
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	# A flat, near-neutral ambient color (not sourced from the sky) so a vivid
+	# sky doesn't tint the character/props blue — only the sky itself is blue.
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = cfg.ambient_color
 	env.ambient_light_energy = cfg.ambient_energy
 
 	env.tonemap_mode = cfg.tonemap_mode
