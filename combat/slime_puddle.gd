@@ -18,11 +18,13 @@ const FADE_TIME := 0.6
 var _player: Player
 var _tick_t := 0.0
 var _life_t := 0.0
+var _mesh: MeshInstance3D
 
 func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 1 << 1   # layer 2: player
 	monitorable = false
+	monitoring = false   # turned on once the grow tween finishes, below
 
 	var cs := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
@@ -31,25 +33,30 @@ func _ready() -> void:
 	cs.shape = shape
 	add_child(cs)
 
-	var mi := MeshInstance3D.new()
+	# The grow/fade animation scales only this mesh, never `self` — this node
+	# (an Area3D) owns the CollisionShape3D above, and the physics server
+	# can't invert a zero-scale transform, which a scale-0 Area3D would hand
+	# it the instant this spawns.
+	_mesh = MeshInstance3D.new()
 	var q := QuadMesh.new()
 	q.size = Vector2(radius, radius) * 2.0
-	mi.mesh = q
-	mi.rotation_degrees = Vector3(-90.0, 0.0, 0.0)   # lie flat, facing up
+	_mesh.mesh = q
+	_mesh.rotation_degrees = Vector3(-90.0, 0.0, 0.0)   # lie flat, facing up
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = color
 	mat.albedo_texture = SoftCircleTexture.make()
-	mi.material_override = mat
-	add_child(mi)
+	_mesh.material_override = mat
+	add_child(_mesh)
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
-	scale = Vector3.ZERO
+	_mesh.scale = Vector3.ZERO
 	var tw := create_tween()
-	tw.tween_property(self, "scale", Vector3.ONE, GROW_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_mesh, "scale", Vector3.ONE, GROW_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_callback(func(): monitoring = true)
 
 func _physics_process(delta: float) -> void:
 	_life_t += delta
@@ -80,5 +87,5 @@ func _dissolve() -> void:
 		_player.exit_slime_puddle()
 		_player = null
 	var tw := create_tween()
-	tw.tween_property(self, "scale", Vector3.ZERO, FADE_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.tween_property(_mesh, "scale", Vector3.ZERO, FADE_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_callback(queue_free)
