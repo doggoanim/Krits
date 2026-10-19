@@ -1,12 +1,15 @@
 shader_type canvas_item;
 // Full-screen dissolve. progress 0 = scene visible, 1 = fully covered.
-// Blocky noise decides which pixels dissolve first; a glowing edge rides the front.
+// A few octaves of smooth value noise (fbm) decide which pixels dissolve first —
+// a continuous, flowing field rather than a grid of uniform blocks, so the edge
+// reads as an organic burn line (think Balatro's card-dissolve) instead of
+// pixelated chunks. A bright edge rides the front of the wipe.
 
 uniform float progress : hint_range(0.0, 1.0) = 0.0;
-uniform vec4 fill_color : source_color = vec4(0.02, 0.03, 0.08, 1.0);
-uniform vec4 edge_color : source_color = vec4(0.35, 0.95, 1.0, 1.0);
+uniform vec4 fill_color : source_color = vec4(0.96, 0.96, 0.98, 1.0);
+uniform vec4 edge_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float edge_width = 0.07;
-uniform float cell_size = 12.0;
+uniform float noise_scale = 7.0;   // smaller = larger, slower-flowing noise features
 
 float hash(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -25,9 +28,21 @@ float vnoise(vec2 p) {
 	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
+// Layering a few octaves of the smooth noise above (each one finer and fainter)
+// is what keeps the dissolve edge organic/wavy instead of a hard-edged grid.
+float fbm(vec2 p) {
+	float v = 0.0;
+	float amp = 0.55;
+	for (int i = 0; i < 4; i++) {
+		v += amp * vnoise(p);
+		p *= 2.05;
+		amp *= 0.5;
+	}
+	return v;
+}
+
 void fragment() {
-	vec2 cell = floor(FRAGCOORD.xy / cell_size);
-	float n = 0.65 * vnoise(cell * 0.12) + 0.35 * hash(cell);
+	float n = fbm(FRAGCOORD.xy / (noise_scale * 16.0));
 	float th = progress * (1.0 + edge_width);
 	if (n < th - edge_width) {
 		COLOR = fill_color;

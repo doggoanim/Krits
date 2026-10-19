@@ -168,9 +168,10 @@ func _build_stage() -> void:
 		_decor(Vector3(sgn * (half - 0.2), 0.03, 0), Vector3(0.4, 0.06, side), glow, 1.0)
 	# Collision walls (layer 7: block the player, not the camera) + faint panels
 	var wall_layer := 1 << 6
+	var wall_col := Color(1.0, 1.0, 1.0, 0.05)
 	for sgn in [-1.0, 1.0]:
-		_slab(Vector3(0, WALL_HEIGHT * 0.5, sgn * (half + 0.5)), Vector3(side + 2.0, WALL_HEIGHT, 1.0), Color(0.3, 0.9, 1.0, 0.05), wall_layer, 0.0, true)
-		_slab(Vector3(sgn * (half + 0.5), WALL_HEIGHT * 0.5, 0), Vector3(1.0, WALL_HEIGHT, side + 2.0), Color(0.3, 0.9, 1.0, 0.05), wall_layer, 0.0, true)
+		_slab(Vector3(0, WALL_HEIGHT * 0.5, sgn * (half + 0.5)), Vector3(side + 2.0, WALL_HEIGHT, 1.0), wall_col, wall_layer, 0.0, true)
+		_slab(Vector3(sgn * (half + 0.5), WALL_HEIGHT * 0.5, 0), Vector3(1.0, WALL_HEIGHT, side + 2.0), wall_col, wall_layer, 0.0, true)
 
 func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false) -> void:
 	var body := StaticBody3D.new()
