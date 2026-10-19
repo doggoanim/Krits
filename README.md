@@ -64,7 +64,11 @@ and nothing requires levels to be built in code. To build a real level visually:
    you like. Anything that should be solid ground/walls needs a collision shape on
    **collision layer 1** (the "World" layer; `StaticBody3D` with its
    `collision_layer` set to just bit 1 checked). `_box()` in `test_level.gd` shows
-   the minimal version of this if you want a code reference.
+   the minimal version of this if you want a code reference. Also check bit 8
+   (`CameraRig.GROUND_LAYER`) on anything flat enough to walk on — floors,
+   platforms, stairs — so the camera's own collision (it ignores ordinary
+   walls/props on purpose, see CameraRig) treats it as ground instead of
+   clipping straight through it.
 3. Add fast-travel points: add child nodes of type `Spawnpoint` (it has a
    `class_name`, so it's searchable in the "Create New Node" dialog like any
    built-in node) and set `spawn_id` / `display_name` / `unlocks_outfit` in the

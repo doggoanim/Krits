@@ -2,6 +2,14 @@ class_name CameraRig
 extends Node3D
 ## Third-person orbit camera. Top-level node: follows `target` without inheriting rotation.
 
+## Physics layer 8 — walkable floor/ground surfaces only, *not* generic world
+## geometry like walls or props (those all share layer 1, "world", with no
+## way to tell them apart by layer alone). A level's flat, walkable surfaces
+## should carry this bit too (see TestLevel._box()'s `is_floor` param) so the
+## camera collides with the ground under it without also bumping into every
+## ordinary wall that happens to sit on the same general "world" layer.
+const GROUND_LAYER := 1 << 7
+
 @export var mouse_sensitivity := 0.003
 @export var follow_speed := 14.0
 @export var base_distance := 6.0
@@ -30,14 +38,14 @@ func _ready() -> void:
 	var probe := SphereShape3D.new()
 	probe.radius = 0.35
 	_arm.shape = probe
-	# Only the ground/world layer and the arena's own circular wall push the
-	# camera in — everything else (ordinary walls, props, enemies) the camera
-	# clips straight through, so it never gets shoved in close to the player
-	# (the x-ray silhouette keeps the player visible through that geometry
-	# instead). Colliding with the world layer stops the camera dipping below
-	# the floor; colliding with the arena wall stops it peeking outside the
-	# fight's barrier.
-	_arm.collision_mask = 1 | Arena.WALL_LAYER
+	# Only walkable ground and the arena's own circular wall push the camera
+	# in — everything else (ordinary walls, props, enemies, all sharing the
+	# generic "world" layer) the camera clips straight through, so it never
+	# gets shoved in close to the player (the x-ray silhouette keeps the
+	# player visible through that geometry instead). Colliding with the
+	# ground layer stops the camera dipping below the floor; colliding with
+	# the arena wall stops it peeking outside the fight's barrier.
+	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER
 	add_child(_arm)
 	_cam = Camera3D.new()
 	_cam.current = true

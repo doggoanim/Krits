@@ -4,19 +4,20 @@ extends Node3D
 ## three spawnpoints and a few encounter zones (two of them close together).
 
 func _ready() -> void:
-	_box(Vector3(0, -0.5, 0), Vector3(160, 1, 160), Color(0.35, 0.5, 0.35))
-	# Wall-bounce practice: tall walls
+	_box(Vector3(0, -0.5, 0), Vector3(160, 1, 160), Color(0.35, 0.5, 0.35), true)
+	# Wall-bounce practice: tall walls — deliberately NOT floors, so the
+	# camera keeps clipping through these instead of getting shoved aside.
 	_box(Vector3(-10, 6, -12), Vector3(1, 12, 10), Color(0.6, 0.6, 0.65))
 	_box(Vector3(-4, 6, -12), Vector3(1, 12, 10), Color(0.6, 0.6, 0.65))
 	# Platforms / stairs
 	for i in 3:
 		var h := 1.5 * (i + 1)
-		_box(Vector3(14 + i * 4, h * 0.5, 6), Vector3(4, h, 4), Color(0.55, 0.45, 0.35))
-	_box(Vector3(30, 4, 6), Vector3(8, 1, 8), Color(0.7, 0.6, 0.4))
+		_box(Vector3(14 + i * 4, h * 0.5, 6), Vector3(4, h, 4), Color(0.55, 0.45, 0.35), true)
+	_box(Vector3(30, 4, 6), Vector3(8, 1, 8), Color(0.7, 0.6, 0.4), true)
 	# Long-jump gap
-	_box(Vector3(0, 0.5, 20), Vector3(8, 1, 8), Color(0.5, 0.5, 0.7))
-	_box(Vector3(0, 0.5, 40), Vector3(8, 1, 8), Color(0.5, 0.5, 0.7))
-	_box(Vector3(0, 0.0, 30), Vector3(10, 0.2, 14), Color(0.8, 0.2, 0.2))   # lava-colored pit marker
+	_box(Vector3(0, 0.5, 20), Vector3(8, 1, 8), Color(0.5, 0.5, 0.7), true)
+	_box(Vector3(0, 0.5, 40), Vector3(8, 1, 8), Color(0.5, 0.5, 0.7), true)
+	_box(Vector3(0, 0.0, 30), Vector3(10, 0.2, 14), Color(0.8, 0.2, 0.2), true)   # lava-colored pit marker
 
 	_spawn(&"start", "Hometown", Vector3(0, 0, 0), &"")
 	_spawn(&"hill", "Hill Outpost", Vector3(30, 4.5, 6), &"azure")
@@ -32,9 +33,13 @@ func _ready() -> void:
 	_enemy(&"pack_b", Vector3(0, 0.2, -52), EnemyLibrary.spinner())
 	_enemy(&"pack_c", Vector3(5, 0.2, -50), EnemyLibrary.piercer())
 
-func _box(pos: Vector3, size: Vector3, col: Color) -> void:
+## `is_floor` additionally marks this as walkable ground (CameraRig.GROUND_LAYER)
+## on top of the regular "world" layer — set it for anything flat enough to
+## stand on, so the camera's own ground collision (see CameraRig) treats it
+## as floor instead of clipping through it like an ordinary wall or prop.
+func _box(pos: Vector3, size: Vector3, col: Color, is_floor := false) -> void:
 	var body := StaticBody3D.new()
-	body.collision_layer = 1
+	body.collision_layer = 1 | (CameraRig.GROUND_LAYER if is_floor else 0)
 	body.position = pos
 	var cs := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
