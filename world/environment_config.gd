@@ -48,5 +48,5 @@ extends Resource
 @export var adjustment_enabled := true
 @export var brightness := 0.95
 @export var contrast := 1.0                          ## kept neutral so blacks don't crush — cartoony reads as bright, not punchy-dark
-@export var saturation := 1.2                         ## the main "cartoony" knob — push toward 1.3-1.5 for more candy-colored, lower toward 1.0 for muted
+@export var saturation := 1.45                        ## the main "cartoony" knob — push further for even more candy-colored, lower toward 1.0 for muted
 @export var color_correction_lut: Texture   ## optional LUT (Texture2D/Texture3D) for a full custom grade

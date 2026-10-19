@@ -115,6 +115,13 @@ func _collect_materials(n: Node) -> void:
 			var mat := mi.get_active_material(i)
 			if mat is BaseMaterial3D:
 				var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+				# Unshaded: the character's colors are drawn exactly as authored,
+				# regardless of sun angle, ambient light color/strength, or shadows
+				# falling on it. Keeps the model reading as a consistent, flat
+				# cartoony color instead of shifting with the world's lighting.
+				# (Screen-wide color grading/saturation in EnvironmentConfig still
+				# applies on top, same as everything else on screen.)
+				dup.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 				mi.set_surface_override_material(i, dup)
 				_materials.append(dup)
 				_base_colors[dup] = dup.albedo_color
