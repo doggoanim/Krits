@@ -26,8 +26,10 @@ direction on the ground skids into a brief slide — no steering until it ends.
              walls, stage_root for its dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield` flag)
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
-- world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, TestLevel blockout,
-             WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
+- world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
+             visibility culling for a region), WorldGate (blocks a path until a story flag is set),
+             TestLevel blockout, WorldDissolver + world_dissolve.gdshader (world-space noise dissolve
+             used by encounters)
 - ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader (screen-space
              fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
 
@@ -40,6 +42,8 @@ direction on the ground skids into a brief slide — no steering until it ends.
 - New enemy: add a static builder in EnemyLibrary (or save an EnemyData .tres).
 - Story: use Game.set_flag / Game.flag; WorldEnemy ids save as `cleared_<id>` flags.
 - Encounters: place a WorldEnemy (enemy_id + EnemyData). Enemies within 14m of the touched one join the fight and enlarge the stage.
+- Large map performance: wrap a region's geometry in a WorldChunk (see "Building your own map" below).
+- Progression blockers: a WorldGate with `required_flag` set opens itself once that story flag is set.
 
 Not tested in-engine (no Godot binary was available while writing): expect to tune
 PlayerConfig values and fix any small typing errors on first run.
@@ -68,8 +72,31 @@ and nothing requires levels to be built in code. To build a real level visually:
    **Level Scene** field to your new scene. That's the only code-side wiring
    needed — `main.gd` instantiates whatever you put there instead of TestLevel.
 
-Each zone is currently one scene loaded wholesale at startup; multiple
-interconnected zones with travel between them (the original "open world" spec)
-isn't built yet — flag it if you want that next and we can design how zones
-hand off to each other (loading a new scene on an Area3D trigger, keeping
-the player's stats/flags via `Game`, etc.).
+### One big interconnected map, with culling and progression gates
+
+If most of the game is meant to be one continuous map rather than separate
+zones you travel between, build it all as one scene (step 1 above still
+applies — one `.tscn`) and use these two to keep it fast and gated:
+
+- **WorldChunk** — wrap each region's geometry/props (a town, a cave, a hill)
+  in a `WorldChunk` node (reparent that region's content underneath it) and
+  position the WorldChunk itself near the region's center. It shows/hides
+  that whole subtree based on distance to the player (`view_distance`,
+  default 80m) so distant parts of the map simply aren't rendered. It
+  doesn't touch collision or enemy logic — `WorldEnemy` already does its own
+  closer-range spawn/despawn, which is the right granularity for actors;
+  WorldChunk is for the geometry and set-dressing around them.
+- **WorldGate** — a `StaticBody3D` you build like any solid obstacle (give it
+  a `CollisionShape3D` and a visual — rubble, a sealed door, a magic wall),
+  set its `required_flag` in the Inspector to a story flag name, and it
+  blocks the path until `Game.set_flag(that_flag)` is called somewhere
+  (a quest trigger, an NPC conversation, a boss defeat), at which point it
+  opens itself live — no reload needed. Hook its `opened` signal if you want
+  a custom animation or sound when it falls away instead of just vanishing.
+
+Spawnpoints work the same as before for fast travel within this single map —
+`M` just teleports the player to whichever unlocked Spawnpoint you pick, no
+scene loading involved. A separate scene-per-zone setup (loading a new scene
+when the player crosses a boundary) is a different, heavier approach for
+when a single scene gets too large to keep open at once — not needed yet,
+and we can build it later if the map grows to that scale.
