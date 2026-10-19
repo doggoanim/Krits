@@ -77,6 +77,14 @@ func _physics_process(delta: float) -> void:
 			_mat.albedo_color = data.color
 
 func _move(delta: float) -> void:
+	if not armed:
+		# Stand still through the barrier materializing and the intro delay —
+		# matches the player, who's also locked out of input for that whole
+		# stretch (see EncounterManager). Without this an enemy would already
+		# be wandering around while the player can't do anything about it yet.
+		if _visual:
+			_visual.play_idle()
+		return
 	var flat := _dest - global_position
 	flat.y = 0.0
 	if flat.length() < 0.5:
@@ -139,7 +147,7 @@ func take_damage(amount: float) -> void:
 # ---------------------------------------------------------------- slime trail
 
 func _update_puddle_trail(delta: float) -> void:
-	if not data.leaves_puddle_trail:
+	if not armed or not data.leaves_puddle_trail:
 		return
 	_puddle_t -= delta
 	if _puddle_t <= 0.0:
