@@ -191,6 +191,7 @@ func start_jump(vel: float) -> void:
 	coyote = 0.0
 	jump_buffer_t = 0.0
 	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	visual.roll_jump_start()
 	effects.burst_jump_dust()
 	machine.transition_to(&"Air")
 
@@ -198,6 +199,7 @@ func bounce_off_orb() -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
 	can_dive = true
+	visual.play_random_attack(config.orb_attack_hold_time)
 	machine.transition_to(&"Air")
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move

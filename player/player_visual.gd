@@ -11,7 +11,12 @@ const MODEL_SCENE := preload("res://assets/player/krits.glb")
 ## future export only needs updating here, not at every call site.
 const ANIM_IDLE := &"idle"
 const ANIM_RUN := &"run"
-const ANIM_JUMP_START := &"jump_start"
+## Three interchangeable jump-start poses, picked at random each jump (see
+## roll_jump_start()/jump_start_anim()) instead of always playing the same one.
+const ANIM_JUMP_START_VARIANTS: Array[StringName] = [&"jump_start1", &"jump_start2", &"jump_start3"]
+## Three interchangeable orb-hit attack poses, picked at random each hit (see
+## play_random_attack()).
+const ANIM_ATTACK_VARIANTS: Array[StringName] = [&"attack1", &"attack2", &"attack3"]
 const ANIM_FALLING := &"falling"
 const ANIM_ROLL := &"roll"
 const ANIM_DIVE := &"air_dive"
@@ -47,6 +52,7 @@ var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node'
 var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
+var _jump_start_anim: StringName = ANIM_JUMP_START_VARIANTS[0]   ## this jump's picked pose
 var _slimed := false     ## standing in a slime puddle — tints the character green (see set_slimed)
 
 const SLIME_TINT_COLOR := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
@@ -160,6 +166,23 @@ func play_hold(anim_name: StringName, duration: float) -> void:
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
 	return _hold_t > 0.0
+
+## Picks a new random jump-start pose — call once when a jump begins (see
+## Player.start_jump()). AirState then just calls jump_start_anim() every
+## frame like it would any other per-frame animation, so the rest of the jump
+## doesn't need to know a variant was picked at all.
+func roll_jump_start() -> void:
+	_jump_start_anim = ANIM_JUMP_START_VARIANTS.pick_random()
+
+func jump_start_anim() -> StringName:
+	return _jump_start_anim
+
+## A random attack pose, protected like a wall-bounce reaction (play_hold)
+## for `duration` — long enough to read as a punch, short enough not to
+## stall an orb-combo chain waiting out the clip's full length. See
+## Player.bounce_off_orb().
+func play_random_attack(duration: float) -> void:
+	play_hold(ANIM_ATTACK_VARIANTS.pick_random(), duration)
 
 ## Code-driven squash/stretch "pop": immediately pushes the whole model's
 ## scale away from its normal rest size — `y_scale` vertically, `xz_scale`

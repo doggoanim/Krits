@@ -20,9 +20,10 @@ direction on the ground skids into a brief slide — no steering until it ends.
              VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
              PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
-- assets/    player/krits.glb — rigged character + animations (idle, run, jump_start, falling, air_dive,
-             roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle, crouch_walk,
-             roll_collision, slide).
+- assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
+             air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
+             crouch_walk, roll_collision, slide, attack1/2/3). jump_start and attack each have
+             3 interchangeable variants, picked at random per jump / per orb hit (PlayerVisual).
              Re-export over this file to update the model/animations.
 - combat/    EncounterManager (a circular barrier dissolves into place right where the fight starts,
              nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its

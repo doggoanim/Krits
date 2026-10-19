@@ -56,3 +56,6 @@ extends Resource
 
 @export_group("Orbs")
 @export var orb_bounce_velocity := 13.5
+@export var orb_attack_hold_time := 0.3    ## how long the orb-hit attack pose protects
+                                            ## itself before air control resumes — short on
+                                            ## purpose so it doesn't stall an orb-combo chain
