@@ -12,9 +12,6 @@ extends Resource
 @export var slide_min_move_time := 0.8     ## must have been moving continuously this long first
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
-@export var turn_input_buffer := 0.15      ## a detected reversal still starts a skid for this long
-                                            ## afterward, even on a frame where one couldn't start
-                                            ## right away (e.g. still mid-hold from the previous skid)
 
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",
