@@ -10,6 +10,7 @@ const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 
 static var _smoke_quad: QuadMesh
 static var _smoke_ramp: GradientTexture1D
+static var _shard_mesh: BoxMesh
 
 ## A puff of smoke at `pos`, parented under `parent` so it's cleaned up if
 ## `parent` is (freed itself once its particles finish). `scale` multiplies
@@ -46,6 +47,45 @@ static func smoke_puff(parent: Node3D, pos: Vector3, scale := 1.0) -> void:
 	p.restart()
 	parent.get_tree().create_timer(p.lifetime + 0.3).timeout.connect(p.queue_free)
 
+## A burst of small angular shards flying outward in every direction, then
+## tumbling and falling under gravity — something breaking/shattering (an orb
+## popping, a breakable crystal, ...), as opposed to smoke_puff's soft billowy
+## cloud. `color` tints the shards (faded out via color_ramp's alpha, not a
+## shrink, so the unshaded flat-color style stays crisp right up to the end);
+## `scale` multiplies both shard size and burst speed.
+static func shatter(parent: Node3D, pos: Vector3, color: Color, scale := 1.0) -> void:
+	_ensure_resources()
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3.UP
+	mat.spread = 180.0   # full sphere, not a cone — shards fly every which way
+	mat.initial_velocity_min = 2.5 * scale
+	mat.initial_velocity_max = 5.5 * scale
+	mat.gravity = Vector3(0.0, -9.0, 0.0)
+	mat.damping_min = 0.4
+	mat.damping_max = 1.2
+	mat.angular_velocity_min = -720.0
+	mat.angular_velocity_max = 720.0
+	mat.scale_min = 0.5 * scale
+	mat.scale_max = 1.1 * scale
+	mat.color_ramp = _make_ramp([color, color, Color(color.r, color.g, color.b, 0.0)])
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	mat.emission_sphere_radius = 0.15 * scale
+
+	var p := GPUParticles3D.new()
+	p.amount = 16
+	p.lifetime = 0.55
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.randomness = 0.3
+	p.local_coords = false
+	p.draw_pass_1 = _shard_mesh
+	p.process_material = mat
+	parent.add_child(p)
+	p.global_position = pos
+	p.emitting = true
+	p.restart()
+	parent.get_tree().create_timer(p.lifetime + 0.3).timeout.connect(p.queue_free)
+
 static func _ensure_resources() -> void:
 	if _smoke_quad != null:
 		return
@@ -55,6 +95,17 @@ static func _ensure_resources() -> void:
 		Color(0.8, 0.8, 0.85, 0.4),
 		Color(0.8, 0.8, 0.85, 0.0),
 	])
+	_shard_mesh = _make_shard_mesh()
+
+static func _make_shard_mesh() -> BoxMesh:
+	var b := BoxMesh.new()
+	b.size = Vector3.ONE * 0.12
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.vertex_color_use_as_albedo = true
+	b.material = m
+	return b
 
 static func _make_quad_mesh(texture: Texture2D) -> QuadMesh:
 	var q := QuadMesh.new()

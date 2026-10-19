@@ -93,6 +93,7 @@ func _try(body: Node3D) -> void:
 		return
 	active = false
 	_refresh()
+	VFX.shatter(get_parent() as Node3D, global_position, ACTIVE_CORE_COLOR)
 	hit.emit(self)
 
 func relocate(pos: Vector3) -> void:
