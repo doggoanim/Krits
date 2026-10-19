@@ -11,6 +11,7 @@ const MODEL_SCENE := preload("res://assets/player/krits.glb")
 ## future export only needs updating here, not at every call site.
 const ANIM_IDLE := &"idle"
 const ANIM_RUN := &"run"
+const RUN_ANIM_SPEED := 1.1   ## plays 10% faster than the clip's authored speed
 ## Three interchangeable jump-start poses, picked at random each jump (see
 ## roll_jump_start()/jump_start_anim()) instead of always playing the same one.
 const ANIM_JUMP_START_VARIANTS: Array[StringName] = [&"jump_start1", &"jump_start2", &"jump_start3"]

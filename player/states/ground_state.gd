@@ -100,7 +100,10 @@ func physics_update(delta: float) -> void:
 	p.set_hvel(h)
 	if moving and not was_sliding:
 		p.face(input, delta)
-	p.visual.play(PlayerVisual.ANIM_RUN if moving else PlayerVisual.ANIM_IDLE)
+	if moving:
+		p.visual.play(PlayerVisual.ANIM_RUN, 0.15, PlayerVisual.RUN_ANIM_SPEED)
+	else:
+		p.visual.play(PlayerVisual.ANIM_IDLE)
 	p.effects.set_running_dust(moving and not was_sliding)
 	p.velocity.y = -1.0
 	p.move_and_slide()
