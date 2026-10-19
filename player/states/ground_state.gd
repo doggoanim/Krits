@@ -22,14 +22,24 @@ func physics_update(delta: float) -> void:
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
 	var prev_h := p.get_hvel()
-	# A sharp enough reversal at speed gets a brief slide reaction before the
-	# usual run/idle pose takes back over (play_hold protects it meanwhile).
-	if moving and prev_h.length() >= c.slide_min_speed \
-			and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot:
+	var was_sliding := p.visual.is_holding()
+
+	# Fast enough stop or sharp enough reversal triggers a brief slide — while
+	# it plays (play_hold protects the pose) you can't steer or accelerate,
+	# just skid to a stop on whatever momentum you already had.
+	if not was_sliding and prev_h.length() >= c.slide_min_speed and \
+			(not moving or prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot):
 		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
-	var h := prev_h.move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
+		was_sliding = true
+
+	var h: Vector3
+	if was_sliding:
+		var spd := maxf(0.0, prev_h.length() - c.ground_decel * delta)
+		h = prev_h.normalized() * spd if spd > 0.0 else Vector3.ZERO
+	else:
+		h = prev_h.move_toward(input * c.walk_speed, (c.ground_accel if moving else c.ground_decel) * delta)
 	p.set_hvel(h)
-	if moving:
+	if moving and not was_sliding:
 		p.face(input, delta)
 	p.visual.play(PlayerVisual.ANIM_RUN if moving else PlayerVisual.ANIM_IDLE)
 	p.velocity.y = -1.0

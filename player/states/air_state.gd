@@ -18,10 +18,13 @@ func physics_update(delta: float) -> void:
 		machine.transition_to(&"Pound")
 		return
 
-	p.air_control(delta)
-	var input := p.input_dir()
-	if input.length() > 0.1:
-		p.face(input, delta)
+	# A wall bounce's reaction pose (play_hold, below) also locks out steering
+	# for the same window — you're along for the bounce's arc until it ends.
+	if not p.visual.is_holding():
+		p.air_control(delta)
+		var input := p.input_dir()
+		if input.length() > 0.1:
+			p.face(input, delta)
 	p.apply_gravity(delta)
 	# A wall-bounce collision pose protects itself via play_hold — this call
 	# is simply ignored for the moment and takes back over once it expires.

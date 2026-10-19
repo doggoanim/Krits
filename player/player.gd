@@ -166,11 +166,19 @@ func bounce_off_orb() -> void:
 	can_dive = true
 	machine.transition_to(&"Air")
 
-## Call after move_and_slide() from Dive / LongJump with the pre-move horizontal velocity.
+## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move
+## horizontal velocity. Always launches into Air with an upward pop — this is
+## the one bounce mechanic shared by every state that can hit a wall hard
+## enough; `bounce_anim`/`bounce_time` just let each caller pick its own
+## reaction pose (a looping tumble for the airborne ones, a sharper collision
+## pose for rolling into one on the ground).
 ## Each source bounces once: a long-jump bounce re-grants the dive (so a dive can
 ## bounce too), a dive bounce does not, so the chain ends there until you land.
-func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool) -> bool:
-	if is_on_floor() or not is_on_wall() or prev_hvel.length() < config.wall_min_speed:
+## `allow_grounded` lets Roll (which is still on the floor the instant this is
+## called) trigger it too — everyone else is already airborne so it's moot.
+func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: StringName,
+		bounce_time: float, allow_grounded := false) -> bool:
+	if (is_on_floor() and not allow_grounded) or not is_on_wall() or prev_hvel.length() < config.wall_min_speed:
 		return false
 	var n := get_wall_normal()
 	n.y = 0.0
@@ -182,7 +190,7 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool) -> bool:
 	velocity = n * config.wall_bounce_push
 	velocity.y = config.wall_bounce_up
 	face(n)
-	visual.play_hold(PlayerVisual.ANIM_ROLL_COLLISION, config.wall_bounce_roll_time)
+	visual.play_hold(bounce_anim, bounce_time)
 	if regrants_dive:
 		can_dive = true
 	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure

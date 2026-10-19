@@ -31,8 +31,7 @@ extends Resource
 @export var roll_stop_speed := 3.0         ## roll ends (stand up) below this speed
 @export var roll_cooldown := 0.6           ## after a roll ends, before the next
 @export var roll_steer := 3.0
-@export var roll_wall_bounce_mult := 0.6   ## speed kept after bouncing off a wall mid-roll
-@export var roll_collision_time := 0.35    ## how long the roll_collision reaction pose plays
+@export var roll_collision_time := 0.35    ## how long the roll_collision reaction pose plays after bouncing off a wall mid-roll
 @export var long_jump_speed := 18.0
 @export var long_jump_velocity := 8.5
 @export var long_jump_gravity_mult := 0.8

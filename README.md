@@ -8,9 +8,10 @@ WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) 
 Ctrl crouch (ground) / ground pound (air) · F1-F9 debug fight tools · Tab stats · M fast travel · O outfits · Esc free mouse
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
-dive or long-jump into a wall = wall bounce (can dive again, chain it) ·
-rolling into a wall bounces you off it too · ground pound works out of a dive ·
-sharply reversing direction on the ground gets a quick slide reaction.
+dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
+dive/long-jump can chain another dive, rolling into one launches you off the
+ground) · ground pound works out of a dive · stopping or sharply reversing
+direction on the ground skids into a brief slide — no steering until it ends.
 
 ## Layout
 - core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup
