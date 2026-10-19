@@ -40,7 +40,7 @@ func _ready() -> void:
 	_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	_mesh.material_override = _mat
 	add_child(_mesh)
-	CelOutline.apply(_mesh, data.size * 0.05)
+	CelOutline.apply(_mesh, data.size * 0.08)
 	_label = Label3D.new()
 	_label.position.y = 1.4 * data.size
 	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED

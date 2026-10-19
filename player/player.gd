@@ -30,6 +30,7 @@ const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
 var _was_on_floor := true
+var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
 
 func _ready() -> void:
@@ -66,11 +67,16 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_timers(delta)
 	machine.physics_update(delta)
-	if is_on_floor() and not _was_on_floor:
+	var on_floor := is_on_floor()
+	if on_floor and not _was_on_floor:
 		can_dive = true
-		visual.squash_stretch(visual.land_squash_y, visual.land_squash_xz)
+		# Only squash for a real fall, not a split-second floor-contact flicker
+		# (slopes/stairs/small bumps toggling is_on_floor() during plain walking).
+		if _air_t >= config.min_air_time_for_land_squash:
+			visual.squash_stretch(visual.land_squash_y, visual.land_squash_xz)
 		Events.player_landed.emit()
-	_was_on_floor = is_on_floor()
+	_air_t = 0.0 if on_floor else _air_t + delta
+	_was_on_floor = on_floor
 	_update_lean(delta)
 
 ## Arcade-style motion lean: pitch forward with ground speed, bank into turns.

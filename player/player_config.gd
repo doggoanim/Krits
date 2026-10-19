@@ -24,6 +24,8 @@ extends Resource
 @export var jump_velocity := 12.0          ## fixed height every jump — no variable height from holding
 @export var coyote_time := 0.1
 @export var jump_buffer := 0.12
+@export var min_air_time_for_land_squash := 0.12   ## skip the landing squash for brief floor-contact
+                                                     ## flicker (slopes, stairs, small bumps) that isn't a real fall
 
 @export_group("Roll / Long Jump")
 @export var roll_speed := 15.0
