@@ -12,6 +12,12 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.face(dir)
 	p.set_hvel(dir * p.config.dive_speed)
 	p.velocity.y = p.config.dive_up
+	# Always takes over immediately — a dive can be triggered right out of
+	# another move's own protected reaction pose (a wall-bounce tumble, the
+	# skid/side-flip, an orb-hit attack, ...), and without this it would
+	# either wait that pose out or (per play()'s hold guard) silently not
+	# play at all until the old hold expired on its own.
+	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_DIVE)
 	p.effects.set_dive_trail(true)
 

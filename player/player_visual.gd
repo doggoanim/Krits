@@ -171,6 +171,13 @@ func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
 func is_holding() -> bool:
 	return _hold_t > 0.0
 
+## Immediately ends whatever play_hold() reaction pose is still protected, if
+## any — for a move that should always take over right away regardless of
+## what was playing before (air dive, say), rather than waiting out someone
+## else's hold or silently failing to play at all (see play()'s hold guard).
+func cancel_hold() -> void:
+	_hold_t = 0.0
+
 ## Picks a new random jump-start pose — call once when a jump begins (see
 ## Player.start_jump()). AirState then just calls jump_start_anim() every
 ## frame like it would any other per-frame animation, so the rest of the jump
