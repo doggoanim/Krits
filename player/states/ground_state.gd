@@ -33,13 +33,15 @@ func physics_update(delta: float) -> void:
 	var prev_h := p.get_hvel()
 	var was_sliding := p.visual.is_holding()
 
-	# Fast enough stop or sharp enough reversal triggers a brief slide — but
-	# only after you've actually been moving for a bit, so a quick tap of the
-	# stick doesn't skid. While it plays (play_hold protects the pose) you
-	# can't steer or accelerate, just carry your existing momentum forward
-	# along an easing curve.
-	if not was_sliding and _move_t >= c.slide_min_move_time and prev_h.length() >= c.slide_min_speed and \
-			(not moving or prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot):
+	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
+	# the stop case is gated by slide_min_move_time (a quick stick tap
+	# shouldn't skid to a stop) — a sharp direction change slides regardless
+	# of how long you'd been moving, same as before. While it plays
+	# (play_hold protects the pose) you can't steer or accelerate, just carry
+	# your existing momentum forward along an easing curve.
+	var stopping := not moving and _move_t >= c.slide_min_move_time
+	var reversing := moving and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
+	if not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing):
 		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
 		was_sliding = true
 		_slide_t = 0.0
