@@ -1,16 +1,16 @@
 class_name PlayerXray
 extends Node3D
-## Shows a flat, see-through silhouette of the player whenever a wall or
+## Shows a white halftone-dot silhouette of the player whenever a wall or
 ## other piece of world geometry blocks the camera's line of sight to them —
 ## the common third-person "x-ray" trick so you don't lose track of the
-## character behind scenery. Built from duplicates of the player's own
+## character behind scenery, styled as a comic/print halftone screen rather
+## than a flat transparent fill. Built from duplicates of the player's own
 ## model meshes (sharing the same skeleton as the original, via
 ## MeshInstance3D.duplicate(), so they follow the animation automatically
-## with no per-frame work needed) rendered unshaded with depth testing
-## disabled, toggled visible only while a raycast from the camera to the
-## player is actually blocked.
+## with no per-frame work needed), toggled visible only while a raycast
+## from the camera to the player is actually blocked.
 
-const COLOR := Color(1.0, 1.0, 1.0, 0.5)
+const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
 
 var player: Player
@@ -22,15 +22,12 @@ func setup(p: Player) -> void:
 	_build_copies(p.visual.get_model())
 
 func _build_copies(model: Node3D) -> void:
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = COLOR
-	mat.no_depth_test = true   # draws even through whatever's occluding the real model
+	var mat := ShaderMaterial.new()
+	mat.shader = SHADER
 	mat.render_priority = 10
 	_collect(model, mat)
 
-func _collect(n: Node, mat: StandardMaterial3D) -> void:
+func _collect(n: Node, mat: ShaderMaterial) -> void:
 	if n is MeshInstance3D and (n as MeshInstance3D).mesh:
 		var mi := n as MeshInstance3D
 		var dup := mi.duplicate() as MeshInstance3D
