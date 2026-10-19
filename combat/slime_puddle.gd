@@ -8,6 +8,10 @@ extends Area3D
 
 const GROW_TIME := 0.25
 const FADE_TIME := 0.6
+const GROUND_CLEARANCE := 0.08   ## lifts the flat quad above the ground it's drawn on,
+                                  ## well clear of z-fighting/clipping on uneven terrain
+                                  ## (bigger than GroundShadow's 0.02 since this also has
+                                  ## to survive the enemy's own ground-probe margin of error)
 
 @export var radius := 1.3
 @export var color := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
@@ -41,6 +45,7 @@ func _ready() -> void:
 	var q := QuadMesh.new()
 	q.size = Vector2(radius, radius) * 2.0
 	_mesh.mesh = q
+	_mesh.position.y = GROUND_CLEARANCE
 	_mesh.rotation_degrees = Vector3(-90.0, 0.0, 0.0)   # lie flat, facing up
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

@@ -19,13 +19,14 @@ var _dest := Vector3.ZERO
 var _mesh: MeshInstance3D   ## placeholder sphere, only built when data.model is unset
 var _mat := StandardMaterial3D.new()
 var _visual: EnemyVisual    ## animated model, only built when data.model is set
-var _label: Label3D
 var _flash := 0.0
 var _dying := false   ## true once defeated, so a lingering death animation isn't overridden
 
 var _special_t := 0.0          ## countdown to the next leap/burst-shoot attack
 var _busy_with_special := false ## true while a leap or burst-shoot is actually playing out
 var _puddle_t := 0.0
+
+const FACE_TURN_SPEED := 8.0   ## rad/s, how fast an enemy turns to face its movement
 
 func setup(d: EnemyData, a: Arena, t: Node3D) -> void:
 	data = d
@@ -39,12 +40,10 @@ func setup(d: EnemyData, a: Arena, t: Node3D) -> void:
 		_special_t = randf_range(1.0, 2.0)   # brief delay after the intro before the first one
 
 func _ready() -> void:
-	var label_height: float
 	if data.model:
 		_visual = EnemyVisual.new()
 		add_child(_visual)
 		_visual.setup(data)
-		label_height = data.model_height * 1.3
 	else:
 		var sm := SphereMesh.new()
 		sm.radius = 0.7 * data.size
@@ -57,14 +56,6 @@ func _ready() -> void:
 		_mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 		_mesh.material_override = _mat
 		add_child(_mesh)
-		label_height = 1.4 * data.size
-	_label = Label3D.new()
-	_label.position.y = label_height
-	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_label.no_depth_test = true
-	_label.font_size = 48
-	add_child(_label)
-	_update_label()
 	_dest = global_position
 
 func _physics_process(delta: float) -> void:
@@ -91,9 +82,19 @@ func _move(delta: float) -> void:
 		if _visual:
 			_visual.play_idle()
 		return
-	global_position += flat.normalized() * data.move_speed * delta
+	var dir := flat.normalized()
+	global_position += dir * data.move_speed * delta
+	_face(dir, delta)
 	if _visual:
 		_visual.play_move()
+
+## Smoothly yaws the enemy to face its movement direction (same atan2
+## convention as Player.face()). Only ever called from _move(), which itself
+## only runs while not _busy_with_special — so this never fights with the
+## leap attack's own tumble/rotate().
+func _face(dir: Vector3, delta: float) -> void:
+	var target := atan2(-dir.x, -dir.z)
+	rotation.y = lerp_angle(rotation.y, target, minf(1.0, FACE_TURN_SPEED * delta))
 
 func _shoot(delta: float) -> void:
 	if not armed:
@@ -111,7 +112,6 @@ func take_damage(amount: float) -> void:
 	_flash = 0.12
 	if _visual:
 		_visual.flash()
-	_update_label()
 	if hp <= 0.0:
 		_dying = true
 		defeated.emit(self)
@@ -121,11 +121,6 @@ func take_damage(amount: float) -> void:
 				get_tree().create_timer(death_len).timeout.connect(queue_free)
 				return
 		queue_free()
-
-## HP only, no name — there's nowhere else on screen showing an enemy's
-## remaining health during a fight, so this stays, just without the label.
-func _update_label() -> void:
-	_label.text = str(maxi(0, ceili(hp)))
 
 # ---------------------------------------------------------------- slime trail
 
@@ -137,6 +132,12 @@ func _update_puddle_trail(delta: float) -> void:
 		_puddle_t = data.puddle_interval
 		_spawn_puddle(global_position, data.puddle_radius)
 
+## `pos` only needs to be roughly where the puddle should sit horizontally —
+## its height always comes from an actual ground probe, never the caller's
+## y. That matters most during the leap attack, where _run_special_attack's
+## trail calls this mid-arc with the slime's current (airborne) position;
+## without re-grounding here the puddle would spawn floating at leap height
+## instead of on the floor beneath.
 func _spawn_puddle(pos: Vector3, radius: float) -> void:
 	var p := SlimePuddle.new()
 	p.radius = radius
@@ -145,7 +146,9 @@ func _spawn_puddle(pos: Vector3, radius: float) -> void:
 	p.tick_interval = data.puddle_tick_interval
 	p.lifetime = data.puddle_lifetime
 	arena.add_child(p)
-	p.global_position = pos
+	var ground_pos := pos
+	ground_pos.y = arena.ground_height(pos)
+	p.global_position = ground_pos
 
 # ---------------------------------------------------------------- special attacks
 
