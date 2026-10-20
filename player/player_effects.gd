@@ -40,7 +40,7 @@ var _smoke_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
 var _smoke_ramp_tex: GradientTexture1D
-var _slime_drip_ramp_tex: GradientTexture1D
+var _slime_drip_material: ParticleProcessMaterial   ## kept so set_slime_drip() can swap its color_ramp
 
 var _run_dust: GPUParticles3D
 var _dive_trail: GPUParticles3D
@@ -53,7 +53,6 @@ func _ready() -> void:
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
-	_slime_drip_ramp_tex = _make_ramp(_slime_drip_colors(PlayerVisual.SLIME_TINT_COLOR))
 
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
 	add_child(_run_dust)
@@ -61,7 +60,8 @@ func _ready() -> void:
 	add_child(_dive_trail)
 	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false, _dust_quad)
 	add_child(_long_jump_trail)
-	_slime_drip = _build_emitter(_slime_drip_material(), 10, 0.6, false, _dust_quad)
+	_slime_drip_material = _slime_drip_material_for(PlayerVisual.SLIME_TINT_COLOR)
+	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _dust_quad)
 	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
 	add_child(_slime_drip)
 
@@ -84,7 +84,12 @@ func set_long_jump_trail(active: bool) -> void:
 ## which puddle the player is actually standing in.
 func set_slime_drip(active: bool, color := PlayerVisual.SLIME_TINT_COLOR) -> void:
 	if active:
-		_slime_drip_ramp_tex.gradient.colors = PackedColorArray(_slime_drip_colors(color))
+		# A fresh GradientTexture1D each time, rather than mutating the
+		# existing one's Gradient in place and hoping the running
+		# GPUParticles3D notices — assigning a whole new resource to the
+		# material's color_ramp is the one change that's guaranteed to show
+		# up, including on particles already mid-flight.
+		_slime_drip_material.color_ramp = _make_ramp(_slime_drip_colors(color))
 	_slime_drip.emitting = active
 
 # ---------------------------------------------------------------- one-shot bursts
@@ -206,7 +211,9 @@ func _slime_drip_colors(color: Color) -> Array:
 ## Small droplets falling straight down off the body — unlike every other
 ## emitter here (all UP-biased, dust kicked up or smoke rising), this one
 ## needs its own direction, so it doesn't go through _material() above.
-func _slime_drip_material() -> ParticleProcessMaterial:
+## `color` seeds its initial ramp; set_slime_drip() swaps color_ramp directly
+## on the returned material afterward whenever the active puddle changes.
+func _slime_drip_material_for(color: Color) -> ParticleProcessMaterial:
 	var m := ParticleProcessMaterial.new()
 	m.direction = Vector3.DOWN
 	m.spread = 20.0
@@ -218,7 +225,7 @@ func _slime_drip_material() -> ParticleProcessMaterial:
 	m.scale_min = 0.25
 	m.scale_max = 0.5
 	m.scale_curve = _growth_curve
-	m.color_ramp = _slime_drip_ramp_tex
+	m.color_ramp = _make_ramp(_slime_drip_colors(color))
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.35
 	return m
