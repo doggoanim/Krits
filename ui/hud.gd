@@ -21,24 +21,30 @@ const SHIELD_FRAME_TEX := preload("res://assets/ui/shield_frame_crop.png")
 const STAMINA_FILL_TEX := preload("res://assets/ui/stamina_fill.png")
 const PORTRAIT_FRAME_TEX := preload("res://assets/ui/portrait_frame_crop.png")
 
-const PORTRAIT_POS := Vector2(70.0, 90.0)
-const PORTRAIT_FRAME_SIZE := Vector2(170.0, 130.0)   ## matches portrait_frame_crop.png's own aspect,
-                                                      ## scaled up
-const PORTRAIT_VIEW_SIZE := Vector2(120.0, 120.0)    ## the live 3D render stays square (so the
+## Positions/sizes below are measured directly off the latest reference image
+## (portrait top-left corner, HP overlapping its right side, stamina stacked
+## tight underneath), scaled down to a sane HUD size and re-anchored to a
+## (24, 20) screen margin instead of wherever the designer happened to draw
+## it on their canvas. Widths come straight from that reference; heights
+## follow from each asset's own aspect ratio instead, so the art doesn't
+## stretch.
+const PORTRAIT_POS := Vector2(24.0, 20.0)
+const PORTRAIT_FRAME_SIZE := Vector2(145.0, 111.0)   ## matches portrait_frame_crop.png's own aspect
+const PORTRAIT_VIEW_SIZE := Vector2(102.0, 102.0)    ## the live 3D render stays square (so the
                                                       ## character isn't stretched) and sits centered
                                                       ## inside the frame art, sized to fill it while
                                                       ## still leaving its hand-drawn border visible
-const PORTRAIT_VIEW_Y_NUDGE := 10.0   ## shifts just the live render (not the frame art) down a bit
-                                      ## within its centered slot
+const PORTRAIT_VIEW_Y_NUDGE := 8.0   ## shifts just the live render (not the frame art) down a bit
+                                     ## within its centered slot
 
-const HP_POS := Vector2(146.0, 118.0)   ## overlaps the portrait's right half, like the reference
-const HP_SIZE := Vector2(340.0, 66.0)       ## matches health_fill.png's aspect (294x57)
-const STAMINA_POS := Vector2(146.0, 186.0)   ## back below the HP bar
-const STAMINA_SIZE := Vector2(280.0, 58.0)  ## matches stamina_fill.png's aspect (254x53)
+const HP_POS := Vector2(156.0, 50.0)   ## overlaps the portrait's right half, like the reference
+const HP_SIZE := Vector2(270.0, 52.0)       ## matches health_fill.png's aspect (294x57)
+const STAMINA_POS := Vector2(164.0, 86.0)   ## stacked tight under the HP bar
+const STAMINA_SIZE := Vector2(224.0, 47.0)  ## matches stamina_fill.png's aspect (254x53)
 
 const TRACK_TINT := Color(0.3, 0.3, 0.32, 0.5)   ## dims the same art to stand in as its own empty track
 
-const READOUT_POS := Vector2(20.0, 260.0)
+const READOUT_POS := Vector2(24.0, 150.0)
 const READOUT_WIDTH := 340.0
 
 var _hp_fill: TexturedSlantedBar
