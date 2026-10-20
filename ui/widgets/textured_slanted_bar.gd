@@ -14,6 +14,11 @@ extends Control
 
 @export var texture: Texture2D
 @export var skew := 0.0
+@export var tint := Color.WHITE   ## multiplied over the texture; used at a dim, semi-transparent
+                                  ## value to draw a "ghost" of the same art behind the live fill as
+                                  ## its empty-state track — see Hud._make_track(), which keeps the
+                                  ## track shaped exactly like the real art instead of a plain
+                                  ## rectangle peeking out past its rounded corners
 
 var max_value := 1.0:
 	set(v):
@@ -46,4 +51,4 @@ func _draw() -> void:
 		Vector2(frac, 1.0),
 		Vector2(0.0, 1.0),
 	])
-	draw_polygon(points, PackedColorArray([Color.WHITE]), uvs, texture)
+	draw_polygon(points, PackedColorArray([tint]), uvs, texture)

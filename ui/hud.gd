@@ -10,11 +10,12 @@ extends Control
 ## tight crops of whatever the designer last exported full-canvas, done once
 ## in a scratch script rather than checked in as a build step; re-crop by
 ## hand if the source art changes). See TexturedSlantedBar for how a single
-## piece of flat art still works as a live, drainable bar. The dark "track"
-## behind each meter stays a plain flat-color SlantedBar, since the art
-## doesn't (yet) draw an empty state to pull a texture from. None of these
-## are skewed any more — the redrawn art is a straight rounded bar, not a
-## slanted parallelogram, so every bar below uses skew = 0.
+## piece of flat art still works as a live, drainable bar. The track behind
+## each meter is the same art again, dimmed (see TexturedSlantedBar.tint),
+## since the art doesn't (yet) draw a separate empty state of its own — a
+## plain rectangle there would peek out past the art's rounded corners. None
+## of these are skewed any more — the redrawn art is a straight rounded bar,
+## not a slanted parallelogram, so every bar below uses skew = 0.
 const HP_FILL_TEX := preload("res://assets/ui/health_fill.png")
 const SHIELD_FRAME_TEX := preload("res://assets/ui/shield_frame_crop.png")
 const STAMINA_FILL_TEX := preload("res://assets/ui/stamina_fill.png")
@@ -32,7 +33,7 @@ const HP_SIZE := Vector2(340.0, 66.0)       ## matches health_fill.png's aspect 
 const STAMINA_POS := Vector2(96.0, 92.0)
 const STAMINA_SIZE := Vector2(280.0, 58.0)  ## matches stamina_fill.png's aspect (254x53)
 
-const TRACK_COLOR := Color(0.12, 0.12, 0.14, 0.85)
+const TRACK_TINT := Color(0.3, 0.3, 0.32, 0.5)   ## dims the same art to stand in as its own empty track
 
 const READOUT_POS := Vector2(20.0, 160.0)
 const READOUT_WIDTH := 340.0
@@ -61,18 +62,20 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	_refresh()   # shield recharges every frame
 
-## Builds the stylized HP/shield/stamina cluster: a flat-color track behind
-## each meter, then its real-art fill on top — the shield frame is its own
-## textured layer sharing the HP bar's position/size so it reads as a frame
-## wrapping it, and because its texture is just border strokes on a
-## transparent interior, "draining" it still looks like an outline shrinking
-## in from the right, not a filled shape.
+## Builds the stylized HP/shield/stamina cluster: a dim, always-full "ghost"
+## of each bar's own art behind it as its empty-state track (shaped exactly
+## like the real art, unlike a plain rectangle, which would peek out past its
+## rounded corners — see TexturedSlantedBar.tint), then the live fill on top.
+## The shield frame is its own textured layer sharing the HP bar's
+## position/size so it reads as a frame wrapping it, and because its texture
+## is just border strokes on a transparent interior, "draining" it still
+## looks like an outline shrinking in from the right, not a filled shape.
 func _build_meter_cluster() -> void:
-	_make_track(HP_POS, HP_SIZE)
+	_make_track(HP_POS, HP_SIZE, HP_FILL_TEX)
 	_hp_fill = _make_textured_bar(HP_POS, HP_SIZE, HP_FILL_TEX)
 	_shield_outline = _make_textured_bar(HP_POS, HP_SIZE, SHIELD_FRAME_TEX)
 
-	_make_track(STAMINA_POS, STAMINA_SIZE)
+	_make_track(STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
 	_stamina_fill = _make_textured_bar(STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
 
 	# The frame art is a static backdrop (grey disc + its own hand-drawn
@@ -93,12 +96,9 @@ func _build_meter_cluster() -> void:
 	portrait_view.size = PORTRAIT_VIEW_SIZE
 	add_child(portrait_view)
 
-func _make_track(pos: Vector2, sz: Vector2) -> SlantedBar:
-	var b := SlantedBar.new()
-	b.position = pos
-	b.size = sz
-	b.fill_color = TRACK_COLOR
-	add_child(b)
+func _make_track(pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
+	var b := _make_textured_bar(pos, sz, tex)
+	b.tint = TRACK_TINT
 	return b
 
 func _make_textured_bar(pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
