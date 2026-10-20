@@ -62,12 +62,25 @@ func _build_meter_cluster() -> void:
 	_make_bar(STAMINA_POS, STAMINA_SIZE, 0.0, TRACK_COLOR)
 	_stamina_fill = _make_bar(STAMINA_POS, STAMINA_SIZE, 0.0, STAMINA_COLOR)
 
-	# Drawn last so the circle sits on top, capping the bars' left ends the
-	# way the reference shows them emerging from behind the portrait.
-	var portrait := PortraitSlot.new()
-	portrait.position = PORTRAIT_POS
-	portrait.size = Vector2.ONE * PORTRAIT_SIZE
-	add_child(portrait)
+	# Layered last so the whole portrait sits on top, capping the bars' left
+	# ends the way the reference shows them emerging from behind it:
+	# a grey fallback disc, the live 3D render over it, then the ring on top.
+	var portrait_bg := PortraitSlot.new()
+	portrait_bg.position = PORTRAIT_POS
+	portrait_bg.size = Vector2.ONE * PORTRAIT_SIZE
+	portrait_bg.outline_width = 0.0
+	add_child(portrait_bg)
+
+	var portrait_view := PortraitViewport.new()
+	portrait_view.position = PORTRAIT_POS
+	portrait_view.size = Vector2.ONE * PORTRAIT_SIZE
+	add_child(portrait_view)
+
+	var portrait_ring := PortraitSlot.new()
+	portrait_ring.position = PORTRAIT_POS
+	portrait_ring.size = Vector2.ONE * PORTRAIT_SIZE
+	portrait_ring.draw_fill = false
+	add_child(portrait_ring)
 
 func _make_bar(pos: Vector2, sz: Vector2, skew: float, color: Color) -> SlantedBar:
 	var b := SlantedBar.new()
