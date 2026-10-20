@@ -169,6 +169,8 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) ->
 		return
 	if not force and _anim.current_animation == anim_name:
 		return
+	print("[JumpDebug] (re)starting clip '%s' (was '%s', force=%s, is_playing=%s)" %
+			[anim_name, _anim.current_animation, force, _anim.is_playing()])
 	_anim.play(anim_name, blend, speed, speed < 0.0)
 
 func flash() -> void:
