@@ -13,7 +13,7 @@ extends Control
 ## transparent, so the disc shows through anywhere the model doesn't cover.
 
 const RENDER_SIZE := 256                ## SubViewport resolution, independent of the Control's size
-const CAMERA_DISTANCE := 1.6
+const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
 const OUTLINE_THICKNESS_RATIO := 0.011   ## matches PlayerVisual's default
 
@@ -91,7 +91,10 @@ func _build_scene() -> void:
 
 	var cam := Camera3D.new()
 	var look_at_pos := Vector3(0.0, Player.STAND_HEIGHT * CAMERA_HEIGHT_FRAC, 0.0)
-	cam.position = look_at_pos + Vector3(0.0, 0.0, CAMERA_DISTANCE)
+	# MODEL_FACING_OFFSET turns the model to face -Z (Godot's forward), so the
+	# camera has to sit on the -Z side to see the front of the face rather
+	# than the back of the head.
+	cam.position = look_at_pos + Vector3(0.0, 0.0, -CAMERA_DISTANCE)
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
