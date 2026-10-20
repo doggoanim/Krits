@@ -11,6 +11,7 @@ func enter(_prev: StringName, msg: Dictionary = {}) -> void:
 	player.set_hvel(Vector3.ZERO)
 	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_POUND_LAND)
+	player.audio.play_pound_land()
 	if player.camera_rig:
 		player.camera_rig.shake(0.25)
 	if msg.get("jump_queued", false):

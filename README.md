@@ -28,8 +28,10 @@ toward the new direction.
 			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
 			 PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name),
-			 PlayerEffects (particles), PlayerAudio (movement SFX, sounds/SFX/ — every one-shot
-			 gets a slight random pitch_scale nudge except air dive and long jump, which stay fixed)
+			 PlayerEffects (particles), PlayerAudio (movement SFX, sounds/SFX/ — jump, long jump,
+			 air dive, wall/roll bounce, skid, side flip, orb attack, footsteps, and the ground
+			 pound's three phases (ready/jump/land); every one-shot gets a slight random
+			 pitch_scale nudge except air dive and long jump, which stay fixed)
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
 			 air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
 			 crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack

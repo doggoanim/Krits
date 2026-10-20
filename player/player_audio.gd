@@ -18,6 +18,13 @@ const LONG_JUMP_SFX: AudioStream = preload(SFX_DIR + "long_jump.wav")
 const WALL_BOUNCE_SFX: AudioStream = preload(SFX_DIR + "wall_bounce.wav")
 const ROLL_BOUNCE_SFX: AudioStream = preload(SFX_DIR + "roll_bounce.wav")
 const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
+const SIDE_FLIP_SFX: AudioStream = preload(SFX_DIR + "side_flip.wav")
+const SKID_SFX: AudioStream = preload(SFX_DIR + "skid.wav")
+## The ground pound's three phases: windup starting, the slam launching
+## downward, and the impact on landing — see PoundState/PoundLandState.
+const POUND_READY_SFX: AudioStream = preload(SFX_DIR + "ground_pound_ready.wav")
+const POUND_JUMP_SFX: AudioStream = preload(SFX_DIR + "ground_pound_jump.wav")
+const POUND_LAND_SFX: AudioStream = preload(SFX_DIR + "ground_pound_land.wav")
 
 const AIR_DIVE_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "air_dive_1.wav"),
@@ -55,6 +62,21 @@ func play_orb_attack() -> void:
 
 func play_footstep() -> void:
 	_play(FOOTSTEP_SFX.pick_random(), PITCH_VARIANCE)
+
+func play_side_flip() -> void:
+	_play(SIDE_FLIP_SFX, PITCH_VARIANCE)
+
+func play_skid() -> void:
+	_play(SKID_SFX, PITCH_VARIANCE)
+
+func play_pound_ready() -> void:
+	_play(POUND_READY_SFX, PITCH_VARIANCE)
+
+func play_pound_jump() -> void:
+	_play(POUND_JUMP_SFX, PITCH_VARIANCE)
+
+func play_pound_land() -> void:
+	_play(POUND_LAND_SFX, PITCH_VARIANCE)
 
 func _play(stream: AudioStream, pitch_variance: float) -> void:
 	var p := AudioStreamPlayer3D.new()

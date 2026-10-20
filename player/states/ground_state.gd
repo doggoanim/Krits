@@ -90,6 +90,7 @@ func physics_update(delta: float) -> void:
 	# accelerate, just carry your existing momentum forward along an easing curve.
 	if starting_slide:
 		p.visual.play_hold(PlayerVisual.ANIM_SLIDE, c.slide_time)
+		p.audio.play_skid()
 		was_sliding = true
 		_slide_t = 0.0
 		_slide_dir = prev_h.normalized()

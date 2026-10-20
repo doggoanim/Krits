@@ -226,7 +226,7 @@ func start_side_flip(dir: Vector3) -> void:
 	# back-to-front (speed -1) instead of literally reversing it.
 	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
-	audio.play_jump()
+	audio.play_side_flip()
 	machine.transition_to(&"Air")
 
 func bounce_off_orb() -> void:
