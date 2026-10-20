@@ -69,10 +69,17 @@ func _build_scene() -> void:
 	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 
+	# fit_height scales _model so it's Player.STAND_HEIGHT tall in world space,
+	# but it returns the AABB it measured *before* that scaling — still the
+	# right thing to size the outline from (CelOutline's grow_amount is
+	# applied inside the model's own pre-scale local space, so it ends up
+	# visually correct either way), but the WRONG thing to frame the camera
+	# with: the camera sits outside the model in world space, so it needs the
+	# model's actual post-scale height, i.e. Player.STAND_HEIGHT itself.
 	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
-	var height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
+	var pre_scale_height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
 	var materials: Array[BaseMaterial3D] = []
-	ModelUtil.apply_cel_shading(_model, height * OUTLINE_THICKNESS_RATIO, Color.BLACK, materials)
+	ModelUtil.apply_cel_shading(_model, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK, materials)
 	for m in materials:
 		if m.resource_name in PlayerVisual.OUTFIT_SLOTS:
 			_outfit_materials.append(m)
@@ -83,7 +90,7 @@ func _build_scene() -> void:
 		_anim.play(PlayerVisual.ANIM_IDLE)
 
 	var cam := Camera3D.new()
-	var look_at_pos := Vector3(0.0, height * CAMERA_HEIGHT_FRAC, 0.0)
+	var look_at_pos := Vector3(0.0, Player.STAND_HEIGHT * CAMERA_HEIGHT_FRAC, 0.0)
 	cam.position = look_at_pos + Vector3(0.0, 0.0, CAMERA_DISTANCE)
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
