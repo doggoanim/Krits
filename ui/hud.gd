@@ -5,28 +5,39 @@ extends Control
 ## which stay plain Godot controls until a later design pass.
 
 ## -- Meter cluster layout -------------------------------------------------
+## HP fill, the shield frame and the stamina fill are now real art, cropped
+## from the designer's mockup (assets/ui/top_left_hud.png) into three
+## separate transparent-background textures — see TexturedSlantedBar for how
+## a single flat mockup image still works as a live, drainable bar. The dark
+## "track" behind each one stays a plain flat-color SlantedBar, since the
+## mockup never drew an empty state to crop art from.
+const HP_FILL_TEX := preload("res://assets/ui/hp_fill.png")
+const SHIELD_FRAME_TEX := preload("res://assets/ui/shield_frame.png")
+const STAMINA_FILL_TEX := preload("res://assets/ui/stamina_fill.png")
+
 const PORTRAIT_POS := Vector2(20.0, 16.0)
 const PORTRAIT_SIZE := 108.0
 
-const BAR_SKEW := 34.0           ## horizontal lean shared by the HP bar and its shield frame
+## BAR_SKEW matches the art's own slant (measured from the mockup: the top
+## edge sits ~20px right of the bottom edge across its ~266px width).
+const BAR_SKEW := 20.0
 const HP_POS := Vector2(96.0, 22.0)   ## overlaps the portrait's right half, like the reference
 const HP_SIZE := Vector2(340.0, 46.0)
-const SHIELD_OUTLINE_WIDTH := 4.0
+const SHIELD_SIZE := Vector2(356.0, 54.0)   ## the shield_frame crop is a little wider/taller than
+                                             ## the hp_fill one (the yellow border pokes past the
+                                             ## red), so it gets its own size sharing HP_POS
 
 const STAMINA_POS := Vector2(96.0, 72.0)
 const STAMINA_SIZE := Vector2(300.0, 26.0)
 
 const TRACK_COLOR := Color(0.12, 0.12, 0.14, 0.85)
-const HP_COLOR := Color(0.85, 0.16, 0.2)
-const SHIELD_COLOR := Color(0.95, 0.78, 0.15)
-const STAMINA_COLOR := Color(0.2, 0.55, 0.85)
 
 const READOUT_POS := Vector2(20.0, 150.0)
 const READOUT_WIDTH := 340.0
 
-var _hp_fill: SlantedBar
-var _shield_outline: SlantedBar
-var _stamina_fill: SlantedBar
+var _hp_fill: TexturedSlantedBar
+var _shield_outline: TexturedSlantedBar
+var _stamina_fill: TexturedSlantedBar
 
 var _level: Label
 var _xp: ProgressBar
@@ -48,19 +59,19 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	_refresh()   # shield recharges every frame
 
-## Builds the stylized HP/shield/stamina cluster. Each meter is a stack of
-## SlantedBar instances sharing one rect: a static full-width track behind,
-## then the live value on top — the shield frame is a third layer, outline
-## only, sharing the HP bar's rect/skew so it reads as a frame around it.
+## Builds the stylized HP/shield/stamina cluster: a flat-color track behind
+## each meter, then its real-art fill on top — the shield frame is its own
+## textured layer sharing the HP bar's position/skew so it reads as a frame
+## wrapping it, and because its texture is just border strokes on a
+## transparent interior, "draining" it still looks like an outline shrinking
+## in from the right, not a filled shape.
 func _build_meter_cluster() -> void:
-	_make_bar(HP_POS, HP_SIZE, BAR_SKEW, TRACK_COLOR)
-	_hp_fill = _make_bar(HP_POS, HP_SIZE, BAR_SKEW, HP_COLOR)
-	_shield_outline = _make_bar(HP_POS, HP_SIZE, BAR_SKEW, SHIELD_COLOR)
-	_shield_outline.outline_only = true
-	_shield_outline.outline_width = SHIELD_OUTLINE_WIDTH
+	_make_track(HP_POS, HP_SIZE, BAR_SKEW)
+	_hp_fill = _make_textured_bar(HP_POS, HP_SIZE, BAR_SKEW, HP_FILL_TEX)
+	_shield_outline = _make_textured_bar(HP_POS, SHIELD_SIZE, BAR_SKEW, SHIELD_FRAME_TEX)
 
-	_make_bar(STAMINA_POS, STAMINA_SIZE, 0.0, TRACK_COLOR)
-	_stamina_fill = _make_bar(STAMINA_POS, STAMINA_SIZE, 0.0, STAMINA_COLOR)
+	_make_track(STAMINA_POS, STAMINA_SIZE, 0.0)
+	_stamina_fill = _make_textured_bar(STAMINA_POS, STAMINA_SIZE, 0.0, STAMINA_FILL_TEX)
 
 	# Layered last so the whole portrait sits on top, capping the bars' left
 	# ends the way the reference shows them emerging from behind it:
@@ -82,12 +93,21 @@ func _build_meter_cluster() -> void:
 	portrait_ring.draw_fill = false
 	add_child(portrait_ring)
 
-func _make_bar(pos: Vector2, sz: Vector2, skew: float, color: Color) -> SlantedBar:
+func _make_track(pos: Vector2, sz: Vector2, skew: float) -> SlantedBar:
 	var b := SlantedBar.new()
 	b.position = pos
 	b.size = sz
 	b.skew = skew
-	b.fill_color = color
+	b.fill_color = TRACK_COLOR
+	add_child(b)
+	return b
+
+func _make_textured_bar(pos: Vector2, sz: Vector2, skew: float, tex: Texture2D) -> TexturedSlantedBar:
+	var b := TexturedSlantedBar.new()
+	b.position = pos
+	b.size = sz
+	b.skew = skew
+	b.texture = tex
 	add_child(b)
 	return b
 
