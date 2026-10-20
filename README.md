@@ -1,9 +1,14 @@
 # Orb Odyssey RPG (Godot 4.7+)
 
-Open `project.godot` in Godot 4.7+ and press F5. Everything is built in code from
-small modules, so there are no hand-edited .tscn files besides `main.tscn` — but
-that's just how this project started, not a rule: see "Building your own map"
-below for hand-building levels visually in the editor, which works fine.
+Open `project.godot` in Godot 4.7+ and press F5 — this boots `ui/main_menu.tscn`
+(New Game / Continue / Quit), which hands off to `main.tscn` for actual gameplay.
+To iterate on gameplay without going through the menu every time, open
+`main.tscn` directly and press F6 (run current scene) instead. Everything is
+built in code from small modules, so there are no hand-edited .tscn files
+besides `main.tscn` and `ui/main_menu.tscn` (both are just a bare root node with
+a script attached — all their content is built in `_ready()`) — but that's just
+how this project started, not a rule: see "Building your own map" below for
+hand-building levels visually in the editor, which works fine.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·

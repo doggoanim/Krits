@@ -55,6 +55,11 @@ func delete_save() -> void:
 	outfit = &"default"
 	unlocked_outfits = [&"default"]
 
+## Whether there's a save file to resume — MainMenu uses this to decide
+## whether "Continue" should be enabled.
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
 func save() -> void:
 	var data := {
 		"stats": stats.to_dict(), "flags": story_flags,
