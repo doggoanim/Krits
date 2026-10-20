@@ -16,6 +16,9 @@ const RENDER_SIZE := 256                ## SubViewport resolution, independent o
 const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
 const OUTLINE_THICKNESS_RATIO := 0.011   ## matches PlayerVisual's default
+const PORTRAIT_TURN := 0.32   ## extra yaw (rad) so the portrait isn't a flat mirror-facing
+                               ## shot — turns the character slightly left; flip the sign
+                               ## if it reads as turning right instead
 
 var _viewport: SubViewport
 var _model: Node3D
@@ -66,7 +69,7 @@ func _build_scene() -> void:
 
 	_model = PlayerVisual.MODEL_SCENE.instantiate()
 	world.add_child(_model)
-	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET
+	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET + PORTRAIT_TURN
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 
 	# fit_height scales _model so it's Player.STAND_HEIGHT tall in world space,

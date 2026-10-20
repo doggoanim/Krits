@@ -3,10 +3,11 @@ extends Node3D
 ## A circular battle zone that appears wherever the fight starts — right on
 ## top of the real world geometry, nobody ever goes anywhere. A ring of wall
 ## segments (stage_root) reveals itself (see play_intro(): the ground ring
-## sweeps around first, then the walls grow straight up) to pen the fight in,
-## then dissolves away again once it's over using the world-dissolve shader
-## (see WorldDissolver, driven by EncounterManager — the teardown is the only
-## side still using it). Spawns orbs (falling in from overhead, see
+## sweeps around first, then the walls grow straight up, the whole thing also
+## materializing out of noise via its own WorldDissolver) to pen the fight in,
+## then dissolves away again once it's over using the same world-dissolve
+## shader the other way (see WorldDissolver, driven by EncounterManager for
+## the teardown). Spawns orbs (falling in from overhead, see
 ## Orb.drop_in()) + enemies, tracks the combo and resolves victory/defeat.
 ## Bullets are parented here so they vanish with the arena. The
 ## EncounterManager owns its lifetime (it frees the arena once the barrier
@@ -62,6 +63,9 @@ var _over := false
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
                                                 ## as _wall_meshes
+var _intro_dissolver := WorldDissolver.new()   ## the reveal's materialize-in effect; kept
+                                                ## separate from EncounterManager's own
+                                                ## WorldDissolver, which drives the teardown
 
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
@@ -86,15 +90,25 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 ## The arena's reveal: the ground ring sweeps around first (each segment pops
 ## in with a short delay from the last, following the same angular order
 ## _build_barrier() placed them in), then the wall segments grow straight up
-## out of the ground once the ring's finished. Awaited by EncounterManager
-## before unlocking the player. Orbs are dropping in on their own timers at
-## the same time (see _spawn_orbs()/Orb.drop_in()) — nothing here needs to
-## wait on them specifically.
+## out of the ground once the ring's finished — the whole thing also
+## materializing out of noise via WorldDissolver (same world-space dissolve
+## used for the teardown, run in reverse) rather than just popping straight
+## into its final translucent material. Awaited by EncounterManager before
+## unlocking the player. Orbs are dropping in on their own timers at the same
+## time (see _spawn_orbs()/Orb.drop_in()) — nothing here needs to wait on
+## them specifically.
 func play_intro() -> void:
 	for mesh in _wall_meshes:
 		mesh.scale.y = 0.0
 	for piece in _ring_pieces:
 		piece.scale = Vector3.ZERO
+
+	_intro_dissolver.begin(stage_root)
+	_intro_dissolver.set_progress(1.0)   # begin() defaults to 0 (fully visible) — start dissolved instead
+	var dissolve_time := RING_DRAW_TIME + WALL_GROW_TIME
+	var dissolve_tween := create_tween()
+	dissolve_tween.tween_method(_intro_dissolver.set_progress, 1.0, 0.0, dissolve_time) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	var ring_tween := create_tween()
 	ring_tween.set_parallel(true)
@@ -108,6 +122,9 @@ func play_intro() -> void:
 	wall_tween.tween_method(_set_wall_growth, 0.0, 1.0, WALL_GROW_TIME) \
 			.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 	await wall_tween.finished
+
+	await dissolve_tween.finished   # guards against a hitch leaving it a frame behind
+	_intro_dissolver.finish()       # restore the real (translucent white) wall/ring materials
 
 ## Grows every wall segment's mesh up from the ground together, `t` 0..1.
 ## Scaling just the mesh (not its StaticBody3D/collider, which stays full
@@ -283,7 +300,7 @@ func _build_barrier() -> void:
 	add_child(stage_root)
 	_wall_meshes.clear()
 	_ring_pieces.clear()
-	var wall_col := Color(1.0, 1.0, 1.0, 0.05)
+	var wall_col := Color(1.0, 1.0, 1.0, 0.32)   ## one solid translucent white, same on every segment
 	var glow_col := Color(1.0, 1.0, 1.0)
 	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
 	for i in WALL_SEGMENTS:
