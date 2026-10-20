@@ -8,6 +8,7 @@ var _t := 0.0
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_t = player.config.pound_recover
 	player.set_hvel(Vector3.ZERO)
+	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_POUND_LAND)
 	if player.camera_rig:
 		player.camera_rig.shake(0.25)

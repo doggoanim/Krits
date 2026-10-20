@@ -4,6 +4,7 @@ extends PlayerState
 ## or a ground pound, and wall-bounces re-grant the dive just like a normal jump.
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
+	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_LONG_JUMP)
 	player.effects.set_long_jump_trail(true)
 

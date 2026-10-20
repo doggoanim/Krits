@@ -9,6 +9,11 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_elapsed = 0.0
 	p.set_crouching(true)
+	# A deliberately-triggered move always takes over immediately, regardless
+	# of whatever reaction pose (a wall-bounce tumble, a side flip, ...) might
+	# still be protected from right before this — see PlayerVisual.play()'s
+	# hold guard.
+	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_ROLL)
 	var dir := p.input_dir()
 	if dir.length() < 0.1:

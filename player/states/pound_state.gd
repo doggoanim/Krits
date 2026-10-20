@@ -8,6 +8,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_t = player.config.pound_windup
 	_slamming = false
 	player.velocity = Vector3.ZERO
+	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_POUND)
 
 func physics_update(delta: float) -> void:
