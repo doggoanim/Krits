@@ -137,7 +137,10 @@ func apply_outfit(o: OutfitData) -> void:
 ## `speed` < 0 plays the clip back-to-front (starting from its last frame) —
 ## for a clip whose own keyframes were authored/exported in reverse, this is
 ## what makes it read correctly in-game instead of literally reversing.
-func play(anim_name: StringName, blend := 0.15, speed := 1.0) -> void:
+## `force` skips the "already playing this clip" dedupe below — play_hold()
+## needs it (see there); a state's regular per-frame play() calls don't, since
+## skipping a no-op restart there is the whole point of that dedupe.
+func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) -> void:
 	if _hold_t > 0.0 and anim_name != _held_anim:
 		return
 	if _anim == null:
@@ -145,7 +148,7 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0) -> void:
 	if not _anim.has_animation(anim_name):
 		push_warning("PlayerVisual.play(): no clip named '%s' in this model" % anim_name)
 		return
-	if _anim.current_animation == anim_name and _anim.is_playing():
+	if not force and _anim.current_animation == anim_name and _anim.is_playing():
 		return
 	_anim.play(anim_name, blend, speed, speed < 0.0)
 
@@ -163,10 +166,14 @@ func set_slimed(active: bool) -> void:
 ## `duration` seconds. Whoever triggered it is responsible for playing
 ## whatever comes next once that window has passed (is_holding() tells you
 ## when it's safe to). `speed` is forwarded to play() as-is (see its doc).
+## Always restarts the clip from the beginning (force=true) even if it's
+## already the one playing — two side flips back to back, say, should each
+## get their own fresh pose, not silently keep whatever position the first
+## one's clip happened to already be at.
 func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
 	_hold_t = duration
 	_held_anim = anim_name
-	play(anim_name, 0.15, speed)
+	play(anim_name, 0.15, speed, true)
 
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:

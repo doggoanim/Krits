@@ -64,6 +64,14 @@ func physics_update(delta: float) -> void:
 			p.start_side_flip(input)
 		else:
 			p.start_jump(c.jump_velocity)
+		# Consumed either way, same as jump_buffer_t itself. _turn_flip_t only
+		# ticks down while GroundState is actually running each frame, which it
+		# isn't for the whole time a side flip is airborne — so without this,
+		# landing from one and pressing jump again right away could re-trigger
+		# ANOTHER side flip off the ORIGINAL skid's now-stale flags, with no
+		# fresh turn behind it at all.
+		_turn_flip_t = 0.0
+		_slide_is_turn = false
 		return
 	# Locked out while the slide pose plays — same "carried along, no input
 	# but jump" rule as steering/accelerating below. Roll (and by extension
