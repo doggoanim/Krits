@@ -81,9 +81,12 @@ var _squash_tween: Tween
 ## Clips meant to play on repeat for as long as their state lasts, rather than
 ## play once and hold a final frame. glTF import defaults every clip to
 ## non-looping, so without this a sustained roll (or just standing still past
-## idle's own length) would play a fraction of a second then freeze — forcing
-## it here means the actual loop behavior never depends on import settings.
-const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK]
+## idle's own length, or falling for longer than the clip's own length) would
+## play once then freeze or (per play()'s dedupe, see there) hard-restart —
+## forcing it here means the actual loop behavior never depends on import
+## settings. Anything NOT in this list (jump_start1/2/3, air_dive, long_jump,
+## ground_pound, ...) is meant to play exactly once and hold its last frame.
+const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING]
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
@@ -140,6 +143,13 @@ func apply_outfit(o: OutfitData) -> void:
 ## `force` skips the "already playing this clip" dedupe below — play_hold()
 ## needs it (see there); a state's regular per-frame play() calls don't, since
 ## skipping a no-op restart there is the whole point of that dedupe.
+## Deliberately does NOT require is_playing() to still be true for the dedupe
+## to count: a non-looping clip (anything not in LOOPING_ANIMS) naturally
+## stops once it reaches its last frame while current_animation stays set to
+## it, and a state driver that keeps calling play(anim_name) every frame
+## (AirState's jump-start pose, say) should see that as "already showing the
+## right pose" and leave it holding its last frame — not restart it from the
+## beginning every single frame forever.
 func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) -> void:
 	if _hold_t > 0.0 and anim_name != _held_anim:
 		return
@@ -148,7 +158,7 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) ->
 	if not _anim.has_animation(anim_name):
 		push_warning("PlayerVisual.play(): no clip named '%s' in this model" % anim_name)
 		return
-	if not force and _anim.current_animation == anim_name and _anim.is_playing():
+	if not force and _anim.current_animation == anim_name:
 		return
 	_anim.play(anim_name, blend, speed, speed < 0.0)
 
@@ -194,12 +204,17 @@ func is_holding_anim(anim_name: StringName) -> bool:
 func cancel_hold() -> void:
 	_hold_t = 0.0
 
-## Picks a new random jump-start pose — call once when a jump begins (see
-## Player.start_jump()). AirState then just calls jump_start_anim() every
-## frame like it would any other per-frame animation, so the rest of the jump
-## doesn't need to know a variant was picked at all.
+## Picks a new random jump-start pose and plays it immediately — call once
+## when a jump begins (see Player.start_jump()). AirState then just calls
+## jump_start_anim() every frame like it would any other per-frame animation,
+## so the rest of the jump doesn't need to know a variant was picked at all.
+## Plays it here (force=true) rather than leaving that to AirState's own
+## per-frame play() call: on the rare chance two jumps in a row roll the same
+## variant with nothing else playing in between, play()'s ordinary dedupe
+## (same clip name already showing) would otherwise skip starting it fresh.
 func roll_jump_start() -> void:
 	_jump_start_anim = ANIM_JUMP_START_VARIANTS.pick_random()
+	play(_jump_start_anim, 0.15, 1.0, true)
 
 func jump_start_anim() -> StringName:
 	return _jump_start_anim
