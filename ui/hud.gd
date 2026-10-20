@@ -34,7 +34,7 @@ const PORTRAIT_VIEW_SIZE := Vector2(112.0, 112.0)    ## the live 3D render stays
                                                       ## character isn't stretched) and sits centered
                                                       ## inside the frame art, sized to fill it while
                                                       ## still leaving its hand-drawn border visible
-const PORTRAIT_VIEW_NUDGE := Vector2(8.0, 16.0)   ## shifts just the live render (not the frame art)
+const PORTRAIT_VIEW_NUDGE := Vector2(9.0, 22.0)   ## shifts just the live render (not the frame art)
                                                   ## right/down a bit within its centered slot
 
 const HP_POS := Vector2(156.0, 50.0)   ## overlaps the portrait's right half, like the reference
