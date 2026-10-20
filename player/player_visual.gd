@@ -112,12 +112,21 @@ func _ready() -> void:
 	apply_outfit(OutfitLibrary.get_outfit(Game.outfit))
 	play(ANIM_IDLE)
 
+## Sets loop_mode explicitly on every clip in the model — LOOP_LINEAR for
+## LOOPING_ANIMS, LOOP_NONE for everything else — rather than only turning
+## looping ON for the ones that need it and trusting the glTF import to have
+## left the rest alone. Some exporters (and some Blender "always loop" action
+## settings) bake a looping flag onto every action regardless, which would
+## make a one-shot pose like a jump-start loop forever in-engine no matter
+## what play() does, since AnimationPlayer handles looping internally once a
+## clip starts — this makes the actual in-engine behavior never depend on
+## whatever the source file happened to be exported with.
 func _force_looping_clips() -> void:
 	if _anim == null:
 		return
-	for anim_name in LOOPING_ANIMS:
-		if _anim.has_animation(anim_name):
-			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+	for anim_name in _anim.get_animation_list():
+		var should_loop: bool = anim_name in LOOPING_ANIMS
+		_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR if should_loop else Animation.LOOP_NONE
 
 ## The loaded model's root node — used by PlayerXray to build see-through
 ## duplicates of the same meshes (sharing the same skeleton, so they
