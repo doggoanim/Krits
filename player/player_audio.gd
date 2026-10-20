@@ -45,8 +45,8 @@ const PITCH_VARIANCE := 0.08
 
 ## Orb attack pitch climbs with the combo (so a long chain audibly ramps up),
 ## capped well short of chipmunk territory for a very long combo.
-const ORB_COMBO_PITCH_STEP := 0.06   ## added per combo step past the first
-const ORB_COMBO_PITCH_MAX := 1.6
+const ORB_COMBO_PITCH_STEP := 0.12   ## added per combo step past the first
+const ORB_COMBO_PITCH_MAX := 2.2
 
 func play_jump() -> void:
 	_play(JUMP_SFX, PITCH_VARIANCE)
