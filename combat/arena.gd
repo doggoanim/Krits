@@ -292,7 +292,7 @@ func _build_barrier() -> void:
 	add_child(stage_root)
 	_wall_meshes.clear()
 	_ring_pieces.clear()
-	var wall_col := Color(1.0, 1.0, 1.0, 0.32)   ## one solid translucent white, same on every segment
+	var wall_col := Color(1.0, 1.0, 1.0, 0.16)   ## one solid translucent white, same on every segment
 	var glow_col := Color(1.0, 1.0, 1.0)
 	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
 	for i in WALL_SEGMENTS:
