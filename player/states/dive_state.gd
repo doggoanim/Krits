@@ -20,6 +20,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_DIVE)
 	p.effects.set_dive_trail(true)
+	p.audio.play_air_dive()
 
 func exit(_next: StringName) -> void:
 	player.effects.set_dive_trail(false)

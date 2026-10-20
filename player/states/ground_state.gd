@@ -14,6 +14,7 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
                            ## hold (see physics_update) so the trick doesn't depend on exact frame
                            ## timing between the two
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
+var _footstep_t := 0.0   ## counts down to the next footstep sound while actually running
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
@@ -112,7 +113,18 @@ func physics_update(delta: float) -> void:
 		p.visual.play(PlayerVisual.ANIM_RUN, 0.15, PlayerVisual.RUN_ANIM_SPEED)
 	else:
 		p.visual.play(PlayerVisual.ANIM_IDLE)
-	p.effects.set_running_dust(moving and not was_sliding)
+	var running := moving and not was_sliding
+	p.effects.set_running_dust(running)
+	if running:
+		_footstep_t -= delta
+		if _footstep_t <= 0.0:
+			p.audio.play_footstep()
+			_footstep_t = c.footstep_interval
+	else:
+		# Reset rather than let it keep draining while stopped/sliding, so the
+		# first step after moving again always lands right away instead of
+		# picking up mid-countdown from before.
+		_footstep_t = 0.0
 	p.velocity.y = -1.0
 	p.move_and_slide()
 	if not p.is_on_floor():

@@ -14,6 +14,7 @@ const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime p
 var camera_rig: CameraRig
 var visual: PlayerVisual
 var effects: PlayerEffects
+var audio: PlayerAudio
 var xray: PlayerXray
 var ground_shadow: GroundShadow
 var machine: StateMachine
@@ -57,6 +58,9 @@ func _ready() -> void:
 
 	effects = PlayerEffects.new()
 	add_child(effects)
+
+	audio = PlayerAudio.new()
+	add_child(audio)
 
 	xray = PlayerXray.new()
 	add_child(xray)
@@ -202,6 +206,7 @@ func start_jump(vel: float) -> void:
 	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
 	visual.roll_jump_start()
 	effects.burst_jump_dust()
+	audio.play_jump()
 	machine.transition_to(&"Air")
 
 ## Mario 64-style skid-turn trick: jumping while skidding from a sharp
@@ -221,6 +226,7 @@ func start_side_flip(dir: Vector3) -> void:
 	# back-to-front (speed -1) instead of literally reversing it.
 	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
+	audio.play_jump()
 	machine.transition_to(&"Air")
 
 func bounce_off_orb() -> void:
@@ -231,6 +237,7 @@ func bounce_off_orb() -> void:
 	# apex, not a flat duration — so the falling pose never pops in mid-rise.
 	var rise_time := config.orb_bounce_velocity / config.gravity
 	visual.play_random_attack(rise_time * config.orb_attack_hold_mult)
+	audio.play_orb_attack()
 	machine.transition_to(&"Air")
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move
@@ -261,8 +268,10 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 	var impact_pos := global_position + n * RADIUS + Vector3.UP * (STAND_HEIGHT * 0.5)
 	if bounce_anim == PlayerVisual.ANIM_ROLL_COLLISION:
 		effects.burst_roll_collision(impact_pos, n)
+		audio.play_roll_bounce()
 	else:
 		effects.burst_wall_impact(impact_pos, n)
+		audio.play_wall_bounce()
 	if regrants_dive:
 		can_dive = true
 	# Same hygiene as start_jump(): a wall bounce counts as a jump, so make sure
