@@ -31,9 +31,9 @@ const PORTRAIT_VIEW_SIZE := Vector2(120.0, 120.0)    ## the live 3D render stays
 const PORTRAIT_VIEW_Y_NUDGE := 10.0   ## shifts just the live render (not the frame art) down a bit
                                       ## within its centered slot
 
-const HP_POS := Vector2(146.0, 110.0)   ## overlaps the portrait's right half, like the reference
+const HP_POS := Vector2(146.0, 118.0)   ## overlaps the portrait's right half, like the reference
 const HP_SIZE := Vector2(340.0, 66.0)       ## matches health_fill.png's aspect (294x57)
-const STAMINA_POS := Vector2(146.0, 186.0)   ## back below the HP bar
+const STAMINA_POS := Vector2(146.0, 194.0)   ## back below the HP bar
 const STAMINA_SIZE := Vector2(280.0, 58.0)  ## matches stamina_fill.png's aspect (254x53)
 
 const TRACK_TINT := Color(0.3, 0.3, 0.32, 0.5)   ## dims the same art to stand in as its own empty track
