@@ -55,6 +55,9 @@ var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back a
 var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""    ## the anim play_hold() is currently protecting
 var _jump_start_anim: StringName = ANIM_JUMP_START_VARIANTS[0]   ## this jump's picked pose
+## What play() itself last told _anim to play — tracked independently of
+## _anim.current_animation/is_playing() (see play()'s dedupe for why).
+var _last_played_anim: StringName = &""
 var _slimed := false     ## standing in a slime puddle — tints the character green (see set_slimed)
 
 const SLIME_TINT_COLOR := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
@@ -152,13 +155,17 @@ func apply_outfit(o: OutfitData) -> void:
 ## `force` skips the "already playing this clip" dedupe below — play_hold()
 ## needs it (see there); a state's regular per-frame play() calls don't, since
 ## skipping a no-op restart there is the whole point of that dedupe.
-## Deliberately does NOT require is_playing() to still be true for the dedupe
-## to count: a non-looping clip (anything not in LOOPING_ANIMS) naturally
-## stops once it reaches its last frame while current_animation stays set to
-## it, and a state driver that keeps calling play(anim_name) every frame
-## (AirState's jump-start pose, say) should see that as "already showing the
-## right pose" and leave it holding its last frame — not restart it from the
-## beginning every single frame forever.
+## Deliberately checks our own _last_played_anim rather than asking the
+## AnimationPlayer itself (current_animation / is_playing()) whether this
+## clip is already running: calling play() from _physics_process and reading
+## those properties back the same way turned out to be unreliable here (one
+## physics tick after force-starting a clip, current_animation/is_playing()
+## could already read back empty/false again, well before the clip had
+## actually finished) — which made every non-looping pose (a jump-start, say)
+## restart from frame 0 on the very next physics frame instead of holding its
+## last frame, since the dedupe never saw it as "already playing". Tracking
+## what we ourselves last told it to play sidesteps that entirely — nothing
+## else in this class touches this AnimationPlayer, so this is authoritative.
 func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) -> void:
 	if _hold_t > 0.0 and anim_name != _held_anim:
 		return
@@ -167,10 +174,9 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) ->
 	if not _anim.has_animation(anim_name):
 		push_warning("PlayerVisual.play(): no clip named '%s' in this model" % anim_name)
 		return
-	if not force and _anim.current_animation == anim_name:
+	if not force and _last_played_anim == anim_name:
 		return
-	print("[JumpDebug] (re)starting clip '%s' (was '%s', force=%s, is_playing=%s)" %
-			[anim_name, _anim.current_animation, force, _anim.is_playing()])
+	_last_played_anim = anim_name
 	_anim.play(anim_name, blend, speed, speed < 0.0)
 
 func flash() -> void:

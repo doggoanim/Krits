@@ -188,7 +188,6 @@ func start_jump(vel: float) -> void:
 		jump_buffer_t = 0.0
 		print("[JumpDebug] start_jump() suppressed: standing in slime")
 		return
-	print("[JumpDebug] start_jump() called from state '%s' (was_on_floor=%s)" % [machine.current_name, is_on_floor()])
 	velocity.y = vel
 	coyote = 0.0
 	jump_buffer_t = 0.0
