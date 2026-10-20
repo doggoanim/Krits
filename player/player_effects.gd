@@ -26,11 +26,11 @@ const SMOKE_RAMP := [
 	Color(0.8, 0.8, 0.85, 0.4),
 	Color(0.8, 0.8, 0.85, 0.0),
 ]
-const SLIME_DRIP_RAMP := [
-	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.9),
-	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.6),
-	Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0, 0.0),
-]
+## Alpha stops for the slime drip's ramp — the color itself is whatever
+## SlimePuddle the player is currently standing in uses (see set_slime_drip()),
+## not a fixed constant, so it always matches that puddle instead of one
+## hardcoded green.
+const SLIME_DRIP_ALPHAS := [0.9, 0.6, 0.0]
 
 const DUST_TEXTURE_PATH := "res://assets/sprites/dirt_texture.png"
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
@@ -53,7 +53,7 @@ func _ready() -> void:
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
-	_slime_drip_ramp_tex = _make_ramp(SLIME_DRIP_RAMP)
+	_slime_drip_ramp_tex = _make_ramp(_slime_drip_colors(PlayerVisual.SLIME_TINT_COLOR))
 
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
 	add_child(_run_dust)
@@ -78,8 +78,13 @@ func set_long_jump_trail(active: bool) -> void:
 
 ## Driven by Player.enter_slime_puddle/exit_slime_puddle, alongside
 ## PlayerVisual.set_slimed — the green tint and the drip particles always
-## turn on and off together.
-func set_slime_drip(active: bool) -> void:
+## turn on and off together. `color` is the specific puddle's own color
+## (passed through from SlimePuddle.color, which varies per enemy), so the
+## drip is recolored to match it each time — not a fixed green regardless of
+## which puddle the player is actually standing in.
+func set_slime_drip(active: bool, color := PlayerVisual.SLIME_TINT_COLOR) -> void:
+	if active:
+		_slime_drip_ramp_tex.gradient.colors = PackedColorArray(_slime_drip_colors(color))
 	_slime_drip.emitting = active
 
 # ---------------------------------------------------------------- one-shot bursts
@@ -188,9 +193,19 @@ func _material(speed: float, gravity_y: float, scale_min: float, scale_max: floa
 	m.emission_sphere_radius = 0.15
 	return m
 
-## Small green droplets falling straight down off the body — unlike every
-## other emitter here (all UP-biased, dust kicked up or smoke rising), this
-## one needs its own direction, so it doesn't go through _material() above.
+## Builds the drip's 3-stop fade-out ramp (start visible, dim, fully
+## transparent — same alpha curve regardless of color) for whichever puddle
+## color is currently active. See set_slime_drip().
+func _slime_drip_colors(color: Color) -> Array:
+	return [
+		Color(color.r, color.g, color.b, 0.9),
+		Color(color.r, color.g, color.b, 0.6),
+		Color(color.r, color.g, color.b, 0.0),
+	]
+
+## Small droplets falling straight down off the body — unlike every other
+## emitter here (all UP-biased, dust kicked up or smoke rising), this one
+## needs its own direction, so it doesn't go through _material() above.
 func _slime_drip_material() -> ParticleProcessMaterial:
 	var m := ParticleProcessMaterial.new()
 	m.direction = Vector3.DOWN

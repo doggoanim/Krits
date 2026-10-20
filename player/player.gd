@@ -323,12 +323,14 @@ func teleport(pos: Vector3) -> void:
 
 ## Called by SlimePuddle while the player is standing in it. A counter, not a
 ## flag, since overlapping puddles must not cancel each other's effect out
-## the moment just one of them is left.
-func enter_slime_puddle() -> void:
+## the moment just one of them is left. `color` is that specific puddle's own
+## color (SlimePuddle.color, which varies per enemy — see EnemyData's slime
+## trail accent) so the drip particles always match whatever puddle you're
+## actually standing in, even stepping straight from one color into another.
+func enter_slime_puddle(color := PlayerVisual.SLIME_TINT_COLOR) -> void:
 	_slime_overlaps += 1
-	if _slime_overlaps == 1:
-		visual.set_slimed(true)
-		effects.set_slime_drip(true)
+	visual.set_slimed(true)
+	effects.set_slime_drip(true, color)
 
 func exit_slime_puddle() -> void:
 	_slime_overlaps = maxi(0, _slime_overlaps - 1)

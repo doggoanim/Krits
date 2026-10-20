@@ -82,7 +82,7 @@ func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
 		_player = body
 		_tick_t = 0.0   # damage right away on stepping in, then every tick_interval after
-		_player.enter_slime_puddle()
+		_player.enter_slime_puddle(color)
 
 func _on_body_exited(body: Node3D) -> void:
 	if body == _player:
