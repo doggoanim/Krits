@@ -47,9 +47,30 @@ const TRACK_TINT := Color(0.3, 0.3, 0.32, 0.5)   ## dims the same art to stand i
 const READOUT_POS := Vector2(24.0, 150.0)
 const READOUT_WIDTH := 340.0
 
+## -- Damage reaction ------------------------------------------------------
+## Taking a hit (not healing — see _on_player_damaged()) punches the portrait
+## (a quick size bounce + a flash to red, both on _portrait_group so the live
+## render and its frame art move/flash together as one piece) and shakes the
+## HP bar (_hp_group, jittered off its resting HP_POS and sprung back).
+const PORTRAIT_HIT_SCALE := 1.18
+const PORTRAIT_HIT_SCALE_TIME := 0.25
+const PORTRAIT_HIT_FLASH_COLOR := Color(1.0, 0.25, 0.25)
+const PORTRAIT_HIT_FLASH_TIME := 0.3
+const HP_SHAKE_STEPS := 5
+const HP_SHAKE_MAGNITUDE := 6.0
+const HP_SHAKE_STEP_TIME := 0.04
+
+var _hp_group: Control    ## wraps the HP track/fill/shield-outline bars — shaken as one unit
 var _hp_fill: TexturedSlantedBar
 var _shield_outline: TexturedSlantedBar
 var _stamina_fill: TexturedSlantedBar
+
+var _portrait_group: Control   ## wraps the portrait frame art + live render — bounced/flashed as one unit
+var _portrait_tween: Tween
+var _hp_shake_tween: Tween
+
+var _last_hp := 0.0
+var _last_shield := 0.0
 
 var _level: Label
 var _xp: ProgressBar
@@ -63,7 +84,9 @@ func _ready() -> void:
 	_build_meter_cluster()
 	_build_legacy_readout()
 
-	Events.player_damaged.connect(func(_a, _b): _refresh())
+	_last_hp = Game.stats.hp
+	_last_shield = Game.stats.shield
+	Events.player_damaged.connect(_on_player_damaged)
 	Events.stats_changed.connect(_refresh)
 	Events.combo_changed.connect(_on_combo)
 	_refresh()
@@ -80,12 +103,32 @@ func _process(_delta: float) -> void:
 ## is just border strokes on a transparent interior, "draining" it still
 ## looks like an outline shrinking in from the right, not a filled shape.
 func _build_meter_cluster() -> void:
-	_make_track(HP_POS, HP_SIZE, HP_FILL_TEX)
-	_hp_fill = _make_textured_bar(HP_POS, HP_SIZE, HP_FILL_TEX)
-	_shield_outline = _make_textured_bar(HP_POS, HP_SIZE, SHIELD_FRAME_TEX)
+	# Wrapped in its own container (rather than added straight to Hud like the
+	# stamina bar) purely so _on_player_damaged() has one node whose position
+	# it can shake — the three bars inside stay at local (0,0)/HP_SIZE,
+	# identical to how they were positioned directly before this.
+	_hp_group = Control.new()
+	_hp_group.position = HP_POS
+	_hp_group.size = HP_SIZE
+	_hp_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_hp_group)
+	_make_track(_hp_group, Vector2.ZERO, HP_SIZE, HP_FILL_TEX)
+	_hp_fill = _make_textured_bar(_hp_group, Vector2.ZERO, HP_SIZE, HP_FILL_TEX)
+	_shield_outline = _make_textured_bar(_hp_group, Vector2.ZERO, HP_SIZE, SHIELD_FRAME_TEX)
 
-	_make_track(STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
-	_stamina_fill = _make_textured_bar(STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
+	_make_track(self, STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
+	_stamina_fill = _make_textured_bar(self, STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
+
+	# Likewise wrapped so the frame art and the live render bounce/flash
+	# together as one piece on a hit, instead of needing to animate two
+	# separate nodes in lockstep. Pivoted at its own center so the scale
+	# punch in _on_player_damaged() grows outward evenly, not off one corner.
+	_portrait_group = Control.new()
+	_portrait_group.position = PORTRAIT_POS
+	_portrait_group.size = PORTRAIT_FRAME_SIZE
+	_portrait_group.pivot_offset = PORTRAIT_FRAME_SIZE * 0.5
+	_portrait_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_portrait_group)
 
 	# The frame art is a static backdrop (grey disc + its own hand-drawn
 	# outline baked in one image); the live 3D render sits centered on top of
@@ -93,30 +136,28 @@ func _build_meter_cluster() -> void:
 	# around — no separate "ring on top" layer needed any more.
 	var portrait_bg := TextureRect.new()
 	portrait_bg.texture = PORTRAIT_FRAME_TEX
-	portrait_bg.position = PORTRAIT_POS
 	portrait_bg.size = PORTRAIT_FRAME_SIZE
 	portrait_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait_bg.stretch_mode = TextureRect.STRETCH_SCALE
 	portrait_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(portrait_bg)
+	_portrait_group.add_child(portrait_bg)
 
 	var portrait_view := PortraitViewport.new()
-	portrait_view.position = PORTRAIT_POS + (PORTRAIT_FRAME_SIZE - PORTRAIT_VIEW_SIZE) * 0.5 \
-			+ PORTRAIT_VIEW_NUDGE
+	portrait_view.position = (PORTRAIT_FRAME_SIZE - PORTRAIT_VIEW_SIZE) * 0.5 + PORTRAIT_VIEW_NUDGE
 	portrait_view.size = PORTRAIT_VIEW_SIZE
-	add_child(portrait_view)
+	_portrait_group.add_child(portrait_view)
 
-func _make_track(pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
-	var b := _make_textured_bar(pos, sz, tex)
+func _make_track(parent: Control, pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
+	var b := _make_textured_bar(parent, pos, sz, tex)
 	b.tint = TRACK_TINT
 	return b
 
-func _make_textured_bar(pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
+func _make_textured_bar(parent: Control, pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
 	var b := TexturedSlantedBar.new()
 	b.position = pos
 	b.size = sz
 	b.texture = tex
-	add_child(b)
+	parent.add_child(b)
 	return b
 
 func _build_legacy_readout() -> void:
@@ -161,3 +202,39 @@ func _refresh() -> void:
 
 func _on_combo(c: int) -> void:
 	_combo.text = "x%d" % c if c > 1 else ""
+
+## Events.player_damaged also fires from PlayerStats.full_heal() (same signal,
+## new hp/shield either way) — only punch the portrait/shake the bar when hp
+## or shield actually went DOWN from last time, not on a heal.
+func _on_player_damaged(hp: float, shield: float) -> void:
+	if hp < _last_hp or shield < _last_shield:
+		_punch_portrait()
+		_shake_hp_bar()
+	_last_hp = hp
+	_last_shield = shield
+	_refresh()
+
+func _punch_portrait() -> void:
+	if _portrait_tween and _portrait_tween.is_valid():
+		_portrait_tween.kill()
+	_portrait_group.scale = Vector2.ONE * PORTRAIT_HIT_SCALE
+	_portrait_group.modulate = PORTRAIT_HIT_FLASH_COLOR
+	_portrait_tween = create_tween()
+	_portrait_tween.set_parallel(true)
+	_portrait_tween.tween_property(_portrait_group, "scale", Vector2.ONE, PORTRAIT_HIT_SCALE_TIME) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_portrait_tween.tween_property(_portrait_group, "modulate", Color.WHITE, PORTRAIT_HIT_FLASH_TIME)
+
+## A few quick random jitters off HP_POS, shrinking each step, then settling
+## exactly back on HP_POS — same idea as PlayerVisual.squash_stretch()'s pop,
+## just on a 2D position instead of a 3D scale.
+func _shake_hp_bar() -> void:
+	if _hp_shake_tween and _hp_shake_tween.is_valid():
+		_hp_shake_tween.kill()
+	_hp_shake_tween = create_tween()
+	var magnitude := HP_SHAKE_MAGNITUDE
+	for i in HP_SHAKE_STEPS:
+		var offset := Vector2(randf_range(-magnitude, magnitude), randf_range(-magnitude, magnitude))
+		_hp_shake_tween.tween_property(_hp_group, "position", HP_POS + offset, HP_SHAKE_STEP_TIME)
+		magnitude *= 0.6
+	_hp_shake_tween.tween_property(_hp_group, "position", HP_POS, HP_SHAKE_STEP_TIME)
