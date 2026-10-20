@@ -113,6 +113,18 @@ func _break() -> void:
 	_refresh()
 	VFX.shatter(get_parent() as Node3D, global_position, ACTIVE_CORE_COLOR)
 
+## Starts high above `target` and falls down to it over `duration` — the
+## arena's opening reveal (see Arena.play_intro()). `delay` staggers several
+## orbs' falls relative to each other so they don't all land in lockstep.
+## Purely a position tween; the player is frozen for the whole reveal, so
+## there's no need to also gate hits while it's still mid-air.
+func drop_in(target: Vector3, from_height: float, duration: float, delay := 0.0) -> void:
+	global_position = target + Vector3.UP * from_height
+	var tw := create_tween()
+	tw.tween_interval(delay)
+	tw.tween_property(self, "global_position", target, duration) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
 func relocate(pos: Vector3) -> void:
 	global_position = pos
 	active = true

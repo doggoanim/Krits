@@ -2,12 +2,15 @@ class_name Arena
 extends Node3D
 ## A circular battle zone that appears wherever the fight starts — right on
 ## top of the real world geometry, nobody ever goes anywhere. A ring of wall
-## segments (stage_root) materializes using the world-dissolve shader (see
-## WorldDissolver, driven by EncounterManager) to pen the fight in, then
-## dissolves away again once it's over. Spawns orbs + enemies, tracks the
-## combo and resolves victory/defeat. Bullets are parented here so they
-## vanish with the arena. The EncounterManager owns its lifetime (it frees
-## the arena once the barrier has dissolved away).
+## segments (stage_root) reveals itself (see play_intro(): the ground ring
+## sweeps around first, then the walls grow straight up) to pen the fight in,
+## then dissolves away again once it's over using the world-dissolve shader
+## (see WorldDissolver, driven by EncounterManager — the teardown is the only
+## side still using it). Spawns orbs (falling in from overhead, see
+## Orb.drop_in()) + enemies, tracks the combo and resolves victory/defeat.
+## Bullets are parented here so they vanish with the arena. The
+## EncounterManager owns its lifetime (it frees the arena once the barrier
+## has dissolved away).
 ##
 ## The ground under the arena is whatever terrain was already there — not a
 ## flat purpose-built floor — so every spawn position is found with a
@@ -38,6 +41,14 @@ const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this abov
                                     ## floor) from reading as part of this fight
 const RANDOM_POINT_ATTEMPTS := 8
 
+## ---- reveal sequence (see play_intro()) ----
+const RING_DRAW_TIME := 0.5     ## total time for the ground ring to sweep fully around
+const RING_POP_TIME := 0.12     ## how long each individual ring segment's own pop-in takes
+const WALL_GROW_TIME := 0.45    ## how long the walls take to rise once the ring's done
+const ORB_DROP_HEIGHT := 9.0    ## how far above its landing spot each orb starts
+const ORB_DROP_TIME := 0.6
+const ORB_DROP_STAGGER := 0.05  ## added delay per orb so they don't all land in lockstep
+
 var radius := BASE_RADIUS
 var combo := 0
 var cancelled := false
@@ -48,6 +59,9 @@ var xp_reward := 0
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
 var _over := false
+var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
+var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
+                                                ## as _wall_meshes
 
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
@@ -68,6 +82,43 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
 	Events.encounter_started.emit(self)
+
+## The arena's reveal: the ground ring sweeps around first (each segment pops
+## in with a short delay from the last, following the same angular order
+## _build_barrier() placed them in), then the wall segments grow straight up
+## out of the ground once the ring's finished. Awaited by EncounterManager
+## before unlocking the player. Orbs are dropping in on their own timers at
+## the same time (see _spawn_orbs()/Orb.drop_in()) — nothing here needs to
+## wait on them specifically.
+func play_intro() -> void:
+	for mesh in _wall_meshes:
+		mesh.scale.y = 0.0
+	for piece in _ring_pieces:
+		piece.scale = Vector3.ZERO
+
+	var ring_tween := create_tween()
+	ring_tween.set_parallel(true)
+	for i in _ring_pieces.size():
+		var start_t := RING_DRAW_TIME * float(i) / float(_ring_pieces.size())
+		ring_tween.tween_property(_ring_pieces[i], "scale", Vector3.ONE, RING_POP_TIME) \
+				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await ring_tween.finished
+
+	var wall_tween := create_tween()
+	wall_tween.tween_method(_set_wall_growth, 0.0, 1.0, WALL_GROW_TIME) \
+			.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	await wall_tween.finished
+
+## Grows every wall segment's mesh up from the ground together, `t` 0..1.
+## Scaling just the mesh (not its StaticBody3D/collider, which stays full
+## size throughout — the player's frozen for the whole reveal anyway, so
+## there's nothing for a not-yet-visible collider to awkwardly block) keeps
+## the ground edge fixed in place instead of growing from the segment's
+## vertical center in both directions at once.
+func _set_wall_growth(t: float) -> void:
+	for mesh in _wall_meshes:
+		mesh.scale.y = t
+		mesh.position.y = -WALL_HEIGHT * 0.5 * (1.0 - t)
 
 ## Call once the barrier is solid; enemies start shooting after a short intro.
 func start_fight() -> void:
@@ -124,24 +175,33 @@ func _spawn_enemy(d: EnemyData) -> void:
 	e.defeated.connect(_on_enemy_defeated)
 	enemies.append(e)
 
+## Picks each orb's landing spot up front (so the spread-out spacing check
+## compares real target positions, not an orb still mid-fall overhead — see
+## _free_orb_position()), then drops them all in with a per-orb stagger.
 func _spawn_orbs(count: int) -> void:
+	var targets: Array[Vector3] = []
 	for i in count:
 		var o := Orb.new()
 		add_child(o)
-		o.global_position = _free_orb_position()
+		var pos := _free_orb_position(targets)
+		targets.append(pos)
 		o.hit.connect(_on_orb_hit)
 		orbs.append(o)
+		o.drop_in(pos, ORB_DROP_HEIGHT, ORB_DROP_TIME, i * ORB_DROP_STAGGER)
 
-func _free_orb_position() -> Vector3:
+## A ground spot kept away from `existing` positions (best-candidate sampling).
+## Callers pass whatever set of positions should count as "already taken" —
+## other orbs' chosen landing spots during the initial spawn, or the current
+## (landed) orbs' live positions when relocating one after a hit.
+func _free_orb_position(existing: Array[Vector3]) -> Vector3:
 	var best := Vector3.ZERO
 	var best_d := -1.0
 	for _i in 12:   # best-candidate sampling keeps orbs spread out
 		var pos := random_point(0.9)
 		pos.y += randf_range(ORB_HEIGHT.x, ORB_HEIGHT.y)   # float above whatever ground is under it
 		var nearest := INF
-		for o in orbs:
-			if is_instance_valid(o):
-				nearest = minf(nearest, o.global_position.distance_to(pos))
+		for t in existing:
+			nearest = minf(nearest, t.distance_to(pos))
 		if nearest > best_d:
 			best_d = nearest
 			best = pos
@@ -172,7 +232,11 @@ func _on_orb_hit(orb: Orb) -> void:
 	Events.combo_changed.emit(combo)
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
 		if is_instance_valid(orb) and not _over:
-			orb.relocate(_free_orb_position()))
+			var taken: Array[Vector3] = []
+			for o in orbs:
+				if is_instance_valid(o):
+					taken.append(o.global_position)
+			orb.relocate(_free_orb_position(taken)))
 
 func _on_player_landed() -> void:
 	if combo > 0:
@@ -217,6 +281,8 @@ func _end(victory: bool) -> void:
 func _build_barrier() -> void:
 	stage_root = Node3D.new()
 	add_child(stage_root)
+	_wall_meshes.clear()
+	_ring_pieces.clear()
 	var wall_col := Color(1.0, 1.0, 1.0, 0.05)
 	var glow_col := Color(1.0, 1.0, 1.0)
 	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
@@ -233,15 +299,17 @@ func _build_barrier() -> void:
 
 		var wall_pos := local_pos
 		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
-		_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y)
+		_wall_meshes.append(_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y))
 
 		var ring_pos := local_pos
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
-		_decor(ring_pos, Vector3(seg_len, 0.06, 0.4), glow_col, 1.0, rot_y)
+		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len, 0.06, 0.4), glow_col, 1.0, rot_y))
 
 ## `pos` is local to stage_root (i.e. relative to the arena's own origin),
 ## not a world-space coordinate — callers must not fold in global_position.
-func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false, rot_y := 0.0) -> void:
+## Returns the visual mesh specifically (not the StaticBody3D) so play_intro()
+## can animate it without touching the collider at all.
+func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false, rot_y := 0.0) -> MeshInstance3D:
 	var body := StaticBody3D.new()
 	body.collision_layer = layer
 	body.position = pos
@@ -251,14 +319,17 @@ func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, tra
 	shape.size = size
 	cs.shape = shape
 	body.add_child(cs)
-	body.add_child(_mesh(size, col, emit, translucent))
+	var mesh := _mesh(size, col, emit, translucent)
+	body.add_child(mesh)
 	stage_root.add_child(body)
+	return mesh
 
-func _decor(pos: Vector3, size: Vector3, col: Color, emit: float, rot_y := 0.0) -> void:
+func _decor(pos: Vector3, size: Vector3, col: Color, emit: float, rot_y := 0.0) -> MeshInstance3D:
 	var m := _mesh(size, col, emit, false)
 	m.position = pos
 	m.rotation.y = rot_y
 	stage_root.add_child(m)
+	return m
 
 func _mesh(size: Vector3, col: Color, emit: float, translucent: bool) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()

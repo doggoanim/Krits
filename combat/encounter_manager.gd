@@ -1,15 +1,16 @@
 class_name EncounterManager
 extends Node
 ## Runs the full encounter sequence:
-##   touch -> a circular barrier dissolves into existence right where the
-##   fight started -> fight -> the barrier dissolves away again (or the
+##   touch -> a circular barrier rises right where the fight started (see
+##   Arena.play_intro()) -> fight -> the barrier dissolves away again (or the
 ##   player respawns on defeat).
 ## Nearby overworld enemies are pulled into the same fight (bigger arena).
 ## Nobody goes anywhere: the player is never teleported, the camera never
 ## cuts away, and the world around the arena stays visible and unchanged —
-## "dissolving" here only ever means the barrier's own geometry crumbling
-## into noise and reforming (see WorldDissolver), never a screen overlay or a
-## change of location.
+## the barrier's reveal and its teardown are both just the barrier's own
+## geometry animating (growing up, then crumbling into noise — see
+## WorldDissolver for the teardown), never a screen overlay or a change of
+## location.
 
 const MERGE_DISTANCE := 14.0
 const BARRIER_TIME := 0.7       ## how long the barrier takes to solidify/dissolve
@@ -66,11 +67,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	active_arena = arena
 	get_parent().add_child(arena)
 	arena.begin(player, player.global_position, roster)
-
-	_dissolver.begin(arena.stage_root)
-	_dissolver.set_progress(1.0)
-	await _tween_progress(_dissolver, 0.0, BARRIER_TIME)
-	_dissolver.finish()
+	await arena.play_intro()   # ground ring sweeps in, then the walls grow up (see Arena)
 	player.machine.transition_to(&"Ground")
 	Game.input_locked = false
 	arena.start_fight()
