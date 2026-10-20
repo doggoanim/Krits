@@ -16,11 +16,11 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
 
 ## Footsteps are timed to the running clip's own loop (see PlayerVisual.run_phase())
-## rather than a fixed timer: a stride cycle normally plants a foot twice, so
-## a footstep fires each time playback crosses one of these two normalized
-## points in the loop. Adjust these (or add more) if the authored clip's
-## actual contact poses land somewhere else.
-const FOOTSTEP_PHASES := [0.0, 0.5]
+## rather than a fixed timer: a footstep fires each time playback crosses one
+## of these normalized points in the loop. Four evenly-spaced points (rather
+## than the two actual foot-plants of a stride) reads better at this
+## character's run speed — tune the count/spacing here if it's still off.
+const FOOTSTEP_PHASES := [0.0, 0.25, 0.5, 0.75]
 var _footstep_phase := -1.0   ## last-seen run_phase(), for edge-crossing detection; -1 = not tracking
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
