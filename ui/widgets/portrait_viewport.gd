@@ -8,9 +8,10 @@ extends Control
 ## live PlayerVisual, so nothing here can affect — or be affected by —
 ## gameplay.
 ##
-## Composited between PortraitSlot's grey fill (behind) and its ring outline
-## (in front) by Hud._build_meter_cluster(); the viewport's background is
-## transparent, so the disc shows through anywhere the model doesn't cover.
+## Composited on top of the portrait frame art by Hud._build_meter_cluster();
+## the viewport's background is transparent, and the render itself is
+## clipped to a circle (see CIRCLE_MASK_SHADER_CODE) so the frame's border
+## shows through cleanly all the way around instead of a square poking out.
 
 const RENDER_SIZE := 256                ## SubViewport resolution, independent of the Control's size
 const CAMERA_DISTANCE := 0.9
@@ -19,6 +20,22 @@ const OUTLINE_THICKNESS_RATIO := 0.011   ## matches PlayerVisual's default
 const PORTRAIT_TURN := 0.32   ## extra yaw (rad) so the portrait isn't a flat mirror-facing
                                ## shot — turns the character slightly left; flip the sign
                                ## if it reads as turning right instead
+
+## Clips the render to a circle inscribed in the TextureRect's own rect — a
+## true circle only when that rect is square, which is how Hud sizes
+## PORTRAIT_VIEW_SIZE. Without this, a wide pose (shoulders, elbows out)
+## could reach the render's square corners and poke past the frame art's
+## circular border instead of being cropped by it.
+const CIRCLE_MASK_SHADER_CODE := """
+shader_type canvas_item;
+
+void fragment() {
+	float dist = length(UV - vec2(0.5));
+	float edge = 1.0 - smoothstep(0.48, 0.5, dist);
+	COLOR = texture(TEXTURE, UV);
+	COLOR.a *= edge;
+}
+"""
 
 var _viewport: SubViewport
 var _model: Node3D
@@ -40,6 +57,11 @@ func _ready() -> void:
 	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE   ## don't force this Control to the render's 256x256
 	tex_rect.stretch_mode = TextureRect.STRETCH_SCALE       ## ...scale it to the portrait's actual size instead
 	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var circle_shader := Shader.new()
+	circle_shader.code = CIRCLE_MASK_SHADER_CODE
+	var circle_mat := ShaderMaterial.new()
+	circle_mat.shader = circle_shader
+	tex_rect.material = circle_mat
 	add_child(tex_rect)
 
 	Events.outfit_changed.connect(func(id: StringName): _apply_outfit(OutfitLibrary.get_outfit(id)))
