@@ -28,7 +28,7 @@ const PORTRAIT_FRAME_TEX := preload("res://assets/ui/portrait_frame_crop.png")
 ## it on their canvas. Widths come straight from that reference; heights
 ## follow from each asset's own aspect ratio instead, so the art doesn't
 ## stretch.
-const PORTRAIT_POS := Vector2(34.0, 30.0)
+const PORTRAIT_POS := Vector2(24.0, 20.0)
 const PORTRAIT_FRAME_SIZE := Vector2(145.0, 111.0)   ## matches portrait_frame_crop.png's own aspect
 const PORTRAIT_VIEW_SIZE := Vector2(102.0, 102.0)    ## the live 3D render stays square (so the
                                                       ## character isn't stretched) and sits centered
