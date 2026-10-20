@@ -34,8 +34,8 @@ const PORTRAIT_VIEW_SIZE := Vector2(102.0, 102.0)    ## the live 3D render stays
                                                       ## character isn't stretched) and sits centered
                                                       ## inside the frame art, sized to fill it while
                                                       ## still leaving its hand-drawn border visible
-const PORTRAIT_VIEW_Y_NUDGE := 8.0   ## shifts just the live render (not the frame art) down a bit
-                                     ## within its centered slot
+const PORTRAIT_VIEW_NUDGE := Vector2(6.0, 8.0)   ## shifts just the live render (not the frame art)
+                                                  ## right/down a bit within its centered slot
 
 const HP_POS := Vector2(156.0, 50.0)   ## overlaps the portrait's right half, like the reference
 const HP_SIZE := Vector2(270.0, 52.0)       ## matches health_fill.png's aspect (294x57)
@@ -102,7 +102,7 @@ func _build_meter_cluster() -> void:
 
 	var portrait_view := PortraitViewport.new()
 	portrait_view.position = PORTRAIT_POS + (PORTRAIT_FRAME_SIZE - PORTRAIT_VIEW_SIZE) * 0.5 \
-			+ Vector2(0.0, PORTRAIT_VIEW_Y_NUDGE)
+			+ PORTRAIT_VIEW_NUDGE
 	portrait_view.size = PORTRAIT_VIEW_SIZE
 	add_child(portrait_view)
 
