@@ -13,6 +13,8 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 
 func physics_update(delta: float) -> void:
 	var p := player
+	if p.jump_buffer_t > 0.0:
+		print("[JumpDebug] Pound ignores jump entirely while winding up/slamming (buffer: %.2f)" % p.jump_buffer_t)
 	if not _slamming:
 		_t -= delta
 		p.velocity = Vector3.ZERO

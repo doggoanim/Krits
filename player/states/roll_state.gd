@@ -31,14 +31,16 @@ func physics_update(delta: float) -> void:
 	# wall-collision reaction pose (play_hold, below) has run its course.
 	p.visual.play(PlayerVisual.ANIM_ROLL)
 	# Roll + jump = long jump (works at any point of the roll).
-	if p.jump_buffer_t > 0.0 and p.can_stand():
-		var dir := p.get_hvel()
-		dir = dir.normalized() if dir.length() > 0.1 else p.facing
-		p.set_hvel(dir * c.long_jump_speed)
-		p.velocity.y = c.long_jump_velocity
-		p.jump_buffer_t = 0.0
-		machine.transition_to(&"LongJump")
-		return
+	if p.jump_buffer_t > 0.0:
+		if p.can_stand():
+			var dir := p.get_hvel()
+			dir = dir.normalized() if dir.length() > 0.1 else p.facing
+			p.set_hvel(dir * c.long_jump_speed)
+			p.velocity.y = c.long_jump_velocity
+			p.jump_buffer_t = 0.0
+			machine.transition_to(&"LongJump")
+			return
+		print("[JumpDebug] Roll long-jump suppressed: no headroom (can_stand() false)")
 
 	var input := p.input_dir()
 	var h := p.get_hvel()

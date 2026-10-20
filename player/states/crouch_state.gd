@@ -14,9 +14,11 @@ func exit(next: StringName) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
-	if p.jump_buffer_t > 0.0 and p.can_stand():
-		p.start_jump(c.jump_velocity)
-		return
+	if p.jump_buffer_t > 0.0:
+		if p.can_stand():
+			p.start_jump(c.jump_velocity)
+			return
+		print("[JumpDebug] Crouch jump suppressed: no headroom (can_stand() false)")
 	if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
 		machine.transition_to(&"Roll")
 		return

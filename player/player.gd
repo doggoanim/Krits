@@ -186,6 +186,7 @@ func start_jump(vel: float) -> void:
 		# so leaving jump_buffer_t set would stall ground movement each of
 		# those frames until the buffer window expired on its own.
 		jump_buffer_t = 0.0
+		print("[JumpDebug] start_jump() suppressed: standing in slime")
 		return
 	velocity.y = vel
 	coyote = 0.0

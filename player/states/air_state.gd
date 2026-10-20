@@ -8,9 +8,11 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
-	if p.jump_buffer_t > 0.0 and p.coyote > 0.0:
-		p.start_jump(c.jump_velocity)
-		return
+	if p.jump_buffer_t > 0.0:
+		if p.coyote > 0.0:
+			p.start_jump(c.jump_velocity)
+			return
+		print("[JumpDebug] Air jump suppressed: coyote window expired")
 	if Input.is_action_just_pressed(&"roll_dive") and p.can_dive:
 		machine.transition_to(&"Dive")
 		return
