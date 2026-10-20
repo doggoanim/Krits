@@ -3,7 +3,9 @@ extends Node3D
 ## Movement particle effects — dust, dirt, smoke. Every ParticleProcessMaterial
 ## is built in code, but the sprite each particle wears is one of two hand-
 ## drawn textures (assets/sprites/): dirt_texture.png for anything dust/dirt,
-## smoke_puff.png for anything smoke/air.
+## smoke_puff.png for anything smoke/air or that needs its color_ramp tint to
+## actually read as that color (dirt_texture.png's own brown base muddies
+## any tint multiplied over it — see the slime drip).
 ##
 ## Two kinds of emitter:
 ## - Persistent, toggled on/off for as long as a move lasts (running dust,
@@ -61,7 +63,11 @@ func _ready() -> void:
 	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false, _dust_quad)
 	add_child(_long_jump_trail)
 	_slime_drip_material = _slime_drip_material_for(PlayerVisual.SLIME_TINT_COLOR)
-	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _dust_quad)
+	# _smoke_quad, not _dust_quad: dirt_texture.png is itself brown, and
+	# multiplying that by the color_ramp tint (vertex_color_use_as_albedo)
+	# always skewed muddy brown no matter what color was requested.
+	# smoke_puff.png's soft, near-white base actually shows the tint.
+	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _smoke_quad)
 	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
 	add_child(_slime_drip)
 
