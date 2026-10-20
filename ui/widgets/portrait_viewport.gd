@@ -34,6 +34,8 @@ func _ready() -> void:
 	var tex_rect := TextureRect.new()
 	tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	tex_rect.texture = _viewport.get_texture()
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE   ## don't force this Control to the render's 256x256
+	tex_rect.stretch_mode = TextureRect.STRETCH_SCALE       ## ...scale it to the portrait's actual size instead
 	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(tex_rect)
 
