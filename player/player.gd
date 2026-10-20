@@ -232,7 +232,11 @@ func start_side_flip(dir: Vector3) -> void:
 	audio.play_side_flip()
 	machine.transition_to(&"Air")
 
-func bounce_off_orb() -> void:
+## `combo` is Arena's running combo count for this hit (1 on the first orb of
+## a chain) — forwarded to the attack sound so it climbs with the combo
+## instead of playing identically on every hit. Defaults to 1 for any other
+## caller that doesn't track a combo.
+func bounce_off_orb(combo := 1) -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
 	can_dive = true
@@ -240,7 +244,7 @@ func bounce_off_orb() -> void:
 	# apex, not a flat duration — so the falling pose never pops in mid-rise.
 	var rise_time := config.orb_bounce_velocity / config.gravity
 	visual.play_random_attack(rise_time * config.orb_attack_hold_mult)
-	audio.play_orb_attack()
+	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move

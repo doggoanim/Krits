@@ -10,6 +10,9 @@ extends Node3D
 ## two reaction sounds should land the same every time instead of varying.
 ## A sound with more than one source file (air dive, footsteps) also picks a
 ## random sample each play, independent of whether its pitch varies.
+## The orb attack additionally climbs in base pitch with the combo count
+## (see play_orb_attack()), with the usual small random variance on top of
+## wherever that base lands.
 
 const SFX_DIR := "res://sounds/SFX/"
 
@@ -40,6 +43,11 @@ const FOOTSTEP_SFX: Array[AudioStream] = [
 ## variety, not a cartoonish chipmunk/demon range.
 const PITCH_VARIANCE := 0.08
 
+## Orb attack pitch climbs with the combo (so a long chain audibly ramps up),
+## capped well short of chipmunk territory for a very long combo.
+const ORB_COMBO_PITCH_STEP := 0.06   ## added per combo step past the first
+const ORB_COMBO_PITCH_MAX := 1.6
+
 func play_jump() -> void:
 	_play(JUMP_SFX, PITCH_VARIANCE)
 
@@ -57,8 +65,10 @@ func play_wall_bounce() -> void:
 func play_roll_bounce() -> void:
 	_play(ROLL_BOUNCE_SFX, PITCH_VARIANCE)
 
-func play_orb_attack() -> void:
-	_play(ORB_ATTACK_SFX, PITCH_VARIANCE)
+## `combo` is Arena's running combo count (1 on the first hit of a chain).
+func play_orb_attack(combo := 1) -> void:
+	var base_pitch := minf(1.0 + float(maxi(combo, 1) - 1) * ORB_COMBO_PITCH_STEP, ORB_COMBO_PITCH_MAX)
+	_play(ORB_ATTACK_SFX, PITCH_VARIANCE, base_pitch)
 
 func play_footstep() -> void:
 	_play(FOOTSTEP_SFX.pick_random(), PITCH_VARIANCE)
@@ -78,10 +88,10 @@ func play_pound_jump() -> void:
 func play_pound_land() -> void:
 	_play(POUND_LAND_SFX, PITCH_VARIANCE)
 
-func _play(stream: AudioStream, pitch_variance: float) -> void:
+func _play(stream: AudioStream, pitch_variance: float, base_pitch := 1.0) -> void:
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream
-	p.pitch_scale = 1.0 + randf_range(-pitch_variance, pitch_variance)
+	p.pitch_scale = base_pitch + randf_range(-pitch_variance, pitch_variance)
 	add_child(p)
 	p.play()
 	p.finished.connect(p.queue_free)

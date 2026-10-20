@@ -236,7 +236,7 @@ func _on_orb_hit(orb: Orb) -> void:
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
 			e.take_damage(dmg)   # same damage to every enemy
-	player.bounce_off_orb()
+	player.bounce_off_orb(combo)
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
