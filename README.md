@@ -20,29 +20,29 @@ toward the new direction.
 
 ## Layout
 - core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup,
-             VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
+			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
-             PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
+			 PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name)
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
-             air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
-             crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack
-             each have 3 interchangeable variants, picked at random per jump / per orb hit
-             (PlayerVisual).
-             Re-export over this file to update the model/animations.
+			 air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
+			 crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack
+			 each have 3 interchangeable variants, picked at random per jump / per orb hit
+			 (PlayerVisual).
+			 Re-export over this file to update the model/animations.
 - combat/    EncounterManager (a circular barrier dissolves into place right where the fight starts,
-             nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its
-             dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield`
-             flag), SlimePuddle (damage/slow/no-jump ground hazard). EnemyData also supports an optional
-             telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
-             an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
+			 nobody teleports anywhere) -> Arena (orbs, combo, the circular wall, stage_root for its
+			 dissolving geometry), Enemy/EnemyData, Bullet + patterns/ (Radial, Aimed, Spiral; `pierces_shield`
+			 flag), SlimePuddle (damage/slow/no-jump ground hazard). EnemyData also supports an optional
+			 telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
+			 an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - outfits/   OutfitData + OutfitLibrary (cosmetic only)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
-             visibility culling for a region), WorldGate (blocks a path until a story flag is set),
-             EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), TestLevel blockout,
-             WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
+			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
+			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), TestLevel blockout,
+			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
 - ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader (screen-space
-             fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
+			 fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
 
 ## Extending
 - New move: add a `states/xxx_state.gd` extending PlayerState, register it in Player._ready.
