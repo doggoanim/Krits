@@ -202,6 +202,20 @@ func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
 	_held_anim = anim_name
 	play(anim_name, 0.15, speed, true)
 
+## Normalized position (0..1) through the running clip's own loop, or -1.0 if
+## it isn't the one currently playing. GroundState uses this to time footstep
+## sounds to the actual animation (its contact poses) instead of a fixed
+## timer guessing at the cadence — the running clip is always looping once
+## it's playing at all (see LOOPING_ANIMS), so position/length wrapping back
+## to 0 is exactly one full stride cycle.
+func run_phase() -> float:
+	if _anim == null or _anim.current_animation != ANIM_RUN:
+		return -1.0
+	var len := _anim.current_animation_length
+	if len <= 0.0:
+		return -1.0
+	return _anim.current_animation_position / len
+
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
 	return _hold_t > 0.0

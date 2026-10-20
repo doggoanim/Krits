@@ -14,7 +14,14 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
                            ## hold (see physics_update) so the trick doesn't depend on exact frame
                            ## timing between the two
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
-var _footstep_t := 0.0   ## counts down to the next footstep sound while actually running
+
+## Footsteps are timed to the running clip's own loop (see PlayerVisual.run_phase())
+## rather than a fixed timer: a stride cycle normally plants a foot twice, so
+## a footstep fires each time playback crosses one of these two normalized
+## points in the loop. Adjust these (or add more) if the authored clip's
+## actual contact poses land somewhere else.
+const FOOTSTEP_PHASES := [0.0, 0.5]
+var _footstep_phase := -1.0   ## last-seen run_phase(), for edge-crossing detection; -1 = not tracking
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
@@ -117,16 +124,35 @@ func physics_update(delta: float) -> void:
 	var running := moving and not was_sliding
 	p.effects.set_running_dust(running)
 	if running:
-		_footstep_t -= delta
-		if _footstep_t <= 0.0:
-			p.audio.play_footstep()
-			_footstep_t = c.footstep_interval
+		_update_footsteps(p)
 	else:
-		# Reset rather than let it keep draining while stopped/sliding, so the
-		# first step after moving again always lands right away instead of
-		# picking up mid-countdown from before.
-		_footstep_t = 0.0
+		# Forget the last phase while stopped/sliding, so starting to run
+		# again doesn't think it just wrapped around from wherever the run
+		# clip happened to be paused at.
+		_footstep_phase = -1.0
 	p.velocity.y = -1.0
 	p.move_and_slide()
 	if not p.is_on_floor():
 		machine.transition_to(&"Air")
+
+## Fires a footstep each time the running clip's playback crosses one of
+## FOOTSTEP_PHASES since the last frame, instead of restarting a fixed timer —
+## so the sound always lands on the clip's own stride, no matter how its
+## actual authored timing compares to a guessed interval. Handles the wrap
+## from ~1.0 back to 0.0 at the end of each loop by unwrapping the current
+## reading before comparing.
+func _update_footsteps(p: Player) -> void:
+	var phase := p.visual.run_phase()
+	if phase < 0.0:
+		_footstep_phase = -1.0
+		return
+	if _footstep_phase < 0.0:
+		_footstep_phase = phase
+		return
+	var cur := phase
+	if cur < _footstep_phase:
+		cur += 1.0   # looped back around since the last frame
+	for step in FOOTSTEP_PHASES:
+		if (_footstep_phase <= step and step < cur) or (_footstep_phase <= step + 1.0 and step + 1.0 < cur):
+			p.audio.play_footstep()
+	_footstep_phase = phase

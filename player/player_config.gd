@@ -12,7 +12,6 @@ extends Resource
 @export var slide_min_move_time := 0.8     ## must have been moving continuously this long first
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
-@export var footstep_interval := 0.39      ## seconds between footstep sounds while running
 
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",

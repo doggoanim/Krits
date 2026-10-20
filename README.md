@@ -31,7 +31,9 @@ toward the new direction.
 			 PlayerEffects (particles), PlayerAudio (movement SFX, sounds/SFX/ — jump, long jump,
 			 air dive, wall/roll bounce, skid, side flip, orb attack, footsteps, and the ground
 			 pound's three phases (ready/jump/land); every one-shot gets a slight random
-			 pitch_scale nudge except air dive and long jump, which stay fixed)
+			 pitch_scale nudge except air dive and long jump, which stay fixed). Footsteps
+			 are timed to the running clip's own loop (PlayerVisual.run_phase()), not a
+			 fixed timer — see GroundState._update_footsteps().
 - assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
 			 air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
 			 crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack
