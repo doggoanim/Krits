@@ -31,7 +31,6 @@ func physics_update(delta: float) -> void:
 		if _t <= 0.0:
 			_slamming = true
 			p.velocity.y = -p.config.pound_speed
-			p.audio.play_pound_jump()
 		return
 	p.move_and_slide()
 	if p.is_on_floor():

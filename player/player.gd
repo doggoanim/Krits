@@ -182,7 +182,10 @@ func air_control(delta: float) -> void:
 
 ## Every jump is a fixed, snappy height — no variable height from holding the
 ## button, so the timing always feels the same regardless of how long jump is held.
-func start_jump(vel: float) -> void:
+## `pound` plays the dedicated ground_pound_jump.wav instead of the plain
+## jump.wav — PoundLandState's high-jump-out-of-recovery combo is the only
+## caller that passes it.
+func start_jump(vel: float, pound := false) -> void:
 	if is_slimed():
 		# Still consume the buffered jump so a held/mashed jump input doesn't
 		# keep re-triggering this no-op every frame — each caller returns
@@ -206,7 +209,7 @@ func start_jump(vel: float) -> void:
 	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
 	visual.roll_jump_start()
 	effects.burst_jump_dust()
-	audio.play_jump()
+	audio.play_pound_jump() if pound else audio.play_jump()
 	machine.transition_to(&"Air")
 
 ## Mario 64-style skid-turn trick: jumping while skidding from a sharp

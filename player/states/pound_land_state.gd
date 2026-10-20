@@ -20,12 +20,12 @@ func enter(_prev: StringName, msg: Dictionary = {}) -> void:
 		# jump, and press it again inside the recovery window. If this is a
 		# no-op (e.g. the player landed in slime), physics_update()'s own
 		# jump_buffer_t check below still covers a press made during recovery.
-		player.start_jump(player.config.pound_jump_velocity)
+		player.start_jump(player.config.pound_jump_velocity, true)
 
 func physics_update(delta: float) -> void:
 	var p := player
 	if p.jump_buffer_t > 0.0:
-		p.start_jump(p.config.pound_jump_velocity)
+		p.start_jump(p.config.pound_jump_velocity, true)
 		return
 	p.velocity = Vector3(0.0, -1.0, 0.0)
 	p.move_and_slide()
