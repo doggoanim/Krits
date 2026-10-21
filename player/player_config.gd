@@ -12,6 +12,12 @@ extends Resource
 @export var slide_min_move_time := 0.8     ## must have been moving continuously this long first
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
+@export var slope_slide_angle_deg := 30.0  ## floor steeper than this forces a downhill slide —
+                                            ## can't stand or walk normally on it (still well under
+                                            ## floor_max_angle in player.gd, so it's still "floor",
+                                            ## just too steep to stand on)
+@export var slope_slide_speed := 10.0      ## top speed while sliding down a steep slope
+@export var slope_slide_accel := 25.0      ## how quickly slope-sliding ramps up to that speed
 
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",

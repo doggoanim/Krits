@@ -14,6 +14,8 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
                            ## hold (see physics_update) so the trick doesn't depend on exact frame
                            ## timing between the two
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
+var _slope_sliding := false   ## true while forced into the steep-slope slide below — only used
+                               ## to play the skid sound once per slide, not every single frame
 
 ## Footsteps are timed to the running clip's own loop (see PlayerVisual.run_phase())
 ## rather than a fixed timer: a footstep fires each time playback crosses one
@@ -28,6 +30,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 		player.set_crouching(false)
 	player.can_dive = true
 	_move_t = 0.0
+	_slope_sliding = false
 	if _msg.get("jump_queued", false):
 		# A jump pressed sometime during a long jump's flight (see
 		# LongJumpState) — re-arm the buffer so this state's own
@@ -87,6 +90,30 @@ func physics_update(delta: float) -> void:
 		_turn_flip_t = 0.0
 		_slide_is_turn = false
 		return
+
+	# Too steep to stand or walk on — forced into a continuous downhill slide
+	# (same skid pose/sound as the stop-skid above, just not time-limited:
+	# it lasts exactly as long as the floor underfoot stays this steep,
+	# not a fixed duration) until you either level out or jump off of it.
+	var on_steep_slope := p.is_on_floor() and p.get_floor_angle() >= deg_to_rad(c.slope_slide_angle_deg)
+	if on_steep_slope:
+		if not _slope_sliding:
+			p.audio.play_skid()
+		_slope_sliding = true
+		var normal := p.get_floor_normal()
+		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
+		if down_slope.length() > 0.001:
+			down_slope = down_slope.normalized()
+			p.face(down_slope, delta)
+		p.set_hvel(p.get_hvel().move_toward(down_slope * c.slope_slide_speed, c.slope_slide_accel * delta))
+		p.visual.play(PlayerVisual.ANIM_SLIDE)
+		p.velocity.y = -1.0
+		p.move_and_slide()
+		if not p.is_on_floor():
+			machine.transition_to(&"Air")
+		return
+	_slope_sliding = false
+
 	# Locked out while the slide pose plays — same "carried along, no input
 	# but jump" rule as steering/accelerating below. Roll (and by extension
 	# the roll-into-jump long jump, which only starts from Roll) and the
