@@ -1,20 +1,19 @@
 class_name MenuBase
 extends PanelContainer
 ## Pauses the game and centers a panel. Subclasses fill `content` in refresh().
+## The panel chrome (centered PanelContainer + its Content VBoxContainer)
+## lives in menu_base.tscn — StatsMenu/TravelMenu inherit that scene and just
+## swap in their own script, so editing menu_base.tscn's layout/size/position
+## updates every menu built on it at once.
+
+@onready var content: VBoxContainer = %Content
 
 var toggle_action: StringName = &""
-var content := VBoxContainer.new()
 
 static var open_menu: MenuBase
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	visible = false
-	set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical = Control.GROW_DIRECTION_BOTH
-	custom_minimum_size = Vector2(380, 0)
-	add_child(content)
 	Events.stats_changed.connect(func(): if visible: refresh())
 
 func can_open() -> bool:
@@ -54,6 +53,8 @@ func _clear() -> void:
 	for c in content.get_children():
 		c.queue_free()
 
+## Dynamic content (row(s) added per the current game state in refresh()) —
+## left as code since there's a variable number of them, not fixed layout.
 func title(text: String) -> void:
 	var l := Label.new()
 	l.text = text

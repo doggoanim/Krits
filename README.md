@@ -56,7 +56,15 @@ toward the new direction.
 			 still there if you want it, see main.gd's `level_scene` default),
 			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
-			 fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
+			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
+			 later). Static layout for all of these lives in their matching .tscn (hud.tscn,
+			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn inheriting it,
+			 screen_transition.tscn) — open any of them in the editor to move/resize things;
+			 the .gd scripts just hold behavior now (refresh logic, tweens, signals). The two
+			 exceptions are deliberate: PortraitSlot is a single custom-drawn Control with
+			 nothing to lay out, and PortraitViewport builds its private mini 3D scene (lights,
+			 camera, the live player model) in code because that camera rig is positioned from
+			 runtime constants (Player.STAND_HEIGHT), not fixed numbers a scene could hold.
 
 ## Extending
 - New move: add a `states/xxx_state.gd` extending PlayerState, register it in Player._ready.

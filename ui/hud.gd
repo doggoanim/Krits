@@ -1,57 +1,17 @@
 class_name Hud
 extends Control
-## Player meter cluster (portrait, HP, shield frame, stamina — custom-drawn,
-## see ui/widgets/) plus level, XP, the control hint and the combo counter,
-## which stay plain Godot controls until a later design pass.
-
-## -- Meter cluster layout -------------------------------------------------
-## HP fill, the shield frame, the stamina fill and the portrait frame are all
-## real art now (assets/ui/*.png — the *_crop/*_fill ones are this file's own
-## tight crops of whatever the designer last exported full-canvas, done once
-## in a scratch script rather than checked in as a build step; re-crop by
-## hand if the source art changes). See TexturedSlantedBar for how a single
-## piece of flat art still works as a live, drainable bar. The track behind
-## each meter is the same art again, dimmed (see TexturedSlantedBar.tint),
-## since the art doesn't (yet) draw a separate empty state of its own — a
-## plain rectangle there would peek out past the art's rounded corners. None
-## of these are skewed any more — the redrawn art is a straight rounded bar,
-## not a slanted parallelogram, so every bar below uses skew = 0.
-const HP_FILL_TEX := preload("res://assets/ui/health_fill.png")
-const SHIELD_FRAME_TEX := preload("res://assets/ui/shield_frame_crop.png")
-const STAMINA_FILL_TEX := preload("res://assets/ui/stamina_fill.png")
-const PORTRAIT_FRAME_TEX := preload("res://assets/ui/portrait_frame_crop.png")
-
-## Positions/sizes below are measured directly off the latest reference image
-## (portrait top-left corner, HP overlapping its right side, stamina stacked
-## tight underneath), scaled down to a sane HUD size and re-anchored to a
-## (24, 20) screen margin instead of wherever the designer happened to draw
-## it on their canvas. Widths come straight from that reference; heights
-## follow from each asset's own aspect ratio instead, so the art doesn't
-## stretch.
-const PORTRAIT_POS := Vector2(24.0, 20.0)
-const PORTRAIT_FRAME_SIZE := Vector2(145.0, 111.0)   ## matches portrait_frame_crop.png's own aspect
-const PORTRAIT_VIEW_SIZE := Vector2(130.0, 130.0)    ## the live 3D render stays square (so the
-                                                      ## character isn't stretched) and sits centered
-                                                      ## inside the frame art, sized to fill it while
-                                                      ## still leaving its hand-drawn border visible
-const PORTRAIT_VIEW_NUDGE := Vector2(10.0, 24.0)   ## shifts just the live render (not the frame art)
-                                                  ## right/down a bit within its centered slot
-
-const HP_POS := Vector2(156.0, 50.0)   ## overlaps the portrait's right half, like the reference
-const HP_SIZE := Vector2(270.0, 52.0)       ## matches health_fill.png's aspect (294x57)
-const STAMINA_POS := Vector2(164.0, 86.0)   ## stacked tight under the HP bar
-const STAMINA_SIZE := Vector2(224.0, 47.0)  ## matches stamina_fill.png's aspect (254x53)
-
-const TRACK_TINT := Color(0.3, 0.3, 0.32, 0.5)   ## dims the same art to stand in as its own empty track
-
-const READOUT_POS := Vector2(24.0, 150.0)
-const READOUT_WIDTH := 340.0
+## Player meter cluster (portrait, HP, shield frame, stamina — custom-drawn
+## bars, see ui/widgets/) plus level, XP, the control hint and the combo
+## counter. All of the static layout — positions, sizes, which texture each
+## bar uses — lives in hud.tscn now; open it in the editor to move or resize
+## anything. This script just drives the live values and the damage-reaction
+## animation (the portrait punch + HP bar shake).
 
 ## -- Damage reaction ------------------------------------------------------
 ## Taking a hit (not healing — see _on_player_damaged()) punches the portrait
 ## (a quick size bounce + a flash to red, both on _portrait_group so the live
 ## render and its frame art move/flash together as one piece) and shakes the
-## HP bar (_hp_group, jittered off its resting HP_POS and sprung back).
+## HP bar (_hp_group, jittered off its resting position and sprung back).
 const PORTRAIT_HIT_SCALE := 1.18
 const PORTRAIT_HIT_SCALE_TIME := 0.25
 const PORTRAIT_HIT_FLASH_COLOR := Color(1.0, 0.25, 0.25)
@@ -60,29 +20,28 @@ const HP_SHAKE_STEPS := 5
 const HP_SHAKE_MAGNITUDE := 6.0
 const HP_SHAKE_STEP_TIME := 0.04
 
-var _hp_group: Control    ## wraps the HP track/fill/shield-outline bars — shaken as one unit
-var _hp_fill: TexturedSlantedBar
-var _shield_outline: TexturedSlantedBar
-var _stamina_fill: TexturedSlantedBar
+## Node paths resolved via hud.tscn's unique names (%Name) — see that scene
+## for where each one actually sits.
+@onready var _hp_group: Control = %HpGroup   ## wraps the HP track/fill/shield-outline bars — shaken as one unit
+@onready var _hp_fill: TexturedSlantedBar = %Fill
+@onready var _shield_outline: TexturedSlantedBar = %ShieldOutline
+@onready var _stamina_fill: TexturedSlantedBar = %StaminaFill
+@onready var _portrait_group: Control = %PortraitGroup   ## wraps the portrait frame art + live render — bounced/flashed as one unit
+@onready var _level: Label = %LevelLabel
+@onready var _xp: ProgressBar = %XpBar
+@onready var _hint: Label = %HintLabel
+@onready var _combo: Label = %ComboLabel
 
-var _portrait_group: Control   ## wraps the portrait frame art + live render — bounced/flashed as one unit
+var _hp_rest_pos: Vector2   ## _hp_group's resting position, read from the scene so the shake
+                            ## always springs back to wherever it's actually placed
 var _portrait_tween: Tween
 var _hp_shake_tween: Tween
 
 var _last_hp := 0.0
 var _last_shield := 0.0
 
-var _level: Label
-var _xp: ProgressBar
-var _hint: Label
-var _combo: Label
-
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	_build_meter_cluster()
-	_build_legacy_readout()
+	_hp_rest_pos = _hp_group.position
 
 	_last_hp = Game.stats.hp
 	_last_shield = Game.stats.shield
@@ -93,95 +52,6 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_refresh()   # shield recharges every frame
-
-## Builds the stylized HP/shield/stamina cluster: a dim, always-full "ghost"
-## of each bar's own art behind it as its empty-state track (shaped exactly
-## like the real art, unlike a plain rectangle, which would peek out past its
-## rounded corners — see TexturedSlantedBar.tint), then the live fill on top.
-## The shield frame is its own textured layer sharing the HP bar's
-## position/size so it reads as a frame wrapping it, and because its texture
-## is just border strokes on a transparent interior, "draining" it still
-## looks like an outline shrinking in from the right, not a filled shape.
-func _build_meter_cluster() -> void:
-	# Wrapped in its own container (rather than added straight to Hud like the
-	# stamina bar) purely so _on_player_damaged() has one node whose position
-	# it can shake — the three bars inside stay at local (0,0)/HP_SIZE,
-	# identical to how they were positioned directly before this.
-	_hp_group = Control.new()
-	_hp_group.position = HP_POS
-	_hp_group.size = HP_SIZE
-	_hp_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_hp_group)
-	_make_track(_hp_group, Vector2.ZERO, HP_SIZE, HP_FILL_TEX)
-	_hp_fill = _make_textured_bar(_hp_group, Vector2.ZERO, HP_SIZE, HP_FILL_TEX)
-	_shield_outline = _make_textured_bar(_hp_group, Vector2.ZERO, HP_SIZE, SHIELD_FRAME_TEX)
-
-	_make_track(self, STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
-	_stamina_fill = _make_textured_bar(self, STAMINA_POS, STAMINA_SIZE, STAMINA_FILL_TEX)
-
-	# Likewise wrapped so the frame art and the live render bounce/flash
-	# together as one piece on a hit, instead of needing to animate two
-	# separate nodes in lockstep. Pivoted at its own center so the scale
-	# punch in _on_player_damaged() grows outward evenly, not off one corner.
-	_portrait_group = Control.new()
-	_portrait_group.position = PORTRAIT_POS
-	_portrait_group.size = PORTRAIT_FRAME_SIZE
-	_portrait_group.pivot_offset = PORTRAIT_FRAME_SIZE * 0.5
-	_portrait_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_portrait_group)
-
-	# The frame art is a static backdrop (grey disc + its own hand-drawn
-	# outline baked in one image); the live 3D render sits centered on top of
-	# it, smaller than the frame so the border stays visible all the way
-	# around — no separate "ring on top" layer needed any more.
-	var portrait_bg := TextureRect.new()
-	portrait_bg.texture = PORTRAIT_FRAME_TEX
-	portrait_bg.size = PORTRAIT_FRAME_SIZE
-	portrait_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait_bg.stretch_mode = TextureRect.STRETCH_SCALE
-	portrait_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_portrait_group.add_child(portrait_bg)
-
-	var portrait_view := PortraitViewport.new()
-	portrait_view.position = (PORTRAIT_FRAME_SIZE - PORTRAIT_VIEW_SIZE) * 0.5 + PORTRAIT_VIEW_NUDGE
-	portrait_view.size = PORTRAIT_VIEW_SIZE
-	_portrait_group.add_child(portrait_view)
-
-func _make_track(parent: Control, pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
-	var b := _make_textured_bar(parent, pos, sz, tex)
-	b.tint = TRACK_TINT
-	return b
-
-func _make_textured_bar(parent: Control, pos: Vector2, sz: Vector2, tex: Texture2D) -> TexturedSlantedBar:
-	var b := TexturedSlantedBar.new()
-	b.position = pos
-	b.size = sz
-	b.texture = tex
-	parent.add_child(b)
-	return b
-
-func _build_legacy_readout() -> void:
-	var box := VBoxContainer.new()
-	box.position = READOUT_POS
-	box.custom_minimum_size = Vector2(READOUT_WIDTH, 0.0)
-	add_child(box)
-	_level = Label.new()
-	box.add_child(_level)
-	_xp = ProgressBar.new()
-	_xp.show_percentage = false
-	_xp.custom_minimum_size = Vector2(READOUT_WIDTH, 8.0)
-	var xp_fill := StyleBoxFlat.new()
-	xp_fill.bg_color = Color(0.9, 0.8, 0.2)
-	_xp.add_theme_stylebox_override("fill", xp_fill)
-	box.add_child(_xp)
-	_hint = Label.new()
-	box.add_child(_hint)
-
-	_combo = Label.new()
-	_combo.add_theme_font_size_override("font_size", 44)
-	_combo.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_combo.position = Vector2(-60, 40)
-	add_child(_combo)
 
 func _refresh() -> void:
 	var s := Game.stats
@@ -225,9 +95,9 @@ func _punch_portrait() -> void:
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_portrait_tween.tween_property(_portrait_group, "modulate", Color.WHITE, PORTRAIT_HIT_FLASH_TIME)
 
-## A few quick random jitters off HP_POS, shrinking each step, then settling
-## exactly back on HP_POS — same idea as PlayerVisual.squash_stretch()'s pop,
-## just on a 2D position instead of a 3D scale.
+## A few quick random jitters off the bar's resting position, shrinking each
+## step, then settling exactly back — same idea as PlayerVisual.squash_stretch()'s
+## pop, just on a 2D position instead of a 3D scale.
 func _shake_hp_bar() -> void:
 	if _hp_shake_tween and _hp_shake_tween.is_valid():
 		_hp_shake_tween.kill()
@@ -235,6 +105,6 @@ func _shake_hp_bar() -> void:
 	var magnitude := HP_SHAKE_MAGNITUDE
 	for i in HP_SHAKE_STEPS:
 		var offset := Vector2(randf_range(-magnitude, magnitude), randf_range(-magnitude, magnitude))
-		_hp_shake_tween.tween_property(_hp_group, "position", HP_POS + offset, HP_SHAKE_STEP_TIME)
+		_hp_shake_tween.tween_property(_hp_group, "position", _hp_rest_pos + offset, HP_SHAKE_STEP_TIME)
 		magnitude *= 0.6
-	_hp_shake_tween.tween_property(_hp_group, "position", HP_POS, HP_SHAKE_STEP_TIME)
+	_hp_shake_tween.tween_property(_hp_group, "position", _hp_rest_pos, HP_SHAKE_STEP_TIME)

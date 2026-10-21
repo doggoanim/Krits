@@ -1,19 +1,15 @@
 class_name ScreenTransition
 extends CanvasLayer
 ## Dissolve overlay. `await dissolve_in()` covers the screen, `await dissolve_out()` reveals it.
+## The full-rect Rect + its dissolve shader material live in screen_transition.tscn.
 
-var _rect := ColorRect.new()
-var _mat := ShaderMaterial.new()
+@onready var _rect: ColorRect = %Rect
+@onready var _mat: ShaderMaterial = _rect.material
+
 var _progress := 0.0
 
 func _ready() -> void:
-	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_mat.shader = load("res://ui/dissolve.gdshader")
-	_rect.material = _mat
-	_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_rect)
 	_set_progress(0.0)
 
 func dissolve_in(duration := 0.9) -> void:
