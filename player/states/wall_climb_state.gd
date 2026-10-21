@@ -25,13 +25,18 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
 	_attach_point = _msg.get("point", p.global_position)
+	# Ease the very first grab in too, not just later corner wraps: seed the
+	# "from" pair at the player's actual current spot — same normal as the
+	# target, so _apply_position()'s blend below only moves the position, not
+	# the facing/rotation — and start the blend timer fresh, instead of
+	# snapping straight to the wall. physics_update()'s own per-frame
+	# p.face(..., delta) call (not the -1.0 "snap" form) then eases the turn
+	# into facing the wall too, for free.
 	_wrap_from_normal = _normal
-	_wrap_from_point = _attach_point
-	_wrap_t = 1.0
+	_wrap_from_point = p.global_position - _normal * p.config.wall_hug_distance
+	_wrap_t = 0.0
 	p.velocity = Vector3.ZERO
 	p.can_dive = true
-	_apply_position(_normal, _attach_point)
-	p.face(-_normal, -1.0)
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_WALL_CLIMB_IDLE)
 
@@ -40,7 +45,10 @@ func physics_update(delta: float) -> void:
 	var c := p.config
 
 	var right := _wall_right(_normal)
-	var strafe := p.input_dir().dot(right)
+	# Raw action strengths, not p.input_dir() — wall-climb steering is fixed
+	# to the controls themselves (A always strafes one way, D the other),
+	# not reinterpreted relative to wherever the camera happens to be looking.
+	var strafe := Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left")
 	var climb := Input.get_action_strength(&"move_forward") - Input.get_action_strength(&"move_back")
 	var move := right * strafe + Vector3.UP * climb
 	if move.length() > 1.0:

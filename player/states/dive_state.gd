@@ -34,6 +34,13 @@ func physics_update(delta: float) -> void:
 	if Input.is_action_just_pressed(&"crouch_pound"):
 		machine.transition_to(&"Pound")
 		return
+	# A climbable wall takes priority over the plain wall-bounce below — same
+	# check/placement GroundState and AirState use, so diving straight into
+	# one grabs it instead of cannoning off it.
+	var wall := p.find_climbable_wall()
+	if not wall.is_empty():
+		p.grab_wall(wall.point, wall.normal)
+		return
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
 	p.move_and_slide()

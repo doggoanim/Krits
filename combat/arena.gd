@@ -237,6 +237,15 @@ func _on_orb_hit(orb: Orb) -> void:
 		if is_instance_valid(e):
 			e.take_damage(dmg)   # same damage to every enemy
 	player.bounce_off_orb(combo)
+	if _over:
+		# That damage just finished off the last enemy — take_damage()'s
+		# defeat chain ran synchronously inside the loop above and already
+		# called _end(), which reset the combo to 0 for the HUD. Emitting
+		# this hit's own (now-stale) nonzero combo below would stomp that
+		# reset right back to the finishing count, and with the fight over
+		# there's no later hit or landing left to clear it again — it would
+		# just sit there on screen. Skip it instead.
+		return
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
