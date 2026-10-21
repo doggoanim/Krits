@@ -69,17 +69,22 @@ func physics_update(delta: float) -> void:
 	var floor_angle := p.get_floor_angle()
 	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg)
 	if on_steep_slope:
+		var normal := p.get_floor_normal()
+		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
+		down_slope = down_slope.normalized() if down_slope.length() > 0.001 else p.facing
 		if p.jump_buffer_t > 0.0:
+			# On top of whatever momentum the slide had already built up
+			# (start_jump() leaves horizontal velocity alone), kick you
+			# further along the slide's own downhill direction — jumping off
+			# a steep slope should read as leaping out of the slide, not
+			# just a vertical hop that happens to still be drifting.
+			p.set_hvel(p.get_hvel() + down_slope * c.slope_jump_push)
 			p.start_jump(c.jump_velocity)
 			return
 		if not _slope_sliding:
 			p.audio.play_skid()
 		_slope_sliding = true
-		var normal := p.get_floor_normal()
-		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
-		if down_slope.length() > 0.001:
-			down_slope = down_slope.normalized()
-			p.face(down_slope, delta)
+		p.face(down_slope, delta)
 		var target_speed := c.slope_speed_for_angle(floor_angle)   ## steeper = faster, see PlayerConfig
 		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
 		p.visual.play(PlayerVisual.ANIM_SLIDE)

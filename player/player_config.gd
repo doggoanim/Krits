@@ -21,6 +21,9 @@ extends Resource
 											## between the two scales linearly with steepness,
 											## see slope_speed_for_angle()
 @export var slope_slide_accel := 25.0      ## how quickly slope-sliding ramps up to its target speed
+@export var slope_jump_push := 6.0         ## extra horizontal kick along the downhill direction when
+											## jumping off a slope slide, added on top of whatever
+											## momentum the slide had already built up
 
 ## Target downhill speed for a floor this steep — linearly scales from
 ## slope_slide_speed right at the slide threshold up to slope_slide_max_speed
