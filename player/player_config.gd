@@ -37,6 +37,18 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 	var t := inverse_lerp(slope_slide_angle_deg, 90.0, rad_to_deg(angle_rad))
 	return lerp(slope_slide_speed, slope_slide_max_speed, clampf(t, 0.0, 1.0))
 
+@export_group("Wall Climb")
+## A wall is climbable purely by having Player.CLIMBABLE_MASK's collision
+## layer bit set — no extra node needed, just a checkbox per wall. See
+## Player.find_climbable_wall()/probe_wall_near() and
+## player/states/wall_climb_state.gd.
+@export var wall_climb_speed := 5.0        ## movement speed along the wall surface, strafing and climbing alike
+@export var wall_hug_distance := 0.5       ## how far the player's capsule center sits from the wall's own surface
+@export var wall_grab_reach := 1.0         ## how far ahead the initial grab probe reaches
+@export var wall_probe_reach := 1.0        ## how far each continuous re-stick/corner-wrap probe reaches
+@export var wall_jump_off_speed := 7.0     ## horizontal push away from the wall when jumping off
+@export var wall_jump_off_velocity := 10.0   ## vertical speed of a wall-jump
+
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",
 ## see GroundState's _slide_is_turn) does this instead of a plain jump —

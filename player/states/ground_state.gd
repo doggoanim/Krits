@@ -56,6 +56,11 @@ func physics_update(delta: float) -> void:
 	var was_sliding := p.visual.is_holding_anim(PlayerVisual.ANIM_SLIDE)
 	_turn_flip_t = maxf(0.0, _turn_flip_t - delta)
 
+	var wall := p.find_climbable_wall()
+	if not wall.is_empty():
+		p.grab_wall(wall.point, wall.normal)
+		return
+
 	# Too steep to stand or walk on at all — a separate mechanic from the
 	# stop/turn skid below, checked first and completely skipping that
 	# detection (and the side-flip trick it can arm) while it's active. A

@@ -29,6 +29,11 @@ const ANIM_CROUCH_WALK := &"crouch_walk"
 const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
 const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
 const ANIM_SIDE_JUMP := &"side_jump"             ## Mario 64-style skid-turn trick jump
+const ANIM_WALL_CLIMB_IDLE := &"wall_climb_idle" ## holding still against a climbable wall
+const ANIM_WALL_CLIMB := &"wall_climb"           ## looping climb/shimmy while moving on one
+## Placeholder clip names — not baked into the model yet (see WallClimbState).
+## play() just warns and no-ops until the real clips exist, so the feature
+## works mechanically in the meantime, just with no pose.
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,

@@ -11,6 +11,14 @@ const RADIUS := 0.4
 const HIT_INVULN := 0.8
 const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime puddle
 
+## A wall is climbable purely by having this collision layer bit set (in
+## addition to whatever else it's on, e.g. layer 1 for its solid collision)
+## — no extra node needed, just a checkbox in the Inspector's Collision
+## Layer grid per-wall. See find_climbable_wall()/probe_wall_near() and
+## player/states/wall_climb_state.gd.
+const CLIMBABLE_MASK := 1 << 8   # layer 9: climbable walls
+const WALL_CLIMB_REGRAB_COOLDOWN := 0.3   ## see wall_climb_cd
+
 ## Godot's automatic floor-snap re-grounds the body if it's within this
 ## distance of a floor after move_and_slide() — see _update_floor_snap().
 const GROUND_FLOOR_SNAP := 0.3
@@ -31,6 +39,8 @@ var coyote := 0.0
 var jump_buffer_t := 0.0
 var invuln := 0.0
 var roll_cd := 0.0
+var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per-frame
+						   ## find_climbable_wall() check can't instantly re-grab it
 
 const LEAN_PITCH_MAX := 0.18     ## ~10 degrees, forward/back lean at full speed
 const LEAN_BANK_MAX := 0.28      ## ~16 degrees, side bank at the fastest turns
@@ -83,7 +93,7 @@ func _ready() -> void:
 		&"Roll": RollState.new(), &"Air": AirState.new(),
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
-		&"Frozen": FrozenState.new(),
+		&"Frozen": FrozenState.new(), &"WallClimb": WallClimbState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -139,6 +149,7 @@ func _update_timers(delta: float) -> void:
 		jump_buffer_t = maxf(0.0, jump_buffer_t - delta)
 	invuln = maxf(0.0, invuln - delta)
 	roll_cd = maxf(0.0, roll_cd - delta)
+	wall_climb_cd = maxf(0.0, wall_climb_cd - delta)
 
 ## Every jump/bounce/pound-jump sets velocity.y and switches state WITHOUT
 ## calling move_and_slide() that same frame — the new state's own
@@ -202,6 +213,66 @@ func air_control(delta: float) -> void:
 		h = h.move_toward(input * config.air_speed, config.air_accel * delta)
 	set_hvel(h)
 
+## Rotated copies of `old_normal`, tried in order, for probe_wall_near()'s
+## corner-wrap search below — 0° first (stay on the same flat wall), then
+## alternating left/right out to ±120° so a wall meeting the old one at any
+## angle (a square building corner, a shallower one, even briefly doubling
+## back) still gets found.
+const WALL_WRAP_ANGLES_DEG: Array[float] = [0.0, 30.0, -30.0, 60.0, -60.0, 90.0, -90.0, 120.0, -120.0]
+
+## Looks for a climbable surface at/around `point`, trying `old_normal`
+## first and then that direction rotated by increasing angles around world
+## UP (see WALL_WRAP_ANGLES_DEG). This single search does double duty: with
+## no rotation it's just "stay stuck to the wall I'm already on", and with
+## a rotation it's "wrap onto whatever adjacent climbable wall is here
+## instead" — WallClimbState doesn't need to special-case corners at all,
+## since both cases are just this same call finding a hit, possibly with a
+## new normal.
+func probe_wall_near(point: Vector3, old_normal: Vector3) -> Dictionary:
+	var space := get_world_3d().direct_space_state
+	for angle_deg in WALL_WRAP_ANGLES_DEG:
+		var dir := old_normal.rotated(Vector3.UP, deg_to_rad(angle_deg))
+		var from := point + dir * config.wall_probe_reach
+		var to := point - dir * 0.1   # a little past the point, so a surface right at it still registers
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, CLIMBABLE_MASK, [get_rid()]))
+		if hit.is_empty():
+			continue
+		var normal: Vector3 = hit.normal
+		normal.y = 0.0
+		if normal.length() < 0.1:
+			continue   # a floor/ceiling hit, not a wall — skip it
+		return {"point": hit.position, "normal": normal.normalized()}
+	return {}
+
+## Looks for a climbable wall directly ahead — called from Ground/Air every
+## frame to auto-grab on touch, same spirit as the old ledge/pole triggers
+## but done with a raycast instead of an Area3D, since "climbable" here is
+## just a collision layer bit on the wall's own existing body, not a
+## dedicated node. NOTE: untested against real level art — tune
+## wall_grab_reach/wall_probe_reach in PlayerConfig once there's an actual
+## climbable wall to test against.
+func find_climbable_wall() -> Dictionary:
+	if wall_climb_cd > 0.0:
+		return {}
+	var dir := get_hvel()
+	dir = dir if dir.length() > 0.1 else -facing
+	dir = Vector3(dir.x, 0.0, dir.z)
+	if dir.length() < 0.001:
+		return {}
+	dir = dir.normalized()
+	var probe_origin := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
+	var space := get_world_3d().direct_space_state
+	var from := probe_origin - dir * config.wall_grab_reach
+	var to := probe_origin + dir * 0.1
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, CLIMBABLE_MASK, [get_rid()]))
+	if hit.is_empty():
+		return {}
+	var normal: Vector3 = hit.normal
+	normal.y = 0.0
+	if normal.length() < 0.1:
+		return {}
+	return {"point": hit.position, "normal": normal.normalized()}
+
 # ---------------------------------------------------------------- actions
 
 ## Every jump is a fixed, snappy height — no variable height from holding the
@@ -254,6 +325,35 @@ func start_side_flip(dir: Vector3) -> void:
 	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
 	audio.play_side_flip()
+	machine.transition_to(&"Air")
+
+## Called whenever find_climbable_wall() finds one, from any state. Guarded
+## against Frozen (a cutscene shouldn't be interrupted by scenery), against
+## re-entering WallClimb while already climbing, and against the brief
+## regrab cooldown right after jumping off one.
+func grab_wall(point: Vector3, normal: Vector3) -> void:
+	if dead or machine.current_name == &"Frozen" or machine.current_name == &"WallClimb" or wall_climb_cd > 0.0:
+		return
+	machine.transition_to(&"WallClimb", {"point": point, "normal": normal})
+
+## Launches away from whatever wall you were climbing, toward `away`, with
+## its own distinct push/height (independent of start_jump()'s
+## jump_velocity). Arms wall_climb_cd so the very next frame's
+## find_climbable_wall() (which would otherwise still be facing the same
+## wall) can't instantly re-grab it.
+func jump_off_wall(away: Vector3) -> void:
+	set_hvel(away * config.wall_jump_off_speed)
+	velocity.y = config.wall_jump_off_velocity
+	face(away)
+	coyote = 0.0
+	jump_buffer_t = 0.0
+	can_dive = true
+	wall_climb_cd = WALL_CLIMB_REGRAB_COOLDOWN
+	visual.cancel_hold()
+	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	visual.roll_jump_start()
+	effects.burst_jump_dust()
+	audio.play_jump()
 	machine.transition_to(&"Air")
 
 ## `combo` is Arena's running combo count for this hit (1 on the first orb of

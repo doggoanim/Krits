@@ -24,6 +24,11 @@ func physics_update(delta: float) -> void:
 		machine.transition_to(&"Pound")
 		return
 
+	var wall := p.find_climbable_wall()
+	if not wall.is_empty():
+		p.grab_wall(wall.point, wall.normal)
+		return
+
 	# A wall bounce's reaction pose (play_hold, below) also locks out steering
 	# for the same window — you're along for the bounce's arc until it ends.
 	if not p.visual.is_holding():
