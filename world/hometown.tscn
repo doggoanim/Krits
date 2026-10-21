@@ -35,14 +35,14 @@ albedo_color = Color(0.62, 0.6, 0.58, 1)
 [sub_resource type="BoxMesh" id="Mesh_House1Walls"]
 size = Vector3(6, 4, 6)
 
-[sub_resource type="BoxShape3D" id="Shape_House1Roof"]
-size = Vector3(6.9, 2.4, 6.9)
-
 [sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
 albedo_color = Color(0.8487937, 0, 0.047033705, 1)
 
 [sub_resource type="PrismMesh" id="Mesh_House1Roof"]
 size = Vector3(6.9, 2.4, 6.9)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_gka81"]
+data = PackedVector3Array(0, 1.1999999, 3.4499998, 3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, -3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, -3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, -3.4499998, -1.1999999, 3.4499998, 3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 3.4499998, -1.1999999, -3.4499998, -3.4499998, -1.1999999, -3.4499998)
 
 [sub_resource type="BoxShape3D" id="Shape_House2Walls"]
 size = Vector3(7, 5, 5)
@@ -53,14 +53,14 @@ albedo_color = Color(0.7, 0.65, 0.55, 1)
 [sub_resource type="BoxMesh" id="Mesh_House2Walls"]
 size = Vector3(7, 5, 5)
 
-[sub_resource type="BoxShape3D" id="Shape_House2Roof"]
-size = Vector3(8.05, 3, 5.75)
-
 [sub_resource type="StandardMaterial3D" id="Mat_RoofBlue"]
 albedo_color = Color(0.2886788, 0.553356, 0.7931672, 1)
 
 [sub_resource type="PrismMesh" id="Mesh_House2Roof"]
 size = Vector3(8.05, 3, 5.75)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_70bq6"]
+data = PackedVector3Array(0, 1.5, 2.875, 4.025, -1.5, 2.875, -4.025, -1.5, 2.875, 0, 1.5, -2.875, -4.025, -1.5, -2.875, 4.025, -1.5, -2.875, 0, 1.5, 2.875, 0, 1.5, -2.875, 4.025, -1.5, 2.875, 0, 1.5, -2.875, 4.025, -1.5, -2.875, 4.025, -1.5, 2.875, 0, 1.5, -2.875, 0, 1.5, 2.875, -4.025, -1.5, -2.875, 0, 1.5, 2.875, -4.025, -1.5, 2.875, -4.025, -1.5, -2.875, -4.025, -1.5, 2.875, 4.025, -1.5, 2.875, -4.025, -1.5, -2.875, 4.025, -1.5, 2.875, 4.025, -1.5, -2.875, -4.025, -1.5, -2.875)
 
 [sub_resource type="BoxShape3D" id="Shape_House3Walls"]
 size = Vector3(5, 3.5, 5)
@@ -68,11 +68,11 @@ size = Vector3(5, 3.5, 5)
 [sub_resource type="BoxMesh" id="Mesh_House3Walls"]
 size = Vector3(5, 3.5, 5)
 
-[sub_resource type="BoxShape3D" id="Shape_House3Roof"]
-size = Vector3(5.75, 2.1, 5.75)
-
 [sub_resource type="PrismMesh" id="Mesh_House3Roof"]
 size = Vector3(5.75, 2.1, 5.75)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_bf34x"]
+data = PackedVector3Array(0, 1.05, 2.875, 2.875, -1.05, 2.875, -2.875, -1.05, 2.875, 0, 1.05, -2.875, -2.875, -1.05, -2.875, 2.875, -1.05, -2.875, 0, 1.05, 2.875, 0, 1.05, -2.875, 2.875, -1.05, 2.875, 0, 1.05, -2.875, 2.875, -1.05, -2.875, 2.875, -1.05, 2.875, 0, 1.05, -2.875, 0, 1.05, 2.875, -2.875, -1.05, -2.875, 0, 1.05, 2.875, -2.875, -1.05, 2.875, -2.875, -1.05, -2.875, -2.875, -1.05, 2.875, 2.875, -1.05, 2.875, -2.875, -1.05, -2.875, 2.875, -1.05, 2.875, 2.875, -1.05, -2.875, -2.875, -1.05, -2.875)
 
 [sub_resource type="BoxShape3D" id="Shape_House4Walls"]
 size = Vector3(6, 4.5, 6)
@@ -80,11 +80,11 @@ size = Vector3(6, 4.5, 6)
 [sub_resource type="BoxMesh" id="Mesh_House4Walls"]
 size = Vector3(6, 4.5, 6)
 
-[sub_resource type="BoxShape3D" id="Shape_House4Roof"]
-size = Vector3(6.9, 2.7, 6.9)
-
 [sub_resource type="PrismMesh" id="Mesh_House4Roof"]
 size = Vector3(6.9, 2.7, 6.9)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_8mbmp"]
+data = PackedVector3Array(0, 1.35, 3.4499998, 3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, -3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, -3.4499998, 0, 1.35, 3.4499998, 0, 1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, 3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, 0, 1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, 0, 1.35, 3.4499998, -3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, -3.4499998, -1.35, 3.4499998, 3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 3.4499998, -1.35, -3.4499998, -3.4499998, -1.35, -3.4499998)
 
 [sub_resource type="CylinderShape3D" id="Shape_WellRim"]
 height = 1.0
@@ -300,12 +300,12 @@ mesh = SubResource("Mesh_House1Walls")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="House1/Roof" unique_id=803769460]
-shape = SubResource("Shape_House1Roof")
-
 [node name="Mesh" type="MeshInstance3D" parent="House1/Roof" unique_id=1345513660]
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_House1Roof")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="House1/Roof" unique_id=1097758306]
+shape = SubResource("ConcavePolygonShape3D_gka81")
 
 [node name="House2" type="Node3D" parent="." unique_id=1894083705]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -13)
@@ -324,12 +324,12 @@ mesh = SubResource("Mesh_House2Walls")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="House2/Roof" unique_id=874676883]
-shape = SubResource("Shape_House2Roof")
-
 [node name="Mesh" type="MeshInstance3D" parent="House2/Roof" unique_id=996289975]
 material_override = SubResource("Mat_RoofBlue")
 mesh = SubResource("Mesh_House2Roof")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="House2/Roof" unique_id=1197262942]
+shape = SubResource("ConcavePolygonShape3D_70bq6")
 
 [node name="House3" type="Node3D" parent="." unique_id=1523153923]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 9)
@@ -348,12 +348,12 @@ mesh = SubResource("Mesh_House3Walls")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="House3/Roof" unique_id=401759767]
-shape = SubResource("Shape_House3Roof")
-
 [node name="Mesh" type="MeshInstance3D" parent="House3/Roof" unique_id=639735868]
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_House3Roof")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="House3/Roof" unique_id=1160644741]
+shape = SubResource("ConcavePolygonShape3D_bf34x")
 
 [node name="House4" type="Node3D" parent="." unique_id=1343661762]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 11)
@@ -372,12 +372,12 @@ mesh = SubResource("Mesh_House4Walls")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.85, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="House4/Roof" unique_id=1990004968]
-shape = SubResource("Shape_House4Roof")
-
 [node name="Mesh" type="MeshInstance3D" parent="House4/Roof" unique_id=1039251097]
 material_override = SubResource("Mat_RoofBlue")
 mesh = SubResource("Mesh_House4Roof")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="House4/Roof" unique_id=187202882]
+shape = SubResource("ConcavePolygonShape3D_8mbmp")
 
 [node name="Well" type="Node3D" parent="." unique_id=1249735749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
