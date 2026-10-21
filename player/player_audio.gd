@@ -37,6 +37,10 @@ const FOOTSTEP_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_1.wav"),
 	preload(SFX_DIR + "footsteps_grass_2.wav"),
 	preload(SFX_DIR + "footsteps_grass_3.wav"),
+	preload(SFX_DIR + "footsteps_grass_4.wav"),
+	preload(SFX_DIR + "footsteps_grass_5.wav"),
+	preload(SFX_DIR + "footsteps_grass_6.wav"),
+	preload(SFX_DIR + "footsteps_grass_7.wav"),
 ]
 
 ## +/- this fraction of normal pitch, picked fresh each play — "slight"
