@@ -35,8 +35,8 @@ albedo_color = Color(0.62, 0.6, 0.58, 1)
 [sub_resource type="BoxMesh" id="Mesh_House1Walls"]
 size = Vector3(6, 4, 6)
 
-[sub_resource type="BoxShape3D" id="Shape_House1Roof"]
-size = Vector3(6.9, 2.4, 6.9)
+[sub_resource type="ConvexPolygonShape3D" id="Shape_House1Roof"]
+points = PackedVector3Array(-3.45, -1.2, -3.45, 3.45, -1.2, -3.45, 3.45, -1.2, 3.45, -3.45, -1.2, 3.45, 0, 1.2, -3.45, 0, 1.2, 3.45)
 
 [sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
 albedo_color = Color(0.8487937, 0, 0.047033705, 1)
@@ -53,8 +53,8 @@ albedo_color = Color(0.7, 0.65, 0.55, 1)
 [sub_resource type="BoxMesh" id="Mesh_House2Walls"]
 size = Vector3(7, 5, 5)
 
-[sub_resource type="BoxShape3D" id="Shape_House2Roof"]
-size = Vector3(8.05, 3, 5.75)
+[sub_resource type="ConvexPolygonShape3D" id="Shape_House2Roof"]
+points = PackedVector3Array(-4.025, -1.5, -2.875, 4.025, -1.5, -2.875, 4.025, -1.5, 2.875, -4.025, -1.5, 2.875, 0, 1.5, -2.875, 0, 1.5, 2.875)
 
 [sub_resource type="StandardMaterial3D" id="Mat_RoofBlue"]
 albedo_color = Color(0.2886788, 0.553356, 0.7931672, 1)
@@ -68,8 +68,8 @@ size = Vector3(5, 3.5, 5)
 [sub_resource type="BoxMesh" id="Mesh_House3Walls"]
 size = Vector3(5, 3.5, 5)
 
-[sub_resource type="BoxShape3D" id="Shape_House3Roof"]
-size = Vector3(5.75, 2.1, 5.75)
+[sub_resource type="ConvexPolygonShape3D" id="Shape_House3Roof"]
+points = PackedVector3Array(-2.875, -1.05, -2.875, 2.875, -1.05, -2.875, 2.875, -1.05, 2.875, -2.875, -1.05, 2.875, 0, 1.05, -2.875, 0, 1.05, 2.875)
 
 [sub_resource type="PrismMesh" id="Mesh_House3Roof"]
 size = Vector3(5.75, 2.1, 5.75)
@@ -80,8 +80,8 @@ size = Vector3(6, 4.5, 6)
 [sub_resource type="BoxMesh" id="Mesh_House4Walls"]
 size = Vector3(6, 4.5, 6)
 
-[sub_resource type="BoxShape3D" id="Shape_House4Roof"]
-size = Vector3(6.9, 2.7, 6.9)
+[sub_resource type="ConvexPolygonShape3D" id="Shape_House4Roof"]
+points = PackedVector3Array(-3.45, -1.35, -3.45, 3.45, -1.35, -3.45, 3.45, -1.35, 3.45, -3.45, -1.35, 3.45, 0, 1.35, -3.45, 0, 1.35, 3.45)
 
 [sub_resource type="PrismMesh" id="Mesh_House4Roof"]
 size = Vector3(6.9, 2.7, 6.9)
