@@ -86,12 +86,17 @@ func physics_update(delta: float) -> void:
 		var height_capped := climb > 0.0 and tentative.y >= top_limit
 		if height_capped:
 			tentative.y = top_limit
-		# Only let the search wrap onto a different wall while the player is
-		# actually steering sideways — pure up/down climbing should only ever
-		# re-check the same wall it's already on, so running out of it (the
-		# actual top/bottom) reliably comes back empty instead of possibly
-		# latching onto some unrelated nearby climbable surface.
-		var found := p.probe_wall_near(tentative, _normal, strafe, absf(strafe) > 0.05)
+		# NOTE: this used to restrict the angle search to 0° (no wrap) while
+		# climbing straight up, on the theory that wrapping onto some
+		# unrelated nearby surface was what let players climb too high.
+		# Reverted — it made plain vertical climbing far more fragile (no
+		# more tolerance for the same wall's own minor surface seams/bumps,
+		# which the multi-angle search was incidentally also covering),
+		# causing random false "top" stops partway up a wall. The real fix
+		# for over-climbing is wall_climb_max_height above, which caps
+		# height independently of what probe_wall_near finds — so there's
+		# nothing left to gain from restricting the search here.
+		var found := p.probe_wall_near(tentative, _normal, strafe)
 		if not found.is_empty():
 			if found.normal.dot(_normal) < 0.99:
 				# A meaningfully different normal than what we're currently
