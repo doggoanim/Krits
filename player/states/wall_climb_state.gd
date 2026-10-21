@@ -20,14 +20,18 @@ var _attach_point := Vector3.ZERO
 var _wrap_from_normal := Vector3.FORWARD   ## where a corner transition eased FROM
 var _wrap_from_point := Vector3.ZERO
 var _wrap_t := 1.0   ## 0 = just started easing into _normal/_attach_point, 1 = fully settled there
-var _at_top := false   ## true once trying to climb further up finds no more wall — see
-                        ## physics_update()'s climb-up probe and the jump handling below
+var _at_top := false   ## true once trying to climb further up finds no more wall, OR the
+                        ## wall_climb_max_height cap is reached — see physics_update()'s
+                        ## climb-up probe and the jump handling below
+var _grab_height := 0.0   ## _attach_point.y at the moment of grabbing — wall_climb_max_height
+                           ## is measured from here, not from world origin
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
 	_attach_point = _msg.get("point", p.global_position)
 	_at_top = false
+	_grab_height = _attach_point.y
 	# Ease the very first grab in too, not just later corner wraps: seed the
 	# "from" pair at the player's actual current spot — same normal as the
 	# target, so _apply_position()'s blend below only moves the position, not
@@ -70,6 +74,18 @@ func physics_update(delta: float) -> void:
 		var ground = p.ground_height_below(_attach_point, c.wall_climb_speed * delta + 0.2)
 		if ground != null and tentative.y < ground:
 			tentative.y = ground
+		# A hard cap independent of the wall's own collision height — some
+		# climbable walls simply have collision that reaches much further up
+		# than the climbable-looking art (a tower, a wall that continues
+		# into geometry overhead, ...), so relying only on "the probe found
+		# nothing" to call it the top let the player keep climbing well past
+		# where it should stop. Clamping tentative.y here means the player
+		# can never actually ask to go higher than the cap in the first
+		# place, regardless of what's physically still there above it.
+		var top_limit := _grab_height + c.wall_climb_max_height
+		var height_capped := climb > 0.0 and tentative.y >= top_limit
+		if height_capped:
+			tentative.y = top_limit
 		# Only let the search wrap onto a different wall while the player is
 		# actually steering sideways — pure up/down climbing should only ever
 		# re-check the same wall it's already on, so running out of it (the
@@ -89,7 +105,10 @@ func physics_update(delta: float) -> void:
 			_attach_point = found.point
 			_normal = found.normal
 			if climb > 0.0:
-				_at_top = false
+				# Still "at the top" if we only got this far because the
+				# height cap clamped us there, even though the wall itself
+				# keeps going — not just when the wall genuinely ran out.
+				_at_top = height_capped
 		elif climb > 0.0:
 			# Tried to climb further up and found nothing there — the top
 			# edge of the wall. Only set on an actual upward attempt (not
