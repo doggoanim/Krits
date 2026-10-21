@@ -256,11 +256,12 @@ func start_side_flip(dir: Vector3) -> void:
 	audio.play_side_flip()
 	machine.transition_to(&"Air")
 
-## Called by Pole.gd's own grab trigger whenever the player touches a pole —
+## Called by a PoleGrab's own trigger whenever the player touches a pole (or
+## any other object a PoleGrab has been attached to, like a tree trunk) —
 ## works from any state, grounded or airborne, same as the real thing.
 ## Guarded against Frozen (a cutscene shouldn't be interrupted by scenery)
 ## and against re-entering PoleClimb while already climbing one.
-func grab_pole(pole: Pole) -> void:
+func grab_pole(pole: PoleGrab) -> void:
 	if dead or machine.current_name == &"Frozen" or machine.current_name == &"PoleClimb":
 		return
 	machine.transition_to(&"PoleClimb", {"pole": pole})

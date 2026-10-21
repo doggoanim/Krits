@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://world/pole_grab.gd" id="1_pole_grab"]
+
+[node name="PoleGrab" type="Area3D"]
+script = ExtResource("1_pole_grab")
+
+[node name="GrabShape" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true

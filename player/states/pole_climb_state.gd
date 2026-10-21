@@ -3,10 +3,12 @@ extends PlayerState
 ## Mario 64-style pole climb: hold forward/back to climb up/down, jump to
 ## launch away from the pole. Every other move is locked out just by this
 ## state never calling any of them. Entered via Player.grab_pole(), called
-## by Pole's own grab trigger — works from any prior state, airborne or on
-## the ground, same as the original.
+## by a PoleGrab's own trigger — works from any prior state, airborne or on
+## the ground, same as the original, and regardless of whether the thing
+## being climbed is a standalone Pole prop or a PoleGrab attached to
+## something else entirely (a tree trunk, say).
 
-var _pole: Pole
+var _pole: PoleGrab
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player

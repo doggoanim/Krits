@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://world/pole.gd" id="1_pole"]
+[ext_resource type="PackedScene" path="res://world/pole_grab.tscn" id="2_grab"]
 
 [node name="Pole" type="Node3D"]
 script = ExtResource("1_pole")
@@ -15,11 +16,5 @@ unique_name_in_owner = true
 [node name="MeshInstance" type="MeshInstance3D" parent="Collision"]
 unique_name_in_owner = true
 
-[node name="GrabZone" type="Area3D" parent="."]
-unique_name_in_owner = true
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-
-[node name="GrabShape" type="CollisionShape3D" parent="GrabZone"]
+[node name="GrabZone" parent="." instance=ExtResource("2_grab")]
 unique_name_in_owner = true

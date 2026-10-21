@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
+[ext_resource type="PackedScene" path="res://world/pole_grab.tscn" id="2_pole_grab"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
@@ -474,6 +475,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S100")
 
+[node name="PoleGrab" parent="Trees/Tree1" instance=ExtResource("2_pole_grab")]
+height = 3.0
+
 [node name="Tree2" type="Node3D" parent="Trees" unique_id=481108530]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -45)
 
@@ -491,6 +495,9 @@ mesh = SubResource("Mesh_Trunk_S115")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.738, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S115")
+
+[node name="PoleGrab" parent="Trees/Tree2" instance=ExtResource("2_pole_grab")]
+height = 3.45
 
 [node name="Tree3" type="Node3D" parent="Trees" unique_id=1827265612]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -20)
@@ -510,6 +517,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.708, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S090")
 
+[node name="PoleGrab" parent="Trees/Tree3" instance=ExtResource("2_pole_grab")]
+height = 2.7
+
 [node name="Tree4" type="Node3D" parent="Trees" unique_id=1661075599]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0, 5)
 
@@ -527,6 +537,9 @@ mesh = SubResource("Mesh_Trunk_S105")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.326, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S105")
+
+[node name="PoleGrab" parent="Trees/Tree4" instance=ExtResource("2_pole_grab")]
+height = 3.15
 
 [node name="Tree5" type="Node3D" parent="Trees" unique_id=591993256]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 30)
@@ -546,6 +559,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.944, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S120")
 
+[node name="PoleGrab" parent="Trees/Tree5" instance=ExtResource("2_pole_grab")]
+height = 3.6
+
 [node name="Tree6" type="Node3D" parent="Trees" unique_id=295000724]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 42)
 
@@ -563,6 +579,9 @@ mesh = SubResource("Mesh_Trunk_S095")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.914, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S095")
+
+[node name="PoleGrab" parent="Trees/Tree6" instance=ExtResource("2_pole_grab")]
+height = 2.85
 
 [node name="Tree7" type="Node3D" parent="Trees" unique_id=1235921288]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 45)
@@ -582,6 +601,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.532, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S110")
 
+[node name="PoleGrab" parent="Trees/Tree7" instance=ExtResource("2_pole_grab")]
+height = 3.3
+
 [node name="Tree8" type="Node3D" parent="Trees" unique_id=1826006510]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 38)
 
@@ -599,6 +621,9 @@ mesh = SubResource("Mesh_Trunk_S100")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S100")
+
+[node name="PoleGrab" parent="Trees/Tree8" instance=ExtResource("2_pole_grab")]
+height = 3.0
 
 [node name="Tree9" type="Node3D" parent="Trees" unique_id=1687150538]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 22)
@@ -618,6 +643,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.708, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S090")
 
+[node name="PoleGrab" parent="Trees/Tree9" instance=ExtResource("2_pole_grab")]
+height = 2.7
+
 [node name="Tree10" type="Node3D" parent="Trees" unique_id=1727269730]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, -15)
 
@@ -635,6 +663,9 @@ mesh = SubResource("Mesh_Trunk_S115")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.738, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S115")
+
+[node name="PoleGrab" parent="Trees/Tree10" instance=ExtResource("2_pole_grab")]
+height = 3.45
 
 [node name="Tree11" type="Node3D" parent="Trees" unique_id=1738491399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, -35)
@@ -654,6 +685,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S100")
 
+[node name="PoleGrab" parent="Trees/Tree11" instance=ExtResource("2_pole_grab")]
+height = 3.0
+
 [node name="Tree12" type="Node3D" parent="Trees" unique_id=74083270]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -42)
 
@@ -671,6 +705,9 @@ mesh = SubResource("Mesh_Trunk_S110")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.532, 0)
 material_override = SubResource("Mat_Foliage")
 mesh = SubResource("Mesh_Foliage_S110")
+
+[node name="PoleGrab" parent="Trees/Tree12" instance=ExtResource("2_pole_grab")]
+height = 3.3
 
 [node name="StartSpawn" type="Area3D" parent="." unique_id=1738210625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 14)
