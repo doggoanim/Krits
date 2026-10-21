@@ -202,12 +202,20 @@ func air_control(delta: float) -> void:
 		h = h.move_toward(input * config.air_speed, config.air_accel * delta)
 	set_hvel(h)
 
+## How far off dead-vertical (for the wall) or dead-flat (for the ledge top)
+## a surface's normal is allowed to be and still count as grabbable — ledge
+## hang only ever catches a perfectly flat, unrotated ledge, never a beveled
+## edge, a sloped roof, or anything else even slightly tilted.
+const LEDGE_MAX_TILT := 0.05
+
 ## Looks for a grabbable ledge directly ahead while falling — a forward probe
 ## at roughly chest height finds a wall, then a downward probe just past it
 ## looks for a surface near that same height (the ledge's own top edge, not
-## a wall that just keeps going well above or below reach). Called from
-## AirState every frame while falling; returns {} when nothing qualifies,
-## otherwise wall_normal/hang_pos/stand_pos for LedgeHangState to use.
+## a wall that just keeps going well above or below reach). Both the wall
+## and the ledge top must come back perfectly flat (see LEDGE_MAX_TILT) —
+## any rotation on either surface disqualifies it. Called from AirState
+## every frame while falling; returns {} when nothing qualifies, otherwise
+## wall_normal/hang_pos for LedgeHangState to use.
 ## NOTE: geometry-sensitive and untested against real level art — tune the
 ## Ledge Hang numbers in PlayerConfig once there's an actual ledge to grab.
 func find_ledge() -> Dictionary:
@@ -227,9 +235,9 @@ func find_ledge() -> Dictionary:
 		return {}
 
 	var normal: Vector3 = fwd_hit.normal
+	if absf(normal.y) > LEDGE_MAX_TILT:
+		return {}   # not a perfectly vertical wall — tilted/rotated, so not grabbable
 	normal.y = 0.0
-	if normal.length() < 0.1:
-		return {}
 	normal = normal.normalized()
 	if (-dir).dot(normal) < 0.5:
 		return {}   # too glancing an angle — not squarely facing the wall
@@ -242,6 +250,8 @@ func find_ledge() -> Dictionary:
 		down_from, down_from + Vector3.DOWN * (tol * 2.0), collision_mask, [get_rid()]))
 	if down_hit.is_empty():
 		return {}   # the wall keeps going well above grab height — nothing to grab here
+	if down_hit.normal.dot(Vector3.UP) < 1.0 - LEDGE_MAX_TILT:
+		return {}   # not a perfectly flat, level ledge top — tilted/rotated, so not grabbable
 
 	var top_y: float = down_hit.position.y
 	if top_y < global_position.y + config.ledge_grab_height - tol:
@@ -249,8 +259,7 @@ func find_ledge() -> Dictionary:
 
 	var hang_pos := hit_xz + normal * config.ledge_hang_offset
 	hang_pos.y = top_y - STAND_HEIGHT * 0.5
-	var stand_pos := Vector3(probe_xz.x, top_y, probe_xz.z) - normal * 0.3
-	return {"wall_normal": normal, "hang_pos": hang_pos, "stand_pos": stand_pos}
+	return {"wall_normal": normal, "hang_pos": hang_pos}
 
 # ---------------------------------------------------------------- actions
 

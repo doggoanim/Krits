@@ -36,13 +36,12 @@ extends Resource
 ## anything the player can already stand on or run into is a valid ledge.
 @export var ledge_grab_height := 1.5             ## height above the player's feet the forward probe
 												  ## is cast at — roughly chest/shoulder height
-@export var ledge_grab_forward_offset := 0.6     ## how far ahead of the player's capsule surface
+@export var ledge_grab_forward_offset := 1.0     ## how far ahead of the player's capsule surface
 												  ## the forward probe reaches
 @export var ledge_grab_vertical_tolerance := 0.35   ## the ledge top must land within this far above
 													 ## or below ledge_grab_height to count as reachable
 @export var ledge_hang_offset := 0.3             ## how far back from the wall the player is held
 												  ## while hanging, clear of the wall face
-@export var ledge_climb_time := 0.5              ## how long the climb-up-and-over takes
 @export var ledge_drop_speed := -3.0             ## initial downward speed when dropping off (crouch)
 
 ## Target downhill speed for a floor this steep — linearly scales from
