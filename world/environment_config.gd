@@ -20,7 +20,7 @@ extends Resource
 @export var sun_shadow_blur := 2.5                   ## higher = softer shadow edges (no hard realistic shadows)
 
 @export_group("Sky")
-@export var sky_top_color := Color(0.22, 0.52, 0.85)      ## cheerful blue, a bit less saturated than before
+@export var sky_top_color := Color(0.180, 0.365, 0.808)      ## cheerful blue, a bit less saturated than before
 @export var sky_horizon_color := Color(0.7, 0.8, 0.9)
 @export var ground_bottom_color := Color(0.28, 0.24, 0.19)
 @export var ground_horizon_color := Color(0.55, 0.5, 0.4)

@@ -33,7 +33,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _combo: Label = %ComboLabel
 
 var _hp_rest_pos: Vector2   ## _hp_group's resting position, read from the scene so the shake
-                            ## always springs back to wherever it's actually placed
+							## always springs back to wherever it's actually placed
 var _portrait_tween: Tween
 var _hp_shake_tween: Tween
 
