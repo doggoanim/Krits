@@ -1,22 +1,16 @@
 class_name AirState
 extends PlayerState
 
-var _diag_frames := 0   ## TEMP: see physics_update()'s print block, for the "jump sometimes
-						 ## doesn't actually move you up" bug — remove once it's found
-
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
 		player.set_crouching(false)
-	_diag_frames = 3
 
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
-	if p.jump_buffer_t > 0.0:
-		if p.coyote > 0.0:
-			p.start_jump(c.jump_velocity)
-			return
-		print("[JumpDebug] Air jump suppressed: coyote window expired")
+	if p.jump_buffer_t > 0.0 and p.coyote > 0.0:
+		p.start_jump(c.jump_velocity)
+		return
 	if Input.is_action_just_pressed(&"roll_dive") and p.can_dive:
 		machine.transition_to(&"Dive")
 		return
@@ -36,19 +30,20 @@ func physics_update(delta: float) -> void:
 		var input := p.input_dir()
 		if input.length() > 0.1:
 			p.face(input, delta)
-	var _diag := _diag_frames > 0
-	if _diag:
-		print("[JumpDebug] Air frame | vel.y before gravity=%.3f on_floor(stale)=%s" % [p.velocity.y, p.is_on_floor()])
 	p.apply_gravity(delta)
-	if _diag:
-		print("[JumpDebug] Air frame | vel.y after gravity=%.3f" % p.velocity.y)
 	# A wall-bounce collision pose protects itself via play_hold — this call
 	# is simply ignored for the moment and takes back over once it expires.
 	p.visual.play(p.visual.jump_start_anim() if p.velocity.y > c.fall_pose_velocity else PlayerVisual.ANIM_FALLING)
 	p.move_and_slide()
-	if _diag:
-		print("[JumpDebug] Air frame | vel.y after move_and_slide=%.3f on_floor=%s global_y=%.3f" \
-			% [p.velocity.y, p.is_on_floor(), p.global_position.y])
-		_diag_frames -= 1
-	if p.is_on_floor():
+	# velocity.y <= 0.0 matters here, not just is_on_floor(): right as a jump
+	# starts, move_and_slide() can report a same-frame false-positive floor
+	# touch resolving the body's resting overlap, even while it's already
+	# moving up — same underlying quirk _update_floor_snap() exists for, just
+	# a case that floor_snap_length alone doesn't cover. Without this guard,
+	# that false positive sent the state back to Ground, whose own -1.0
+	# floor-hug bias stomped the jump's velocity before Air could reclaim it
+	# the very next frame — the jump's effects/sound played but it never
+	# actually left the ground. Only treat it as a real landing while
+	# actually falling.
+	if p.is_on_floor() and p.velocity.y <= 0.0:
 		machine.transition_to(&"Ground")
