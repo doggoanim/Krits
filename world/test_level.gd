@@ -19,9 +19,9 @@ func _ready() -> void:
 	_box(Vector3(0, 0.5, 40), Vector3(8, 1, 8), Color(0.5, 0.5, 0.7), true)
 	_box(Vector3(0, 0.0, 30), Vector3(10, 0.2, 14), Color(0.8, 0.2, 0.2), true)   # lava-colored pit marker
 
-	_spawn(&"start", "Hometown", Vector3(0, 0, 0), &"")
-	_spawn(&"hill", "Hill Outpost", Vector3(30, 4.5, 6), &"azure")
-	_spawn(&"far", "Far Platform", Vector3(0, 1.0, 40), &"crimson")
+	_spawn(&"start", "Hometown", Vector3(0, 0, 0))
+	_spawn(&"hill", "Hill Outpost", Vector3(30, 4.5, 6))
+	_spawn(&"far", "Far Platform", Vector3(0, 1.0, 40))
 
 	# Overworld enemies: they pop in when you approach and wander. Touch one to fight.
 	_enemy(&"slime_solo", Vector3(-25, 0.2, 10), EnemyLibrary.green_slime())
@@ -56,11 +56,10 @@ func _box(pos: Vector3, size: Vector3, col: Color, is_floor := false) -> void:
 	body.add_child(mi)
 	add_child(body)
 
-func _spawn(id: StringName, nm: String, pos: Vector3, outfit: StringName) -> void:
+func _spawn(id: StringName, nm: String, pos: Vector3) -> void:
 	var sp := Spawnpoint.new()
 	sp.spawn_id = id
 	sp.display_name = nm
-	sp.unlocks_outfit = outfit
 	sp.position = pos
 	add_child(sp)
 

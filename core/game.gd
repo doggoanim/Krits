@@ -1,5 +1,5 @@
 extends Node
-## Global game state: stats, story flags, unlocked spawnpoints, outfit, saving.
+## Global game state: stats, story flags, unlocked spawnpoints, saving.
 
 const SAVE_PATH := "user://save.json"
 
@@ -9,8 +9,6 @@ var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
 var god_mode := false
 var input_locked := false   ## true during encounter transitions
-var outfit: StringName = &"default"
-var unlocked_outfits: Array[StringName] = [&"default"]
 
 func _process(delta: float) -> void:
 	stats.tick(delta)
@@ -28,11 +26,6 @@ func unlock_spawn(id: StringName) -> void:
 		unlocked_spawns.append(id)
 	Events.spawnpoint_activated.emit(id)
 	save()
-
-func set_outfit(id: StringName) -> void:
-	if id in unlocked_outfits:
-		outfit = id
-		Events.outfit_changed.emit(id)
 
 ## Clears every "cleared_<id>" world-enemy flag (leaves other story flags
 ## alone), so already-defeated overworld enemies count as undefeated again.
@@ -52,8 +45,6 @@ func delete_save() -> void:
 	story_flags.clear()
 	unlocked_spawns.clear()
 	last_spawn = &""
-	outfit = &"default"
-	unlocked_outfits = [&"default"]
 
 ## Whether there's a save file to resume — MainMenu uses this to decide
 ## whether "Continue" should be enabled.
@@ -64,8 +55,7 @@ func save() -> void:
 	var data := {
 		"stats": stats.to_dict(), "flags": story_flags,
 		"spawns": unlocked_spawns.map(func(s): return String(s)),
-		"last_spawn": String(last_spawn), "outfit": String(outfit),
-		"outfits": unlocked_outfits.map(func(s): return String(s)),
+		"last_spawn": String(last_spawn),
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f: f.store_string(JSON.stringify(data))
@@ -81,7 +71,4 @@ func load_game() -> bool:
 	unlocked_spawns.clear()
 	for s in parsed.get("spawns", []): unlocked_spawns.append(StringName(s))
 	last_spawn = StringName(parsed.get("last_spawn", ""))
-	outfit = StringName(parsed.get("outfit", "default"))
-	unlocked_outfits.clear()
-	for s in parsed.get("outfits", ["default"]): unlocked_outfits.append(StringName(s))
 	return true

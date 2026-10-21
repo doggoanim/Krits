@@ -38,7 +38,7 @@ static func _accumulate_aabb(n: Node, parent_xform: Transform3D, box: AABB, has_
 ## (toon diffuse ramp, specular disabled) and gives it a black inverted-hull
 ## outline `outline_thickness` thick (see CelOutline). Appends every
 ## duplicated material to `out_materials` if given, so a caller (flash-on-hit,
-## outfit tinting, ...) can modify them later without re-walking the tree.
+## slime tinting, ...) can modify them later without re-walking the tree.
 static func apply_cel_shading(model: Node3D, outline_thickness: float,
 		outline_color := Color.BLACK, out_materials: Array = []) -> void:
 	_shade_recursive(model, outline_thickness, outline_color, out_materials)

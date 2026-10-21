@@ -4,7 +4,6 @@ extends Area3D
 
 @export var spawn_id: StringName = &"start"
 @export var display_name := "Start"
-@export var unlocks_outfit: StringName = &""   ## optional cosmetic reward
 
 var _mat := StandardMaterial3D.new()
 
@@ -47,8 +46,6 @@ func is_unlocked() -> bool:
 func activate() -> void:
 	Game.unlock_spawn(spawn_id)
 	Game.stats.full_heal()
-	if unlocks_outfit != &"" and unlocks_outfit not in Game.unlocked_outfits:
-		Game.unlocked_outfits.append(unlocks_outfit)
 
 func respawn_position() -> Vector3:
 	return global_position + Vector3.UP * 0.2

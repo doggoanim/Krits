@@ -3,10 +3,9 @@ extends Control
 ## Live 3D headshot for the HUD portrait. Renders a *second*, independent
 ## copy of the player model into an isolated SubViewport (its own lights,
 ## camera and World3D — never the gameplay scene) and displays it through a
-## TextureRect. Looping the idle clip and listening for outfit changes keeps
-## it in sync with the in-game character without ever touching Player or the
-## live PlayerVisual, so nothing here can affect — or be affected by —
-## gameplay.
+## TextureRect. Looping the idle clip keeps it in sync with the in-game
+## character without ever touching Player or the live PlayerVisual, so
+## nothing here can affect — or be affected by — gameplay.
 ##
 ## Composited on top of the portrait frame art by Hud._build_meter_cluster();
 ## the viewport's background is transparent, and the render itself is
@@ -40,7 +39,6 @@ void fragment() {
 var _viewport: SubViewport
 var _model: Node3D
 var _anim: AnimationPlayer
-var _outfit_materials: Array[BaseMaterial3D] = []
 
 func _ready() -> void:
 	_viewport = SubViewport.new()
@@ -63,8 +61,6 @@ func _ready() -> void:
 	circle_mat.shader = circle_shader
 	tex_rect.material = circle_mat
 	add_child(tex_rect)
-
-	Events.outfit_changed.connect(func(id: StringName): _apply_outfit(OutfitLibrary.get_outfit(id)))
 
 func _build_scene() -> void:
 	var world := Node3D.new()
@@ -103,12 +99,7 @@ func _build_scene() -> void:
 	# model's actual post-scale height, i.e. Player.STAND_HEIGHT itself.
 	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
 	var pre_scale_height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
-	var materials: Array[BaseMaterial3D] = []
-	ModelUtil.apply_cel_shading(_model, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK, materials)
-	for m in materials:
-		if m.resource_name in PlayerVisual.OUTFIT_SLOTS:
-			_outfit_materials.append(m)
-	_apply_outfit(OutfitLibrary.get_outfit(Game.outfit))
+	ModelUtil.apply_cel_shading(_model, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK)
 
 	if _anim != null and _anim.has_animation(PlayerVisual.ANIM_IDLE):
 		_anim.get_animation(PlayerVisual.ANIM_IDLE).loop_mode = Animation.LOOP_LINEAR
@@ -123,7 +114,3 @@ func _build_scene() -> void:
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
-
-func _apply_outfit(o: OutfitData) -> void:
-	for m in _outfit_materials:
-		m.albedo_color = o.color

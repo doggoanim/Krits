@@ -19,5 +19,4 @@ signal leveled_up(level: int)
 # World
 signal spawnpoint_activated(id: StringName)
 signal fast_travel_requested(id: StringName)
-signal outfit_changed(id: StringName)
 signal story_flag_changed(flag: StringName, value: Variant)

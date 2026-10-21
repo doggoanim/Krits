@@ -197,8 +197,8 @@ func _refresh() -> void:
 	_xp.max_value = s.xp_to_next()
 	_xp.value = s.xp
 	_level.text = "Lv %d   HP %d/%d   Shield %d/%d" % [s.level, s.hp, s.max_hp(), s.shield, s.max_shield()]
-	_hint.text = "[Tab] Stats (%d pts)   [M] Travel   [O] Outfits" % s.points if s.points > 0 \
-		else "[Tab] Stats   [M] Travel   [O] Outfits"
+	_hint.text = "[Tab] Stats (%d pts)   [M] Travel" % s.points if s.points > 0 \
+		else "[Tab] Stats   [M] Travel"
 
 func _on_combo(c: int) -> void:
 	_combo.text = "x%d" % c if c > 1 else ""

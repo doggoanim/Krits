@@ -12,7 +12,6 @@ func _ready() -> void:
 	_key(&"interact", KEY_E)
 	_key(&"menu_stats", KEY_TAB)
 	_key(&"menu_travel", KEY_M)
-	_key(&"menu_outfit", KEY_O)
 	_key(&"ui_cancel_menu", KEY_ESCAPE)
 
 func _key(action: StringName, keycode: Key) -> void:

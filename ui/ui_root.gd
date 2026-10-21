@@ -9,4 +9,3 @@ func _ready() -> void:
 	add_child(StatsMenu.new())
 	travel_menu = TravelMenu.new()
 	add_child(travel_menu)
-	add_child(OutfitMenu.new())

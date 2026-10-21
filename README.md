@@ -12,7 +12,7 @@ hand-building levels visually in the editor, which works fine.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·
-Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · O outfits · Esc free mouse
+Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · Esc free mouse
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
 dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
@@ -24,7 +24,7 @@ a Mario 64-style side flip instead of a plain jump — higher arc, launches
 toward the new direction.
 
 ## Layout
-- core/      Events (signal bus), Game (stats, flags, spawns, outfit, save), InputSetup,
+- core/      Events (signal bus), Game (stats, flags, spawns, save), InputSetup,
 			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
 			 PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name),
@@ -47,12 +47,11 @@ toward the new direction.
 			 telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
 			 an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
-- outfits/   OutfitData + OutfitLibrary (cosmetic only)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
 			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), TestLevel blockout,
 			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
-- ui/        Hud, menus (stats / travel / outfits), ScreenTransition + dissolve.gdshader (screen-space
+- ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
 
 ## Extending
@@ -89,9 +88,9 @@ and nothing requires levels to be built in code. To build a real level visually:
    clipping straight through it.
 3. Add fast-travel points: add child nodes of type `Spawnpoint` (it has a
    `class_name`, so it's searchable in the "Create New Node" dialog like any
-   built-in node) and set `spawn_id` / `display_name` / `unlocks_outfit` in the
-   Inspector. `Game.last_spawn` (or `&"start"` on a fresh save) is where the
-   player appears, so make sure one Spawnpoint has `spawn_id = "start"`.
+   built-in node) and set `spawn_id` / `display_name` in the Inspector.
+   `Game.last_spawn` (or `&"start"` on a fresh save) is where the player
+   appears, so make sure one Spawnpoint has `spawn_id = "start"`.
 4. Add overworld enemies: add child nodes of type `WorldEnemy`, and in the
    Inspector set `enemy_id` (unique per enemy, used for the `cleared_<id>` save
    flag) and `data` to an `EnemyData` resource — either one of `EnemyLibrary`'s

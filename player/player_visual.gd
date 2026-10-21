@@ -30,10 +30,6 @@ const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounde
 const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
 const ANIM_SIDE_JUMP := &"side_jump"             ## Mario 64-style skid-turn trick jump
 
-## Material slots (named in the model) that get tinted by the active outfit.
-## Skin/hair/face stay as authored — outfits only recolor the "clothing" parts.
-const OUTFIT_SLOTS := [&"Body", &"Pants", &"Shoes"]
-
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,
 ## which makes every animation look reversed (the character appears to run
@@ -45,10 +41,8 @@ const MODEL_FACING_OFFSET := PI
 var _anim: AnimationPlayer
 var _model: Node3D
 var _materials: Array[BaseMaterial3D] = []
-var _outfit_materials: Array[BaseMaterial3D] = []
 var _base_colors: Dictionary = {}   # BaseMaterial3D -> Color, the non-flash color
 var _flash_t := 0.0
-var _outfit: OutfitData
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
 var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
@@ -103,16 +97,12 @@ func _ready() -> void:
 			outline_color, _materials)
 	for m in _materials:
 		_base_colors[m] = m.albedo_color
-		if m.resource_name in OUTFIT_SLOTS:
-			_outfit_materials.append(m)
 	_force_looping_clips()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
 	else:
 		print("PlayerVisual: clips found in model = ", _anim.get_animation_list())
 
-	Events.outfit_changed.connect(func(id: StringName): apply_outfit(OutfitLibrary.get_outfit(id)))
-	apply_outfit(OutfitLibrary.get_outfit(Game.outfit))
 	play(ANIM_IDLE)
 
 ## Sets loop_mode explicitly on every clip in the model — LOOP_LINEAR for
@@ -136,12 +126,6 @@ func _force_looping_clips() -> void:
 ## animate in sync automatically).
 func get_model() -> Node3D:
 	return _model
-
-func apply_outfit(o: OutfitData) -> void:
-	_outfit = o
-	for m in _outfit_materials:
-		m.albedo_color = o.color
-		_base_colors[m] = o.color
 
 ## Plays `anim_name` if it isn't already the one running. Safe to call every
 ## frame — the common case (state hasn't changed) is a cheap no-op. Does
