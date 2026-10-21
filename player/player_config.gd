@@ -28,16 +28,6 @@ extends Resource
 												  ## (instead of the usual jump-start pose) before
 												  ## AirState's own per-frame animation takes back over
 
-@export_group("Pole Climb")
-## See Pole (world/pole.gd) for the grab trigger and PoleClimbState for the
-## behavior itself — these are purely the movement-feel numbers, same split
-## as every other group here.
-@export var pole_climb_speed := 4.0        ## vertical speed while holding forward/back to climb
-@export var pole_jump_off_speed := 7.0     ## horizontal push away from the pole when jumping off
-@export var pole_jump_off_velocity := 10.0   ## vertical speed of a pole-jump — its own number,
-											  ## independent of jump_velocity, so it can arc higher
-											  ## than a plain ground jump the way Mario 64's does
-
 ## Target downhill speed for a floor this steep — linearly scales from
 ## slope_slide_speed right at the slide threshold up to slope_slide_max_speed
 ## at a vertical surface, so steeper consistently means faster. Shared by

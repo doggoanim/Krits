@@ -83,7 +83,7 @@ func _ready() -> void:
 		&"Roll": RollState.new(), &"Air": AirState.new(),
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
-		&"Frozen": FrozenState.new(), &"PoleClimb": PoleClimbState.new(),
+		&"Frozen": FrozenState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -254,33 +254,6 @@ func start_side_flip(dir: Vector3) -> void:
 	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
 	audio.play_side_flip()
-	machine.transition_to(&"Air")
-
-## Called by a PoleGrab's own trigger whenever the player touches a pole (or
-## any other object a PoleGrab has been attached to, like a tree trunk) —
-## works from any state, grounded or airborne, same as the real thing.
-## Guarded against Frozen (a cutscene shouldn't be interrupted by scenery)
-## and against re-entering PoleClimb while already climbing one.
-func grab_pole(pole: PoleGrab) -> void:
-	if dead or machine.current_name == &"Frozen" or machine.current_name == &"PoleClimb":
-		return
-	machine.transition_to(&"PoleClimb", {"pole": pole})
-
-## Mario 64-style pole-jump: launches away from whatever pole you were
-## climbing, toward `away`, with its own distinct push/height (independent
-## of start_jump()'s jump_velocity) rather than a plain vertical hop.
-func jump_off_pole(away: Vector3) -> void:
-	set_hvel(away * config.pole_jump_off_speed)
-	velocity.y = config.pole_jump_off_velocity
-	face(away)
-	coyote = 0.0
-	jump_buffer_t = 0.0
-	can_dive = true
-	visual.cancel_hold()
-	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
-	visual.roll_jump_start()
-	effects.burst_jump_dust()
-	audio.play_jump()
 	machine.transition_to(&"Air")
 
 ## `combo` is Arena's running combo count for this hit (1 on the first orb of
