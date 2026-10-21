@@ -2,11 +2,12 @@ extends Node3D
 ## Composition root: builds the world, player, camera, UI and wires systems together.
 
 ## Set this in the Inspector (select "Main" in main.tscn) to point at a level
-## you've built by hand in the editor instead of the code-built TestLevel
-## blockout. Any scene works as long as its root contains: StaticBody3D world
-## geometry on collision_layer 1 (bit 0), one or more Spawnpoint nodes, and
-## any WorldEnemy nodes you want wandering the level — see world/test_level.gd
-## for a worked example of all three, and README.md for the full contract.
+## you've built by hand in the editor instead of the code-built default
+## (Hometown). Any scene works as long as its root contains: StaticBody3D
+## world geometry on collision_layer 1 (bit 0), one or more Spawnpoint nodes,
+## and any WorldEnemy nodes you want wandering the level — see
+## world/hometown.gd or world/test_level.gd for worked examples of all
+## three, and README.md for the full contract.
 @export var level_scene: PackedScene
 
 ## Sun/sky/tonemap/glow/color-grading, all in one place — see
@@ -23,7 +24,9 @@ func _ready() -> void:
 	Game.load_game()
 	_build_environment()
 
-	var level := level_scene.instantiate() if level_scene else TestLevel.new()
+	# Hometown is the real first area; TestLevel (a mechanics blockout, not a
+	# designed place) is still there if you want it — swap the line below.
+	var level := level_scene.instantiate() if level_scene else Hometown.new()
 	add_child(level)
 
 	player = Player.new()

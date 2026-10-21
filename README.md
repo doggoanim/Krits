@@ -49,7 +49,10 @@ toward the new direction.
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
-			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), TestLevel blockout,
+			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), Hometown (the default
+			 first area — a small plaza built entirely from Godot's own primitive meshes: boxes,
+			 cylinders, prisms; no Blender or terrain plugin needed), TestLevel (a mechanics-testing
+			 blockout, not a designed place — still there if you want it, see main.gd),
 			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
@@ -78,7 +81,13 @@ and nothing requires levels to be built in code. To build a real level visually:
 1. Create a new scene (`Scene > New Scene`), root node type `Node3D`. Save it
    somewhere under `world/` (or wherever you like), e.g. `world/hometown.tscn`.
 2. Build your geometry normally — meshes, `CSGShape3D`, imported models, whatever
-   you like. Anything that should be solid ground/walls needs a collision shape on
+   you like. Godot has no built-in sculptable terrain tool (unlike Unity); for
+   basic-shapes environments, `CSGShape3D` primitives or a `GridMap` (tile-based,
+   paint a `MeshLibrary` in the editor) cover most needs without Blender — see
+   `world/hometown.gd` for a whole zone built from nothing but boxes, cylinders
+   and prisms. For organic rolling terrain, add a heightmap plugin (Terrain3D,
+   HTerrain, both free via AssetLib) or sculpt a mesh externally and import it.
+   Anything that should be solid ground/walls needs a collision shape on
    **collision layer 1** (the "World" layer; `StaticBody3D` with its
    `collision_layer` set to just bit 1 checked). `_box()` in `test_level.gd` shows
    the minimal version of this if you want a code reference. Also check bit 8
