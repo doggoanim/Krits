@@ -101,10 +101,15 @@ func physics_update(delta: float) -> void:
 func _apply_position(normal: Vector3, point: Vector3) -> void:
 	player.global_position = point + normal * player.config.wall_hug_distance
 
-## A horizontal "sideways along the wall" axis for `normal` — arbitrary in
-## the sense that which way ends up "right" vs "left" isn't guaranteed to
-## match a given wall's own art/orientation, but it's consistent frame to
-## frame, which is all steering here actually needs.
+## The player's screen/keyboard right while attached to a wall with this
+## normal. While climbing, the player faces -normal (into the wall — see
+## enter()/_apply_position() callers), and screen-right for someone facing
+## `fwd` is fwd.cross(UP) — so right = (-normal).cross(UP) = UP.cross(normal).
+## Getting this backwards (e.g. normal.cross(UP), the old version) doesn't
+## matter when steering is run through a camera-relative dot product, since
+## that self-corrects for either sign — but now that strafe is a raw,
+## camera-independent D-minus-A value (see physics_update()), the actual
+## handedness here is what decides whether D is really "right".
 func _wall_right(normal: Vector3) -> Vector3:
-	var right := normal.cross(Vector3.UP)
+	var right := Vector3.UP.cross(normal)
 	return right.normalized() if right.length() > 0.01 else Vector3.RIGHT
