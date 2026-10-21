@@ -279,6 +279,15 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
 	return {}
 
+## Ground height straight down from `from`, within `max_dist` — same
+## world-geometry layer (1) Arena.ground_height() probes, used by
+## WallClimbState to stop climbing down from pushing the player through the
+## floor at the base of a wall. Null if nothing's found in range.
+func ground_height_below(from: Vector3, max_dist: float) -> Variant:
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * max_dist, 1)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.position.y if not hit.is_empty() else null
+
 ## Looks for a climbable wall directly ahead — called from Ground/Air every
 ## frame to auto-grab on touch, same spirit as the old ledge/pole triggers
 ## but done with a probe instead of an Area3D, since "climbable" here is

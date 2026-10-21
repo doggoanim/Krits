@@ -57,6 +57,16 @@ func physics_update(delta: float) -> void:
 
 	if moving:
 		var tentative := _attach_point + move * c.wall_climb_speed * delta
+		# Climbing down shouldn't be able to push the player through the floor
+		# at the base of the wall. Cast from the player's last-known-good spot
+		# (still above ground), not from `tentative` itself — once a frame's
+		# step lands below the floor, a downward-only ray from there would
+		# never see the ground it just passed through. _attach_point.y tracks
+		# the player's own origin height (see find_climbable_wall()), so the
+		# result clamps straight onto tentative.y with no extra offset.
+		var ground = p.ground_height_below(_attach_point, c.wall_climb_speed * delta + 0.2)
+		if ground != null and tentative.y < ground:
+			tentative.y = ground
 		var found := p.probe_wall_near(tentative, _normal, strafe)
 		if not found.is_empty():
 			if found.normal.dot(_normal) < 0.99:
