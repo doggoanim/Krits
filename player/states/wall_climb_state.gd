@@ -20,11 +20,14 @@ var _attach_point := Vector3.ZERO
 var _wrap_from_normal := Vector3.FORWARD   ## where a corner transition eased FROM
 var _wrap_from_point := Vector3.ZERO
 var _wrap_t := 1.0   ## 0 = just started easing into _normal/_attach_point, 1 = fully settled there
+var _at_top := false   ## true once trying to climb further up finds no more wall — see
+                        ## physics_update()'s climb-up probe and the jump handling below
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
 	_attach_point = _msg.get("point", p.global_position)
+	_at_top = false
 	# Ease the very first grab in too, not just later corner wraps: seed the
 	# "from" pair at the player's actual current spot — same normal as the
 	# target, so _apply_position()'s blend below only moves the position, not
@@ -80,6 +83,14 @@ func physics_update(delta: float) -> void:
 				_wrap_t = 0.0
 			_attach_point = found.point
 			_normal = found.normal
+			if climb > 0.0:
+				_at_top = false
+		elif climb > 0.0:
+			# Tried to climb further up and found nothing there — the top
+			# edge of the wall. Only set on an actual upward attempt (not
+			# sideways movement, which says nothing about what's above), so
+			# a jump pressed right after still reads as "at the top".
+			_at_top = true
 		# If nothing climbable is found near where we tried to go, treat it
 		# like a solid edge and just don't move that frame — same fallback
 		# as any other blocked movement, rather than falling off the first
@@ -106,7 +117,18 @@ func physics_update(delta: float) -> void:
 		return
 
 	if p.jump_buffer_t > 0.0:
-		p.jump_off_wall(_normal)
+		if _at_top:
+			# Nothing left to grab above — this reads as stepping off the top
+			# of the wall, not kicking off of it: a normal straight-up jump
+			# instead of jump_off_wall()'s horizontal push-away, just held in
+			# the roll pose for a beat afterward, the same trick GroundState's
+			# steep-slope jump uses.
+			p.can_dive = true
+			p.wall_climb_cd = Player.WALL_CLIMB_REGRAB_COOLDOWN
+			p.start_jump(c.jump_velocity)
+			p.visual.play_hold(PlayerVisual.ANIM_ROLL, c.slope_jump_roll_hold_time)
+		else:
+			p.jump_off_wall(_normal)
 
 func _apply_position(normal: Vector3, point: Vector3) -> void:
 	player.global_position = point + normal * player.config.wall_hug_distance
