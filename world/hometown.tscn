@@ -35,8 +35,8 @@ albedo_color = Color(0.62, 0.6, 0.58, 1)
 [sub_resource type="BoxMesh" id="Mesh_House1Walls"]
 size = Vector3(6, 4, 6)
 
-[sub_resource type="ConvexPolygonShape3D" id="Shape_House1Roof"]
-points = PackedVector3Array(-3.45, -1.2, -3.45, 3.45, -1.2, -3.45, 3.45, -1.2, 3.45, -3.45, -1.2, 3.45, 0, 1.2, -3.45, 0, 1.2, 3.45)
+[sub_resource type="BoxShape3D" id="Shape_House1Roof"]
+size = Vector3(6.9, 2.4, 6.9)
 
 [sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
 albedo_color = Color(0.8487937, 0, 0.047033705, 1)
@@ -53,8 +53,8 @@ albedo_color = Color(0.7, 0.65, 0.55, 1)
 [sub_resource type="BoxMesh" id="Mesh_House2Walls"]
 size = Vector3(7, 5, 5)
 
-[sub_resource type="ConvexPolygonShape3D" id="Shape_House2Roof"]
-points = PackedVector3Array(-4.025, -1.5, -2.875, 4.025, -1.5, -2.875, 4.025, -1.5, 2.875, -4.025, -1.5, 2.875, 0, 1.5, -2.875, 0, 1.5, 2.875)
+[sub_resource type="BoxShape3D" id="Shape_House2Roof"]
+size = Vector3(8.05, 3, 5.75)
 
 [sub_resource type="StandardMaterial3D" id="Mat_RoofBlue"]
 albedo_color = Color(0.2886788, 0.553356, 0.7931672, 1)
@@ -68,8 +68,8 @@ size = Vector3(5, 3.5, 5)
 [sub_resource type="BoxMesh" id="Mesh_House3Walls"]
 size = Vector3(5, 3.5, 5)
 
-[sub_resource type="ConvexPolygonShape3D" id="Shape_House3Roof"]
-points = PackedVector3Array(-2.875, -1.05, -2.875, 2.875, -1.05, -2.875, 2.875, -1.05, 2.875, -2.875, -1.05, 2.875, 0, 1.05, -2.875, 0, 1.05, 2.875)
+[sub_resource type="BoxShape3D" id="Shape_House3Roof"]
+size = Vector3(5.75, 2.1, 5.75)
 
 [sub_resource type="PrismMesh" id="Mesh_House3Roof"]
 size = Vector3(5.75, 2.1, 5.75)
@@ -80,8 +80,8 @@ size = Vector3(6, 4.5, 6)
 [sub_resource type="BoxMesh" id="Mesh_House4Walls"]
 size = Vector3(6, 4.5, 6)
 
-[sub_resource type="ConvexPolygonShape3D" id="Shape_House4Roof"]
-points = PackedVector3Array(-3.45, -1.35, -3.45, 3.45, -1.35, -3.45, 3.45, -1.35, 3.45, -3.45, -1.35, 3.45, 0, 1.35, -3.45, 0, 1.35, 3.45)
+[sub_resource type="BoxShape3D" id="Shape_House4Roof"]
+size = Vector3(6.9, 2.7, 6.9)
 
 [sub_resource type="PrismMesh" id="Mesh_House4Roof"]
 size = Vector3(6.9, 2.7, 6.9)
@@ -238,6 +238,12 @@ height = 3.3
 top_radius = 0.0
 bottom_radius = 1.76
 height = 3.52
+
+[sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
+size = Vector3(10.715, 0.35, 12.595)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gka81"]
+size = Vector3(10.715, 0.35, 12.595)
 
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
@@ -667,3 +673,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 5, 0)
 script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
+
+[node name="SLOPE" type="StaticBody3D" parent="." unique_id=706873338]
+transform = Transform3D(1, 0, 0, 0, 0.6799007, -0.7333042, 0, 0.7333042, 0.6799007, -15.957043, 1.6517792, -36.796364)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SLOPE" unique_id=1707694586]
+mesh = SubResource("BoxMesh_bf34x")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SLOPE" unique_id=382698887]
+shape = SubResource("BoxShape3D_gka81")
