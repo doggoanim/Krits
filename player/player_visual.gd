@@ -29,9 +29,10 @@ const ANIM_CROUCH_WALK := &"crouch_walk"
 const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
 const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
 const ANIM_SIDE_JUMP := &"side_jump"             ## Mario 64-style skid-turn trick jump
-const ANIM_LEDGE_HANG := &"ledge_hang"           ## idle pose while holding a grabbed ledge
-## Placeholder clip name — not baked into the model yet (see LedgeHangState).
-## play() just warns and no-ops until the real clip exists, so the feature
+const ANIM_POLE_HANG := &"pole_hang"             ## idle pose while holding a pole, not climbing
+const ANIM_POLE_CLIMB := &"pole_climb"           ## looping climb, played forward/backward for up/down
+## Placeholder clip names — not baked into the model yet (see PoleClimbState).
+## play() just warns and no-ops until the real clips exist, so the feature
 ## works mechanically in the meantime, just with no pose.
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —

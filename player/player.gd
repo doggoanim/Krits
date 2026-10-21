@@ -39,8 +39,6 @@ const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
 
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
-var _ledge_fwd_cast: ShapeCast3D   ## see find_ledge()
-var _ledge_down_cast: ShapeCast3D
 var _was_on_floor := true
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
@@ -77,14 +75,6 @@ func _ready() -> void:
 	add_child(ground_shadow)
 	ground_shadow.setup(self)
 
-	# A small sphere sweep rather than an infinitely thin ray — far more
-	# forgiving of exactly where a ledge's edge or top surface happens to
-	# sit relative to the probe. `enabled = false` turns off its automatic
-	# per-physics-frame update; find_ledge() repositions and fires each one
-	# manually (force_shapecast_update()) only while actually falling.
-	_ledge_fwd_cast = _make_ledge_cast()
-	_ledge_down_cast = _make_ledge_cast()
-
 	machine = StateMachine.new()
 	machine.name = "StateMachine"
 	add_child(machine)
@@ -93,7 +83,7 @@ func _ready() -> void:
 		&"Roll": RollState.new(), &"Air": AirState.new(),
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
-		&"Frozen": FrozenState.new(), &"LedgeHang": LedgeHangState.new(),
+		&"Frozen": FrozenState.new(), &"PoleClimb": PoleClimbState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -212,99 +202,6 @@ func air_control(delta: float) -> void:
 		h = h.move_toward(input * config.air_speed, config.air_accel * delta)
 	set_hvel(h)
 
-## How far off dead-vertical (for the wall) or dead-flat (for the ledge top)
-## a surface's normal is allowed to be and still count as grabbable — ledge
-## hang only ever catches a perfectly flat, unrotated ledge, never a beveled
-## edge, a sloped roof, or anything else even slightly tilted.
-const LEDGE_MAX_TILT := 0.05
-
-func _make_ledge_cast() -> ShapeCast3D:
-	var cast := ShapeCast3D.new()
-	var shape := SphereShape3D.new()
-	shape.radius = config.ledge_probe_radius
-	cast.shape = shape
-	cast.collision_mask = collision_mask
-	cast.add_exception(self)
-	cast.enabled = false
-	add_child(cast)
-	return cast
-
-## Sweeps `cast`'s sphere from `from` to `from + motion` and returns its
-## first hit's point/normal, or {} if it didn't hit anything. A shared
-## helper between the forward and downward ledge probes below — the sphere
-## sweep itself (rather than an infinitely thin raycast) is what makes
-## either probe forgiving of exactly where an edge or surface sits relative
-## to the probe's own position.
-func _shape_probe(cast: ShapeCast3D, from: Vector3, motion: Vector3) -> Dictionary:
-	cast.global_position = from
-	cast.target_position = motion   # local space, but this node never rotates away from world axes
-	cast.force_shapecast_update()
-	if not cast.is_colliding():
-		return {}
-	return {"point": cast.get_collision_point(0), "normal": cast.get_collision_normal(0)}
-
-## Looks for a grabbable ledge directly ahead while falling. A forward probe
-## at roughly chest height finds a wall — tried dead-center first, then a
-## couple of lateral offsets, so a ledge right at the edge of the center
-## probe's path (a thin pillar, a corner) still gets caught. A downward
-## probe just past that wall then looks for a surface near the same height
-## (the ledge's own top edge, not a wall that just keeps going well above or
-## below reach). Both probes must come back perfectly flat (see
-## LEDGE_MAX_TILT) — any rotation on either surface disqualifies it. Called
-## from AirState every frame while falling; returns {} when nothing
-## qualifies, otherwise wall_normal/hang_pos for LedgeHangState to use.
-## NOTE: geometry-sensitive and untested against real level art — tune the
-## Ledge Hang numbers in PlayerConfig once there's an actual ledge to grab.
-func find_ledge() -> Dictionary:
-	var dir := get_hvel()
-	dir = dir if dir.length() > 0.1 else -facing
-	dir = Vector3(dir.x, 0.0, dir.z)
-	if dir.length() < 0.001:
-		return {}
-	dir = dir.normalized()
-	var side := dir.cross(Vector3.UP)
-
-	var origin := global_position + Vector3.UP * config.ledge_grab_height
-	var reach := dir * (RADIUS + config.ledge_grab_forward_offset)
-	var spread := config.ledge_probe_lateral_spread
-	var hit := {}
-	for lateral in [0.0, spread, -spread]:
-		var candidate := _shape_probe(_ledge_fwd_cast, origin + side * lateral, reach)
-		if candidate.is_empty():
-			continue
-		var normal: Vector3 = candidate.normal
-		if absf(normal.y) > LEDGE_MAX_TILT:
-			continue   # not a perfectly vertical wall — tilted/rotated, so not grabbable
-		normal.y = 0.0
-		normal = normal.normalized()
-		if (-dir).dot(normal) < 0.5:
-			continue   # too glancing an angle — not squarely facing the wall
-		hit = {"point": candidate.point, "normal": normal}
-		break
-	if hit.is_empty():
-		return {}
-
-	var hit_xz: Vector3 = hit.point
-	var normal: Vector3 = hit.normal
-	var probe_xz := hit_xz - normal * 0.05   # nudge past the wall face, into open space above it
-	var tol := config.ledge_grab_vertical_tolerance
-	var down_from := Vector3(probe_xz.x, global_position.y + config.ledge_grab_height + tol, probe_xz.z)
-	var down_hit := _shape_probe(_ledge_down_cast, down_from, Vector3.DOWN * (tol * 2.0))
-	if down_hit.is_empty():
-		return {}   # the wall keeps going well above grab height — nothing to grab here
-	var down_normal: Vector3 = down_hit.normal
-	if down_normal.dot(Vector3.UP) < 1.0 - LEDGE_MAX_TILT:
-		return {}   # not a perfectly flat, level ledge top — tilted/rotated, so not grabbable
-
-	var down_point: Vector3 = down_hit.point
-	var top_y: float = down_point.y
-	if top_y < global_position.y + config.ledge_grab_height - tol:
-		return {}   # whatever's down there is below grab height — not reachable from here
-
-	var hang_pos := hit_xz + normal * config.ledge_hang_offset
-	hang_pos.y = top_y - STAND_HEIGHT * 0.5
-	return {"wall_normal": normal, "hang_pos": hang_pos}
-
 # ---------------------------------------------------------------- actions
 
 ## Every jump is a fixed, snappy height — no variable height from holding the
@@ -357,6 +254,32 @@ func start_side_flip(dir: Vector3) -> void:
 	visual.play_hold(PlayerVisual.ANIM_SIDE_JUMP, config.side_flip_hold_time, -1.0)
 	effects.burst_jump_dust()
 	audio.play_side_flip()
+	machine.transition_to(&"Air")
+
+## Called by Pole.gd's own grab trigger whenever the player touches a pole —
+## works from any state, grounded or airborne, same as the real thing.
+## Guarded against Frozen (a cutscene shouldn't be interrupted by scenery)
+## and against re-entering PoleClimb while already climbing one.
+func grab_pole(pole: Pole) -> void:
+	if dead or machine.current_name == &"Frozen" or machine.current_name == &"PoleClimb":
+		return
+	machine.transition_to(&"PoleClimb", {"pole": pole})
+
+## Mario 64-style pole-jump: launches away from whatever pole you were
+## climbing, toward `away`, with its own distinct push/height (independent
+## of start_jump()'s jump_velocity) rather than a plain vertical hop.
+func jump_off_pole(away: Vector3) -> void:
+	set_hvel(away * config.pole_jump_off_speed)
+	velocity.y = config.pole_jump_off_velocity
+	face(away)
+	coyote = 0.0
+	jump_buffer_t = 0.0
+	can_dive = true
+	visual.cancel_hold()
+	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	visual.roll_jump_start()
+	effects.burst_jump_dust()
+	audio.play_jump()
 	machine.transition_to(&"Air")
 
 ## `combo` is Arena's running combo count for this hit (1 on the first orb of

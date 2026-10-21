@@ -28,26 +28,15 @@ extends Resource
 												  ## (instead of the usual jump-start pose) before
 												  ## AirState's own per-frame animation takes back over
 
-@export_group("Ledge Hang")
-## A forward probe at roughly chest height finds a wall while falling; a
-## second probe just past it looks for a surface near that same height (the
-## ledge's own top edge, as opposed to a wall that just keeps going) — see
-## Player.find_ledge(). Both probes use the player's own collision_mask, so
-## anything the player can already stand on or run into is a valid ledge.
-@export var ledge_grab_height := .2             ## height above the player's feet the forward probe
-												  ## is cast at — roughly chest/shoulder height
-@export var ledge_grab_forward_offset := 1.2     ## how far ahead of the player's capsule surface
-												  ## the forward probe reaches
-@export var ledge_grab_vertical_tolerance := 0.5   ## the ledge top must land within this far above
-													 ## or below ledge_grab_height to count as reachable
-@export var ledge_hang_offset := 0.3             ## how far back from the wall the player is held
-												  ## while hanging, clear of the wall face
-@export var ledge_probe_radius := 0.15           ## radius of the sphere swept for both probes —
-												  ## bigger than a raycast's point, so a ledge right at
-												  ## the edge of the probe's path still gets caught
-@export var ledge_probe_lateral_spread := 0.3    ## how far left/right of dead-center the forward
-												  ## probe retries if the centered sweep finds nothing
-@export var ledge_drop_speed := -3.0             ## initial downward speed when dropping off (crouch)
+@export_group("Pole Climb")
+## See Pole (world/pole.gd) for the grab trigger and PoleClimbState for the
+## behavior itself — these are purely the movement-feel numbers, same split
+## as every other group here.
+@export var pole_climb_speed := 4.0        ## vertical speed while holding forward/back to climb
+@export var pole_jump_off_speed := 7.0     ## horizontal push away from the pole when jumping off
+@export var pole_jump_off_velocity := 10.0   ## vertical speed of a pole-jump — its own number,
+											  ## independent of jump_velocity, so it can arc higher
+											  ## than a plain ground jump the way Mario 64's does
 
 ## Target downhill speed for a floor this steep — linearly scales from
 ## slope_slide_speed right at the slide threshold up to slope_slide_max_speed
