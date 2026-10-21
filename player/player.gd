@@ -39,6 +39,8 @@ const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
 
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
+var _ledge_fwd_cast: ShapeCast3D   ## see find_ledge()
+var _ledge_down_cast: ShapeCast3D
 var _was_on_floor := true
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
@@ -74,6 +76,14 @@ func _ready() -> void:
 	ground_shadow = GroundShadow.new()
 	add_child(ground_shadow)
 	ground_shadow.setup(self)
+
+	# A small sphere sweep rather than an infinitely thin ray — far more
+	# forgiving of exactly where a ledge's edge or top surface happens to
+	# sit relative to the probe. `enabled = false` turns off its automatic
+	# per-physics-frame update; find_ledge() repositions and fires each one
+	# manually (force_shapecast_update()) only while actually falling.
+	_ledge_fwd_cast = _make_ledge_cast()
+	_ledge_down_cast = _make_ledge_cast()
 
 	machine = StateMachine.new()
 	machine.name = "StateMachine"
@@ -208,14 +218,41 @@ func air_control(delta: float) -> void:
 ## edge, a sloped roof, or anything else even slightly tilted.
 const LEDGE_MAX_TILT := 0.05
 
-## Looks for a grabbable ledge directly ahead while falling — a forward probe
-## at roughly chest height finds a wall, then a downward probe just past it
-## looks for a surface near that same height (the ledge's own top edge, not
-## a wall that just keeps going well above or below reach). Both the wall
-## and the ledge top must come back perfectly flat (see LEDGE_MAX_TILT) —
-## any rotation on either surface disqualifies it. Called from AirState
-## every frame while falling; returns {} when nothing qualifies, otherwise
-## wall_normal/hang_pos for LedgeHangState to use.
+func _make_ledge_cast() -> ShapeCast3D:
+	var cast := ShapeCast3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = config.ledge_probe_radius
+	cast.shape = shape
+	cast.collision_mask = collision_mask
+	cast.add_exception(self)
+	cast.enabled = false
+	add_child(cast)
+	return cast
+
+## Sweeps `cast`'s sphere from `from` to `from + motion` and returns its
+## first hit's point/normal, or {} if it didn't hit anything. A shared
+## helper between the forward and downward ledge probes below — the sphere
+## sweep itself (rather than an infinitely thin raycast) is what makes
+## either probe forgiving of exactly where an edge or surface sits relative
+## to the probe's own position.
+func _shape_probe(cast: ShapeCast3D, from: Vector3, motion: Vector3) -> Dictionary:
+	cast.global_position = from
+	cast.target_position = motion   # local space, but this node never rotates away from world axes
+	cast.force_shapecast_update()
+	if not cast.is_colliding():
+		return {}
+	return {"point": cast.get_collision_point(0), "normal": cast.get_collision_normal(0)}
+
+## Looks for a grabbable ledge directly ahead while falling. A forward probe
+## at roughly chest height finds a wall — tried dead-center first, then a
+## couple of lateral offsets, so a ledge right at the edge of the center
+## probe's path (a thin pillar, a corner) still gets caught. A downward
+## probe just past that wall then looks for a surface near the same height
+## (the ledge's own top edge, not a wall that just keeps going well above or
+## below reach). Both probes must come back perfectly flat (see
+## LEDGE_MAX_TILT) — any rotation on either surface disqualifies it. Called
+## from AirState every frame while falling; returns {} when nothing
+## qualifies, otherwise wall_normal/hang_pos for LedgeHangState to use.
 ## NOTE: geometry-sensitive and untested against real level art — tune the
 ## Ledge Hang numbers in PlayerConfig once there's an actual ledge to grab.
 func find_ledge() -> Dictionary:
@@ -225,35 +262,42 @@ func find_ledge() -> Dictionary:
 	if dir.length() < 0.001:
 		return {}
 	dir = dir.normalized()
+	var side := dir.cross(Vector3.UP)
 
-	var space := get_world_3d().direct_space_state
-	var probe_origin := global_position + Vector3.UP * config.ledge_grab_height
-	var fwd_to := probe_origin + dir * (RADIUS + config.ledge_grab_forward_offset)
-	var fwd_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
-		probe_origin, fwd_to, collision_mask, [get_rid()]))
-	if fwd_hit.is_empty():
+	var origin := global_position + Vector3.UP * config.ledge_grab_height
+	var reach := dir * (RADIUS + config.ledge_grab_forward_offset)
+	var spread := config.ledge_probe_lateral_spread
+	var hit := {}
+	for lateral in [0.0, spread, -spread]:
+		var candidate := _shape_probe(_ledge_fwd_cast, origin + side * lateral, reach)
+		if candidate.is_empty():
+			continue
+		var normal: Vector3 = candidate.normal
+		if absf(normal.y) > LEDGE_MAX_TILT:
+			continue   # not a perfectly vertical wall — tilted/rotated, so not grabbable
+		normal.y = 0.0
+		normal = normal.normalized()
+		if (-dir).dot(normal) < 0.5:
+			continue   # too glancing an angle — not squarely facing the wall
+		hit = {"point": candidate.point, "normal": normal}
+		break
+	if hit.is_empty():
 		return {}
 
-	var normal: Vector3 = fwd_hit.normal
-	if absf(normal.y) > LEDGE_MAX_TILT:
-		return {}   # not a perfectly vertical wall — tilted/rotated, so not grabbable
-	normal.y = 0.0
-	normal = normal.normalized()
-	if (-dir).dot(normal) < 0.5:
-		return {}   # too glancing an angle — not squarely facing the wall
-
-	var hit_xz: Vector3 = fwd_hit.position
+	var hit_xz: Vector3 = hit.point
+	var normal: Vector3 = hit.normal
 	var probe_xz := hit_xz - normal * 0.05   # nudge past the wall face, into open space above it
 	var tol := config.ledge_grab_vertical_tolerance
 	var down_from := Vector3(probe_xz.x, global_position.y + config.ledge_grab_height + tol, probe_xz.z)
-	var down_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
-		down_from, down_from + Vector3.DOWN * (tol * 2.0), collision_mask, [get_rid()]))
+	var down_hit := _shape_probe(_ledge_down_cast, down_from, Vector3.DOWN * (tol * 2.0))
 	if down_hit.is_empty():
 		return {}   # the wall keeps going well above grab height — nothing to grab here
-	if down_hit.normal.dot(Vector3.UP) < 1.0 - LEDGE_MAX_TILT:
+	var down_normal: Vector3 = down_hit.normal
+	if down_normal.dot(Vector3.UP) < 1.0 - LEDGE_MAX_TILT:
 		return {}   # not a perfectly flat, level ledge top — tilted/rotated, so not grabbable
 
-	var top_y: float = down_hit.position.y
+	var down_point: Vector3 = down_hit.point
+	var top_y: float = down_point.y
 	if top_y < global_position.y + config.ledge_grab_height - tol:
 		return {}   # whatever's down there is below grab height — not reachable from here
 

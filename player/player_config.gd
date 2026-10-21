@@ -42,6 +42,11 @@ extends Resource
 													 ## or below ledge_grab_height to count as reachable
 @export var ledge_hang_offset := 0.3             ## how far back from the wall the player is held
 												  ## while hanging, clear of the wall face
+@export var ledge_probe_radius := 0.15           ## radius of the sphere swept for both probes —
+												  ## bigger than a raycast's point, so a ledge right at
+												  ## the edge of the probe's path still gets caught
+@export var ledge_probe_lateral_spread := 0.3    ## how far left/right of dead-center the forward
+												  ## probe retries if the centered sweep finds nothing
 @export var ledge_drop_speed := -3.0             ## initial downward speed when dropping off (crouch)
 
 ## Target downhill speed for a floor this steep — linearly scales from
