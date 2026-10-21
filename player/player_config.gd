@@ -46,6 +46,13 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 @export var wall_hug_distance := 0.5       ## how far the player's capsule center sits from the wall's own surface
 @export var wall_grab_reach := 1.0         ## how far ahead the initial grab probe reaches
 @export var wall_probe_reach := 1.0        ## how far each continuous re-stick/corner-wrap probe reaches
+@export var wall_probe_radius := 0.2       ## radius of the sphere swept for both probes — bigger than a
+											## raycast's point, so a grazing approach angle or a surface
+											## a touch off from where the probe expected it still registers
+@export var wall_wrap_time := 0.15         ## how long a corner transition eases over, once the probe's
+											## normal changes meaningfully — keeps a wrap from looking like
+											## an instant snap. Ordinary flat-wall movement isn't affected,
+											## since the normal doesn't change frame to frame there.
 @export var wall_jump_off_speed := 7.0     ## horizontal push away from the wall when jumping off
 @export var wall_jump_off_velocity := 10.0   ## vertical speed of a wall-jump
 

@@ -49,6 +49,7 @@ const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
 
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
+var _wall_cast: ShapeCast3D   ## see find_climbable_wall()/probe_wall_near()
 var _was_on_floor := true
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
@@ -67,6 +68,21 @@ func _ready() -> void:
 	_shape_node.shape = _shape
 	add_child(_shape_node)
 	set_crouching(false)
+
+	# A small sphere sweep rather than an infinitely thin ray — far more
+	# forgiving of exactly where a climbable surface sits relative to the
+	# probe (a grazing approach angle, a wall that's a hair off from where
+	# the probe expected it, ...). `enabled = false` turns off its automatic
+	# per-physics-frame update; find_climbable_wall()/probe_wall_near()
+	# reposition and fire it manually (force_shapecast_update()) on demand.
+	_wall_cast = ShapeCast3D.new()
+	var wall_shape := SphereShape3D.new()
+	wall_shape.radius = config.wall_probe_radius
+	_wall_cast.shape = wall_shape
+	_wall_cast.collision_mask = CLIMBABLE_MASK
+	_wall_cast.add_exception(self)
+	_wall_cast.enabled = false
+	add_child(_wall_cast)
 
 	visual = PlayerVisual.new()
 	add_child(visual)
@@ -213,44 +229,63 @@ func air_control(delta: float) -> void:
 		h = h.move_toward(input * config.air_speed, config.air_accel * delta)
 	set_hvel(h)
 
-## Rotated copies of `old_normal`, tried in order, for probe_wall_near()'s
-## corner-wrap search below — 0° first (stay on the same flat wall), then
-## alternating left/right out to ±120° so a wall meeting the old one at any
-## angle (a square building corner, a shallower one, even briefly doubling
-## back) still gets found.
-const WALL_WRAP_ANGLES_DEG: Array[float] = [0.0, 30.0, -30.0, 60.0, -60.0, 90.0, -90.0, 120.0, -120.0]
+## Magnitudes tried outward from 0° in probe_wall_near()'s corner-wrap
+## search, each tried on whichever side the caller's `bias_sign` says the
+## player is actually steering toward before the opposite side — see
+## _wall_wrap_angles().
+const WALL_WRAP_MAGNITUDES_DEG: Array[float] = [30.0, 60.0, 90.0, 120.0]
 
-## Looks for a climbable surface at/around `point`, trying `old_normal`
-## first and then that direction rotated by increasing angles around world
-## UP (see WALL_WRAP_ANGLES_DEG). This single search does double duty: with
-## no rotation it's just "stay stuck to the wall I'm already on", and with
-## a rotation it's "wrap onto whatever adjacent climbable wall is here
-## instead" — WallClimbState doesn't need to special-case corners at all,
+## Builds probe_wall_near()'s angle search order: 0° first (stay on the
+## same flat wall), then each magnitude in WALL_WRAP_MAGNITUDES_DEG on the
+## `bias_sign` side before its mirror on the other side. Without this bias
+## the search order was a fixed left-before-right regardless of which way
+## the player was actually steering, so a corner could just as easily wrap
+## onto a wall behind/opposite their intended direction if it happened to
+## resolve first — this makes it prefer whatever side the player is
+## actually trying to go, falling back to the other side only if nothing
+## climbable is there.
+func _wall_wrap_angles(bias_sign: float) -> Array[float]:
+	var s := signf(bias_sign) if absf(bias_sign) > 0.001 else 1.0
+	var angles: Array[float] = [0.0]
+	for mag in WALL_WRAP_MAGNITUDES_DEG:
+		angles.append(mag * s)
+		angles.append(-mag * s)
+	return angles
+
+## Sweeps a small sphere looking for a climbable surface at/around `point`,
+## trying `old_normal` first and then that direction rotated by increasing
+## angles around world UP (see _wall_wrap_angles(); `bias_sign` should be
+## the player's current steering direction along the wall, positive or
+## negative — WallClimbState passes its own `strafe`). This single search
+## does double duty: with no rotation it's just "stay stuck to the wall I'm
+## already on", and with a rotation it's "wrap onto whatever adjacent
+## climbable wall is here instead, preferring the side I'm steering
+## toward" — WallClimbState doesn't need to special-case corners at all,
 ## since both cases are just this same call finding a hit, possibly with a
 ## new normal.
-func probe_wall_near(point: Vector3, old_normal: Vector3) -> Dictionary:
-	var space := get_world_3d().direct_space_state
-	for angle_deg in WALL_WRAP_ANGLES_DEG:
+func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> Dictionary:
+	for angle_deg in _wall_wrap_angles(bias_sign):
 		var dir := old_normal.rotated(Vector3.UP, deg_to_rad(angle_deg))
 		var from := point + dir * config.wall_probe_reach
-		var to := point - dir * 0.1   # a little past the point, so a surface right at it still registers
-		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, CLIMBABLE_MASK, [get_rid()]))
-		if hit.is_empty():
+		_wall_cast.global_position = from
+		_wall_cast.target_position = -dir * (config.wall_probe_reach + 0.1)
+		_wall_cast.force_shapecast_update()
+		if not _wall_cast.is_colliding():
 			continue
-		var normal: Vector3 = hit.normal
+		var normal: Vector3 = _wall_cast.get_collision_normal(0)
 		normal.y = 0.0
 		if normal.length() < 0.1:
 			continue   # a floor/ceiling hit, not a wall — skip it
-		return {"point": hit.position, "normal": normal.normalized()}
+		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
 	return {}
 
 ## Looks for a climbable wall directly ahead — called from Ground/Air every
 ## frame to auto-grab on touch, same spirit as the old ledge/pole triggers
-## but done with a raycast instead of an Area3D, since "climbable" here is
+## but done with a probe instead of an Area3D, since "climbable" here is
 ## just a collision layer bit on the wall's own existing body, not a
 ## dedicated node. NOTE: untested against real level art — tune
-## wall_grab_reach/wall_probe_reach in PlayerConfig once there's an actual
-## climbable wall to test against.
+## wall_grab_reach/wall_probe_reach/wall_probe_radius in PlayerConfig once
+## there's an actual climbable wall to test against.
 func find_climbable_wall() -> Dictionary:
 	if wall_climb_cd > 0.0:
 		return {}
@@ -261,17 +296,16 @@ func find_climbable_wall() -> Dictionary:
 		return {}
 	dir = dir.normalized()
 	var probe_origin := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
-	var space := get_world_3d().direct_space_state
-	var from := probe_origin - dir * config.wall_grab_reach
-	var to := probe_origin + dir * 0.1
-	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, CLIMBABLE_MASK, [get_rid()]))
-	if hit.is_empty():
+	_wall_cast.global_position = probe_origin - dir * config.wall_grab_reach
+	_wall_cast.target_position = dir * (config.wall_grab_reach + 0.1)
+	_wall_cast.force_shapecast_update()
+	if not _wall_cast.is_colliding():
 		return {}
-	var normal: Vector3 = hit.normal
+	var normal: Vector3 = _wall_cast.get_collision_normal(0)
 	normal.y = 0.0
 	if normal.length() < 0.1:
 		return {}
-	return {"point": hit.position, "normal": normal.normalized()}
+	return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
 
 # ---------------------------------------------------------------- actions
 
