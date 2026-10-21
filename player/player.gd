@@ -127,6 +127,8 @@ func _update_timers(delta: float) -> void:
 	coyote = config.coyote_time if is_on_floor() else maxf(0.0, coyote - delta)
 	if Input.is_action_just_pressed(&"jump"):
 		jump_buffer_t = config.jump_buffer
+		print("[JumpDebug] jump pressed | state=%s on_floor=%s coyote=%.3f slimed=%s" \
+			% [machine.current_name, is_on_floor(), coyote, is_slimed()])
 	else:
 		jump_buffer_t = maxf(0.0, jump_buffer_t - delta)
 	invuln = maxf(0.0, invuln - delta)
