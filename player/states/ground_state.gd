@@ -56,6 +56,40 @@ func physics_update(delta: float) -> void:
 	var was_sliding := p.visual.is_holding_anim(PlayerVisual.ANIM_SLIDE)
 	_turn_flip_t = maxf(0.0, _turn_flip_t - delta)
 
+	# Too steep to stand or walk on at all — a separate mechanic from the
+	# stop/turn skid below, checked first and completely skipping that
+	# detection (and the side-flip trick it can arm) while it's active. A
+	# held input direction that happens to look like a skid-turn reversal
+	# relative to the slide's own downhill velocity must never be able to
+	# steal a jump off the slide into a fixed-direction side flip — that
+	# would both throw away the slide's momentum (start_side_flip replaces
+	# horizontal velocity outright) and ignore request #2 below. A plain
+	# jump never touches horizontal velocity, so it carries the slide's
+	# momentum into the air for free.
+	var floor_angle := p.get_floor_angle()
+	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg)
+	if on_steep_slope:
+		if p.jump_buffer_t > 0.0:
+			p.start_jump(c.jump_velocity)
+			return
+		if not _slope_sliding:
+			p.audio.play_skid()
+		_slope_sliding = true
+		var normal := p.get_floor_normal()
+		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
+		if down_slope.length() > 0.001:
+			down_slope = down_slope.normalized()
+			p.face(down_slope, delta)
+		var target_speed := c.slope_speed_for_angle(floor_angle)   ## steeper = faster, see PlayerConfig
+		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
+		p.visual.play(PlayerVisual.ANIM_SLIDE)
+		p.velocity.y = -1.0
+		p.move_and_slide()
+		if not p.is_on_floor():
+			machine.transition_to(&"Air")
+		return
+	_slope_sliding = false
+
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
 	# the stop case is gated by slide_min_move_time (a quick stick tap
 	# shouldn't skid to a stop) — a sharp direction change slides regardless
@@ -90,31 +124,6 @@ func physics_update(delta: float) -> void:
 		_turn_flip_t = 0.0
 		_slide_is_turn = false
 		return
-
-	# Too steep to stand or walk on — forced into a continuous downhill slide
-	# (same skid pose/sound as the stop-skid above, just not time-limited:
-	# it lasts exactly as long as the floor underfoot stays this steep,
-	# not a fixed duration) until you either level out or jump off of it.
-	var floor_angle := p.get_floor_angle()
-	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg)
-	if on_steep_slope:
-		if not _slope_sliding:
-			p.audio.play_skid()
-		_slope_sliding = true
-		var normal := p.get_floor_normal()
-		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
-		if down_slope.length() > 0.001:
-			down_slope = down_slope.normalized()
-			p.face(down_slope, delta)
-		var target_speed := c.slope_speed_for_angle(floor_angle)   ## steeper = faster, see PlayerConfig
-		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
-		p.visual.play(PlayerVisual.ANIM_SLIDE)
-		p.velocity.y = -1.0
-		p.move_and_slide()
-		if not p.is_on_floor():
-			machine.transition_to(&"Air")
-		return
-	_slope_sliding = false
 
 	# Locked out while the slide pose plays — same "carried along, no input
 	# but jump" rule as steering/accelerating below. Roll (and by extension
