@@ -48,7 +48,7 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											   ## (shorter than the clip's own ~1.25s so a mistimed
 											   ## trick doesn't strand you mid-air with no steering)
 @export var side_flip_input_window := 0.4     ## grace window (from the moment a turn-skid starts)
-                                               ## during which a buffered jump still triggers the
+											   ## during which a buffered jump still triggers the
 											   ## side flip — independent of the slide pose's own
 											   ## (shorter) animation-hold duration, so a jump press
 											   ## that lands a beat late still catches the trick
