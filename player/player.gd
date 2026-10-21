@@ -11,6 +11,11 @@ const RADIUS := 0.4
 const HIT_INVULN := 0.8
 const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime puddle
 
+## Godot's automatic floor-snap re-grounds the body if it's within this
+## distance of a floor after move_and_slide() — see _update_floor_snap().
+const GROUND_FLOOR_SNAP := 0.3
+const JUMP_FLOOR_SNAP := 0.0
+
 var camera_rig: CameraRig
 var visual: PlayerVisual
 var effects: PlayerEffects
@@ -43,7 +48,7 @@ func _ready() -> void:
 	collision_layer = 1 << 1   # layer 2: player
 	collision_mask = 1 | (1 << 6)   # layer 1: world, layer 7: arena walls
 	add_to_group(&"player")
-	floor_snap_length = 0.3
+	floor_snap_length = GROUND_FLOOR_SNAP
 	floor_max_angle = deg_to_rad(50.0)
 
 	_shape = CapsuleShape3D.new()
@@ -86,6 +91,7 @@ func _physics_process(delta: float) -> void:
 	if dead:
 		return
 	_update_timers(delta)
+	_update_floor_snap()
 	machine.physics_update(delta)
 	var on_floor := is_on_floor()
 	if on_floor and not _was_on_floor:
@@ -133,6 +139,22 @@ func _update_timers(delta: float) -> void:
 		jump_buffer_t = maxf(0.0, jump_buffer_t - delta)
 	invuln = maxf(0.0, invuln - delta)
 	roll_cd = maxf(0.0, roll_cd - delta)
+
+## Every jump/bounce/pound-jump sets velocity.y and switches state WITHOUT
+## calling move_and_slide() that same frame — the new state's own
+## physics_update does that a frame later. Up to that point the body hasn't
+## actually moved, so it's still sitting exactly on the floor the instant
+## that first move_and_slide() call happens — precisely the condition
+## Godot's automatic floor-snap exists to catch, and it does: regardless of
+## velocity.y's sign, it can silently re-ground the body on that very call,
+## which looks like "the jump's effects/sound played but you never left the
+## ground." Disabling the snap for as long as velocity.y is actually
+## positive (rising) sidesteps this no matter which move set it, and the
+## normal snap distance comes right back the instant gravity turns it
+## negative — well clear of the floor by then, and still wanted for
+## catching landings on slopes/stairs without a visible bump.
+func _update_floor_snap() -> void:
+	floor_snap_length = JUMP_FLOOR_SNAP if velocity.y > 0.0 else GROUND_FLOOR_SNAP
 
 # ---------------------------------------------------------------- input / motion
 
