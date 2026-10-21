@@ -70,7 +70,12 @@ func physics_update(delta: float) -> void:
 		var ground = p.ground_height_below(_attach_point, c.wall_climb_speed * delta + 0.2)
 		if ground != null and tentative.y < ground:
 			tentative.y = ground
-		var found := p.probe_wall_near(tentative, _normal, strafe)
+		# Only let the search wrap onto a different wall while the player is
+		# actually steering sideways — pure up/down climbing should only ever
+		# re-check the same wall it's already on, so running out of it (the
+		# actual top/bottom) reliably comes back empty instead of possibly
+		# latching onto some unrelated nearby climbable surface.
+		var found := p.probe_wall_near(tentative, _normal, strafe, absf(strafe) > 0.05)
 		if not found.is_empty():
 			if found.normal.dot(_normal) < 0.99:
 				# A meaningfully different normal than what we're currently

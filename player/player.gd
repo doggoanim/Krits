@@ -261,8 +261,18 @@ func _wall_wrap_angles(bias_sign: float) -> Array[float]:
 ## toward" — WallClimbState doesn't need to special-case corners at all,
 ## since both cases are just this same call finding a hit, possibly with a
 ## new normal.
-func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> Dictionary:
-	for angle_deg in _wall_wrap_angles(bias_sign):
+## `allow_wrap` gates the rotated angles entirely — pass false while the
+## player has no actual sideways steering intent (climbing straight
+## up/down). Without this, climbing straight up with zero strafe still ran
+## the full corner-wrap search (bias_sign == 0 falls back to searching every
+## angle anyway — see _wall_wrap_angles()), which could snap onto some
+## unrelated nearby climbable surface instead of correctly running out of
+## wall at the real top: the player could climb indefinitely by hopping
+## wall to wall, and WallClimbState's own "nothing found" top-of-wall check
+## never fired since *something* was usually found somewhere.
+func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0, allow_wrap := true) -> Dictionary:
+	var angles := _wall_wrap_angles(bias_sign) if allow_wrap else [0.0] as Array[float]
+	for angle_deg in angles:
 		var dir := old_normal.rotated(Vector3.UP, deg_to_rad(angle_deg))
 		var from := point + dir * config.wall_probe_reach
 		_wall_cast.global_position = from
