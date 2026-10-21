@@ -28,6 +28,12 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 		player.set_crouching(false)
 	player.can_dive = true
 	_move_t = 0.0
+	if _msg.get("jump_queued", false):
+		# A jump pressed sometime during a long jump's flight (see
+		# LongJumpState) — re-arm the buffer so this state's own
+		# physics_update, running right after this, picks it up and jumps
+		# immediately instead of needing a fresh press on the exact landing frame.
+		player.jump_buffer_t = player.config.jump_buffer
 
 func exit(_next: StringName) -> void:
 	player.effects.set_running_dust(false)
