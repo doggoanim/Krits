@@ -95,7 +95,8 @@ func physics_update(delta: float) -> void:
 	# (same skid pose/sound as the stop-skid above, just not time-limited:
 	# it lasts exactly as long as the floor underfoot stays this steep,
 	# not a fixed duration) until you either level out or jump off of it.
-	var on_steep_slope := p.is_on_floor() and p.get_floor_angle() >= deg_to_rad(c.slope_slide_angle_deg)
+	var floor_angle := p.get_floor_angle()
+	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg)
 	if on_steep_slope:
 		if not _slope_sliding:
 			p.audio.play_skid()
@@ -105,7 +106,8 @@ func physics_update(delta: float) -> void:
 		if down_slope.length() > 0.001:
 			down_slope = down_slope.normalized()
 			p.face(down_slope, delta)
-		p.set_hvel(p.get_hvel().move_toward(down_slope * c.slope_slide_speed, c.slope_slide_accel * delta))
+		var target_speed := c.slope_speed_for_angle(floor_angle)   ## steeper = faster, see PlayerConfig
+		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
 		p.visual.play(PlayerVisual.ANIM_SLIDE)
 		p.velocity.y = -1.0
 		p.move_and_slide()

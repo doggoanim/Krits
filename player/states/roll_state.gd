@@ -47,6 +47,19 @@ func physics_update(delta: float) -> void:
 	if input.length() > 0.1:   # light steering
 		var lim := c.roll_steer * delta
 		h = h.rotated(Vector3.UP, clampf(h.signed_angle_to(input, Vector3.UP), -lim, lim))
+	# Slope awareness: gravity's own component along the floor pulls a roll
+	# downhill (and resists it going uphill), scaling up with steepness just
+	# like GroundState's forced slide does for standing — blended additively
+	# into the roll's existing momentum here rather than overriding it, so a
+	# gentle slope just nudges your line while a steep one can overpower your
+	# steering entirely, same as it would rolling a real ball down a hill.
+	if p.is_on_floor():
+		var angle := p.get_floor_angle()
+		if angle > 0.001:
+			var normal := p.get_floor_normal()
+			var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
+			if down_slope.length() > 0.001:
+				h += down_slope.normalized() * (c.gravity * sin(angle)) * delta
 	var spd := maxf(0.0, h.length() - c.roll_decay * delta)
 	h = h.normalized() * spd if spd > 0.0 else Vector3.ZERO
 	p.set_hvel(h)

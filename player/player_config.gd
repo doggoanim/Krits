@@ -16,8 +16,20 @@ extends Resource
 											## can't stand or walk normally on it (still well under
 											## floor_max_angle in player.gd, so it's still "floor",
 											## just too steep to stand on)
-@export var slope_slide_speed := 10.0      ## top speed while sliding down a steep slope
-@export var slope_slide_accel := 25.0      ## how quickly slope-sliding ramps up to that speed
+@export var slope_slide_speed := 10.0      ## slide speed right at slope_slide_angle_deg
+@export var slope_slide_max_speed := 20.0  ## slide speed at a vertical (90°) surface — speed
+											## between the two scales linearly with steepness,
+											## see slope_speed_for_angle()
+@export var slope_slide_accel := 25.0      ## how quickly slope-sliding ramps up to its target speed
+
+## Target downhill speed for a floor this steep — linearly scales from
+## slope_slide_speed right at the slide threshold up to slope_slide_max_speed
+## at a vertical surface, so steeper consistently means faster. Shared by
+## GroundState's forced slide and RollState's downhill slope pull so a given
+## slope feels the same whether you're standing or rolling through it.
+func slope_speed_for_angle(angle_rad: float) -> float:
+	var t := inverse_lerp(slope_slide_angle_deg, 90.0, rad_to_deg(angle_rad))
+	return lerp(slope_slide_speed, slope_slide_max_speed, clampf(t, 0.0, 1.0))
 
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",
