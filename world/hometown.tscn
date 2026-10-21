@@ -50,6 +50,18 @@ size = Vector3(44, 0.05, 4)
 [sub_resource type="BoxMesh" id="Mesh_PathEW"]
 size = Vector3(44, 0.05, 4)
 
+[sub_resource type="BoxShape3D" id="Shape_House1Roof"]
+size = Vector3(6.9, 2.4, 6.9)
+
+[sub_resource type="BoxShape3D" id="Shape_House2Roof"]
+size = Vector3(8.05, 3.0, 5.75)
+
+[sub_resource type="BoxShape3D" id="Shape_House3Roof"]
+size = Vector3(5.75, 2.1, 5.75)
+
+[sub_resource type="BoxShape3D" id="Shape_House4Roof"]
+size = Vector3(6.9, 2.7, 6.9)
+
 [sub_resource type="BoxShape3D" id="Shape_House1Walls"]
 size = Vector3(6, 4, 6)
 
@@ -276,8 +288,14 @@ shape = SubResource("Shape_House1Walls")
 mesh = SubResource("Mesh_House1Walls")
 material_override = SubResource("Mat_Stone")
 
-[node name="Roof" type="MeshInstance3D" parent="House1"]
+[node name="Roof" type="StaticBody3D" parent="House1"]
+collision_layer = 129
 position = Vector3(0, 5.2, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House1/Roof"]
+shape = SubResource("Shape_House1Roof")
+
+[node name="Mesh" type="MeshInstance3D" parent="House1/Roof"]
 mesh = SubResource("Mesh_House1Roof")
 material_override = SubResource("Mat_RoofRed")
 
@@ -295,8 +313,14 @@ shape = SubResource("Shape_House2Walls")
 mesh = SubResource("Mesh_House2Walls")
 material_override = SubResource("Mat_StoneLight")
 
-[node name="Roof" type="MeshInstance3D" parent="House2"]
+[node name="Roof" type="StaticBody3D" parent="House2"]
+collision_layer = 129
 position = Vector3(0, 6.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House2/Roof"]
+shape = SubResource("Shape_House2Roof")
+
+[node name="Mesh" type="MeshInstance3D" parent="House2/Roof"]
 mesh = SubResource("Mesh_House2Roof")
 material_override = SubResource("Mat_RoofBlue")
 
@@ -314,8 +338,14 @@ shape = SubResource("Shape_House3Walls")
 mesh = SubResource("Mesh_House3Walls")
 material_override = SubResource("Mat_Stone")
 
-[node name="Roof" type="MeshInstance3D" parent="House3"]
+[node name="Roof" type="StaticBody3D" parent="House3"]
+collision_layer = 129
 position = Vector3(0, 4.55, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House3/Roof"]
+shape = SubResource("Shape_House3Roof")
+
+[node name="Mesh" type="MeshInstance3D" parent="House3/Roof"]
 mesh = SubResource("Mesh_House3Roof")
 material_override = SubResource("Mat_RoofRed")
 
@@ -333,8 +363,14 @@ shape = SubResource("Shape_House4Walls")
 mesh = SubResource("Mesh_House4Walls")
 material_override = SubResource("Mat_StoneLight")
 
-[node name="Roof" type="MeshInstance3D" parent="House4"]
+[node name="Roof" type="StaticBody3D" parent="House4"]
+collision_layer = 129
 position = Vector3(0, 5.85, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House4/Roof"]
+shape = SubResource("Shape_House4Roof")
+
+[node name="Mesh" type="MeshInstance3D" parent="House4/Roof"]
 mesh = SubResource("Mesh_House4Roof")
 material_override = SubResource("Mat_RoofBlue")
 
