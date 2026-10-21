@@ -24,6 +24,16 @@ func physics_update(delta: float) -> void:
 		machine.transition_to(&"Pound")
 		return
 
+	# Ledge grab: only while actually falling (not still rising out of a
+	# jump), so a jump thrown at a nearby wall doesn't snag on its way up —
+	# it only catches on the way back down, same as it reads in most
+	# platformers.
+	if p.velocity.y <= 0.0:
+		var ledge := p.find_ledge()
+		if not ledge.is_empty():
+			machine.transition_to(&"LedgeHang", ledge)
+			return
+
 	# A wall bounce's reaction pose (play_hold, below) also locks out steering
 	# for the same window — you're along for the bounce's arc until it ends.
 	if not p.visual.is_holding():

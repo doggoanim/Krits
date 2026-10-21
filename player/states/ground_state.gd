@@ -80,6 +80,12 @@ func physics_update(delta: float) -> void:
 			# just a vertical hop that happens to still be drifting.
 			p.set_hvel(p.get_hvel() + down_slope * c.slope_jump_push)
 			p.start_jump(c.jump_velocity)
+			# start_jump() picks one of the regular jump-start poses — override
+			# it with the roll pose for a beat, since a jump launched out of a
+			# fast downhill slide reads more like tumbling off it than a plain
+			# standing hop. AirState's own per-frame animation takes back over
+			# once the hold expires.
+			p.visual.play_hold(PlayerVisual.ANIM_ROLL, c.slope_jump_roll_hold_time)
 			return
 		if not _slope_sliding:
 			p.audio.play_skid()

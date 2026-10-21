@@ -24,6 +24,26 @@ extends Resource
 @export var slope_jump_push := 6.0         ## extra horizontal kick along the downhill direction when
 											## jumping off a slope slide, added on top of whatever
 											## momentum the slide had already built up
+@export var slope_jump_roll_hold_time := 0.45   ## how long a slope-slide jump holds the roll pose
+												  ## (instead of the usual jump-start pose) before
+												  ## AirState's own per-frame animation takes back over
+
+@export_group("Ledge Hang")
+## A forward probe at roughly chest height finds a wall while falling; a
+## second probe just past it looks for a surface near that same height (the
+## ledge's own top edge, as opposed to a wall that just keeps going) — see
+## Player.find_ledge(). Both probes use the player's own collision_mask, so
+## anything the player can already stand on or run into is a valid ledge.
+@export var ledge_grab_height := 1.5             ## height above the player's feet the forward probe
+												  ## is cast at — roughly chest/shoulder height
+@export var ledge_grab_forward_offset := 0.6     ## how far ahead of the player's capsule surface
+												  ## the forward probe reaches
+@export var ledge_grab_vertical_tolerance := 0.35   ## the ledge top must land within this far above
+													 ## or below ledge_grab_height to count as reachable
+@export var ledge_hang_offset := 0.3             ## how far back from the wall the player is held
+												  ## while hanging, clear of the wall face
+@export var ledge_climb_time := 0.5              ## how long the climb-up-and-over takes
+@export var ledge_drop_speed := -3.0             ## initial downward speed when dropping off (crouch)
 
 ## Target downhill speed for a floor this steep — linearly scales from
 ## slope_slide_speed right at the slide threshold up to slope_slide_max_speed

@@ -83,7 +83,7 @@ func _ready() -> void:
 		&"Roll": RollState.new(), &"Air": AirState.new(),
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
-		&"Frozen": FrozenState.new(),
+		&"Frozen": FrozenState.new(), &"LedgeHang": LedgeHangState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -201,6 +201,56 @@ func air_control(delta: float) -> void:
 	else:
 		h = h.move_toward(input * config.air_speed, config.air_accel * delta)
 	set_hvel(h)
+
+## Looks for a grabbable ledge directly ahead while falling — a forward probe
+## at roughly chest height finds a wall, then a downward probe just past it
+## looks for a surface near that same height (the ledge's own top edge, not
+## a wall that just keeps going well above or below reach). Called from
+## AirState every frame while falling; returns {} when nothing qualifies,
+## otherwise wall_normal/hang_pos/stand_pos for LedgeHangState to use.
+## NOTE: geometry-sensitive and untested against real level art — tune the
+## Ledge Hang numbers in PlayerConfig once there's an actual ledge to grab.
+func find_ledge() -> Dictionary:
+	var dir := get_hvel()
+	dir = dir if dir.length() > 0.1 else -facing
+	dir = Vector3(dir.x, 0.0, dir.z)
+	if dir.length() < 0.001:
+		return {}
+	dir = dir.normalized()
+
+	var space := get_world_3d().direct_space_state
+	var probe_origin := global_position + Vector3.UP * config.ledge_grab_height
+	var fwd_to := probe_origin + dir * (RADIUS + config.ledge_grab_forward_offset)
+	var fwd_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		probe_origin, fwd_to, collision_mask, [get_rid()]))
+	if fwd_hit.is_empty():
+		return {}
+
+	var normal: Vector3 = fwd_hit.normal
+	normal.y = 0.0
+	if normal.length() < 0.1:
+		return {}
+	normal = normal.normalized()
+	if (-dir).dot(normal) < 0.5:
+		return {}   # too glancing an angle — not squarely facing the wall
+
+	var hit_xz: Vector3 = fwd_hit.position
+	var probe_xz := hit_xz - normal * 0.05   # nudge past the wall face, into open space above it
+	var tol := config.ledge_grab_vertical_tolerance
+	var down_from := Vector3(probe_xz.x, global_position.y + config.ledge_grab_height + tol, probe_xz.z)
+	var down_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		down_from, down_from + Vector3.DOWN * (tol * 2.0), collision_mask, [get_rid()]))
+	if down_hit.is_empty():
+		return {}   # the wall keeps going well above grab height — nothing to grab here
+
+	var top_y: float = down_hit.position.y
+	if top_y < global_position.y + config.ledge_grab_height - tol:
+		return {}   # whatever's down there is below grab height — not reachable from here
+
+	var hang_pos := hit_xz + normal * config.ledge_hang_offset
+	hang_pos.y = top_y - STAND_HEIGHT * 0.5
+	var stand_pos := Vector3(probe_xz.x, top_y, probe_xz.z) - normal * 0.3
+	return {"wall_normal": normal, "hang_pos": hang_pos, "stand_pos": stand_pos}
 
 # ---------------------------------------------------------------- actions
 
