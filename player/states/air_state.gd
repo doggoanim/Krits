@@ -2,7 +2,7 @@ class_name AirState
 extends PlayerState
 
 var _diag_frames := 0   ## TEMP: see physics_update()'s print block, for the "jump sometimes
-                         ## doesn't actually move you up" bug — remove once it's found
+						 ## doesn't actually move you up" bug — remove once it's found
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
