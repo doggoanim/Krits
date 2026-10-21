@@ -55,6 +55,8 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## since the normal doesn't change frame to frame there.
 @export var wall_jump_off_speed := 7.0     ## horizontal push away from the wall when jumping off
 @export var wall_jump_off_velocity := 10.0   ## vertical speed of a wall-jump
+@export var wall_release_push := 1.5       ## horizontal push away from the wall when letting go via crouch
+@export var wall_drop_speed := -3.0        ## initial downward speed when letting go via crouch
 
 @export_group("Side Flip")
 ## Jumping while skidding from a sharp direction reversal (a "skid turn",

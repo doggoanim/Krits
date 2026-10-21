@@ -76,6 +76,14 @@ func physics_update(delta: float) -> void:
 	p.visual.play(PlayerVisual.ANIM_WALL_CLIMB if moving else PlayerVisual.ANIM_WALL_CLIMB_IDLE)
 
 	if Input.is_action_pressed(&"crouch_pound"):
+		# A real push away from the wall, not just zero velocity — and the
+		# same regrab cooldown jump_off_wall() uses, since without it
+		# AirState's own find_climbable_wall() check (still facing the same
+		# wall, barely any distance covered yet) would just grab it straight
+		# back on the very next frame.
+		p.velocity = -_normal * c.wall_release_push
+		p.velocity.y = c.wall_drop_speed
+		p.wall_climb_cd = Player.WALL_CLIMB_REGRAB_COOLDOWN
 		machine.transition_to(&"Air")
 		return
 

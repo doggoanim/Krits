@@ -296,8 +296,8 @@ func find_climbable_wall() -> Dictionary:
 		return {}
 	dir = dir.normalized()
 	var probe_origin := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
-	_wall_cast.global_position = probe_origin - dir * config.wall_grab_reach
-	_wall_cast.target_position = dir * (config.wall_grab_reach + 0.1)
+	_wall_cast.global_position = probe_origin
+	_wall_cast.target_position = dir * (RADIUS + config.wall_grab_reach)
 	_wall_cast.force_shapecast_update()
 	if not _wall_cast.is_colliding():
 		return {}
