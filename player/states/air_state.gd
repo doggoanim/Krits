@@ -1,9 +1,13 @@
 class_name AirState
 extends PlayerState
 
+var _diag_frames := 0   ## TEMP: see physics_update()'s print block, for the "jump sometimes
+                         ## doesn't actually move you up" bug — remove once it's found
+
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
 		player.set_crouching(false)
+	_diag_frames = 3
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -27,10 +31,19 @@ func physics_update(delta: float) -> void:
 		var input := p.input_dir()
 		if input.length() > 0.1:
 			p.face(input, delta)
+	var _diag := _diag_frames > 0
+	if _diag:
+		print("[JumpDebug] Air frame | vel.y before gravity=%.3f on_floor(stale)=%s" % [p.velocity.y, p.is_on_floor()])
 	p.apply_gravity(delta)
+	if _diag:
+		print("[JumpDebug] Air frame | vel.y after gravity=%.3f" % p.velocity.y)
 	# A wall-bounce collision pose protects itself via play_hold — this call
 	# is simply ignored for the moment and takes back over once it expires.
 	p.visual.play(p.visual.jump_start_anim() if p.velocity.y > c.fall_pose_velocity else PlayerVisual.ANIM_FALLING)
 	p.move_and_slide()
+	if _diag:
+		print("[JumpDebug] Air frame | vel.y after move_and_slide=%.3f on_floor=%s global_y=%.3f" \
+			% [p.velocity.y, p.is_on_floor(), p.global_position.y])
+		_diag_frames -= 1
 	if p.is_on_floor():
 		machine.transition_to(&"Ground")
