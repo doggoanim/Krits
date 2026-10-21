@@ -245,6 +245,9 @@ size = Vector3(10.715, 0.35, 12.595)
 [sub_resource type="BoxShape3D" id="BoxShape3D_gka81"]
 size = Vector3(10.715, 0.35, 12.595)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
+size = Vector3(10.715, 0.35, 12.595)
+
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=376223182]
@@ -675,10 +678,21 @@ spawn_id = &"overlook"
 display_name = "Hilltop"
 
 [node name="SLOPE" type="StaticBody3D" parent="." unique_id=706873338]
-transform = Transform3D(1, 0, 0, 0, 0.6799007, -0.7333042, 0, 0.7333042, 0.6799007, -15.957043, 1.6517792, -36.796364)
+transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SLOPE" unique_id=1707694586]
 mesh = SubResource("BoxMesh_bf34x")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SLOPE" unique_id=382698887]
 shape = SubResource("BoxShape3D_gka81")
+
+[node name="SLOPE2" type="StaticBody3D" parent="." unique_id=1264340287]
+transform = Transform3D(1, 0, 0, 0, 0.999347, -0.036133796, 0, 0.036133796, 0.999347, -15.957043, 1.6517792, -36.796364)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SLOPE2" unique_id=1197038778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
+mesh = SubResource("BoxMesh_bf34x")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SLOPE2" unique_id=958427448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
+shape = SubResource("BoxShape3D_70bq6")
