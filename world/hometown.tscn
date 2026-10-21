@@ -1,0 +1,651 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://world/spawnpoint.gd" id="1_spawn"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Grass"]
+albedo_color = Color(0.36, 0.56, 0.32, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_DirtPath"]
+albedo_color = Color(0.55, 0.42, 0.28, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Stone"]
+albedo_color = Color(0.62, 0.6, 0.58, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_StoneLight"]
+albedo_color = Color(0.7, 0.65, 0.55, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Wood"]
+albedo_color = Color(0.5, 0.35, 0.22, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
+albedo_color = Color(0.65, 0.25, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_RoofBlue"]
+albedo_color = Color(0.25, 0.35, 0.55, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Foliage"]
+albedo_color = Color(0.22, 0.45, 0.25, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_HillStep"]
+albedo_color = Color(0.5, 0.42, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_HillTop"]
+albedo_color = Color(0.45, 0.55, 0.4, 1)
+
+[sub_resource type="BoxShape3D" id="Shape_Ground"]
+size = Vector3(120, 1, 120)
+
+[sub_resource type="BoxMesh" id="Mesh_Ground"]
+size = Vector3(120, 1, 120)
+
+[sub_resource type="BoxShape3D" id="Shape_PathNS"]
+size = Vector3(4, 0.05, 44)
+
+[sub_resource type="BoxMesh" id="Mesh_PathNS"]
+size = Vector3(4, 0.05, 44)
+
+[sub_resource type="BoxShape3D" id="Shape_PathEW"]
+size = Vector3(44, 0.05, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_PathEW"]
+size = Vector3(44, 0.05, 4)
+
+[sub_resource type="BoxShape3D" id="Shape_House1Walls"]
+size = Vector3(6, 4, 6)
+
+[sub_resource type="BoxMesh" id="Mesh_House1Walls"]
+size = Vector3(6, 4, 6)
+
+[sub_resource type="PrismMesh" id="Mesh_House1Roof"]
+size = Vector3(6.9, 2.4, 6.9)
+
+[sub_resource type="BoxShape3D" id="Shape_House2Walls"]
+size = Vector3(7, 5, 5)
+
+[sub_resource type="BoxMesh" id="Mesh_House2Walls"]
+size = Vector3(7, 5, 5)
+
+[sub_resource type="PrismMesh" id="Mesh_House2Roof"]
+size = Vector3(8.05, 3.0, 5.75)
+
+[sub_resource type="BoxShape3D" id="Shape_House3Walls"]
+size = Vector3(5, 3.5, 5)
+
+[sub_resource type="BoxMesh" id="Mesh_House3Walls"]
+size = Vector3(5, 3.5, 5)
+
+[sub_resource type="PrismMesh" id="Mesh_House3Roof"]
+size = Vector3(5.75, 2.1, 5.75)
+
+[sub_resource type="BoxShape3D" id="Shape_House4Walls"]
+size = Vector3(6, 4.5, 6)
+
+[sub_resource type="BoxMesh" id="Mesh_House4Walls"]
+size = Vector3(6, 4.5, 6)
+
+[sub_resource type="PrismMesh" id="Mesh_House4Roof"]
+size = Vector3(6.9, 2.7, 6.9)
+
+[sub_resource type="CylinderShape3D" id="Shape_WellRim"]
+radius = 1.2
+height = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_WellRim"]
+top_radius = 1.2
+bottom_radius = 1.2
+height = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_WellPole"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 2.2
+
+[sub_resource type="CylinderMesh" id="Mesh_WellRoof"]
+top_radius = 0.0
+bottom_radius = 1.6
+height = 1.0
+
+[sub_resource type="BoxShape3D" id="Shape_Step1"]
+size = Vector3(4, 1.5, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_Step1"]
+size = Vector3(4, 1.5, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_Step2"]
+size = Vector3(4, 3, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_Step2"]
+size = Vector3(4, 3, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_Step3"]
+size = Vector3(4, 4.5, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_Step3"]
+size = Vector3(4, 4.5, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_HillTop"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_HillTop"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S100"]
+radius = 0.25
+height = 3.0
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S100"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 3.0
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S100"]
+top_radius = 0.0
+bottom_radius = 1.6
+height = 3.2
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S115"]
+radius = 0.2875
+height = 3.45
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S115"]
+top_radius = 0.2875
+bottom_radius = 0.2875
+height = 3.45
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S115"]
+top_radius = 0.0
+bottom_radius = 1.84
+height = 3.68
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S090"]
+radius = 0.225
+height = 2.7
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S090"]
+top_radius = 0.225
+bottom_radius = 0.225
+height = 2.7
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S090"]
+top_radius = 0.0
+bottom_radius = 1.44
+height = 2.88
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S105"]
+radius = 0.2625
+height = 3.15
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S105"]
+top_radius = 0.2625
+bottom_radius = 0.2625
+height = 3.15
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S105"]
+top_radius = 0.0
+bottom_radius = 1.68
+height = 3.36
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S120"]
+radius = 0.3
+height = 3.6
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S120"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 3.6
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S120"]
+top_radius = 0.0
+bottom_radius = 1.92
+height = 3.84
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S095"]
+radius = 0.2375
+height = 2.85
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S095"]
+top_radius = 0.2375
+bottom_radius = 0.2375
+height = 2.85
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S095"]
+top_radius = 0.0
+bottom_radius = 1.52
+height = 3.04
+
+[sub_resource type="CylinderShape3D" id="Shape_Trunk_S110"]
+radius = 0.275
+height = 3.3
+
+[sub_resource type="CylinderMesh" id="Mesh_Trunk_S110"]
+top_radius = 0.275
+bottom_radius = 0.275
+height = 3.3
+
+[sub_resource type="CylinderMesh" id="Mesh_Foliage_S110"]
+top_radius = 0.0
+bottom_radius = 1.76
+height = 3.52
+
+[node name="Hometown" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+collision_layer = 129
+position = Vector3(0, -0.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("Shape_Ground")
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("Mesh_Ground")
+material_override = SubResource("Mat_Grass")
+
+[node name="PathNS" type="StaticBody3D" parent="."]
+collision_layer = 129
+position = Vector3(0, 0.01, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="PathNS"]
+shape = SubResource("Shape_PathNS")
+
+[node name="Mesh" type="MeshInstance3D" parent="PathNS"]
+mesh = SubResource("Mesh_PathNS")
+material_override = SubResource("Mat_DirtPath")
+
+[node name="PathEW" type="StaticBody3D" parent="."]
+collision_layer = 129
+position = Vector3(0, 0.01, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="PathEW"]
+shape = SubResource("Shape_PathEW")
+
+[node name="Mesh" type="MeshInstance3D" parent="PathEW"]
+mesh = SubResource("Mesh_PathEW")
+material_override = SubResource("Mat_DirtPath")
+
+[node name="House1" type="Node3D" parent="."]
+position = Vector3(-11, 0, -11)
+
+[node name="Walls" type="StaticBody3D" parent="House1"]
+collision_layer = 1
+position = Vector3(0, 2, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House1/Walls"]
+shape = SubResource("Shape_House1Walls")
+
+[node name="Mesh" type="MeshInstance3D" parent="House1/Walls"]
+mesh = SubResource("Mesh_House1Walls")
+material_override = SubResource("Mat_Stone")
+
+[node name="Roof" type="MeshInstance3D" parent="House1"]
+position = Vector3(0, 5.2, 0)
+mesh = SubResource("Mesh_House1Roof")
+material_override = SubResource("Mat_RoofRed")
+
+[node name="House2" type="Node3D" parent="."]
+position = Vector3(11, 0, -13)
+
+[node name="Walls" type="StaticBody3D" parent="House2"]
+collision_layer = 1
+position = Vector3(0, 2.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House2/Walls"]
+shape = SubResource("Shape_House2Walls")
+
+[node name="Mesh" type="MeshInstance3D" parent="House2/Walls"]
+mesh = SubResource("Mesh_House2Walls")
+material_override = SubResource("Mat_StoneLight")
+
+[node name="Roof" type="MeshInstance3D" parent="House2"]
+position = Vector3(0, 6.5, 0)
+mesh = SubResource("Mesh_House2Roof")
+material_override = SubResource("Mat_RoofBlue")
+
+[node name="House3" type="Node3D" parent="."]
+position = Vector3(-14, 0, 9)
+
+[node name="Walls" type="StaticBody3D" parent="House3"]
+collision_layer = 1
+position = Vector3(0, 1.75, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House3/Walls"]
+shape = SubResource("Shape_House3Walls")
+
+[node name="Mesh" type="MeshInstance3D" parent="House3/Walls"]
+mesh = SubResource("Mesh_House3Walls")
+material_override = SubResource("Mat_Stone")
+
+[node name="Roof" type="MeshInstance3D" parent="House3"]
+position = Vector3(0, 4.55, 0)
+mesh = SubResource("Mesh_House3Roof")
+material_override = SubResource("Mat_RoofRed")
+
+[node name="House4" type="Node3D" parent="."]
+position = Vector3(14, 0, 11)
+
+[node name="Walls" type="StaticBody3D" parent="House4"]
+collision_layer = 1
+position = Vector3(0, 2.25, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="House4/Walls"]
+shape = SubResource("Shape_House4Walls")
+
+[node name="Mesh" type="MeshInstance3D" parent="House4/Walls"]
+mesh = SubResource("Mesh_House4Walls")
+material_override = SubResource("Mat_StoneLight")
+
+[node name="Roof" type="MeshInstance3D" parent="House4"]
+position = Vector3(0, 5.85, 0)
+mesh = SubResource("Mesh_House4Roof")
+material_override = SubResource("Mat_RoofBlue")
+
+[node name="Well" type="Node3D" parent="."]
+position = Vector3(0, 0, -6)
+
+[node name="Rim" type="StaticBody3D" parent="Well"]
+collision_layer = 1
+position = Vector3(0, 0.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Well/Rim"]
+shape = SubResource("Shape_WellRim")
+
+[node name="Mesh" type="MeshInstance3D" parent="Well/Rim"]
+mesh = SubResource("Mesh_WellRim")
+material_override = SubResource("Mat_Stone")
+
+[node name="Pole" type="MeshInstance3D" parent="Well"]
+position = Vector3(0, 2.1, 0)
+mesh = SubResource("Mesh_WellPole")
+material_override = SubResource("Mat_Wood")
+
+[node name="Roof" type="MeshInstance3D" parent="Well"]
+position = Vector3(0, 3.5, 0)
+mesh = SubResource("Mesh_WellRoof")
+material_override = SubResource("Mat_RoofRed")
+
+[node name="Hill" type="Node3D" parent="."]
+
+[node name="Step1" type="StaticBody3D" parent="Hill"]
+collision_layer = 129
+position = Vector3(30, 0.75, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Hill/Step1"]
+shape = SubResource("Shape_Step1")
+
+[node name="Mesh" type="MeshInstance3D" parent="Hill/Step1"]
+mesh = SubResource("Mesh_Step1")
+material_override = SubResource("Mat_HillStep")
+
+[node name="Step2" type="StaticBody3D" parent="Hill"]
+collision_layer = 129
+position = Vector3(34, 1.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Hill/Step2"]
+shape = SubResource("Shape_Step2")
+
+[node name="Mesh" type="MeshInstance3D" parent="Hill/Step2"]
+mesh = SubResource("Mesh_Step2")
+material_override = SubResource("Mat_HillStep")
+
+[node name="Step3" type="StaticBody3D" parent="Hill"]
+collision_layer = 129
+position = Vector3(38, 2.25, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Hill/Step3"]
+shape = SubResource("Shape_Step3")
+
+[node name="Mesh" type="MeshInstance3D" parent="Hill/Step3"]
+mesh = SubResource("Mesh_Step3")
+material_override = SubResource("Mat_HillStep")
+
+[node name="Top" type="StaticBody3D" parent="Hill"]
+collision_layer = 129
+position = Vector3(42, 4.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Hill/Top"]
+shape = SubResource("Shape_HillTop")
+
+[node name="Mesh" type="MeshInstance3D" parent="Hill/Top"]
+mesh = SubResource("Mesh_HillTop")
+material_override = SubResource("Mat_HillTop")
+
+[node name="Trees" type="Node3D" parent="."]
+
+[node name="Tree1" type="Node3D" parent="Trees"]
+position = Vector3(-35, 0, -35)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree1"]
+collision_layer = 1
+position = Vector3(0, 1.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree1/Trunk"]
+shape = SubResource("Shape_Trunk_S100")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree1/Trunk"]
+mesh = SubResource("Mesh_Trunk_S100")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree1"]
+position = Vector3(0, 4.12, 0)
+mesh = SubResource("Mesh_Foliage_S100")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree2" type="Node3D" parent="Trees"]
+position = Vector3(-30, 0, -45)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree2"]
+collision_layer = 1
+position = Vector3(0, 1.725, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree2/Trunk"]
+shape = SubResource("Shape_Trunk_S115")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree2/Trunk"]
+mesh = SubResource("Mesh_Trunk_S115")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree2"]
+position = Vector3(0, 4.738, 0)
+mesh = SubResource("Mesh_Foliage_S115")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree3" type="Node3D" parent="Trees"]
+position = Vector3(-45, 0, -20)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree3"]
+collision_layer = 1
+position = Vector3(0, 1.35, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree3/Trunk"]
+shape = SubResource("Shape_Trunk_S090")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree3/Trunk"]
+mesh = SubResource("Mesh_Trunk_S090")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree3"]
+position = Vector3(0, 3.708, 0)
+mesh = SubResource("Mesh_Foliage_S090")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree4" type="Node3D" parent="Trees"]
+position = Vector3(-40, 0, 5)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree4"]
+collision_layer = 1
+position = Vector3(0, 1.575, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree4/Trunk"]
+shape = SubResource("Shape_Trunk_S105")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree4/Trunk"]
+mesh = SubResource("Mesh_Trunk_S105")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree4"]
+position = Vector3(0, 4.326, 0)
+mesh = SubResource("Mesh_Foliage_S105")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree5" type="Node3D" parent="Trees"]
+position = Vector3(-38, 0, 30)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree5"]
+collision_layer = 1
+position = Vector3(0, 1.8, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree5/Trunk"]
+shape = SubResource("Shape_Trunk_S120")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree5/Trunk"]
+mesh = SubResource("Mesh_Trunk_S120")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree5"]
+position = Vector3(0, 4.944, 0)
+mesh = SubResource("Mesh_Foliage_S120")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree6" type="Node3D" parent="Trees"]
+position = Vector3(-20, 0, 42)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree6"]
+collision_layer = 1
+position = Vector3(0, 1.425, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree6/Trunk"]
+shape = SubResource("Shape_Trunk_S095")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree6/Trunk"]
+mesh = SubResource("Mesh_Trunk_S095")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree6"]
+position = Vector3(0, 3.914, 0)
+mesh = SubResource("Mesh_Foliage_S095")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree7" type="Node3D" parent="Trees"]
+position = Vector3(5, 0, 45)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree7"]
+collision_layer = 1
+position = Vector3(0, 1.65, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree7/Trunk"]
+shape = SubResource("Shape_Trunk_S110")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree7/Trunk"]
+mesh = SubResource("Mesh_Trunk_S110")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree7"]
+position = Vector3(0, 4.532, 0)
+mesh = SubResource("Mesh_Foliage_S110")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree8" type="Node3D" parent="Trees"]
+position = Vector3(25, 0, 38)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree8"]
+collision_layer = 1
+position = Vector3(0, 1.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree8/Trunk"]
+shape = SubResource("Shape_Trunk_S100")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree8/Trunk"]
+mesh = SubResource("Mesh_Trunk_S100")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree8"]
+position = Vector3(0, 4.12, 0)
+mesh = SubResource("Mesh_Foliage_S100")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree9" type="Node3D" parent="Trees"]
+position = Vector3(40, 0, 22)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree9"]
+collision_layer = 1
+position = Vector3(0, 1.35, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree9/Trunk"]
+shape = SubResource("Shape_Trunk_S090")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree9/Trunk"]
+mesh = SubResource("Mesh_Trunk_S090")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree9"]
+position = Vector3(0, 3.708, 0)
+mesh = SubResource("Mesh_Foliage_S090")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree10" type="Node3D" parent="Trees"]
+position = Vector3(48, 0, -15)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree10"]
+collision_layer = 1
+position = Vector3(0, 1.725, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree10/Trunk"]
+shape = SubResource("Shape_Trunk_S115")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree10/Trunk"]
+mesh = SubResource("Mesh_Trunk_S115")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree10"]
+position = Vector3(0, 4.738, 0)
+mesh = SubResource("Mesh_Foliage_S115")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree11" type="Node3D" parent="Trees"]
+position = Vector3(35, 0, -35)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree11"]
+collision_layer = 1
+position = Vector3(0, 1.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree11/Trunk"]
+shape = SubResource("Shape_Trunk_S100")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree11/Trunk"]
+mesh = SubResource("Mesh_Trunk_S100")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree11"]
+position = Vector3(0, 4.12, 0)
+mesh = SubResource("Mesh_Foliage_S100")
+material_override = SubResource("Mat_Foliage")
+
+[node name="Tree12" type="Node3D" parent="Trees"]
+position = Vector3(10, 0, -42)
+
+[node name="Trunk" type="StaticBody3D" parent="Trees/Tree12"]
+collision_layer = 1
+position = Vector3(0, 1.65, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Trees/Tree12/Trunk"]
+shape = SubResource("Shape_Trunk_S110")
+
+[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree12/Trunk"]
+mesh = SubResource("Mesh_Trunk_S110")
+material_override = SubResource("Mat_Wood")
+
+[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree12"]
+position = Vector3(0, 4.532, 0)
+mesh = SubResource("Mesh_Foliage_S110")
+material_override = SubResource("Mat_Foliage")
+
+[node name="StartSpawn" type="Area3D" parent="." node_paths=PackedStringArray()]
+script = ExtResource("1_spawn")
+spawn_id = &"start"
+display_name = "Town Square"
+position = Vector3(8, 0, 14)
+
+[node name="OverlookSpawn" type="Area3D" parent="." node_paths=PackedStringArray()]
+script = ExtResource("1_spawn")
+spawn_id = &"overlook"
+display_name = "Hilltop"
+position = Vector3(42, 5.0, 0)

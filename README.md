@@ -49,10 +49,11 @@ toward the new direction.
 - stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
 - world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
-			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), Hometown (the default
-			 first area — a small plaza built entirely from Godot's own primitive meshes: boxes,
-			 cylinders, prisms; no Blender or terrain plugin needed), TestLevel (a mechanics-testing
-			 blockout, not a designed place — still there if you want it, see main.gd),
+			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
+			 first area — a small plaza built from plain Godot nodes: boxes, cylinders, prisms, no
+			 Blender or terrain plugin needed; open it in the editor and drag things around like any
+			 other scene), TestLevel (a code-built mechanics-testing blockout, not a designed place —
+			 still there if you want it, see main.gd's `level_scene` default),
 			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted later)
@@ -82,10 +83,12 @@ and nothing requires levels to be built in code. To build a real level visually:
    somewhere under `world/` (or wherever you like), e.g. `world/hometown.tscn`.
 2. Build your geometry normally — meshes, `CSGShape3D`, imported models, whatever
    you like. Godot has no built-in sculptable terrain tool (unlike Unity); for
-   basic-shapes environments, `CSGShape3D` primitives or a `GridMap` (tile-based,
-   paint a `MeshLibrary` in the editor) cover most needs without Blender — see
-   `world/hometown.gd` for a whole zone built from nothing but boxes, cylinders
-   and prisms. For organic rolling terrain, add a heightmap plugin (Terrain3D,
+   basic-shapes environments, `CSGShape3D` primitives, a `GridMap` (tile-based,
+   paint a `MeshLibrary` in the editor), or plain `StaticBody3D`+`MeshInstance3D`
+   nodes (what `world/hometown.tscn` uses) all cover this without Blender — see
+   `hometown.tscn` for a whole zone built from nothing but boxes, cylinders
+   and prisms, editable like any other scene. For organic rolling terrain, add
+   a heightmap plugin (Terrain3D,
    HTerrain, both free via AssetLib) or sculpt a mesh externally and import it.
    Anything that should be solid ground/walls needs a collision shape on
    **collision layer 1** (the "World" layer; `StaticBody3D` with its
