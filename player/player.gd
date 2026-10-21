@@ -289,8 +289,12 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 func find_climbable_wall() -> Dictionary:
 	if wall_climb_cd > 0.0:
 		return {}
+	# `facing`, not `-facing`: when hvel is too small to tell (standing still,
+	# or just bumped a wall head-on and move_and_slide() zeroed the velocity),
+	# probe the direction the player is actually looking, not behind them —
+	# using -facing here was grabbing walls the player had their back to.
 	var dir := get_hvel()
-	dir = dir if dir.length() > 0.1 else -facing
+	dir = dir if dir.length() > 0.1 else facing
 	dir = Vector3(dir.x, 0.0, dir.z)
 	if dir.length() < 0.001:
 		return {}
@@ -305,7 +309,16 @@ func find_climbable_wall() -> Dictionary:
 	normal.y = 0.0
 	if normal.length() < 0.1:
 		return {}
-	return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
+	# The probe sweeps at chest height (probe_origin above), but global_position
+	# itself is the player's feet — returning the hit point as-is would plant
+	# the player's feet at chest height once WallClimbState applies it
+	# (point + normal * hug_distance becomes the new global_position),
+	# visibly popping them up by STAND_HEIGHT * 0.5 on every grab. Undo that
+	# offset here so the returned point lines up with the player's own origin
+	# height instead of the probe's.
+	var point: Vector3 = _wall_cast.get_collision_point(0)
+	point.y -= STAND_HEIGHT * 0.5
+	return {"point": point, "normal": normal.normalized()}
 
 # ---------------------------------------------------------------- actions
 
