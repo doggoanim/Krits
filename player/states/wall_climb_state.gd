@@ -18,9 +18,7 @@ extends PlayerState
 var _normal := Vector3.FORWARD      ## the wall currently attached to
 var _attach_point := Vector3.ZERO   ## a point on that wall, at the player's own origin height
                                      ## (not the probe's chest-height — see find_climbable_wall())
-var _grab_height := 0.0             ## _attach_point.y at the moment of grabbing —
-                                     ## wall_climb_max_height is measured from here
-var _at_top := false                ## climbing up found nothing, or hit the height cap — makes
+var _at_top := false                ## true once climbing further up finds no more wall — makes
                                      ## jump a plain vertical hop instead of a wall-jump kick-off
 
 var _ease_from_normal := Vector3.FORWARD   ## corner-wrap/grab transitions blend FROM this pair...
@@ -31,7 +29,6 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
 	_attach_point = _msg.get("point", p.global_position)
-	_grab_height = _attach_point.y
 	_at_top = false
 
 	# Ease the grab in rather than snapping: seed the "from" pair at the
@@ -78,9 +75,10 @@ func physics_update(delta: float) -> void:
 		_jump(p, c)
 
 ## Tries to move `move * wall_climb_speed * delta` from the current attach
-## point: clamped so it can't sink through the floor below or climb past
-## wall_climb_max_height above, then checked against whatever's actually
-## still climbable there (the same wall, a wrapped corner, or nothing).
+## point: clamped so it can't sink through the floor below, then checked
+## against whatever's actually still climbable there (the same wall, a
+## wrapped corner, or nothing — genuinely running out of wall is the only
+## thing that counts as reaching the top; there's no height limit).
 func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, climb: float, delta: float) -> void:
 	var tentative := _attach_point + move * c.wall_climb_speed * delta
 
@@ -96,16 +94,6 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	var ground = p.ground_height_below(ray_origin, c.wall_climb_speed * delta + 0.2)
 	if ground != null and tentative.y < ground:
 		tentative.y = ground
-
-	# A hard cap on how far above the grab point the player can climb,
-	# independent of how much further the wall's own collision actually
-	# goes (some climbable walls reach well past their climbable-looking
-	# art). Reaching it counts as "the top" just like genuinely running out
-	# of wall, even though probe_wall_near() below would still find more.
-	var top_limit := _grab_height + c.wall_climb_max_height
-	var height_capped := climb > 0.0 and tentative.y >= top_limit
-	if height_capped:
-		tentative.y = top_limit
 
 	var found := p.probe_wall_near(tentative, _normal, strafe)
 	if found.is_empty():
@@ -128,9 +116,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	_attach_point = found.point
 	_normal = found.normal
 	if climb > 0.0:
-		# Still "at the top" if we only got this far because the height cap
-		# clamped us there, even though the wall itself keeps going.
-		_at_top = height_capped
+		_at_top = false
 
 func _let_go(p: Player, c: PlayerConfig) -> void:
 	# A real push away from the wall, not just zero velocity — and the same
