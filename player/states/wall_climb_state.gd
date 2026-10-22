@@ -17,9 +17,9 @@ extends PlayerState
 
 var _normal := Vector3.FORWARD      ## the wall currently attached to
 var _attach_point := Vector3.ZERO   ## a point on that wall, at the player's own origin height
-                                     ## (not the probe's chest-height — see find_climbable_wall())
+									 ## (not the probe's chest-height — see find_climbable_wall())
 var _at_top := false                ## true once climbing further up finds no more wall — makes
-                                     ## jump a plain vertical hop instead of a wall-jump kick-off
+									 ## jump a plain vertical hop instead of a wall-jump kick-off
 
 var _ease_from_normal := Vector3.FORWARD   ## corner-wrap/grab transitions blend FROM this pair...
 var _ease_from_point := Vector3.ZERO
