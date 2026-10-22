@@ -95,7 +95,15 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	if ground != null and tentative.y < ground:
 		tentative.y = ground
 
-	var found := p.probe_wall_near(tentative, _normal, strafe)
+	# Checked at head height, not at `tentative` itself (the player's own
+	# origin/feet height) — _attach_point tracks the feet, but stopping only
+	# once the FEET run out of wall left the head free to poke out well
+	# above the top edge first (and, combined with the top-edge/corner
+	# normal bug, let the player climb right onto the roof). Probing a full
+	# STAND_HEIGHT above instead makes the climb stop once the head would
+	# clip the top, not the feet.
+	var probe_point := tentative + Vector3.UP * Player.STAND_HEIGHT
+	var found := p.probe_wall_near(probe_point, _normal, strafe)
 	if found.is_empty():
 		# Nothing climbable where we tried to go — same fallback as any
 		# other blocked movement: just don't move this frame. Only an
@@ -113,7 +121,11 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 		_ease_from_normal = _ease_from_normal.slerp(_normal, _ease_t)
 		_ease_from_point = _ease_from_point.lerp(_attach_point, _ease_t)
 		_ease_t = 0.0
-	_attach_point = found.point
+	# found.point is at probe_point's (head) height, since probe_wall_near()
+	# only sweeps horizontally — rebuild the stored attach point back at the
+	# player's own origin height, keeping the wall-surface X/Z the probe
+	# actually found (matters when this was a corner wrap).
+	_attach_point = Vector3(found.point.x, tentative.y, found.point.z)
 	_normal = found.normal
 	if climb > 0.0:
 		_at_top = false
