@@ -51,8 +51,9 @@ var _flash_t := 0.0
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
 var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
-var _hold_t := 0.0       ## >0 while a one-off reaction pose must not be interrupted
-var _held_anim := &""    ## the anim play_hold() is currently protecting
+var _hold_t := 0.0              ## >0 while a one-off reaction pose must not be interrupted
+var _held_anim := &""           ## the anim play_hold() is currently protecting
+var _hold_blocks_control := true   ## see play_hold()'s blocks_control param / is_holding_control()
 var _jump_start_anim: StringName = ANIM_JUMP_START_VARIANTS[0]   ## this jump's picked pose
 ## What play() itself last told _anim to play — tracked independently of
 ## _anim.current_animation/is_playing() (see play()'s dedupe for why).
@@ -186,9 +187,18 @@ func set_slimed(active: bool) -> void:
 ## already the one playing — two side flips back to back, say, should each
 ## get their own fresh pose, not silently keep whatever position the first
 ## one's clip happened to already be at.
-func play_hold(anim_name: StringName, duration: float, speed := 1.0) -> void:
+##
+## `blocks_control` is what states check via is_holding_control() to decide
+## whether to skip steering while this pose plays — true (the default) for a
+## reaction pose that should genuinely take movement out of the player's
+## hands for a beat (a wall bounce, a skid-into-side-flip). Pass false for a
+## purely cosmetic pose that should still protect itself from being
+## overwritten but never take control away (the top-of-wall jump's roll
+## pose, say — full air control from the moment it leaves the wall).
+func play_hold(anim_name: StringName, duration: float, speed := 1.0, blocks_control := true) -> void:
 	_hold_t = duration
 	_held_anim = anim_name
+	_hold_blocks_control = blocks_control
 	play(anim_name, 0.15, speed, true)
 
 ## Normalized position (0..1) through the running clip's own loop, or -1.0 if
@@ -208,6 +218,13 @@ func run_phase() -> float:
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
 	return _hold_t > 0.0
+
+## True only while a hold is active AND that hold wants control locked out —
+## see play_hold()'s blocks_control param. States gate steering on this
+## instead of plain is_holding(), so a purely cosmetic hold doesn't also
+## take control away.
+func is_holding_control() -> bool:
+	return _hold_t > 0.0 and _hold_blocks_control
 
 ## True while a play_hold() reaction pose is still protected AND it's
 ## specifically `anim_name` — for callers that need to tell one held pose

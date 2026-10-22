@@ -23,9 +23,11 @@ func physics_update(delta: float) -> void:
 		p.grab_wall(wall.point, wall.normal)
 		return
 
-	# A wall bounce's reaction pose (play_hold, below) also locks out steering
-	# for the same window — you're along for the bounce's arc until it ends.
-	if not p.visual.is_holding():
+	# A wall bounce's reaction pose also locks out steering for the same
+	# window — you're along for the bounce's arc until it ends. A purely
+	# cosmetic hold (the top-of-wall jump's roll pose) doesn't count — see
+	# is_holding_control().
+	if not p.visual.is_holding_control():
 		p.air_control(delta)
 		var input := p.input_dir()
 		if input.length() > 0.1:

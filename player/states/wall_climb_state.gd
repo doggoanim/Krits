@@ -144,11 +144,14 @@ func _jump(p: Player, c: PlayerConfig) -> void:
 		# Nothing left to grab above — this reads as stepping off the top of
 		# the wall, not kicking off of it: a normal straight-up jump instead
 		# of jump_off_wall()'s horizontal push-away, held in the roll pose
-		# for a beat, the same trick GroundState's steep-slope jump uses.
+		# for a beat (the same trick GroundState's steep-slope jump uses) but
+		# purely cosmetically — blocks_control=false, so the player keeps
+		# full air steering the instant they leave the wall, unlike the
+		# slope-jump's deliberate brief "tumbling" control lock.
 		p.can_dive = true
 		p.wall_climb_cd = Player.WALL_CLIMB_REGRAB_COOLDOWN
 		p.start_jump(c.jump_velocity)
-		p.visual.play_hold(PlayerVisual.ANIM_ROLL, c.slope_jump_roll_hold_time)
+		p.visual.play_hold(PlayerVisual.ANIM_ROLL, c.slope_jump_roll_hold_time, 1.0, false)
 	else:
 		p.jump_off_wall(_normal)
 
