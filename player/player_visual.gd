@@ -205,19 +205,24 @@ func play_hold(anim_name: StringName, duration: float, speed := 1.0, blocks_cont
 	_hold_blocks_control = blocks_control
 	play(anim_name, 0.15, speed, true)
 
-## Normalized position (0..1) through the running clip's own loop, or -1.0 if
-## it isn't the one currently playing. GroundState uses this to time footstep
-## sounds to the actual animation (its contact poses) instead of a fixed
-## timer guessing at the cadence — the running clip is always looping once
-## it's playing at all (see LOOPING_ANIMS), so position/length wrapping back
-## to 0 is exactly one full stride cycle.
-func run_phase() -> float:
-	if _anim == null or _anim.current_animation != ANIM_RUN:
+## Normalized position (0..1) through anim_name's own loop, or -1.0 if it
+## isn't the one currently playing. Used to time a footstep/climb sound to
+## the actual animation (its contact poses) instead of a fixed timer
+## guessing at the cadence — works for any clip that's always looping once
+## it's playing at all (see LOOPING_ANIMS), since position/length wrapping
+## back to 0 is exactly one full stride/shimmy cycle.
+func anim_phase(anim_name: StringName) -> float:
+	if _anim == null or _anim.current_animation != anim_name:
 		return -1.0
 	var len := _anim.current_animation_length
 	if len <= 0.0:
 		return -1.0
 	return _anim.current_animation_position / len
+
+## GroundState's own shorthand — kept since "the running clip" reads clearer
+## at its call site than naming ANIM_RUN explicitly.
+func run_phase() -> float:
+	return anim_phase(ANIM_RUN)
 
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:

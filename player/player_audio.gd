@@ -23,6 +23,7 @@ const ROLL_BOUNCE_SFX: AudioStream = preload(SFX_DIR + "roll_bounce.wav")
 const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
 const SIDE_FLIP_SFX: AudioStream = preload(SFX_DIR + "side_flip.wav")
 const SKID_SFX: AudioStream = preload(SFX_DIR + "skid.wav")
+const CLIMB_SFX: AudioStream = preload(SFX_DIR + "climb.wav")
 ## The ground pound's three phases: windup starting, the slam launching
 ## downward, and the impact on landing — see PoundState/PoundLandState.
 const POUND_READY_SFX: AudioStream = preload(SFX_DIR + "ground_pound_ready.wav")
@@ -82,6 +83,9 @@ func play_side_flip() -> void:
 
 func play_skid() -> void:
 	_play(SKID_SFX, PITCH_VARIANCE)
+
+func play_climb() -> void:
+	_play(CLIMB_SFX, PITCH_VARIANCE)
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)

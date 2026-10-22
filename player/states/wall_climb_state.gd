@@ -25,6 +25,17 @@ var _ease_from_normal := Vector3.FORWARD   ## corner-wrap/grab transitions blend
 var _ease_from_point := Vector3.ZERO
 var _ease_t := 1.0                         ## ...TO _normal/_attach_point, over wall_wrap_time
 
+## Same edge-crossing idiom GroundState's footsteps use (see its
+## _update_footsteps): a sound fires each time the currently playing climb
+## clip's own looping playback crosses one of CLIMB_SOUND_PHASES, instead of
+## a fixed timer guessing at the cadence. _climb_sound_anim additionally
+## tracks WHICH of the four directional clips that phase belongs to, since
+## switching from one to another (e.g. climbing up into strafing right)
+## mid-move restarts the cycle on a differently-timed clip.
+const CLIMB_SOUND_PHASES := [0.0, 0.5]
+var _climb_sound_anim := &""
+var _climb_sound_phase := -1.0
+
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
@@ -77,7 +88,9 @@ func physics_update(delta: float) -> void:
 	_apply_position(shown_normal, shown_point)
 	p.face(-shown_normal, delta)
 	p.velocity = Vector3.ZERO
-	p.visual.play(_climb_anim(moving, strafe, climb))
+	var anim := _climb_anim(moving, strafe, climb)
+	p.visual.play(anim)
+	_update_climb_sound(p, moving, anim)
 
 	if Input.is_action_pressed(&"crouch_pound"):
 		_let_go(p, c)
@@ -186,3 +199,34 @@ func _climb_anim(moving: bool, strafe: float, climb: float) -> StringName:
 	if absf(climb) >= absf(strafe):
 		return PlayerVisual.ANIM_CLIMB_UP if climb > 0.0 else PlayerVisual.ANIM_CLIMB_DOWN
 	return PlayerVisual.ANIM_CLIMB_RIGHT if strafe > 0.0 else PlayerVisual.ANIM_CLIMB_LEFT
+
+## Same edge-crossing technique as GroundState's _update_footsteps, timed off
+## whichever directional clip is currently playing instead of a fixed timer.
+## Idle (not moving) plays nothing and resets the tracking, same as
+## footsteps resetting while stopped/sliding — so the very next step after
+## idle always starts a fresh cycle instead of picking up mid-stride.
+func _update_climb_sound(p: Player, moving: bool, anim: StringName) -> void:
+	if not moving:
+		_climb_sound_anim = &""
+		_climb_sound_phase = -1.0
+		return
+	if anim != _climb_sound_anim:
+		# Switched which directional clip is playing (e.g. climbing up into
+		# strafing right) — these aren't the same cycle, so restart tracking
+		# rather than comparing a phase against a differently-timed clip.
+		_climb_sound_anim = anim
+		_climb_sound_phase = -1.0
+	var phase := p.visual.anim_phase(anim)
+	if phase < 0.0:
+		_climb_sound_phase = -1.0
+		return
+	if _climb_sound_phase < 0.0:
+		_climb_sound_phase = phase
+		return
+	var cur := phase
+	if cur < _climb_sound_phase:
+		cur += 1.0   # looped back around since the last frame
+	for step in CLIMB_SOUND_PHASES:
+		if (_climb_sound_phase <= step and step < cur) or (_climb_sound_phase <= step + 1.0 and step + 1.0 < cur):
+			p.audio.play_climb()
+	_climb_sound_phase = phase
