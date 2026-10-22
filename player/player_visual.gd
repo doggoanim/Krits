@@ -92,7 +92,8 @@ var _squash_tween: Tween
 ## forcing it here means the actual loop behavior never depends on import
 ## settings. Anything NOT in this list (jump_start1/2/3, air_dive, long_jump,
 ## ground_pound, ...) is meant to play exactly once and hold its last frame.
-const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING]
+const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING,
+	ANIM_CLIMB_IDLE, ANIM_CLIMB_UP, ANIM_CLIMB_DOWN, ANIM_CLIMB_LEFT, ANIM_CLIMB_RIGHT]
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
