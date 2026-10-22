@@ -10,6 +10,11 @@ extends Resource
 @export var crouch_speed := 3.0
 @export var slide_min_speed := 4.0         ## must be moving at least this fast to trigger a slide
 @export var slide_min_move_time := 0.8     ## must have been moving continuously this long first
+@export var stop_detect_delay := 0.06      ## input must read as fully released for this long before
+											## it's treated as a stop — gives a reversal typed via two
+											## separate keys a couple ticks to land its second key
+											## before the brief in-between zero reading gets mistaken
+											## for letting go entirely (see GroundState's "stopping")
 @export var slide_turn_dot := -0.4         ## direction change sharper than this (dot product) triggers it
 @export var slide_time := 0.25             ## how long the slide reaction pose plays
 @export var slope_slide_angle_deg := 30.0  ## floor steeper than this forces a downhill slide —

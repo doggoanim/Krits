@@ -14,6 +14,8 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
                            ## hold (see physics_update) so the trick doesn't depend on exact frame
                            ## timing between the two
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
+var _no_input_t := 0.0   ## seconds input has read as fully released, continuously — see
+                           ## stop_detect_delay below, right where "stopping" is computed
 var _slope_sliding := false   ## true while forced into the steep-slope slide below — only used
                                ## to play the skid sound once per slide, not every single frame
 
@@ -46,6 +48,7 @@ func physics_update(delta: float) -> void:
 	var c := p.config
 	var input := p.input_dir()
 	var moving := input.length() > 0.1
+	_no_input_t = 0.0 if moving else _no_input_t + delta
 	var prev_h := p.get_hvel()
 	# Specifically the slide pose, not just "some hold is active" — a side
 	# flip's own (longer) hold can still be running when it lands here, and
@@ -112,7 +115,19 @@ func physics_update(delta: float) -> void:
 	# of how long you'd been moving, same as before. Checked here (before the
 	# jump branch below) so a jump pressed on the very frame the skid starts
 	# still sees it.
-	var stopping := not moving and _move_t >= c.slide_min_move_time
+	#
+	# "stopping" is also gated by stop_detect_delay: a hard reversal typed on
+	# a keyboard (old key up, new key down) doesn't always land both edges on
+	# the same physics tick — one tick can read as a true zero input, with
+	# the opposite key only registering the tick after. Committing to
+	# "stopping" on that very first zero tick would start a stop-skid (and,
+	# via was_sliding, lock out any further trigger for the rest of its
+	# hold) a frame before the real reversal arrives, so the actual turn
+	# never gets detected at all. Waiting a couple of ticks before treating
+	# released input as a real stop gives that next tick a chance to land
+	# first; reversing itself needs no such delay since it only fires once
+	# the opposing input actually shows up.
+	var stopping := not moving and _no_input_t >= c.stop_detect_delay and _move_t >= c.slide_min_move_time
 	var reversing := moving and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
 	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing)
 	if starting_slide:
