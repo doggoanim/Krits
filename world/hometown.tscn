@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://world/npc.gd" id="1_npc"]
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_dnode"]
+[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="1_dchoice"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
@@ -266,28 +268,33 @@ height = 1.8
 [sub_resource type="StandardMaterial3D" id="Mat_MiraRobe"]
 albedo_color = Color(0.3764706, 0.28627452, 0.5529412, 1)
 
-[sub_resource type="DialogueNode" id="Node_MiraBye"]
+[sub_resource type="Resource" id="Node_MiraBye"]
+script = ExtResource("1_dnode")
 speaker = "Elder Mira"
 text = "Take care out there."
 
-[sub_resource type="DialogueNode" id="Node_MiraInfo"]
+[sub_resource type="Resource" id="Node_MiraInfo"]
+script = ExtResource("1_dnode")
 speaker = "Elder Mira"
 text = "This little place has been here longer than I have, believe it or not. Quiet, mostly. We like it that way."
 next = SubResource("Node_MiraBye")
 
-[sub_resource type="DialogueChoice" id="Choice_MiraInfo"]
+[sub_resource type="Resource" id="Choice_MiraInfo"]
+script = ExtResource("1_dchoice")
 text = "Tell me about this town"
 next = SubResource("Node_MiraInfo")
 
-[sub_resource type="DialogueChoice" id="Choice_MiraBye"]
+[sub_resource type="Resource" id="Choice_MiraBye"]
+script = ExtResource("1_dchoice")
 text = "Just passing through"
 next = SubResource("Node_MiraBye")
 
-[sub_resource type="DialogueNode" id="Node_MiraGreet"]
+[sub_resource type="Resource" id="Node_MiraGreet"]
+script = ExtResource("1_dnode")
 speaker = "Elder Mira"
 text = "Oh, hello there! Passing through, or just taking in the sights?"
 sets_flag = &"met_mira"
-choices = Array[DialogueChoice]([SubResource("Choice_MiraInfo"), SubResource("Choice_MiraBye")])
+choices = [SubResource("Choice_MiraInfo"), SubResource("Choice_MiraBye")]
 
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
