@@ -77,11 +77,23 @@ func _show_node(node: DialogueNode) -> void:
 			shown.append(choice)
 	_choice_list.visible = not shown.is_empty()
 	_continue_hint.visible = shown.is_empty()
+	var first_button: Button
 	for choice in shown:
 		var b := Button.new()
 		b.text = choice.text
+		b.focus_mode = Control.FOCUS_ALL
 		b.pressed.connect(_pick.bind(choice))
 		_choice_list.add_child(b)
+		if first_button == null:
+			first_button = b
+	if first_button:
+		# Lets ui_up/ui_down (arrow keys, Godot's own default — not WASD, so
+		# this doesn't fight the game's own movement bindings) step through
+		# the choices, and ui_accept (Enter/Space) pick whichever is
+		# focused — Control's built-in focus/activation behavior, no extra
+		# input handling needed here beyond actually grabbing focus somewhere
+		# to start from.
+		first_button.grab_focus()
 
 func _pick(choice: DialogueChoice) -> void:
 	if choice.sets_flag != &"":
