@@ -46,9 +46,14 @@ func start(node: DialogueNode) -> void:
 	_show_node(node)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or not _choice_list.get_children().is_empty():
-		return   # a choice is showing — picked via its own button, not this
-	if event.is_action_pressed(&"interact"):
+	if not visible:
+		return
+	if event.is_action_pressed(&"ui_cancel_menu"):
+		# Bail out early, same "Esc always gets you out" convention MenuBase
+		# uses — regardless of whether a choice is currently showing.
+		_end()
+		return
+	if _choice_list.get_children().is_empty() and event.is_action_pressed(&"interact"):
 		_show_node(_current.next if _current else null)
 
 func _show_node(node: DialogueNode) -> void:
@@ -132,7 +137,7 @@ func _build_ui() -> void:
 	vbox.add_child(_text_label)
 
 	_continue_hint = Label.new()
-	_continue_hint.text = "Press E to continue"
+	_continue_hint.text = "Press E to continue — Esc to leave"
 	_continue_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_continue_hint.modulate = Color(1.0, 1.0, 1.0, 0.6)
 	vbox.add_child(_continue_hint)
