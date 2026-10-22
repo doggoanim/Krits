@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
