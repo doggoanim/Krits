@@ -43,6 +43,22 @@ const FOOTSTEP_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_6.wav"),
 	preload(SFX_DIR + "footsteps_grass_7.wav"),
 ]
+## Four alternate full takes of the same continuous tumble loop (not short
+## one-shots to fire repeatedly like footsteps) — one is picked at random
+## when a roll starts and plays for the roll's whole duration. See
+## set_rolling().
+const ROLL_SFX: Array[AudioStream] = [
+	preload(SFX_DIR + "roll_1.wav"),
+	preload(SFX_DIR + "roll_2.wav"),
+	preload(SFX_DIR + "roll_3.wav"),
+	preload(SFX_DIR + "roll_4.wav"),
+]
+
+## Quietest/lowest-pitched at roll_stop_speed, full volume/pitch at
+## roll_speed — see set_rolling()'s speed_ratio param.
+const ROLL_MIN_VOLUME_DB := -16.0
+const ROLL_MIN_PITCH := 0.85
+const ROLL_MAX_PITCH := 1.15
 
 ## +/- this fraction of normal pitch, picked fresh each play — "slight"
 ## variety, not a cartoonish chipmunk/demon range.
@@ -52,6 +68,22 @@ const PITCH_VARIANCE := 0.08
 ## capped well short of chipmunk territory for a very long combo.
 const ORB_COMBO_PITCH_STEP := 0.12   ## added per combo step past the first
 const ORB_COMBO_PITCH_MAX := 2.2
+
+## The rolling loop's own player — persistent and toggled on/off for the
+## whole duration of a roll, same "built once, _ready()" idiom PlayerEffects
+## uses for its continuous particle emitters (running dust, trails), rather
+## than the fire-and-forget _play() pattern every other sound here uses.
+var _roll_player: AudioStreamPlayer3D
+
+func _ready() -> void:
+	_roll_player = AudioStreamPlayer3D.new()
+	add_child(_roll_player)
+	# Loop each take itself rather than relying on its .wav import settings
+	# already having loop enabled — guarantees it regardless of how the file
+	# was authored/imported.
+	for stream in ROLL_SFX:
+		if stream is AudioStreamWAV:
+			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 
 func play_jump() -> void:
 	_play(JUMP_SFX, PITCH_VARIANCE)
@@ -86,6 +118,24 @@ func play_skid() -> void:
 
 func play_climb() -> void:
 	_play(CLIMB_SFX, PITCH_VARIANCE)
+
+## Continuous tumble loop for RollState, toggled on/off like a particle
+## emitter rather than fired per-call. `active` starts/stops it; while active,
+## `speed_ratio` (0..1, the caller's own current-speed-vs-roll-speed mix —
+## see RollState) continuously fades volume and pitch, so the loop actually
+## tracks how fast the roll currently is instead of playing flat throughout.
+## The specific take is picked once per roll (not re-rolled every call) since
+## these are full continuous loops, not short one-shots to vary every repeat.
+func set_rolling(active: bool, speed_ratio := 0.0) -> void:
+	if active:
+		if not _roll_player.playing:
+			_roll_player.stream = ROLL_SFX.pick_random()
+			_roll_player.play()
+		var t := clampf(speed_ratio, 0.0, 1.0)
+		_roll_player.volume_db = lerpf(ROLL_MIN_VOLUME_DB, 0.0, t)
+		_roll_player.pitch_scale = lerpf(ROLL_MIN_PITCH, ROLL_MAX_PITCH, t)
+	elif _roll_player.playing:
+		_roll_player.stop()
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)

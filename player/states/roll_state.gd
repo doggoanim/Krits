@@ -23,6 +23,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 
 func exit(_next: StringName) -> void:
 	player.roll_cd = player.config.roll_cooldown
+	player.audio.set_rolling(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -63,6 +64,9 @@ func physics_update(delta: float) -> void:
 	var spd := maxf(0.0, h.length() - c.roll_decay * delta)
 	h = h.normalized() * spd if spd > 0.0 else Vector3.ZERO
 	p.set_hvel(h)
+	# Tumble loop fades in/out with the roll's own current speed — 0 right
+	# at roll_stop_speed (about to end), full by roll_speed (fresh launch).
+	p.audio.set_rolling(true, inverse_lerp(c.roll_stop_speed, c.roll_speed, spd))
 	p.face(h, delta)
 	p.velocity.y = -1.0
 	var prev_h := p.get_hvel()
