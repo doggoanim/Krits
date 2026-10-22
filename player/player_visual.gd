@@ -29,8 +29,11 @@ const ANIM_CROUCH_WALK := &"crouch_walk"
 const ANIM_ROLL_COLLISION := &"roll_collision"   ## bonking into a wall, grounded or airborne
 const ANIM_SLIDE := &"slide"                     ## brief reaction to a sharp direction change
 const ANIM_SIDE_JUMP := &"side_jump"             ## Mario 64-style skid-turn trick jump
-const ANIM_WALL_CLIMB_IDLE := &"wall_climb_idle" ## holding still against a climbable wall
-const ANIM_WALL_CLIMB := &"wall_climb"           ## looping climb/shimmy while moving on one
+const ANIM_CLIMB_IDLE := &"climb_idle"   ## holding still against a climbable wall
+const ANIM_CLIMB_UP := &"climb_up"       ## climbing/shimmying in each of the four directions —
+const ANIM_CLIMB_DOWN := &"climb_down"   ## WallClimbState picks whichever of strafe/climb is
+const ANIM_CLIMB_LEFT := &"climb_left"   ## currently dominant, there's no blended diagonal clip
+const ANIM_CLIMB_RIGHT := &"climb_right"
 ## Placeholder clip names — not baked into the model yet (see WallClimbState).
 ## play() just warns and no-ops until the real clips exist, so the feature
 ## works mechanically in the meantime, just with no pose.

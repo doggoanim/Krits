@@ -43,7 +43,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.velocity = Vector3.ZERO
 	p.can_dive = true
 	p.visual.cancel_hold()
-	p.visual.play(PlayerVisual.ANIM_WALL_CLIMB_IDLE)
+	p.visual.play(PlayerVisual.ANIM_CLIMB_IDLE)
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -77,7 +77,7 @@ func physics_update(delta: float) -> void:
 	_apply_position(shown_normal, shown_point)
 	p.face(-shown_normal, delta)
 	p.velocity = Vector3.ZERO
-	p.visual.play(PlayerVisual.ANIM_WALL_CLIMB if moving else PlayerVisual.ANIM_WALL_CLIMB_IDLE)
+	p.visual.play(_climb_anim(moving, strafe, climb))
 
 	if Input.is_action_pressed(&"crouch_pound"):
 		_let_go(p, c)
@@ -176,3 +176,13 @@ func _apply_position(normal: Vector3, point: Vector3) -> void:
 func _wall_right(normal: Vector3) -> Vector3:
 	var right := Vector3.UP.cross(normal)
 	return right.normalized() if right.length() > 0.01 else Vector3.RIGHT
+
+## The model has four distinct directional climb clips (up/down/left/right)
+## instead of one blended loop, so a diagonal move just plays whichever axis
+## is currently dominant rather than mixing two poses.
+func _climb_anim(moving: bool, strafe: float, climb: float) -> StringName:
+	if not moving:
+		return PlayerVisual.ANIM_CLIMB_IDLE
+	if absf(climb) >= absf(strafe):
+		return PlayerVisual.ANIM_CLIMB_UP if climb > 0.0 else PlayerVisual.ANIM_CLIMB_DOWN
+	return PlayerVisual.ANIM_CLIMB_RIGHT if strafe > 0.0 else PlayerVisual.ANIM_CLIMB_LEFT
