@@ -36,8 +36,11 @@ func physics_update(delta: float) -> void:
 		return
 	# A climbable wall takes priority over the plain wall-bounce below — same
 	# check/placement GroundState and AirState use, so diving straight into
-	# one grabs it instead of cannoning off it.
-	var wall := p.find_climbable_wall()
+	# one grabs it instead of cannoning off it. ignore_cooldown=true: diving
+	# is a deliberate lunge, so jumping off a wall and immediately diving
+	# back into it should climb again right away, not sit out the same
+	# regrab cooldown that exists to stop an unintended instant re-stick.
+	var wall := p.find_climbable_wall(true)
 	if not wall.is_empty():
 		p.grab_wall(wall.point, wall.normal)
 		return

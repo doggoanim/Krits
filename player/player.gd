@@ -306,8 +306,16 @@ func ground_height_below(from: Vector3, max_dist: float) -> Variant:
 ## spirit as the old ledge/pole triggers but done with a probe instead of an
 ## Area3D, since "climbable" here is just a collision layer bit on the
 ## wall's own existing body, not a dedicated node.
-func find_climbable_wall() -> Dictionary:
-	if wall_climb_cd > 0.0:
+##
+## wall_climb_cd normally blocks this right after jumping off a wall, so the
+## kick-off's own push doesn't just re-stick you to the same wall before
+## you've actually moved away from it — that's an incidental, unintended
+## re-grab, not something the player asked for. ignore_cooldown lets a
+## deliberate action skip that block: DiveState passes it so launching off a
+## wall and immediately diving back into it climbs again right away, instead
+## of being treated as the very re-grab the cooldown exists to prevent.
+func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
+	if wall_climb_cd > 0.0 and not ignore_cooldown:
 		return {}
 	# `facing`, not `-facing`: when hvel is too small to tell (standing still,
 	# or just bumped a wall head-on and move_and_slide() zeroed the velocity),
