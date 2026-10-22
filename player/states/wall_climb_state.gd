@@ -49,10 +49,12 @@ func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
 
-	# Raw action strengths for strafe, not p.input_dir() — wall-climb
-	# steering is fixed to the controls themselves (A always one way, D the
-	# other), never reinterpreted relative to wherever the camera is looking.
-	var strafe := Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left")
+	# p.input_dir() again, not raw action strengths — wall-climb steering is
+	# camera-relative like every other move state: strafing across the wall
+	# follows wherever the camera is currently facing, same as A/D do on the
+	# ground, rather than always meaning the same screen/keyboard direction
+	# regardless of camera angle.
+	var strafe := p.input_dir().dot(_wall_right(_normal))
 	var climb := Input.get_action_strength(&"move_forward") - Input.get_action_strength(&"move_back")
 	var move: Vector3 = (_wall_right(_normal) * strafe + Vector3.UP * climb).limit_length(1.0)
 	var moving := move.length() > 0.05
