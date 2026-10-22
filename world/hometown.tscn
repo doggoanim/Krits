@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_dnode"]
-[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="1_dchoice"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
@@ -256,34 +255,6 @@ size = Vector3(0.63, 11.65, 7.895)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bf34x"]
 size = Vector3(0.63, 11.65, 7.895)
-
-[sub_resource type="Resource" id="Node_MiraBye"]
-script = ExtResource("1_dnode")
-speaker = "Elder Mira"
-text = "Take care out there."
-
-[sub_resource type="Resource" id="Node_MiraInfo"]
-script = ExtResource("1_dnode")
-speaker = "Elder Mira"
-text = "This little place has been here longer than I have, believe it or not. Quiet, mostly. We like it that way."
-next = SubResource("Node_MiraBye")
-
-[sub_resource type="Resource" id="Choice_MiraInfo"]
-script = ExtResource("1_dchoice")
-text = "Tell me about this town"
-next = SubResource("Node_MiraInfo")
-
-[sub_resource type="Resource" id="Choice_MiraBye"]
-script = ExtResource("1_dchoice")
-text = "Just passing through"
-next = SubResource("Node_MiraBye")
-
-[sub_resource type="Resource" id="Node_MiraGreet"]
-script = ExtResource("1_dnode")
-speaker = "Elder Mira"
-text = "Oh, hello there! Passing through, or just taking in the sights?"
-sets_flag = &"met_mira"
-choices = [SubResource("Choice_MiraInfo"), SubResource("Choice_MiraBye")]
 
 [sub_resource type="CapsuleShape3D" id="Shape_MiraBody"]
 radius = 0.4
@@ -770,7 +741,7 @@ shape = SubResource("BoxShape3D_bf34x")
 [node name="ElderMira" type="StaticBody3D" parent="." unique_id=-1165481586]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -6)
 script = ExtResource("1_npc")
-dialogue = SubResource("Node_MiraGreet")
+dialogue = ExtResource("1_mira_dialogue")
 
 [node name="Collision" type="CollisionShape3D" parent="ElderMira" unique_id=-1165481585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

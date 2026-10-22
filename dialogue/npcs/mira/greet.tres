@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DialogueNode" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_script"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/choice_info.tres" id="2_info"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/choice_bye.tres" id="3_bye"]
+
+[resource]
+script = ExtResource("1_script")
+speaker = "Elder Mira"
+text = "Oh, hello there! Passing through, or just taking in the sights?"
+sets_flag = &"met_mira"
+choices = [ExtResource("2_info"), ExtResource("3_bye")]

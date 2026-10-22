@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DialogueNode" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_script"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/bye.tres" id="2_bye"]
+
+[resource]
+script = ExtResource("1_script")
+speaker = "Elder Mira"
+text = "This little place has been here longer than I have, believe it or not. Quiet, mostly. We like it that way."
+next = ExtResource("2_bye")

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DialogueNode" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+speaker = "Elder Mira"
+text = "Take care out there."

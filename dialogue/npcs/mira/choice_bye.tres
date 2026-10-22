@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DialogueChoice" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="1_script"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mira/bye.tres" id="2_bye"]
+
+[resource]
+script = ExtResource("1_script")
+text = "Just passing through"
+next = ExtResource("2_bye")
