@@ -21,6 +21,15 @@ func enter(_prev: StringName, msg: Dictionary = {}) -> void:
 		# no-op (e.g. the player landed in slime), physics_update()'s own
 		# jump_buffer_t check below still covers a press made during recovery.
 		player.start_jump(player.config.pound_jump_velocity, true)
+		if machine.current_name != &"PoundLand":
+			return   # the jump actually took over — see start_jump()'s own transition
+
+	# Landing on a steep slope skips the recovery pose entirely and hands
+	# straight to Ground, whose own on_steep_slope check takes over
+	# immediately — a pound into a slope should start sliding right away,
+	# not stand planted through the whole recovery animation first.
+	if player.is_on_floor() and player.get_floor_angle() >= deg_to_rad(player.config.slope_slide_angle_deg):
+		machine.transition_to(&"Ground")
 
 func physics_update(delta: float) -> void:
 	var p := player
