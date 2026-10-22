@@ -15,3 +15,4 @@ func _ready() -> void:
 	add_child(STATS_MENU_SCENE.instantiate())
 	travel_menu = TRAVEL_MENU_SCENE.instantiate() as TravelMenu
 	add_child(travel_menu)
+	add_child(DialogueBox.new())   # code-built, no scene file — see DialogueBox's own doc comment

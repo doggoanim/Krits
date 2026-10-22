@@ -25,6 +25,8 @@ func refresh() -> void:
 func open() -> void:
 	if open_menu != null or Game.input_locked or not can_open():
 		return
+	if DialogueBox.instance != null and DialogueBox.instance.is_active():
+		return
 	open_menu = self
 	_clear()
 	refresh()

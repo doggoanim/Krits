@@ -20,3 +20,7 @@ signal leveled_up(level: int)
 signal spawnpoint_activated(id: StringName)
 signal fast_travel_requested(id: StringName)
 signal story_flag_changed(flag: StringName, value: Variant)
+
+# Dialogue
+signal dialogue_started
+signal dialogue_ended
