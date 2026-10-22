@@ -71,7 +71,19 @@ func physics_update(delta: float) -> void:
 		# never see the ground it just passed through. _attach_point.y tracks
 		# the player's own origin height (see find_climbable_wall()), so the
 		# result clamps straight onto tentative.y with no extra offset.
-		var ground = p.ground_height_below(_attach_point, c.wall_climb_speed * delta + 0.2)
+		# The ray origin is pushed off the wall by wall_hug_distance (where
+		# the player's body actually sits — see _apply_position()) rather
+		# than cast from _attach_point itself: that point sits ON the wall's
+		# own surface, and the wall is also on the same world-geometry layer
+		# this ray checks (it's "climbable" on top of its normal solid
+		# collision, not instead of it) — a ray starting exactly on/in that
+		# collision can self-intersect with the wall itself, returning a
+		# bogus "ground" height wherever it happens to graze along the way
+		# down, instead of the real floor far below. That false reading
+		# landing above the player's actual climb target is what was
+		# randomly halting ordinary climbs partway up a wall.
+		var ray_origin := _attach_point + _normal * c.wall_hug_distance
+		var ground = p.ground_height_below(ray_origin, c.wall_climb_speed * delta + 0.2)
 		if ground != null and tentative.y < ground:
 			tentative.y = ground
 		# A hard cap independent of the wall's own collision height — some
