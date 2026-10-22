@@ -271,11 +271,26 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 		if not _wall_cast.is_colliding():
 			continue
 		var normal: Vector3 = _wall_cast.get_collision_normal(0)
+		if not _is_wall_normal(normal):
+			continue
 		normal.y = 0.0
-		if normal.length() < 0.1:
-			continue   # a floor/ceiling hit, not a wall — skip it
 		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
 	return {}
+
+## True for a normal that's actually a wall's, not a floor, ceiling, or a
+## wall's own top/bottom edge. Checked on the RAW normal, before zeroing its
+## Y component to flatten it: a sphere sweep catching a box's top edge/corner
+## returns a normal blended between the vertical face and the flat top, and
+## that blend can easily keep more than the near-zero horizontal sliver a
+## check on the already-flattened normal would catch — e.g. a corner hit
+## could read as (0.3, 0.9, 0.3), which flattens to a "valid-looking"
+## (0.3, 0, 0.3) even though it's really the top edge, not the wall's face.
+## Rejecting anything more than ~45° off horizontal here, before that
+## flattening throws the vertical component away, is what stops a climb
+## from walking straight up and over onto a wall's flat roof instead of
+## stopping at its actual top.
+func _is_wall_normal(normal: Vector3) -> bool:
+	return absf(normal.y) < 0.7
 
 ## Ground height straight down from `from`, within `max_dist` — same
 ## world-geometry layer (1) Arena.ground_height() probes, used by
@@ -311,9 +326,9 @@ func find_climbable_wall() -> Dictionary:
 	if not _wall_cast.is_colliding():
 		return {}
 	var normal: Vector3 = _wall_cast.get_collision_normal(0)
-	normal.y = 0.0
-	if normal.length() < 0.1:
+	if not _is_wall_normal(normal):
 		return {}
+	normal.y = 0.0
 	# The probe sweeps at chest height (probe_origin above), but global_position
 	# itself is the player's feet — returning the hit point as-is would plant
 	# the player's feet at chest height once WallClimbState applies it
