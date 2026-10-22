@@ -53,8 +53,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		# uses — regardless of whether a choice is currently showing.
 		_end()
 		return
-	if _choice_list.get_children().is_empty() and event.is_action_pressed(&"interact"):
-		_show_node(_current.next if _current else null)
+	var choices := _choice_list.get_children()
+	if choices.is_empty():
+		if event.is_action_pressed(&"interact"):
+			_show_node(_current.next if _current else null)
+		return
+	# W/S step through choices same as the arrow keys already do via Button's
+	# own built-in ui_up/ui_down focus handling — these aren't ui_up/ui_down
+	# themselves, so they need to be wired by hand here instead.
+	if event.is_action_pressed(&"move_forward"):
+		_move_choice_focus(choices, -1)
+	elif event.is_action_pressed(&"move_back"):
+		_move_choice_focus(choices, 1)
+
+## Steps the focused choice button by `step` (wrapping), same direction
+## sense as the arrow keys: move_forward (W) goes up the list, move_back (S)
+## goes down it.
+func _move_choice_focus(choices: Array, step: int) -> void:
+	var focused := get_viewport().gui_get_focus_owner()
+	var idx: int = choices.find(focused) if focused else -1
+	idx = 0 if idx < 0 else (idx + step + choices.size()) % choices.size()
+	choices[idx].grab_focus()
 
 func _show_node(node: DialogueNode) -> void:
 	_current = node
