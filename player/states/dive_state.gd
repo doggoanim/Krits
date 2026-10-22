@@ -42,7 +42,7 @@ func physics_update(delta: float) -> void:
 	# regrab cooldown that exists to stop an unintended instant re-stick.
 	var wall := p.find_climbable_wall(true)
 	if not wall.is_empty():
-		p.grab_wall(wall.point, wall.normal)
+		p.grab_wall(wall.point, wall.normal, true)
 		return
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()

@@ -406,8 +406,15 @@ func start_side_flip(dir: Vector3) -> void:
 ## against Frozen (a cutscene shouldn't be interrupted by scenery), against
 ## re-entering WallClimb while already climbing, and against the brief
 ## regrab cooldown right after jumping off one.
-func grab_wall(point: Vector3, normal: Vector3) -> void:
-	if dead or machine.current_name == &"Frozen" or machine.current_name == &"WallClimb" or wall_climb_cd > 0.0:
+## ignore_cooldown mirrors find_climbable_wall()'s own param (see there) —
+## DiveState finds the wall AND grabs it with the cooldown ignored, so a
+## dive straight back into a wall you just jumped off of climbs immediately
+## instead of silently failing to transition here for the rest of the
+## cooldown while find_climbable_wall() keeps finding it every frame.
+func grab_wall(point: Vector3, normal: Vector3, ignore_cooldown := false) -> void:
+	if dead or machine.current_name == &"Frozen" or machine.current_name == &"WallClimb":
+		return
+	if wall_climb_cd > 0.0 and not ignore_cooldown:
 		return
 	machine.transition_to(&"WallClimb", {"point": point, "normal": normal})
 
