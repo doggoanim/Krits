@@ -15,6 +15,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	# hold guard.
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_ROLL)
+	p.audio.play_roll_start()
 	var dir := p.input_dir()
 	if dir.length() < 0.1:
 		dir = p.facing

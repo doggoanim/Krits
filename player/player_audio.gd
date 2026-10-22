@@ -24,6 +24,7 @@ const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
 const SIDE_FLIP_SFX: AudioStream = preload(SFX_DIR + "side_flip.wav")
 const SKID_SFX: AudioStream = preload(SFX_DIR + "skid.wav")
 const CLIMB_SFX: AudioStream = preload(SFX_DIR + "climb.wav")
+const ROLL_START_SFX: AudioStream = preload(SFX_DIR + "roll_start.wav")
 ## The ground pound's three phases: windup starting, the slam launching
 ## downward, and the impact on landing — see PoundState/PoundLandState.
 const POUND_READY_SFX: AudioStream = preload(SFX_DIR + "ground_pound_ready.wav")
@@ -118,6 +119,11 @@ func play_skid() -> void:
 
 func play_climb() -> void:
 	_play(CLIMB_SFX, PITCH_VARIANCE)
+
+## One-shot cue for the moment a roll begins, separate from set_rolling()'s
+## continuous tumble loop — same "distinct launch sound" pattern as jump/dive.
+func play_roll_start() -> void:
+	_play(ROLL_START_SFX, PITCH_VARIANCE)
 
 ## Continuous tumble loop for RollState, toggled on/off like a particle
 ## emitter rather than fired per-call. `active` starts/stops it; while active,
