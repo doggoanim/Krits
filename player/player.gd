@@ -286,13 +286,11 @@ func ground_height_below(from: Vector3, max_dist: float) -> Variant:
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.position.y if not hit.is_empty() else null
 
-## Looks for a climbable wall directly ahead — called from Ground/Air every
-## frame to auto-grab on touch, same spirit as the old ledge/pole triggers
-## but done with a probe instead of an Area3D, since "climbable" here is
-## just a collision layer bit on the wall's own existing body, not a
-## dedicated node. NOTE: untested against real level art — tune
-## wall_grab_reach/wall_probe_reach/wall_probe_radius in PlayerConfig once
-## there's an actual climbable wall to test against.
+## Looks for a climbable wall directly ahead — called from Ground/Air/Dive/
+## LongJump every frame to auto-grab on touch or on landing into one, same
+## spirit as the old ledge/pole triggers but done with a probe instead of an
+## Area3D, since "climbable" here is just a collision layer bit on the
+## wall's own existing body, not a dedicated node.
 func find_climbable_wall() -> Dictionary:
 	if wall_climb_cd > 0.0:
 		return {}
