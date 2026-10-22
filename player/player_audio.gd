@@ -81,10 +81,18 @@ func _ready() -> void:
 	add_child(_roll_player)
 	# Loop each take itself rather than relying on its .wav import settings
 	# already having loop enabled — guarantees it regardless of how the file
-	# was authored/imported.
+	# was authored/imported. loop_begin/loop_end must be set explicitly too:
+	# a freshly imported WAV with no embedded loop markers has both at 0, so
+	# turning on loop_mode alone collapses the loop to a zero-length region
+	# right at the very start — sounds like it never plays at all, instead of
+	# looping the whole clip. get_length() * mix_rate gives the frame count
+	# without needing format-specific math (8-bit/16-bit/ADPCM/QOA all differ
+	# in bytes-per-frame, but get_length() already accounts for that).
 	for stream in ROLL_SFX:
 		if stream is AudioStreamWAV:
 			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			stream.loop_begin = 0
+			stream.loop_end = int(round(stream.get_length() * stream.mix_rate))
 
 func play_jump() -> void:
 	_play(JUMP_SFX, PITCH_VARIANCE)
