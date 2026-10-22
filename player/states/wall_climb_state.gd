@@ -21,10 +21,10 @@ var _wrap_from_normal := Vector3.FORWARD   ## where a corner transition eased FR
 var _wrap_from_point := Vector3.ZERO
 var _wrap_t := 1.0   ## 0 = just started easing into _normal/_attach_point, 1 = fully settled there
 var _at_top := false   ## true once trying to climb further up finds no more wall, OR the
-                        ## wall_climb_max_height cap is reached — see physics_update()'s
-                        ## climb-up probe and the jump handling below
+						## wall_climb_max_height cap is reached — see physics_update()'s
+						## climb-up probe and the jump handling below
 var _grab_height := 0.0   ## _attach_point.y at the moment of grabbing — wall_climb_max_height
-                           ## is measured from here, not from world origin
+						   ## is measured from here, not from world origin
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
