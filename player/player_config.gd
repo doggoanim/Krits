@@ -48,7 +48,7 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 ## Player.find_climbable_wall()/probe_wall_near() and
 ## player/states/wall_climb_state.gd.
 @export var wall_climb_speed := 4.0        ## movement speed along the wall surface, strafing and climbing alike
-@export var wall_hug_distance := 0.5       ## how far the player's capsule center sits from the wall's own surface
+@export var wall_hug_distance := 0.3       ## how far the player's capsule center sits from the wall's own surface
 @export var wall_grab_reach := 0.2         ## how far ahead the initial grab probe reaches
 @export var wall_probe_reach := 0.3        ## how far each continuous re-stick/corner-wrap probe reaches
 @export var wall_probe_radius := 0.12      ## radius of the sphere swept for both probes — bigger than a
