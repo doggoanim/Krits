@@ -55,6 +55,11 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## normal changes meaningfully — keeps a wrap from looking like
 											## an instant snap. Ordinary flat-wall movement isn't affected,
 											## since the normal doesn't change frame to frame there.
+@export var wall_climb_head_clearance := 1.4   ## how far above the player's feet the climb-stop
+												## check looks for wall — lower this to let the player
+												## climb a bit higher before stopping (closer to
+												## STAND_HEIGHT means the head stops right at the edge;
+												## lower leaves more head/shoulders poking past it)
 @export var wall_jump_off_speed := 7.0     ## horizontal push away from the wall when jumping off
 @export var wall_jump_off_velocity := 10.0   ## vertical speed of a wall-jump
 @export var wall_release_push := 1.5       ## horizontal push away from the wall when letting go via crouch

@@ -95,14 +95,13 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	if ground != null and tentative.y < ground:
 		tentative.y = ground
 
-	# Checked at head height, not at `tentative` itself (the player's own
-	# origin/feet height) — _attach_point tracks the feet, but stopping only
-	# once the FEET run out of wall left the head free to poke out well
-	# above the top edge first (and, combined with the top-edge/corner
-	# normal bug, let the player climb right onto the roof). Probing a full
-	# STAND_HEIGHT above instead makes the climb stop once the head would
-	# clip the top, not the feet.
-	var probe_point := tentative + Vector3.UP * Player.STAND_HEIGHT
+	# Checked wall_climb_head_clearance above `tentative`, not at the
+	# player's own origin/feet height — _attach_point tracks the feet, but
+	# stopping only once the FEET run out of wall left the head free to poke
+	# out well above the top edge first (and, combined with the top-edge/
+	# corner normal bug, let the player climb right onto the roof). Tune
+	# the clearance in PlayerConfig if the stop point feels too low/high.
+	var probe_point := tentative + Vector3.UP * c.wall_climb_head_clearance
 	var found := p.probe_wall_near(probe_point, _normal, strafe)
 	if found.is_empty():
 		# Nothing climbable where we tried to go — same fallback as any
