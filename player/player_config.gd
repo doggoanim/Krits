@@ -55,7 +55,7 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## normal changes meaningfully — keeps a wrap from looking like
 											## an instant snap. Ordinary flat-wall movement isn't affected,
 											## since the normal doesn't change frame to frame there.
-@export var wall_climb_max_height := 6.0   ## how far above the point you grabbed a wall you can
+@export var wall_climb_max_height := 3.0   ## how far above the point you grabbed a wall you can
 											## climb before being stopped, regardless of how much
 											## further the wall's own collision actually goes —
 											## see WallClimbState's _grab_height/height_capped
