@@ -49,12 +49,21 @@ func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
 
-	# p.input_dir() again, not raw action strengths — wall-climb steering is
-	# camera-relative like every other move state: strafing across the wall
-	# follows wherever the camera is currently facing, same as A/D do on the
-	# ground, rather than always meaning the same screen/keyboard direction
-	# regardless of camera angle.
-	var strafe := p.input_dir().dot(_wall_right(_normal))
+	# Full-strength A/D, same as ever — only WHICH of the two is "wall-right"
+	# flips, based on which side of the wall the camera's currently looking
+	# from (so A/D still mean screen-left/screen-right, like every other move
+	# state, rather than a fixed keyboard direction regardless of camera
+	# angle). Using input_dir() itself here instead would also project away
+	# some of the input's magnitude whenever the camera isn't looking
+	# squarely at the wall, quietly slowing the climb down — flipping just
+	# the sign keeps full speed at any angle.
+	var raw_strafe := Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left")
+	var cam_yaw := p.camera_rig.yaw if p.camera_rig else 0.0
+	var cam_right := Basis(Vector3.UP, cam_yaw) * Vector3.RIGHT
+	# >= 0.0 rather than signf(), which returns 0.0 (not ±1.0) exactly square
+	# to the wall — camera facing straight at or away from it, an entirely
+	# normal angle to be climbing from, not an edge case to go unflipped for.
+	var strafe := raw_strafe * (1.0 if cam_right.dot(_wall_right(_normal)) >= 0.0 else -1.0)
 	var climb := Input.get_action_strength(&"move_forward") - Input.get_action_strength(&"move_back")
 	var move: Vector3 = (_wall_right(_normal) * strafe + Vector3.UP * climb).limit_length(1.0)
 	var moving := move.length() > 0.05
