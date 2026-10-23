@@ -47,6 +47,7 @@ func _refresh_slot(slot_name: StringName, mesh_path: String, material: Material)
 	if slot == null:
 		return
 	for child in slot.get_children():
+		slot.remove_child(child)
 		child.queue_free()
 	if not ResourceLoader.exists(mesh_path):
 		push_warning("Tree: no mesh variant at %s" % mesh_path)
