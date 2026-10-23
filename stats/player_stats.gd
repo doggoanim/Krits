@@ -1,32 +1,49 @@
 class_name PlayerStats
 extends RefCounted
-## Level, XP, spendable points and the three stats: HP, Shield, Damage.
-## Shield is a second bar that recharges after a delay. Piercing hits skip it.
+## HP, Shield, Damage, and gold. Stats are entirely equipment-driven now —
+## see equipment/ — rather than levels/spent points: max_hp()/max_shield()/
+## damage() just read off whatever's currently equipped. Shield is a second
+## bar that recharges after a delay. Piercing hits skip it.
+##
+## owned_* holds the ids (not the Resource objects — a JSON save can't hold
+## those) of every item of that slot the player has ever bought, so
+## re-equipping something already owned is free; the starting item's id is
+## always in there so there's always something free to fall back to.
+## equipped_* holds the actual resolved EquipmentData for whatever's
+## currently worn/wielded — that's what max_hp()/max_shield()/damage() read.
 
 const BASE_HP := 100.0
 const BASE_SHIELD := 50.0
 const BASE_DAMAGE := 1.0   ## orb hits are the only thing that uses this — combo scaling
                            ## (see Arena.COMBO_BONUS) still ramps up from here as normal
-const HP_PER_POINT := 20.0
-const SHIELD_PER_POINT := 15.0
-const DAMAGE_PER_POINT := 3.0
-const POINTS_PER_LEVEL := 3
 const SHIELD_RECHARGE_DELAY := 3.0
 const SHIELD_RECHARGE_RATE := 12.0
 
-var level := 1
-var xp := 0
-var points := 0
-var invested := {&"hp": 0, &"shield": 0, &"damage": 0}
+var gold := 0
+var owned_armors: Array[StringName] = []
+var owned_shields: Array[StringName] = []
+var owned_weapons: Array[StringName] = []
+var equipped_armor: ArmorData
+var equipped_shield: ShieldData
+var equipped_weapon: WeaponData
 
 var hp := BASE_HP
 var shield := BASE_SHIELD
 var _since_hit := 0.0
 
-func max_hp() -> float: return BASE_HP + invested[&"hp"] * HP_PER_POINT
-func max_shield() -> float: return BASE_SHIELD + invested[&"shield"] * SHIELD_PER_POINT
-func damage() -> float: return BASE_DAMAGE + invested[&"damage"] * DAMAGE_PER_POINT
-func xp_to_next() -> int: return 50 + (level - 1) * 35
+func _init() -> void:
+	equipped_armor = EquipmentLibrary.starting_armor()
+	equipped_shield = EquipmentLibrary.starting_shield()
+	equipped_weapon = EquipmentLibrary.starting_weapon()
+	owned_armors = [equipped_armor.id]
+	owned_shields = [equipped_shield.id]
+	owned_weapons = [equipped_weapon.id]
+	hp = max_hp()
+	shield = max_shield()
+
+func max_hp() -> float: return BASE_HP + (equipped_armor.hp_bonus if equipped_armor else 0.0)
+func max_shield() -> float: return BASE_SHIELD + (equipped_shield.shield_bonus if equipped_shield else 0.0)
+func damage() -> float: return BASE_DAMAGE + (equipped_weapon.damage_bonus if equipped_weapon else 0.0)
 
 func tick(delta: float) -> void:
 	_since_hit += delta
@@ -51,33 +68,77 @@ func full_heal() -> void:
 	shield = max_shield()
 	Events.player_damaged.emit(hp, shield)
 
-func add_xp(amount: int) -> void:
-	xp += amount
-	while xp >= xp_to_next():
-		xp -= xp_to_next()
-		level += 1
-		points += POINTS_PER_LEVEL
-		Events.leveled_up.emit(level)
+func add_gold(amount: int) -> void:
+	gold += amount
 	Events.stats_changed.emit()
 
-func spend_point(stat: StringName) -> bool:
-	if points <= 0 or not invested.has(stat):
+## ShopMenu's one entry point: buys `item` if it's affordable and not
+## already owned (free to re-buy — i.e. re-equip — if it is), then equips
+## it either way. False only means "couldn't afford it and don't own it
+## yet" — nothing is changed in that case.
+func buy(item: EquipmentData) -> bool:
+	if not _owns(item) and item.price > gold:
 		return false
-	points -= 1
-	invested[stat] += 1
-	if stat == &"hp": hp += HP_PER_POINT
-	if stat == &"shield": shield += SHIELD_PER_POINT
-	Events.stats_changed.emit()
+	if not _owns(item):
+		gold -= item.price
+		_owned_list(item).append(item.id)
+	equip(item)
 	return true
 
+func is_owned(item: EquipmentData) -> bool:
+	return _owns(item)
+
+func equip(item: EquipmentData) -> void:
+	if item is ArmorData:
+		equipped_armor = item
+		hp = minf(hp, max_hp())
+	elif item is ShieldData:
+		equipped_shield = item
+		shield = minf(shield, max_shield())
+	elif item is WeaponData:
+		equipped_weapon = item
+	Events.stats_changed.emit()
+
+func _owns(item: EquipmentData) -> bool:
+	return item.id in _owned_list(item)
+
+func _owned_list(item: EquipmentData) -> Array:
+	if item is ArmorData: return owned_armors
+	if item is ShieldData: return owned_shields
+	return owned_weapons
+
 func to_dict() -> Dictionary:
-	return {"level": level, "xp": xp, "points": points, "invested": {"hp": invested[&"hp"], "shield": invested[&"shield"], "damage": invested[&"damage"]}}
+	return {
+		"gold": gold,
+		"owned_armors": owned_armors.map(func(id): return String(id)),
+		"owned_shields": owned_shields.map(func(id): return String(id)),
+		"owned_weapons": owned_weapons.map(func(id): return String(id)),
+		"equipped_armor": String(equipped_armor.id) if equipped_armor else "",
+		"equipped_shield": String(equipped_shield.id) if equipped_shield else "",
+		"equipped_weapon": String(equipped_weapon.id) if equipped_weapon else "",
+	}
 
 func from_dict(d: Dictionary) -> void:
-	level = d.get("level", 1)
-	xp = d.get("xp", 0)
-	points = d.get("points", 0)
-	var inv: Dictionary = d.get("invested", {})
-	for k in invested.keys():
-		invested[k] = int(inv.get(str(k), inv.get(k, 0)))
+	gold = int(d.get("gold", 0))
+	owned_armors = _load_id_array(d.get("owned_armors", []), EquipmentLibrary.starting_armor().id)
+	owned_shields = _load_id_array(d.get("owned_shields", []), EquipmentLibrary.starting_shield().id)
+	owned_weapons = _load_id_array(d.get("owned_weapons", []), EquipmentLibrary.starting_weapon().id)
+	equipped_armor = EquipmentLibrary.by_id(StringName(d.get("equipped_armor", ""))) as ArmorData
+	if equipped_armor == null: equipped_armor = EquipmentLibrary.starting_armor()
+	equipped_shield = EquipmentLibrary.by_id(StringName(d.get("equipped_shield", ""))) as ShieldData
+	if equipped_shield == null: equipped_shield = EquipmentLibrary.starting_shield()
+	equipped_weapon = EquipmentLibrary.by_id(StringName(d.get("equipped_weapon", ""))) as WeaponData
+	if equipped_weapon == null: equipped_weapon = EquipmentLibrary.starting_weapon()
 	full_heal()
+
+## Shared by the three owned_* loaders: StringName-ifies every saved id,
+## always making sure `fallback` (the slot's starting item) is in there even
+## on an old save from before it existed, so there's always something to
+## equip even if a saved id no longer resolves through EquipmentLibrary.
+func _load_id_array(raw: Array, fallback: StringName) -> Array[StringName]:
+	var out: Array[StringName] = []
+	for id in raw:
+		out.append(StringName(id))
+	if fallback not in out:
+		out.append(fallback)
+	return out

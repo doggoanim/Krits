@@ -62,7 +62,7 @@ var cancelled := false
 var player: Player
 var enemies: Array[Enemy] = []
 var orbs: Array[Orb] = []
-var xp_reward := 0
+var gold_reward := 0
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
 var _over := false
@@ -269,7 +269,7 @@ func _on_player_landed() -> void:
 
 func _on_enemy_defeated(e: Enemy) -> void:
 	enemies.erase(e)
-	xp_reward += e.data.xp
+	gold_reward += e.data.gold
 	if enemies.is_empty():
 		_end(true)
 
@@ -291,7 +291,7 @@ func _end(victory: bool) -> void:
 	if player.camera_rig:
 		player.camera_rig.extra_distance = 0.0
 	if victory:
-		Game.stats.add_xp(xp_reward)
+		Game.stats.add_gold(gold_reward)
 	Events.combo_changed.emit(0)
 	Events.encounter_ended.emit(self, victory)
 	finished.emit(victory)

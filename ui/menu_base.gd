@@ -43,7 +43,11 @@ func close() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(toggle_action):
+	# toggle_action is left empty by a menu that's only ever opened
+	# programmatically (ShopMenu, opened by a ShopKeeper in the world) rather
+	# than via its own hotkey — is_action_pressed("") would just be an
+	# invalid-action error, so skip the check entirely rather than call it.
+	if toggle_action != &"" and event.is_action_pressed(toggle_action):
 		if visible:
 			close()
 		else:

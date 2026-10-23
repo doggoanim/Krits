@@ -9,7 +9,7 @@ static func green_slime() -> EnemyData:
 	d.id = &"green_slime"
 	d.display_name = "Green Slime"
 	d.max_hp = 6.0
-	d.xp = 20
+	d.gold = 20
 	d.color = Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)   # also the puddle/slime-ball tint
 	d.model = GREEN_SLIME_MODEL
 	d.model_height = 1.1
@@ -51,7 +51,7 @@ static func spinner() -> EnemyData:
 	d.id = &"spinner"
 	d.display_name = "Spinner"
 	d.max_hp = 90.0
-	d.xp = 35
+	d.gold = 35
 	d.move_speed = 2.0
 	d.color = Color(0.7, 0.3, 0.9)
 	var s := SpiralPattern.new()
@@ -66,7 +66,7 @@ static func piercer() -> EnemyData:
 	d.id = &"piercer"
 	d.display_name = "Piercer"
 	d.max_hp = 80.0
-	d.xp = 45
+	d.gold = 45
 	d.move_speed = 5.0
 	d.color = Color(1.0, 0.2, 0.7)
 	var p := AimedPattern.new()

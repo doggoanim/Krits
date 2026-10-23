@@ -46,8 +46,17 @@ toward the new direction.
 			 flag), SlimePuddle (damage/slow/no-jump ground hazard). EnemyData also supports an optional
 			 telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
 			 an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
-- stats/     PlayerStats (levels, 3 points per level into hp/shield/damage, shield recharge)
-- world/     WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
+- stats/     PlayerStats (HP/Shield/Damage, entirely equipment-driven — see equipment/ — plus
+			 gold and shield recharge; no levels)
+- equipment/ EquipmentData (base: id/display_name/price) + ArmorData (HP), ShieldData (Shield),
+			 WeaponData (Damage, plus a `kind` of Sword/Bow/Staff — only Sword has combat
+			 behavior wired up so far), EquipmentLibrary (the catalog, same static-builder
+			 pattern as EnemyLibrary). ShopMenu (ui/) lists/buys/equips from it; ShopKeeper
+			 (world/) is the in-world trigger that opens it.
+- world/     Interactable (shared range/prompt/trigger base — floats a prompt while the player's in
+			 range and able to use it, calls _interact() on press), NPC and ShopKeeper both extend it
+			 (talk vs. open ShopMenu). WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint,
+			 WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
 			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
 			 first area — a small plaza built from plain Godot nodes: boxes, cylinders, prisms, no

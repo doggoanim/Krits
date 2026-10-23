@@ -1,11 +1,16 @@
 class_name Hud
 extends Control
 ## Player meter cluster (portrait, HP, shield frame, stamina — custom-drawn
-## bars, see ui/widgets/) plus level, XP, the control hint and the combo
-## counter. All of the static layout — positions, sizes, which texture each
-## bar uses — lives in hud.tscn now; open it in the editor to move or resize
-## anything. This script just drives the live values and the damage-reaction
-## animation (the portrait punch + HP bar shake).
+## bars, see ui/widgets/) plus gold, the control hint and the combo counter.
+## All of the static layout — positions, sizes, which texture each bar uses —
+## lives in hud.tscn now; open it in the editor to move or resize anything.
+## This script just drives the live values and the damage-reaction animation
+## (the portrait punch + HP bar shake).
+##
+## %LevelLabel/%XpBar are hud.tscn's old names from when stats were
+## level-based — kept as-is rather than renamed in the scene file (pure
+## churn, no behavior change) now that stats are equipment-driven; the label
+## shows gold these days and the bar just stays hidden (see _refresh()).
 
 ## -- Damage reaction ------------------------------------------------------
 ## Taking a hit (not healing — see _on_player_damaged()) punches the portrait
@@ -64,11 +69,12 @@ func _refresh() -> void:
 	_stamina_fill.max_value = 1.0
 	_stamina_fill.value = 1.0
 
-	_xp.max_value = s.xp_to_next()
-	_xp.value = s.xp
-	_level.text = "Lv %d   HP %d/%d   Shield %d/%d" % [s.level, s.hp, s.max_hp(), s.shield, s.max_shield()]
-	_hint.text = "[Tab] Stats (%d pts)   [M] Travel" % s.points if s.points > 0 \
-		else "[Tab] Stats   [M] Travel"
+	# No more XP/levels (stats are equipment-driven now, see PlayerStats) —
+	# the bar that used to track XP-to-next-level just stays hidden; the
+	# label it sat next to now shows gold instead.
+	_xp.visible = false
+	_level.text = "Gold %d   HP %d/%d   Shield %d/%d" % [s.gold, s.hp, s.max_hp(), s.shield, s.max_shield()]
+	_hint.text = "[Tab] Stats   [M] Travel"
 
 func _on_combo(c: int) -> void:
 	_combo.text = "x%d" % c if c > 1 else ""

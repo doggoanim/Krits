@@ -3,6 +3,7 @@
 [ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
@@ -264,6 +265,17 @@ height = 1.8
 albedo_color = Color(0.3764706, 0.28627452, 0.5529412, 1)
 
 [sub_resource type="CapsuleMesh" id="Mesh_MiraBody"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleShape3D" id="Shape_ShopBody"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_ShopRobe"]
+albedo_color = Color(0.8117647, 0.6627451, 0.19215687, 1)
+
+[sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
 radius = 0.4
 height = 1.8
 
@@ -760,3 +772,17 @@ shape = SubResource("Shape_MiraBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 material_override = SubResource("Mat_MiraRobe")
 mesh = SubResource("Mesh_MiraBody")
+
+[node name="ShopKeeper" type="StaticBody3D" parent="." unique_id=-1165481583]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -6)
+script = ExtResource("1_shopkeeper")
+prompt_text = "Press E to shop"
+
+[node name="Collision" type="CollisionShape3D" parent="ShopKeeper" unique_id=-1165481582]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_ShopBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="ShopKeeper" unique_id=-1165481581]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("Mat_ShopRobe")
+mesh = SubResource("Mesh_ShopBody")

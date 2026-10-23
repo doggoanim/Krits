@@ -1,5 +1,8 @@
 class_name StatsMenu
 extends MenuBase
+## Read-only summary now that stats are equipment-driven (see PlayerStats) —
+## shopping/equipping happens at a shop (ShopMenu), not here. This just shows
+## what you're currently carrying and the numbers it adds up to.
 
 func _init() -> void:
 	toggle_action = &"menu_stats"
@@ -9,20 +12,13 @@ func refresh() -> void:
 		content.remove_child(c)
 		c.queue_free()
 	var s := Game.stats
-	title("Level %d  —  %d points" % [s.level, s.points])
-	_row("HP", &"hp", "%d" % s.max_hp())
-	_row("Shield", &"shield", "%d" % s.max_shield())
-	_row("Damage", &"damage", "%d" % s.damage())
+	title("Gold: %d" % s.gold)
+	_row("HP", "%d / %d" % [s.hp, s.max_hp()], s.equipped_armor)
+	_row("Shield", "%d / %d" % [s.shield, s.max_shield()], s.equipped_shield)
+	_row("Damage", "%d" % s.damage(), s.equipped_weapon)
 
-func _row(label: String, stat: StringName, value: String) -> void:
-	var h := HBoxContainer.new()
+func _row(label: String, value: String, item: EquipmentData) -> void:
 	var l := Label.new()
-	l.text = "%s: %s" % [label, value]
-	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(l)
-	var b := Button.new()
-	b.text = "+"
-	b.disabled = Game.stats.points <= 0
-	b.pressed.connect(func(): Game.stats.spend_point(stat))
-	h.add_child(b)
-	content.add_child(h)
+	var gear := item.display_name if item else "—"
+	l.text = "%s: %s   (%s)" % [label, value, gear]
+	content.add_child(l)

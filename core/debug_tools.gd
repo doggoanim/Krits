@@ -2,10 +2,11 @@ class_name DebugTools
 extends Node
 ## Dev shortcuts for testing fights quickly. Only active in debug builds.
 ##  F1 green slime  F2 spinner  F3 piercer  F4 trio  F5 big group (6)
-##  F6 cancel fight  F7 god mode  F8 level up  F9 full heal
+##  F6 cancel fight  F7 god mode  F8 add gold  F9 full heal
 ##  F10 respawn defeated overworld enemies  F11 delete save
 
-const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 Level up  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save"
+const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F8 +100 Gold  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save"
+const DEBUG_GOLD := 100
 
 var player: Player
 var encounters: EncounterManager
@@ -40,7 +41,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F7:
 			Game.god_mode = not Game.god_mode
 			_update_label()
-		KEY_F8: Game.stats.add_xp(Game.stats.xp_to_next())
+		KEY_F8: Game.stats.add_gold(DEBUG_GOLD)
 		KEY_F9: Game.stats.full_heal()
 		KEY_F10:
 			Game.reset_cleared_enemies()
