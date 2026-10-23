@@ -1,18 +1,18 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="PackedScene" uid="uid://dmeqelu4llijv" path="res://assets/world/trunk_1.glb" id="1_trunk"]
-[ext_resource type="PackedScene" uid="uid://b8o6ned2c2u34" path="res://assets/world/leaves_1.glb" id="2_leaves"]
+[ext_resource type="Script" path="res://world/tree.gd" id="1_script"]
 
 [sub_resource type="CylinderShape3D" id="Shape_Trunk"]
 height = 3.0
 radius = 0.24
 
 [node name="Tree" type="Node3D"]
+script = ExtResource("1_script")
 
-[node name="Trunk" parent="." instance=ExtResource("1_trunk")]
+[node name="TrunkSlot" type="Node3D" parent="."]
 transform = Transform3D(0.3124674, 0, 0, 0, 0.3124674, 0, 0, 0, 0.3124674, 0, 1.4448495, 0)
 
-[node name="Leaves" parent="." instance=ExtResource("2_leaves")]
+[node name="LeavesSlot" type="Node3D" parent="."]
 transform = Transform3D(0.360726, 0, 0, 0, 0.360726, 0, 0, 0, 0.360726, 0, 3.6865878, 0)
 
 [node name="Collision" type="StaticBody3D" parent="."]
