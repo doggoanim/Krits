@@ -56,10 +56,13 @@ const STAFF_SLOW_MULT := 0.5
 ## one of them ever needs to be tuned independently.
 const STAFF_STATUS_TIME := 3.0
 const STAFF_STUN_TIME := 1.0   ## Earth's stun, applied by any cast spell that includes it
-const STAFF_BUFFER_MAX := 5        ## queuing a 6th overloads the staff instead — see _overload_staff()
+const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUT := 4.0  ## seconds of not queueing a new rune before the buffer clears itself
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
                                         ## an overload is a mistake, not something a shield should soften
+const STAFF_OVERLOAD_FLING_UP := 8.0     ## vertical pop from an overload — gentler than a real
+const STAFF_OVERLOAD_FLING_PUSH := 5.0   ## wall bounce (PlayerConfig.wall_bounce_up/push), just enough
+                                           ## to read as "that knocked me back" rather than a launch
 const GROUND_PROBE_UP := 6.0    ## how far above a candidate point the ground raycast starts
 const GROUND_PROBE_DOWN := 50.0 ## how far down it's willing to look
 const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this above/below the
@@ -372,7 +375,7 @@ func _handle_bow_hit(orb: Orb) -> void:
 ## A rune (FIRE/ICE/EARTH) just queues itself, no damage dealt and no bounce
 ## — it's a pickup, not combat feedback (see Orb.Kind's doc comment). CAST is
 ## the only orb that actually resolves anything. Queuing past STAFF_BUFFER_MAX
-## doesn't quietly drop the oldest rune anymore — it overloads instead, see
+## doesn't quietly drop the oldest rune — it overloads instead, see
 ## _overload_staff().
 func _handle_staff_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.CAST:
@@ -386,12 +389,13 @@ func _handle_staff_hit(orb: Orb) -> void:
 	_update_buffer_label()
 	_respawn_orb_later(orb)
 
-## Queuing a 6th rune overloads the staff: the whole buffer dumps itself as
+## Queuing a 4th rune overloads the staff: the whole buffer dumps itself as
 ## self-inflicted damage (pierces the shield, same as a real hit that
 ## ignores it — see Player.hit()) with a tri-color burst (one per element,
 ## matching Orb.KIND_COLORS so it's visually the same "fire/ice/earth" the
-## runes themselves use), plus a brief forced ragdoll as the "that was a
-## mistake" beat. The orb that triggered it still respawns normally.
+## runes themselves use) and a small outward/upward fling so it still reads
+## as a real hit, not just a number disappearing. The orb that triggered it
+## still respawns normally.
 func _overload_staff(orb: Orb) -> void:
 	_rune_buffer.clear()
 	_rune_buffer_t = 0.0
@@ -400,7 +404,11 @@ func _overload_staff(orb: Orb) -> void:
 		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[element][0], 1.3)
 	player.hit(STAFF_OVERLOAD_DAMAGE, true)
 	if not player.dead:
-		player.machine.transition_to(&"Ragdoll")
+		var dir := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0))
+		dir = dir.normalized() if dir.length() > 0.01 else -player.facing
+		player.set_hvel(dir * STAFF_OVERLOAD_FLING_PUSH)
+		player.velocity.y = STAFF_OVERLOAD_FLING_UP
+		player.machine.transition_to(&"Air")
 	_respawn_orb_later(orb)
 
 ## Looks up whatever's queued as a spell (see _lookup_spell()), applies its

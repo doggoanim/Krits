@@ -132,7 +132,6 @@ func _ready() -> void:
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
 		&"Frozen": FrozenState.new(), &"WallClimb": WallClimbState.new(),
-		&"Ragdoll": RagdollState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -160,12 +159,6 @@ func _physics_process(delta: float) -> void:
 ## (dive/pound/long jump/roll) already has its own baked animation, and
 ## layering a lean on top of those would fight the authored pose.
 func _update_lean(delta: float) -> void:
-	# RagdollState owns rotation.x/z entirely while it's active (its own free
-	# tumble spin, not a lean) — see its doc comment. Leaving this running
-	# would fight it, smoothing rotation back toward 0 every frame while the
-	# ragdoll is also setting it.
-	if machine.current_name == &"Ragdoll":
-		return
 	var yaw := atan2(-facing.x, -facing.z)
 	var yaw_rate := wrapf(yaw - _prev_facing_yaw, -PI, PI) / maxf(delta, 0.0001)
 	_prev_facing_yaw = yaw
