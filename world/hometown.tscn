@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://world/tree.gd" id="1_tree"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
@@ -146,107 +147,6 @@ albedo_texture = ExtResource("1_epjlq")
 
 [sub_resource type="BoxMesh" id="Mesh_HillTop"]
 size = Vector3(10, 1, 10)
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S100"]
-height = 3.0
-radius = 0.25
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S100"]
-top_radius = 0.25
-bottom_radius = 0.25
-height = 3.0
-
-[sub_resource type="StandardMaterial3D" id="Mat_Foliage"]
-albedo_color = Color(0.32975066, 0.43482056, 0.15868464, 1)
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S100"]
-top_radius = 0.0
-bottom_radius = 1.6
-height = 3.2
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S115"]
-height = 3.45
-radius = 0.2875
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S115"]
-top_radius = 0.2875
-bottom_radius = 0.2875
-height = 3.45
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S115"]
-top_radius = 0.0
-bottom_radius = 1.84
-height = 3.68
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S090"]
-height = 2.7
-radius = 0.225
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S090"]
-top_radius = 0.225
-bottom_radius = 0.225
-height = 2.7
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S090"]
-top_radius = 0.0
-bottom_radius = 1.44
-height = 2.88
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S105"]
-height = 3.15
-radius = 0.2625
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S105"]
-top_radius = 0.2625
-bottom_radius = 0.2625
-height = 3.15
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S105"]
-top_radius = 0.0
-bottom_radius = 1.68
-height = 3.36
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S120"]
-height = 3.6
-radius = 0.3
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S120"]
-top_radius = 0.3
-bottom_radius = 0.3
-height = 3.6
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S120"]
-top_radius = 0.0
-bottom_radius = 1.92
-height = 3.84
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S095"]
-height = 2.85
-radius = 0.2375
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S095"]
-top_radius = 0.2375
-bottom_radius = 0.2375
-height = 2.85
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S095"]
-top_radius = 0.0
-bottom_radius = 1.52
-height = 3.04
-
-[sub_resource type="CylinderShape3D" id="Shape_Trunk_S110"]
-height = 3.3
-radius = 0.275
-
-[sub_resource type="CylinderMesh" id="Mesh_Trunk_S110"]
-top_radius = 0.275
-bottom_radius = 0.275
-height = 3.3
-
-[sub_resource type="CylinderMesh" id="Mesh_Foliage_S110"]
-top_radius = 0.0
-bottom_radius = 1.76
-height = 3.52
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -490,219 +390,51 @@ mesh = SubResource("Mesh_HillTop")
 
 [node name="Tree1" type="Node3D" parent="Trees" unique_id=361431711]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, -35)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree1" unique_id=996208370]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree1/Trunk" unique_id=1499378870]
-shape = SubResource("Shape_Trunk_S100")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree1/Trunk" unique_id=740676046]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S100")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree1" unique_id=1662001179]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S100")
+script = ExtResource("1_tree")
 
 [node name="Tree2" type="Node3D" parent="Trees" unique_id=481108530]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -45)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree2" unique_id=430776980]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.725, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree2/Trunk" unique_id=1257897484]
-shape = SubResource("Shape_Trunk_S115")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree2/Trunk" unique_id=112731093]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S115")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree2" unique_id=536872497]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.738, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S115")
+script = ExtResource("1_tree")
 
 [node name="Tree3" type="Node3D" parent="Trees" unique_id=1827265612]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -20)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree3" unique_id=830409097]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree3/Trunk" unique_id=556071320]
-shape = SubResource("Shape_Trunk_S090")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree3/Trunk" unique_id=1611269008]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S090")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree3" unique_id=894880300]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.708, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S090")
+script = ExtResource("1_tree")
 
 [node name="Tree4" type="Node3D" parent="Trees" unique_id=1661075599]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0, 5)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree4" unique_id=1124532321]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.575, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree4/Trunk" unique_id=62222623]
-shape = SubResource("Shape_Trunk_S105")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree4/Trunk" unique_id=1531712311]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S105")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree4" unique_id=1852022946]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.326, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S105")
+script = ExtResource("1_tree")
 
 [node name="Tree5" type="Node3D" parent="Trees" unique_id=591993256]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 30)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree5" unique_id=1461058962]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree5/Trunk" unique_id=1944445860]
-shape = SubResource("Shape_Trunk_S120")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree5/Trunk" unique_id=1164326207]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S120")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree5" unique_id=1718129159]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.944, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S120")
+script = ExtResource("1_tree")
 
 [node name="Tree6" type="Node3D" parent="Trees" unique_id=295000724]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 42)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree6" unique_id=2032485479]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.425, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree6/Trunk" unique_id=1496221961]
-shape = SubResource("Shape_Trunk_S095")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree6/Trunk" unique_id=1115097045]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S095")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree6" unique_id=367794844]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.914, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S095")
+script = ExtResource("1_tree")
 
 [node name="Tree7" type="Node3D" parent="Trees" unique_id=1235921288]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 45)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree7" unique_id=1933294860]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree7/Trunk" unique_id=1763397234]
-shape = SubResource("Shape_Trunk_S110")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree7/Trunk" unique_id=1523629851]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S110")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree7" unique_id=714433180]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.532, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S110")
+script = ExtResource("1_tree")
 
 [node name="Tree8" type="Node3D" parent="Trees" unique_id=1826006510]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 38)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree8" unique_id=1355098511]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree8/Trunk" unique_id=1398826976]
-shape = SubResource("Shape_Trunk_S100")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree8/Trunk" unique_id=10688432]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S100")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree8" unique_id=1781995657]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S100")
+script = ExtResource("1_tree")
 
 [node name="Tree9" type="Node3D" parent="Trees" unique_id=1687150538]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 22)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree9" unique_id=1400444463]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree9/Trunk" unique_id=1682301969]
-shape = SubResource("Shape_Trunk_S090")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree9/Trunk" unique_id=2035249861]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S090")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree9" unique_id=2076658053]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.708, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S090")
+script = ExtResource("1_tree")
 
 [node name="Tree10" type="Node3D" parent="Trees" unique_id=1727269730]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, -15)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree10" unique_id=166598341]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.725, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree10/Trunk" unique_id=2109309755]
-shape = SubResource("Shape_Trunk_S115")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree10/Trunk" unique_id=585753867]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S115")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree10" unique_id=1738728287]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.738, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S115")
+script = ExtResource("1_tree")
 
 [node name="Tree11" type="Node3D" parent="Trees" unique_id=1738491399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, -35)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree11" unique_id=2023832840]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree11/Trunk" unique_id=1854890783]
-shape = SubResource("Shape_Trunk_S100")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree11/Trunk" unique_id=1613063676]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S100")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree11" unique_id=1777196189]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.12, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S100")
+script = ExtResource("1_tree")
 
 [node name="Tree12" type="Node3D" parent="Trees" unique_id=74083270]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -42)
-
-[node name="Trunk" type="StaticBody3D" parent="Trees/Tree12" unique_id=782706694]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Trees/Tree12/Trunk" unique_id=2138938677]
-shape = SubResource("Shape_Trunk_S110")
-
-[node name="Mesh" type="MeshInstance3D" parent="Trees/Tree12/Trunk" unique_id=722015967]
-material_override = SubResource("Mat_Wood")
-mesh = SubResource("Mesh_Trunk_S110")
-
-[node name="Foliage" type="MeshInstance3D" parent="Trees/Tree12" unique_id=723517625]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.532, 0)
-material_override = SubResource("Mat_Foliage")
-mesh = SubResource("Mesh_Foliage_S110")
+script = ExtResource("1_tree")
 
 [node name="StartSpawn" type="Area3D" parent="." unique_id=1738210625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 14)
