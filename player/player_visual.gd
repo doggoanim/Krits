@@ -37,6 +37,7 @@ const ANIM_CLIMB_RIGHT := &"climb_right"
 ## Placeholder clip names — not baked into the model yet (see WallClimbState).
 ## play() just warns and no-ops until the real clips exist, so the feature
 ## works mechanically in the meantime, just with no pose.
+const ANIM_RAGDOLL := &"ragdoll"   ## not baked in yet either (see RagdollState) — same story
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,

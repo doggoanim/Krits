@@ -49,12 +49,19 @@ toward the new direction.
 			 What touching an Orb does depends on the equipped WeaponData.kind (Arena._on_orb_hit()):
 			 Sword is the plain combo hit above; Bow spawns ARROW/SHOOT orbs (arrows bank damage,
 			 a shoot orb releases the whole bank, a shoot with nothing banked whiffs); Staff spawns
-			 FIRE/ICE/LIGHTNING/ARCANE rune orbs (touching one just queues it, no damage) plus one
-			 CAST orb per fight — touching CAST looks up whatever's queued against a named
-			 spell table (Arena._build_spell_table()/_lookup_spell(), Magicka-style), applying a
-			 damage multiplier plus each queued element's own status effect via
-			 Enemy.apply_burn()/apply_slow()/apply_stun(); an unlisted combination still falls
-			 back to a sensible default (_fallback_spell()) so no cast is ever wasted.
+			 FIRE/ICE/EARTH rune orbs (touching one just queues it into a 5-slot buffer, no damage,
+			 no bounce — a pickup, not a hit) plus one CAST orb per fight — touching CAST looks up
+			 whatever's queued against a named spell table (Arena._build_spell_table()/
+			 _lookup_spell(), Magicka-style), applying a damage multiplier plus each queued
+			 element's own status effect via Enemy.apply_burn()/apply_slow()/apply_stun(); an
+			 unlisted combination still falls back to a sensible default (_fallback_spell()) so no
+			 cast is ever wasted. Queuing a 6th rune instead overloads the staff
+			 (Arena._overload_staff()): self-damage that pierces the shield, a tri-color burst, and
+			 a forced knockdown (RagdollState — a visual tumble, not a real physics skeleton; jump
+			 to stand back up once it's held for at least a second). ARROW/FIRE/ICE/EARTH orbs also
+			 render differently from the rest (Orb._refresh()): a hollow, semi-transparent core with
+			 a billboard icon at the center (Orb.ICON_TEXTURE_PATHS — drop an image in at that path
+			 and it shows automatically) instead of the plain solid orb every other kind uses.
 - stats/     PlayerStats (HP/Shield/Damage, entirely equipment-driven — see equipment/ — plus
 			 gold and shield recharge; no levels)
 - equipment/ EquipmentData (base: id/display_name/price) + ArmorData (HP), ShieldData (Shield),

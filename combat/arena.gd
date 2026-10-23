@@ -55,9 +55,11 @@ const STAFF_SLOW_MULT := 0.5
 ## shared by all of them for simplicity; split these out per-status if any
 ## one of them ever needs to be tuned independently.
 const STAFF_STATUS_TIME := 3.0
-const STAFF_STUN_TIME := 1.0
-const STAFF_BUFFER_MAX := 3        ## oldest rune falls out once a 4th is queued
+const STAFF_STUN_TIME := 1.0   ## Earth's stun, applied by any cast spell that includes it
+const STAFF_BUFFER_MAX := 5        ## queuing a 6th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUT := 4.0  ## seconds of not queueing a new rune before the buffer clears itself
+const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
+                                        ## an overload is a mistake, not something a shield should soften
 const GROUND_PROBE_UP := 6.0    ## how far above a candidate point the ground raycast starts
 const GROUND_PROBE_DOWN := 50.0 ## how far down it's willing to look
 const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this above/below the
@@ -268,10 +270,10 @@ func _orb_kinds_for_weapon(count: int) -> Array:
 			# Exactly one CAST orb per fight, regardless of size — multiple would
 			# just mean never needing to wait for one, which flattens the whole
 			# "queue runes, then commit" rhythm the buffer's built around. The
-			# rest are an even mix of the four runes.
+			# rest are an even mix of the three runes.
 			var out := _random_kinds(maxi(0, count - 1),
-					[Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.LIGHTNING, Orb.Kind.ARCANE],
-					[1.0, 1.0, 1.0, 1.0])
+					[Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH],
+					[1.0, 1.0, 1.0])
 			out.append(Orb.Kind.CAST)
 			out.shuffle()
 			return out
@@ -351,10 +353,11 @@ func _handle_sword_hit(orb: Orb) -> void:
 ## ARROW orbs bank damage without hitting anything; the next SHOOT orb
 ## releases the whole bank at once (and does nothing if nothing's banked —
 ## you still touched it, so it still respawns, just with no effect this time).
+## Collecting an arrow doesn't bounce the player like a real hit does — it's
+## just a pickup (see Orb.Kind's doc comment), not combat feedback.
 func _handle_bow_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.ARROW:
 		_arrow_stack += Game.stats.damage()
-		player.bounce_off_orb(1)
 		_respawn_orb_later(orb)
 		return
 	if _arrow_stack <= 0.0:
@@ -366,18 +369,38 @@ func _handle_bow_hit(orb: Orb) -> void:
 	_arrow_stack = 0.0
 	_resolve_hit(orb, dmg, combo)
 
-## A rune (FIRE/ICE/LIGHTNING/ARCANE) just queues itself, no damage dealt yet
-## — see _rune_buffer. CAST is the only orb that actually resolves anything.
+## A rune (FIRE/ICE/EARTH) just queues itself, no damage dealt and no bounce
+## — it's a pickup, not combat feedback (see Orb.Kind's doc comment). CAST is
+## the only orb that actually resolves anything. Queuing past STAFF_BUFFER_MAX
+## doesn't quietly drop the oldest rune anymore — it overloads instead, see
+## _overload_staff().
 func _handle_staff_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.CAST:
 		_cast_rune_buffer(orb)
 		return
+	if _rune_buffer.size() >= STAFF_BUFFER_MAX:
+		_overload_staff(orb)
+		return
 	_rune_buffer.append(orb.kind)
-	if _rune_buffer.size() > STAFF_BUFFER_MAX:
-		_rune_buffer.pop_front()
 	_rune_buffer_t = STAFF_BUFFER_TIMEOUT
 	_update_buffer_label()
-	player.bounce_off_orb(1)
+	_respawn_orb_later(orb)
+
+## Queuing a 6th rune overloads the staff: the whole buffer dumps itself as
+## self-inflicted damage (pierces the shield, same as a real hit that
+## ignores it — see Player.hit()) with a tri-color burst (one per element,
+## matching Orb.KIND_COLORS so it's visually the same "fire/ice/earth" the
+## runes themselves use), plus a brief forced ragdoll as the "that was a
+## mistake" beat. The orb that triggered it still respawns normally.
+func _overload_staff(orb: Orb) -> void:
+	_rune_buffer.clear()
+	_rune_buffer_t = 0.0
+	_update_buffer_label()
+	for element in [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]:
+		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[element][0], 1.3)
+	player.hit(STAFF_OVERLOAD_DAMAGE, true)
+	if not player.dead:
+		player.machine.transition_to(&"Ragdoll")
 	_respawn_orb_later(orb)
 
 ## Looks up whatever's queued as a spell (see _lookup_spell()), applies its
@@ -405,8 +428,7 @@ func _apply_element_status(element: Orb.Kind) -> void:
 		match element:
 			Orb.Kind.FIRE: e.apply_burn(STAFF_BURN_DPS, STAFF_STATUS_TIME)
 			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_STATUS_TIME)
-			Orb.Kind.LIGHTNING: e.apply_stun(STAFF_STUN_TIME)
-			# ARCANE: no status, just damage — see _build_spell_table()
+			Orb.Kind.EARTH: e.apply_stun(STAFF_STUN_TIME)
 
 ## Named combinations (order doesn't matter — a multiset lookup, so Fire+Ice
 ## and Ice+Fire are the same spell), each a {mult, statuses} pair: `mult`
@@ -420,26 +442,21 @@ func _apply_element_status(element: Orb.Kind) -> void:
 ## good as a combo you've actually learned — see _lookup_spell().
 func _build_spell_table() -> void:
 	_spell_table = {
-		_rune_key([Orb.Kind.ARCANE]): {"mult": 1.6, "statuses": []},
 		_rune_key([Orb.Kind.FIRE, Orb.Kind.FIRE]): {"mult": 2.4, "statuses": [Orb.Kind.FIRE]},
 		_rune_key([Orb.Kind.ICE, Orb.Kind.ICE]): {"mult": 1.8, "statuses": [Orb.Kind.ICE]},
-		_rune_key([Orb.Kind.LIGHTNING, Orb.Kind.LIGHTNING]): {"mult": 2.0, "statuses": [Orb.Kind.LIGHTNING]},
-		_rune_key([Orb.Kind.ARCANE, Orb.Kind.ARCANE]): {"mult": 2.8, "statuses": []},
+		_rune_key([Orb.Kind.EARTH, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.EARTH]},
 		_rune_key([Orb.Kind.FIRE, Orb.Kind.ICE]): {"mult": 2.0, "statuses": [Orb.Kind.FIRE, Orb.Kind.ICE]},
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.LIGHTNING]): {"mult": 2.0, "statuses": [Orb.Kind.FIRE, Orb.Kind.LIGHTNING]},
-		_rune_key([Orb.Kind.ICE, Orb.Kind.LIGHTNING]): {"mult": 2.0, "statuses": [Orb.Kind.ICE, Orb.Kind.LIGHTNING]},
-		_rune_key([Orb.Kind.ARCANE, Orb.Kind.FIRE]): {"mult": 2.2, "statuses": [Orb.Kind.FIRE]},
-		_rune_key([Orb.Kind.ARCANE, Orb.Kind.ICE]): {"mult": 2.2, "statuses": [Orb.Kind.ICE]},
-		_rune_key([Orb.Kind.ARCANE, Orb.Kind.LIGHTNING]): {"mult": 2.2, "statuses": [Orb.Kind.LIGHTNING]},
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.LIGHTNING]): {"mult": 3.5,
-				"statuses": [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.LIGHTNING]},
+		_rune_key([Orb.Kind.FIRE, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.FIRE, Orb.Kind.EARTH]},
+		_rune_key([Orb.Kind.ICE, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.ICE, Orb.Kind.EARTH]},
+		_rune_key([Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]): {"mult": 3.5,
+				"statuses": [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]},
 	}
 
 ## `buffer`'s spell, from the table above if it's a combination that's been
 ## given one, otherwise a sensible default so casting anything is never
-## wasted: one hit per queued rune's own worth of damage, with every
-## non-arcane element's status applied — i.e. exactly what a single Fire/
-## Ice/Lightning rune already does on its own below, just added up.
+## wasted: one hit per queued rune's own worth of damage, with every element's
+## status applied — i.e. exactly what a single Fire/Ice/Earth rune already
+## does on its own below, just added up.
 func _lookup_spell(buffer: Array) -> Dictionary:
 	var key := _rune_key(buffer)
 	if _spell_table.has(key):
@@ -449,7 +466,7 @@ func _lookup_spell(buffer: Array) -> Dictionary:
 func _fallback_spell(buffer: Array) -> Dictionary:
 	var statuses: Array = []
 	for rune in buffer:
-		if rune != Orb.Kind.ARCANE and rune not in statuses:
+		if rune not in statuses:
 			statuses.append(rune)
 	return {"mult": float(buffer.size()), "statuses": statuses}
 
@@ -478,8 +495,7 @@ func _rune_name(k: Orb.Kind) -> String:
 	match k:
 		Orb.Kind.FIRE: return "Fire"
 		Orb.Kind.ICE: return "Ice"
-		Orb.Kind.LIGHTNING: return "Lightning"
-		Orb.Kind.ARCANE: return "Arcane"
+		Orb.Kind.EARTH: return "Earth"
 		_: return "?"
 
 ## The part every damage-dealing orb hit shares, regardless of which weapon
