@@ -55,17 +55,11 @@ func _refresh_slot(slot_name: StringName, mesh_path: String, material: Material)
 	var packed: PackedScene = load(mesh_path)
 	var instance := packed.instantiate()
 	slot.add_child(instance)
-	if Engine.is_editor_hint():
-		var edited_root := get_tree().edited_scene_root
-		if edited_root:
-			_own_recursive(instance, edited_root)
+	# Deliberately NOT setting owner: this child is rebuilt fresh every time
+	# the scene loads, so it must never be serialized into the .tscn file.
+	# Owning it would bake it in, and the next load would add another one
+	# on top, colliding with the saved copy (trunk_1, trunk_12, trunk_13, ...).
 	_apply_material(slot_name, material)
-
-
-func _own_recursive(node: Node, owner: Node) -> void:
-	node.owner = owner
-	for child in node.get_children():
-		_own_recursive(child, owner)
 
 
 func _apply_material(slot_name: StringName, material: Material) -> void:
