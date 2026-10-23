@@ -4,10 +4,13 @@ extends PlayerState
 ## roll_stop_speed (or the button is released after the minimum time) you stand up.
 
 var _elapsed := 0.0
+var _finished_t := 0.0   ## how long the roll has wanted to end but couldn't stand up —
+                          ## see the can_stand() escape hatch at the bottom of physics_update()
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_elapsed = 0.0
+	_finished_t = 0.0
 	p.set_crouching(true)
 	# A deliberately-triggered move always takes over immediately, regardless
 	# of whatever reaction pose (a wall-bounce tumble, a side flip, ...) might
@@ -85,5 +88,15 @@ func physics_update(delta: float) -> void:
 	_elapsed += delta
 	var held := Input.is_action_pressed(&"roll_dive")
 	var finished := spd < c.roll_stop_speed or (_elapsed >= c.roll_time and not held)
-	if finished and p.can_stand():
+	# Normally gated on can_stand() so you don't pop up through a low ceiling.
+	# But rolling onto the far side of a slope/valley can pin you somewhere
+	# with headroom too tight to ever pass that check — at that point the roll
+	# has already stopped (finished stays true forever) with nothing else in
+	# this state able to change it, which would otherwise soft-lock you
+	# crouch-rolling in place forever. Standing up anyway after a short grace
+	# period is the safe fallback: GroundState/CrouchState's own enter() only
+	# uncrouches if can_stand() passes there too, so a genuinely tight spot
+	# just leaves you crouched (fully controllable) instead of stuck rolling.
+	_finished_t = _finished_t + delta if finished else 0.0
+	if finished and (p.can_stand() or _finished_t >= 0.3):
 		machine.transition_to(&"Crouch" if Input.is_action_pressed(&"crouch_pound") else &"Ground")

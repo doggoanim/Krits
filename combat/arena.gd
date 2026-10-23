@@ -27,6 +27,12 @@ const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; Camera
                                  ## barrier during a fight
 const WALL_HEIGHT := 90.0       ## tall enough that there's no realistic camera angle
                                  ## (even zoomed out mid-fight) that sees over it
+const WALL_DEPTH_BELOW_GROUND := 20.0   ## how far the wall's COLLIDER (only) extends below
+                                 ## the ground height sampled at its segment's center —
+                                 ## the terrain can dip within a segment's own span even
+                                 ## though only its center point is raycast, which left a
+                                 ## gap a player could slide/roll under at the segment's
+                                 ## edges; purely underground so it's never visible
 const WALL_SEGMENTS := 28       ## faceted approximation of a circle
 const ORBS_BASE := 5
 const ORBS_PER_ENEMY := 2
@@ -317,7 +323,7 @@ func _build_barrier() -> void:
 
 		var wall_pos := local_pos
 		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
-		_wall_meshes.append(_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y))
+		_wall_meshes.append(_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y, WALL_DEPTH_BELOW_GROUND))
 
 		var ring_pos := local_pos
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
@@ -327,15 +333,20 @@ func _build_barrier() -> void:
 ## not a world-space coordinate — callers must not fold in global_position.
 ## Returns the visual mesh specifically (not the StaticBody3D) so play_intro()
 ## can animate it without touching the collider at all.
-func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false, rot_y := 0.0) -> MeshInstance3D:
+## `collider_extra_depth` stretches just the collision shape straight down by
+## that much (see WALL_DEPTH_BELOW_GROUND) without changing the visible mesh
+## or its size/position at all — it's buried underground, so there's nothing
+## to see either way.
+func _slab(pos: Vector3, size: Vector3, col: Color, layer: int, emit: float, translucent := false, rot_y := 0.0, collider_extra_depth := 0.0) -> MeshInstance3D:
 	var body := StaticBody3D.new()
 	body.collision_layer = layer
 	body.position = pos
 	body.rotation.y = rot_y
 	var cs := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
-	shape.size = size
+	shape.size = size + Vector3(0.0, collider_extra_depth, 0.0)
 	cs.shape = shape
+	cs.position.y = -collider_extra_depth * 0.5   # grow only downward; the top stays put
 	body.add_child(cs)
 	var mesh := _mesh(size, col, emit, translucent)
 	body.add_child(mesh)
