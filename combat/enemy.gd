@@ -26,6 +26,18 @@ var _special_t := 0.0          ## countdown to the next leap/burst-shoot attack
 var _busy_with_special := false ## true while a leap or burst-shoot is actually playing out
 var _puddle_t := 0.0
 
+## ---- status effects (Staff's elemental orbs — see Orb.Kind/Arena) -------
+## Each is independent and just ticks down on its own; nothing here stops
+## _move()/_shoot() except _stun_t (checked in _physics_process()), and none
+## of them interrupt a leap/burst-shoot already in progress (that's an
+## in-flight coroutine — safely cancelling it mid-arc isn't worth the
+## complexity this is meant to add, a battlefield debuff, not a hard stop).
+var _speed_mult := 1.0
+var _slow_t := 0.0
+var _stun_t := 0.0
+var _burn_dps := 0.0
+var _burn_t := 0.0
+
 const FACE_TURN_SPEED := 8.0   ## rad/s, how fast an enemy turns to face its movement
 const SPHERE_OUTLINE_RATIO := 0.08   ## placeholder-sphere outline thickness, as a fraction of its radius
 
@@ -64,7 +76,10 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _dying:
 		return
-	if not _busy_with_special:
+	_update_status_effects(delta)
+	if _dying:
+		return   # a burn tick above can finish it off mid-frame
+	if _stun_t <= 0.0 and not _busy_with_special:
 		_move(delta)
 		_shoot(delta)
 	_update_puddle_trail(delta)
@@ -94,7 +109,7 @@ func _move(delta: float) -> void:
 			_visual.play_idle()
 		return
 	var dir := flat.normalized()
-	global_position += dir * data.move_speed * delta
+	global_position += dir * data.move_speed * _speed_mult * delta
 	_face(dir, delta)
 	if _visual:
 		_visual.play_move()
@@ -128,6 +143,36 @@ func _shoot(delta: float) -> void:
 			_timers[i] = p.interval
 			p.fire(global_position, target.global_position, arena, _steps[i])
 			_steps[i] += 1
+
+## Slows movement to `mult` of normal for `duration` — refreshes rather than
+## stacking (a second Ice hit while already slowed just extends it, doesn't
+## compound the multiplier).
+func apply_slow(mult: float, duration: float) -> void:
+	_speed_mult = mult
+	_slow_t = duration
+
+## Stops _move()/_shoot() entirely for `duration` — takes the longer of the
+## current and new duration rather than stacking, same reasoning as slow.
+func apply_stun(duration: float) -> void:
+	_stun_t = maxf(_stun_t, duration)
+
+## Ticks `dps` damage per second for `duration`, refreshing like slow (a
+## second Fire hit resets the burn's clock rather than adding a second,
+## independent burn on top).
+func apply_burn(dps: float, duration: float) -> void:
+	_burn_dps = dps
+	_burn_t = duration
+
+func _update_status_effects(delta: float) -> void:
+	if _slow_t > 0.0:
+		_slow_t -= delta
+		if _slow_t <= 0.0:
+			_speed_mult = 1.0
+	if _stun_t > 0.0:
+		_stun_t -= delta
+	if _burn_t > 0.0:
+		_burn_t -= delta
+		take_damage(_burn_dps * delta)
 
 func take_damage(amount: float) -> void:
 	hp -= amount

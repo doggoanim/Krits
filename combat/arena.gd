@@ -9,6 +9,9 @@ extends Node3D
 ## side still using it; play_intro() tried that too but reverted it, see its
 ## own doc comment for why). Spawns orbs (falling in from overhead, see
 ## Orb.drop_in()) + enemies, tracks the combo and resolves victory/defeat.
+## What touching an orb actually does depends on the equipped weapon (see
+## _on_orb_hit()/_spawn_orbs()) — Sword's plain combo hits, Bow's stack-then-
+## release arrow/shoot pair, Staff's elemental reactions/status effects.
 ## Bullets are parented here so they vanish with the arena. The
 ## EncounterManager owns its lifetime (it frees the arena once the barrier
 ## has dissolved away).
@@ -40,6 +43,18 @@ const ORB_HEIGHT := Vector2(1.8, 4.4)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
 const INTRO_DELAY := 1.0       ## enemies hold fire for this long after the reveal
+
+## ---- weapon-specific orb behavior (see _on_orb_hit()/_spawn_orbs()) ----
+const BOW_ARROW_WEIGHT := 0.6   ## vs. BOW_SHOOT_WEIGHT when randomly picking each orb's
+const BOW_SHOOT_WEIGHT := 0.4   ## kind — weighted more toward arrows since a shoot orb
+                                 ## spends the whole stack in one go
+const STAFF_REACTION_MULT := 2.0   ## bonus multiplier for hitting a DIFFERENT element
+                                    ## right after the last one (see _handle_staff_hit())
+const STAFF_BURN_DPS := 3.0
+const STAFF_BURN_TIME := 3.0
+const STAFF_SLOW_MULT := 0.5
+const STAFF_SLOW_TIME := 3.0
+const STAFF_STUN_TIME := 1.0
 const GROUND_PROBE_UP := 6.0    ## how far above a candidate point the ground raycast starts
 const GROUND_PROBE_DOWN := 50.0 ## how far down it's willing to look
 const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this above/below the
@@ -63,6 +78,9 @@ var player: Player
 var enemies: Array[Enemy] = []
 var orbs: Array[Orb] = []
 var gold_reward := 0
+var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released by the next SHOOT orb
+var _last_staff_element: Orb.Kind = Orb.Kind.PLAIN   ## Staff only — PLAIN doubles as "none yet"
+                                                       ## since Staff itself never spawns a PLAIN orb
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
 var _over := false
@@ -195,14 +213,55 @@ func _spawn_enemy(d: EnemyData) -> void:
 ## _free_orb_position()), then drops them all in with a per-orb stagger.
 func _spawn_orbs(count: int) -> void:
 	var targets: Array[Vector3] = []
+	var kinds := _orb_kinds_for_weapon(count)
 	for i in count:
 		var o := Orb.new()
+		o.kind = kinds[i]   # before add_child() — _ready()'s _refresh() needs it to pick the right color
 		add_child(o)
 		var pos := _free_orb_position(targets)
 		targets.append(pos)
 		o.hit.connect(_on_orb_hit)
 		orbs.append(o)
 		o.drop_in(pos, ORB_DROP_HEIGHT, ORB_DROP_TIME, i * ORB_DROP_STAGGER)
+
+## What kind each of `count` freshly-spawned orbs should be, picked purely by
+## the currently equipped weapon — Sword spawns all plain orbs (today's
+## original behavior), Bow spawns a weighted mix of arrow/shoot, Staff an
+## even mix of the three elements. A relocated orb (see _on_orb_hit()'s
+## respawn scheduling) keeps whatever kind it already had rather than
+## re-rolling — simpler, and it means the overall mix this picks at the
+## start of the fight roughly holds for its whole duration.
+func _orb_kinds_for_weapon(count: int) -> Array:
+	match _equipped_weapon_kind():
+		WeaponData.Kind.BOW:
+			return _random_kinds(count, [Orb.Kind.ARROW, Orb.Kind.SHOOT],
+					[BOW_ARROW_WEIGHT, BOW_SHOOT_WEIGHT])
+		WeaponData.Kind.STAFF:
+			return _random_kinds(count, [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.LIGHTNING],
+					[1.0, 1.0, 1.0])
+		_:
+			var out: Array = []
+			out.resize(count)
+			out.fill(Orb.Kind.PLAIN)
+			return out
+
+func _equipped_weapon_kind() -> WeaponData.Kind:
+	var w := Game.stats.equipped_weapon
+	return w.kind if w else WeaponData.Kind.SWORD
+
+func _random_kinds(count: int, kinds: Array, weights: Array) -> Array:
+	var total := 0.0
+	for w in weights: total += w
+	var out: Array = []
+	for _i in count:
+		var roll := randf() * total
+		var acc := 0.0
+		for i in kinds.size():
+			acc += weights[i]
+			if roll <= acc:
+				out.append(kinds[i])
+				break
+	return out
 
 ## A ground spot kept away from `existing` positions (best-candidate sampling).
 ## Callers pass whatever set of positions should count as "already taken" —
@@ -234,15 +293,74 @@ func ground_height(pos: Vector3) -> float:
 
 # ---------------------------------------------------------------- combat
 
+## Dispatches purely on the currently equipped weapon — each handler decides
+## for itself what this particular orb touch does (deal damage, bank it,
+## nothing at all) and, if it actually dealt damage, calls _resolve_hit() for
+## the bookkeeping every damaging hit shares.
 func _on_orb_hit(orb: Orb) -> void:
 	if _over:
 		return
+	match _equipped_weapon_kind():
+		WeaponData.Kind.BOW: _handle_bow_hit(orb)
+		WeaponData.Kind.STAFF: _handle_staff_hit(orb)
+		_: _handle_sword_hit(orb)
+
+## Today's original behavior, unchanged: every hit deals damage, combo keeps
+## climbing (and scaling damage up with it) for as long as you keep landing them.
+func _handle_sword_hit(orb: Orb) -> void:
 	combo += 1
 	var dmg := Game.stats.damage() * (1.0 + COMBO_BONUS * (combo - 1))
+	_resolve_hit(orb, dmg, combo)
+
+## ARROW orbs bank damage without hitting anything; the next SHOOT orb
+## releases the whole bank at once (and does nothing if nothing's banked —
+## you still touched it, so it still respawns, just with no effect this time).
+func _handle_bow_hit(orb: Orb) -> void:
+	if orb.kind == Orb.Kind.ARROW:
+		_arrow_stack += Game.stats.damage()
+		player.bounce_off_orb(1)
+		_respawn_orb_later(orb)
+		return
+	if _arrow_stack <= 0.0:
+		player.bounce_off_orb(1)   # a whiff — nothing was stacked to release
+		_respawn_orb_later(orb)
+		return
+	combo += 1
+	var dmg := _arrow_stack
+	_arrow_stack = 0.0
+	_resolve_hit(orb, dmg, combo)
+
+## Every element hit deals damage and applies its own status effect
+## regardless; hitting a DIFFERENT element than the last one additionally
+## triggers a bonus-damage "reaction". Tracking just the last element (not a
+## full pairwise reaction table) keeps this simple while still rewarding
+## reading the orb layout and alternating instead of mashing one element.
+func _handle_staff_hit(orb: Orb) -> void:
+	combo += 1
+	var dmg := Game.stats.damage()
+	if _last_staff_element != Orb.Kind.PLAIN and _last_staff_element != orb.kind:
+		dmg *= STAFF_REACTION_MULT
+	_last_staff_element = orb.kind
+	_apply_element_status(orb.kind)
+	_resolve_hit(orb, dmg, combo)
+
+func _apply_element_status(element: Orb.Kind) -> void:
+	for e in enemies:
+		if not is_instance_valid(e):
+			continue
+		match element:
+			Orb.Kind.FIRE: e.apply_burn(STAFF_BURN_DPS, STAFF_BURN_TIME)
+			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_SLOW_TIME)
+			Orb.Kind.LIGHTNING: e.apply_stun(STAFF_STUN_TIME)
+
+## The part every damage-dealing orb hit shares, regardless of which weapon
+## got it there: hit every enemy, bounce the player, fire the usual combo/
+## orb_hit events, and schedule the orb's respawn.
+func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int) -> void:
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
 			e.take_damage(dmg)   # same damage to every enemy
-	player.bounce_off_orb(combo)
+	player.bounce_off_orb(combo_for_feedback)
 	if _over:
 		# That damage just finished off the last enemy — take_damage()'s
 		# defeat chain ran synchronously inside the loop above and already
@@ -252,8 +370,11 @@ func _on_orb_hit(orb: Orb) -> void:
 		# there's no later hit or landing left to clear it again — it would
 		# just sit there on screen. Skip it instead.
 		return
-	Events.orb_hit.emit(combo, dmg)
-	Events.combo_changed.emit(combo)
+	Events.orb_hit.emit(combo_for_feedback, dmg)
+	Events.combo_changed.emit(combo_for_feedback)
+	_respawn_orb_later(orb)
+
+func _respawn_orb_later(orb: Orb) -> void:
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
 		if is_instance_valid(orb) and not _over:
 			var taken: Array[Vector3] = []

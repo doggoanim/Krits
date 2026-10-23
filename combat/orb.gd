@@ -8,6 +8,36 @@ extends Area3D
 
 signal hit(orb: Orb)
 
+## What touching this orb does, set by Arena when it's spawned — purely a
+## label the orb carries; it has no behavior of its own beyond picking its
+## color (see _refresh()). Arena._on_orb_hit() is what actually interprets
+## `kind` differently per equipped weapon:
+## - PLAIN: the only kind Sword ever spawns — a normal combo hit, today's
+##   behavior, unchanged.
+## - ARROW/SHOOT: Bow's pair — touching an arrow orb stacks damage without
+##   hitting anything; touching a shoot orb releases the whole stack at once
+##   (and does nothing if nothing's stacked).
+## - FIRE/ICE/LIGHTNING: Staff's three elements — hitting the same element
+##   twice in a row is a normal hit, hitting a *different* one right after is
+##   a bonus-damage "reaction". Each element also applies its own status
+##   effect on every hit regardless (see Enemy.apply_burn()/apply_slow()/
+##   apply_stun()): fire burns, ice slows, lightning stuns.
+enum Kind { PLAIN, ARROW, SHOOT, FIRE, ICE, LIGHTNING }
+
+## Core/ring color per kind, active state first in each pair — see _refresh().
+## Only PLAIN's pair matches the original fixed ACTIVE_CORE_COLOR/
+## ACTIVE_RING_COLOR this replaces.
+const KIND_COLORS := {
+	Kind.PLAIN: [Color(0.2, 0.9, 1.0), Color(0.85, 1.0, 1.0)],
+	Kind.ARROW: [Color(0.35, 0.9, 0.35), Color(0.85, 1.0, 0.85)],
+	Kind.SHOOT: [Color(1.0, 0.6, 0.15), Color(1.0, 0.9, 0.7)],
+	Kind.FIRE: [Color(1.0, 0.35, 0.15), Color(1.0, 0.8, 0.6)],
+	Kind.ICE: [Color(0.4, 0.8, 1.0), Color(0.85, 0.97, 1.0)],
+	Kind.LIGHTNING: [Color(0.95, 0.9, 0.25), Color(1.0, 1.0, 0.85)],
+}
+
+var kind: Kind = Kind.PLAIN
+
 const CORE_RADIUS := 0.4
 const RING_INNER_RADIUS := 0.5
 const RING_OUTER_RADIUS := 0.62
@@ -19,8 +49,6 @@ const PULSE_SPEED := 3.1       ## faster than the bob so the two don't lock in s
 const PULSE_AMOUNT := 0.06     ## fraction of scale the core breathes by
 const RING_SPIN_SPEED := 1.6   ## rad/s while active
 const RING_SPIN_SPEED_IDLE := 0.4   ## slow idle spin while waiting to respawn
-const ACTIVE_CORE_COLOR := Color(0.2, 0.9, 1.0)
-const ACTIVE_RING_COLOR := Color(0.85, 1.0, 1.0)
 const INACTIVE_COLOR := Color(0.25, 0.3, 0.35, 0.3)
 
 var active := true
@@ -111,7 +139,7 @@ func break_apart() -> void:
 func _break() -> void:
 	active = false
 	_refresh()
-	VFX.shatter(get_parent() as Node3D, global_position, ACTIVE_CORE_COLOR)
+	VFX.shatter(get_parent() as Node3D, global_position, KIND_COLORS[kind][0])
 
 ## Starts high above `target` and falls down to it over `duration` — the
 ## arena's opening reveal (see Arena.play_intro()). `delay` staggers several
@@ -131,9 +159,10 @@ func relocate(pos: Vector3) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	_core_mat.albedo_color = ACTIVE_CORE_COLOR if active else INACTIVE_COLOR
+	var colors: Array = KIND_COLORS[kind]
+	_core_mat.albedo_color = colors[0] if active else INACTIVE_COLOR
 	_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
-	_ring_mat.albedo_color = ACTIVE_RING_COLOR if active else INACTIVE_COLOR
+	_ring_mat.albedo_color = colors[1] if active else INACTIVE_COLOR
 	_ring_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	if _outline_mat:
 		_outline_mat.albedo_color.a = 1.0 if active else INACTIVE_COLOR.a

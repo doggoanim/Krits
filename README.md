@@ -46,6 +46,12 @@ toward the new direction.
 			 flag), SlimePuddle (damage/slow/no-jump ground hazard). EnemyData also supports an optional
 			 telegraphed leap attack and a randomized burst-shoot volley (see EnemyLibrary.green_slime for
 			 an enemy using both, plus a puddle trail) on top of the plain generic bullet patterns.
+			 What touching an Orb does depends on the equipped WeaponData.kind (Arena._on_orb_hit()):
+			 Sword is the plain combo hit above; Bow spawns ARROW/SHOOT orbs (arrows bank damage,
+			 a shoot orb releases the whole bank, a shoot with nothing banked whiffs); Staff spawns
+			 FIRE/ICE/LIGHTNING orbs (each applies its own status effect via Enemy.apply_burn()/
+			 apply_slow()/apply_stun(); hitting a different element than the last one also triggers
+			 a bonus-damage "reaction").
 - stats/     PlayerStats (HP/Shield/Damage, entirely equipment-driven — see equipment/ — plus
 			 gold and shield recharge; no levels)
 - equipment/ EquipmentData (base: id/display_name/price) + ArmorData (HP), ShieldData (Shield),
