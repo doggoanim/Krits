@@ -130,8 +130,18 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	# isn't itself climbable — a perpendicular wall meeting this one at a
 	# corner, a pillar, a ledge. Same "nothing found -> don't move" fallback
 	# as running out of wall entirely.
+	#
+	# Checked at chest height, not at _attach_point's own feet-level height:
+	# _wall_body only excludes the wall currently being climbed, not the
+	# ground it's standing in — a sweep right down at the feet (exactly
+	# where you are the instant you grab a wall by walking into it, still
+	# planted on the floor) constantly clipped the floor's own collision and
+	# read as "blocked", which stopped every move, climbing or strafing,
+	# right from the first frame. Same chest-height offset find_climbable_wall()
+	# already probes at, for the same reason.
+	var chest := Vector3.UP * (Player.STAND_HEIGHT * 0.5)
 	var tentative_body_pos := tentative + _normal * c.wall_hug_distance
-	if not p.is_path_clear(p.global_position, tentative_body_pos, _wall_body):
+	if not p.is_path_clear(p.global_position + chest, tentative_body_pos + chest, _wall_body):
 		return
 
 	# Checked wall_climb_head_clearance above `tentative`, not at the
