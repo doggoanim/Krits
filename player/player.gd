@@ -323,16 +323,29 @@ func _is_wall_normal(normal: Vector3) -> bool:
 ## collision shares layer 1 with everything else, so without excluding it
 ## specifically, hugging close to its surface would constantly read as
 ## blocked by the very wall being climbed.
+##
+## A hit on ANOTHER climbable wall doesn't count as blocked either: at an
+## inside (concave) corner, moving tangentially along the current wall runs
+## straight into the adjacent wall's own solid collision before
+## probe_wall_near() ever gets a chance to discover and wrap onto it — since
+## that's exactly what WallClimbState's corner-wrap is supposed to do, not
+## something it should be stopped from reaching, only a hit on something
+## that ISN'T climbable (a pillar, a prop, a genuine dead end) is treated as
+## a real obstruction.
 func is_path_clear(from: Vector3, to: Vector3, ignore_body: Variant) -> bool:
 	if ignore_body is CollisionObject3D:
 		_obstruction_cast.add_exception(ignore_body)
 	_obstruction_cast.global_position = from
 	_obstruction_cast.target_position = to - from
 	_obstruction_cast.force_shapecast_update()
-	var clear := not _obstruction_cast.is_colliding()
+	var blocked := _obstruction_cast.is_colliding()
+	if blocked:
+		var collider := _obstruction_cast.get_collider(0)
+		if collider is CollisionObject3D and (collider.collision_layer & CLIMBABLE_MASK) != 0:
+			blocked = false
 	if ignore_body is CollisionObject3D:
 		_obstruction_cast.remove_exception(ignore_body)
-	return clear
+	return not blocked
 
 ## Ground height straight down from `from`, within `max_dist` — same
 ## world-geometry layer (1) Arena.ground_height() probes, used by
