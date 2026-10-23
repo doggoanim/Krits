@@ -21,7 +21,7 @@ size = Vector3(120, 1, 120)
 size = Vector3(4, 0.05, 44)
 
 [sub_resource type="StandardMaterial3D" id="Mat_DirtPath"]
-albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
+albedo_color = Color(0.99872035, 0.9740259, 0.9471552, 1)
 albedo_texture = ExtResource("1_o4qy2")
 
 [sub_resource type="BoxMesh" id="Mesh_PathNS"]
