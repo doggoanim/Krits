@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="PackedScene" path="res://world/tree.tscn" id="1_tree"]
+[ext_resource type="PackedScene" uid="uid://dclrmir6w3jok" path="res://world/tree.tscn" id="1_tree"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
