@@ -1,15 +1,18 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
+[ext_resource type="Texture2D" uid="uid://8rimybdfgoy2" path="res://assets/textures/grass.jpg" id="1_epjlq"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
+[ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
+[ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="Script" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 
 [sub_resource type="BoxShape3D" id="Shape_Ground"]
 size = Vector3(120, 1, 120)
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
+albedo_texture = ExtResource("1_epjlq")
 
 [sub_resource type="BoxMesh" id="Mesh_Ground"]
 size = Vector3(120, 1, 120)
@@ -19,6 +22,7 @@ size = Vector3(4, 0.05, 44)
 
 [sub_resource type="StandardMaterial3D" id="Mat_DirtPath"]
 albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
+albedo_texture = ExtResource("1_o4qy2")
 
 [sub_resource type="BoxMesh" id="Mesh_PathNS"]
 size = Vector3(4, 0.05, 44)
@@ -116,6 +120,7 @@ size = Vector3(4, 1.5, 10)
 
 [sub_resource type="StandardMaterial3D" id="Mat_HillStep"]
 albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
+albedo_texture = ExtResource("1_o4qy2")
 
 [sub_resource type="BoxMesh" id="Mesh_Step1"]
 size = Vector3(4, 1.5, 10)
@@ -137,6 +142,7 @@ size = Vector3(10, 1, 10)
 
 [sub_resource type="StandardMaterial3D" id="Mat_HillTop"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
+albedo_texture = ExtResource("1_epjlq")
 
 [sub_resource type="BoxMesh" id="Mesh_HillTop"]
 size = Vector3(10, 1, 10)
@@ -289,6 +295,7 @@ collision_layer = 129
 shape = SubResource("Shape_Ground")
 
 [node name="Mesh" type="MeshInstance3D" parent="Ground" unique_id=2028200518]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
 material_override = SubResource("Mat_Grass")
 mesh = SubResource("Mesh_Ground")
 
