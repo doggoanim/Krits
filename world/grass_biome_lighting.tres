@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://cxq5uev4mffcc"]
 
 [ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="1_v032n"]
-[ext_resource type="Texture2D" path="res://assets/luts/arri_lut.png" id="2_lut"]
+[ext_resource type="CompressedTexture3D" uid="uid://b7ywf065f6aoe" path="res://assets/luts/sunset_lut.png" id="2_lut"]
 
 [resource]
 script = ExtResource("1_v032n")
