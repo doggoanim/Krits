@@ -49,16 +49,19 @@ toward the new direction.
 			 What touching an Orb does depends on the equipped WeaponData.kind (Arena._on_orb_hit()):
 			 Sword is the plain combo hit above; Bow spawns ARROW/SHOOT orbs (arrows bank damage,
 			 a shoot orb releases the whole bank, a shoot with nothing banked whiffs); Staff spawns
-			 FIRE/ICE/LIGHTNING orbs (each applies its own status effect via Enemy.apply_burn()/
-			 apply_slow()/apply_stun(); hitting a different element than the last one also triggers
-			 a bonus-damage "reaction").
+			 FIRE/ICE/LIGHTNING/ARCANE rune orbs (touching one just queues it, no damage) plus one
+			 CAST orb per fight — touching CAST looks up whatever's queued against a named
+			 spell table (Arena._build_spell_table()/_lookup_spell(), Magicka-style), applying a
+			 damage multiplier plus each queued element's own status effect via
+			 Enemy.apply_burn()/apply_slow()/apply_stun(); an unlisted combination still falls
+			 back to a sensible default (_fallback_spell()) so no cast is ever wasted.
 - stats/     PlayerStats (HP/Shield/Damage, entirely equipment-driven — see equipment/ — plus
 			 gold and shield recharge; no levels)
 - equipment/ EquipmentData (base: id/display_name/price) + ArmorData (HP), ShieldData (Shield),
-			 WeaponData (Damage, plus a `kind` of Sword/Bow/Staff — only Sword has combat
-			 behavior wired up so far), EquipmentLibrary (the catalog, same static-builder
-			 pattern as EnemyLibrary). ShopMenu (ui/) lists/buys/equips from it; ShopKeeper
-			 (world/) is the in-world trigger that opens it.
+			 WeaponData (Damage, plus a `kind` of Sword/Bow/Staff — each with its own orb
+			 behavior in Arena, see combat/ above), EquipmentLibrary (the catalog, same
+			 static-builder pattern as EnemyLibrary). ShopMenu (ui/) lists/buys/equips from it;
+			 ShopKeeper (world/) is the in-world trigger that opens it.
 - world/     Interactable (shared range/prompt/trigger base — floats a prompt while the player's in
 			 range and able to use it, calls _interact() on press), NPC and ShopKeeper both extend it
 			 (talk vs. open ShopMenu). WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint,

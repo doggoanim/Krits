@@ -17,12 +17,15 @@ signal hit(orb: Orb)
 ## - ARROW/SHOOT: Bow's pair — touching an arrow orb stacks damage without
 ##   hitting anything; touching a shoot orb releases the whole stack at once
 ##   (and does nothing if nothing's stacked).
-## - FIRE/ICE/LIGHTNING: Staff's three elements — hitting the same element
-##   twice in a row is a normal hit, hitting a *different* one right after is
-##   a bonus-damage "reaction". Each element also applies its own status
-##   effect on every hit regardless (see Enemy.apply_burn()/apply_slow()/
-##   apply_stun()): fire burns, ice slows, lightning stuns.
-enum Kind { PLAIN, ARROW, SHOOT, FIRE, ICE, LIGHTNING }
+## - FIRE/ICE/LIGHTNING/ARCANE: Staff's four runes — touching one queues it
+##   into Arena's rune buffer without hitting anything. CAST releases
+##   whatever's queued as a spell looked up from that combination (see
+##   Arena._lookup_spell()) — a single rune still does something on its own,
+##   a learned combination does something better. Each element's own rune
+##   also carries its usual status effect (fire burns, ice slows, lightning
+##   stuns — see Enemy.apply_burn()/apply_slow()/apply_stun()) when a spell
+##   that includes it is cast; arcane has no status, just raw damage.
+enum Kind { PLAIN, ARROW, SHOOT, FIRE, ICE, LIGHTNING, ARCANE, CAST }
 
 ## Core/ring color per kind, active state first in each pair — see _refresh().
 ## Only PLAIN's pair matches the original fixed ACTIVE_CORE_COLOR/
@@ -34,6 +37,8 @@ const KIND_COLORS := {
 	Kind.FIRE: [Color(1.0, 0.35, 0.15), Color(1.0, 0.8, 0.6)],
 	Kind.ICE: [Color(0.4, 0.8, 1.0), Color(0.85, 0.97, 1.0)],
 	Kind.LIGHTNING: [Color(0.95, 0.9, 0.25), Color(1.0, 1.0, 0.85)],
+	Kind.ARCANE: [Color(0.75, 0.35, 0.95), Color(0.95, 0.85, 1.0)],
+	Kind.CAST: [Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0)],
 }
 
 var kind: Kind = Kind.PLAIN
