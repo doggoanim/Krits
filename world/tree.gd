@@ -1,4 +1,4 @@
-class_name Tree
+class_name WorldTree
 extends Node3D
 ## A single world tree. Attached directly to each hand-placed tree position
 ## in hometown.tscn (keeping the level author's chosen spot) — everything
@@ -27,10 +27,10 @@ const LEAVES_SCENES := [
 ## Each raw mesh's own total height and lowest point along Y, in its own file's
 ## units — index matches TRUNK_SCENES/LEAVES_SCENES above. Re-measure these
 ## (e.g. via a glTF bounding-box check) if the source files are ever replaced.
-const TRUNK_RAW_HEIGHT := [9.601, 9.716, 9.559, 10.299]
-const TRUNK_RAW_MIN_Y := [-4.624, -4.624, -4.624, -4.624]
-const LEAVES_RAW_HEIGHT := [8.871, 12.892, 5.257]
-const LEAVES_RAW_MIN_Y := [-3.234, -5.905, -2.129]
+const TRUNK_RAW_HEIGHT: Array[float] = [9.601, 9.716, 9.559, 10.299]
+const TRUNK_RAW_MIN_Y: Array[float] = [-4.624, -4.624, -4.624, -4.624]
+const LEAVES_RAW_HEIGHT: Array[float] = [8.871, 12.892, 5.257]
+const LEAVES_RAW_MIN_Y: Array[float] = [-3.234, -5.905, -2.129]
 
 const TARGET_TRUNK_HEIGHT := 3.0    ## matches the old placeholder cylinder trunk's height
 const TARGET_LEAVES_HEIGHT := 3.2   ## matches the old placeholder cone foliage's height
