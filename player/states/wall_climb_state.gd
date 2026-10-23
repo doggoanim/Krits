@@ -18,6 +18,10 @@ extends PlayerState
 var _normal := Vector3.FORWARD      ## the wall currently attached to
 var _attach_point := Vector3.ZERO   ## a point on that wall, at the player's own origin height
 									 ## (not the probe's chest-height — see find_climbable_wall())
+var _wall_body: Variant = null      ## that wall's own collider — excluded from the
+									 ## obstruction check in _attempt_move() (see there and
+									 ## Player.is_path_clear()), otherwise hugging its own
+									 ## surface would constantly read as blocked by itself
 var _at_top := false                ## true once climbing further up finds no more wall — makes
 									 ## jump a plain vertical hop instead of a wall-jump kick-off
 
@@ -40,6 +44,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_normal = _msg.get("normal", Vector3.FORWARD)
 	_attach_point = _msg.get("point", p.global_position)
+	_wall_body = _msg.get("body", null)
 	_at_top = false
 
 	# Ease the grab in rather than snapping: seed the "from" pair at the
@@ -119,6 +124,16 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	if ground != null and tentative.y < ground:
 		tentative.y = ground
 
+	# Position here is set directly rather than through move_and_slide()
+	# (see this file's own doc comment), so nothing else stops a strafe/
+	# climb move from sliding straight through solid world geometry that
+	# isn't itself climbable — a perpendicular wall meeting this one at a
+	# corner, a pillar, a ledge. Same "nothing found -> don't move" fallback
+	# as running out of wall entirely.
+	var tentative_body_pos := tentative + _normal * c.wall_hug_distance
+	if not p.is_path_clear(p.global_position, tentative_body_pos, _wall_body):
+		return
+
 	# Checked wall_climb_head_clearance above `tentative`, not at the
 	# player's own origin/feet height — _attach_point tracks the feet, but
 	# stopping only once the FEET run out of wall left the head free to poke
@@ -150,6 +165,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	# actually found (matters when this was a corner wrap).
 	_attach_point = Vector3(found.point.x, tentative.y, found.point.z)
 	_normal = found.normal
+	_wall_body = found.get("body", null)
 	if climb > 0.0:
 		_at_top = false
 

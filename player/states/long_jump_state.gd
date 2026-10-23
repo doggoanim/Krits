@@ -35,7 +35,7 @@ func physics_update(delta: float) -> void:
 	# Same priority as DiveState: a climbable wall grabs instead of bouncing.
 	var wall := p.find_climbable_wall()
 	if not wall.is_empty():
-		p.grab_wall(wall.point, wall.normal)
+		p.grab_wall(wall.point, wall.normal, wall.body)
 		return
 	p.air_control(delta)
 	p.face(p.get_hvel(), delta)

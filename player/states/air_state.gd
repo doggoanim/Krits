@@ -20,7 +20,7 @@ func physics_update(delta: float) -> void:
 
 	var wall := p.find_climbable_wall()
 	if not wall.is_empty():
-		p.grab_wall(wall.point, wall.normal)
+		p.grab_wall(wall.point, wall.normal, wall.body)
 		return
 
 	# A wall bounce's reaction pose also locks out steering for the same

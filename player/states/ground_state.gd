@@ -61,7 +61,7 @@ func physics_update(delta: float) -> void:
 
 	var wall := p.find_climbable_wall()
 	if not wall.is_empty():
-		p.grab_wall(wall.point, wall.normal)
+		p.grab_wall(wall.point, wall.normal, wall.body)
 		return
 
 	# Too steep to stand or walk on at all — a separate mechanic from the

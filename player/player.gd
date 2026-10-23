@@ -50,6 +50,7 @@ const LEAN_SMOOTH := 9.0         ## higher = snappier lean response
 var _shape: CapsuleShape3D
 var _shape_node: CollisionShape3D
 var _wall_cast: ShapeCast3D   ## see find_climbable_wall()/probe_wall_near()
+var _obstruction_cast: ShapeCast3D   ## see is_path_clear()
 var _was_on_floor := true
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
@@ -83,6 +84,27 @@ func _ready() -> void:
 	_wall_cast.add_exception(self)
 	_wall_cast.enabled = false
 	add_child(_wall_cast)
+
+	# WallClimbState sets position directly rather than going through
+	# move_and_slide() (see its own doc comment for why), so nothing normally
+	# stops it sliding straight through solid world geometry other than
+	# whichever climbable wall it's currently attached to — a perpendicular
+	# wall meeting the climbed one at a corner, a pillar, a ledge, anything
+	# that isn't itself climbable. is_path_clear() below is WallClimbState's
+	# one check against that, reusing the same small-sphere-sweep idiom as
+	# _wall_cast; a separate node since its mask/exceptions differ (world
+	# geometry only, and the exception list changes per climb rather than
+	# being fixed at startup).
+	_obstruction_cast = ShapeCast3D.new()
+	var obstruction_shape := SphereShape3D.new()
+	obstruction_shape.radius = RADIUS * 0.6   ## smaller than the body itself — this only needs
+												## to catch a real solid in the way, not every
+												## graze against the climbed wall's own edge
+	_obstruction_cast.shape = obstruction_shape
+	_obstruction_cast.collision_mask = 1   # world geometry — not CLIMBABLE_MASK; that's handled separately
+	_obstruction_cast.add_exception(self)
+	_obstruction_cast.enabled = false
+	add_child(_obstruction_cast)
 
 	visual = PlayerVisual.new()
 	add_child(visual)
@@ -274,7 +296,8 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 		if not _is_wall_normal(normal):
 			continue
 		normal.y = 0.0
-		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized()}
+		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized(),
+				"body": _wall_cast.get_collider(0)}
 	return {}
 
 ## True for a normal that's actually a wall's, not a floor, ceiling, or a
@@ -291,6 +314,25 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 ## stopping at its actual top.
 func _is_wall_normal(normal: Vector3) -> bool:
 	return absf(normal.y) < 0.7
+
+## True if a small sphere could move in a straight line from `from` to `to`
+## without hitting solid world geometry (layer 1) — WallClimbState's check
+## against sliding straight through anything solid that isn't the wall it's
+## currently attached to (see its own doc comment and _obstruction_cast's).
+## `ignore_body` is that currently-climbed wall's own collider: its solid
+## collision shares layer 1 with everything else, so without excluding it
+## specifically, hugging close to its surface would constantly read as
+## blocked by the very wall being climbed.
+func is_path_clear(from: Vector3, to: Vector3, ignore_body: Variant) -> bool:
+	if ignore_body is CollisionObject3D:
+		_obstruction_cast.add_exception(ignore_body)
+	_obstruction_cast.global_position = from
+	_obstruction_cast.target_position = to - from
+	_obstruction_cast.force_shapecast_update()
+	var clear := not _obstruction_cast.is_colliding()
+	if ignore_body is CollisionObject3D:
+		_obstruction_cast.remove_exception(ignore_body)
+	return clear
 
 ## Ground height straight down from `from`, within `max_dist` — same
 ## world-geometry layer (1) Arena.ground_height() probes, used by
@@ -346,7 +388,7 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	# height instead of the probe's.
 	var point: Vector3 = _wall_cast.get_collision_point(0)
 	point.y -= STAND_HEIGHT * 0.5
-	return {"point": point, "normal": normal.normalized()}
+	return {"point": point, "normal": normal.normalized(), "body": _wall_cast.get_collider(0)}
 
 # ---------------------------------------------------------------- actions
 
@@ -411,12 +453,12 @@ func start_side_flip(dir: Vector3) -> void:
 ## dive straight back into a wall you just jumped off of climbs immediately
 ## instead of silently failing to transition here for the rest of the
 ## cooldown while find_climbable_wall() keeps finding it every frame.
-func grab_wall(point: Vector3, normal: Vector3, ignore_cooldown := false) -> void:
+func grab_wall(point: Vector3, normal: Vector3, body: Variant = null, ignore_cooldown := false) -> void:
 	if dead or machine.current_name == &"Frozen" or machine.current_name == &"WallClimb":
 		return
 	if wall_climb_cd > 0.0 and not ignore_cooldown:
 		return
-	machine.transition_to(&"WallClimb", {"point": point, "normal": normal})
+	machine.transition_to(&"WallClimb", {"point": point, "normal": normal, "body": body})
 
 ## Launches away from whatever wall you were climbing, toward `away`, with
 ## its own distinct push/height (independent of start_jump()'s
