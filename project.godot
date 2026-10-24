@@ -37,7 +37,6 @@ import/blender/enabled=false
 
 [layer_names]
 
-3d_render/layer_20="trample_marker"
 3d_physics/layer_1="world"
 3d_physics/layer_2="player"
 3d_physics/layer_3="enemy"
@@ -48,18 +47,3 @@ import/blender/enabled=false
 [physics]
 
 common/physics_ticks_per_second=120
-
-[shader_globals]
-
-trample_map={
-"type": "sampler2D",
-"value": "res://world/grass/trample_map_default.png"
-}
-trample_center={
-"type": "vec3",
-"value": Vector3(0, 0, 0)
-}
-trample_area_size={
-"type": "float",
-"value": 24.0
-}
