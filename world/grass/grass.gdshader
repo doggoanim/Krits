@@ -22,6 +22,7 @@ uniform float trample_strength : hint_range(0.0, 1.0) = 0.85;
 uniform float wind_strength = 0.12;
 uniform float wind_scale = 0.35;       // world units per wind wave
 uniform float wind_speed = 1.4;
+uniform vec3 lean_correction_degrees = vec3(0.0);   // rotates the mesh (X, Y, Z, applied in that order) around its own base to straighten a built-in lean/tilt in the source asset — try each axis until it looks right
 
 // Published every frame by TrampleMap — never assigned directly on a
 // material instance.
@@ -30,6 +31,21 @@ global uniform vec3 trample_center;
 global uniform float trample_area_size = 24.0;
 
 void vertex() {
+	// Straighten a rigid lean baked into the source mesh — the billboard
+	// step below only controls which way the whole card faces, it can't
+	// fix a tilt that's already in the mesh's own local vertex data.
+	if (dot(abs(lean_correction_degrees), vec3(1.0)) > 0.0001) {
+		vec3 a = radians(lean_correction_degrees);
+		vec3 cs = cos(a);
+		vec3 sn = sin(a);
+		// X axis (pitch)
+		VERTEX.yz = mat2(vec2(cs.x, sn.x), vec2(-sn.x, cs.x)) * VERTEX.yz;
+		// Y axis (yaw)
+		VERTEX.xz = mat2(vec2(cs.y, sn.y), vec2(-sn.y, cs.y)) * VERTEX.xz;
+		// Z axis (roll)
+		VERTEX.xy = mat2(vec2(cs.z, sn.z), vec2(-sn.z, cs.z)) * VERTEX.xy;
+	}
+
 	vec3 world_origin = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
 	// 0 at the blade's root, 1 at its tip, eased so the base stays planted.
