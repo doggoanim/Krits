@@ -7,6 +7,8 @@ render_mode cull_disabled, diffuse_toon, specular_toon, blend_mix;
 // reading the depth buffer to see what's underneath each pixel; flag it
 // if you want that added as a second pass.
 
+uniform sampler2D albedo_texture : source_color;   // optional — leave empty for the flat toon-color look
+uniform vec2 uv_scroll_speed = vec2(0.05, 0.03);   // UV units/sec, only matters if a texture is set
 uniform vec4 shallow_color : source_color = vec4(0.4, 0.8, 0.85, 0.65);
 uniform vec4 deep_color : source_color = vec4(0.05, 0.25, 0.45, 0.9);
 uniform float wave_height = 0.08;
@@ -32,6 +34,14 @@ void fragment() {
 	t = floor(t * color_bands) / max(color_bands - 1.0, 1.0);
 	vec3 color = mix(shallow_color.rgb, deep_color.rgb, t);
 	float alpha = mix(shallow_color.a, deep_color.a, t);
+
+	// Texture is optional: an unset sampler2D defaults to solid white, so
+	// this multiply is a no-op (leaves the flat toon-color look untouched)
+	// until you actually assign one.
+	vec2 scrolled_uv = UV + TIME * uv_scroll_speed;
+	vec4 tex = texture(albedo_texture, scrolled_uv);
+	color *= tex.rgb;
+	alpha *= tex.a;
 
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), fresnel_power);
 	ALBEDO = color;
