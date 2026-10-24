@@ -53,7 +53,7 @@ common/physics_ticks_per_second=120
 
 trample_map={
 "type": "sampler2D",
-"value": null
+"value": "res://world/grass/trample_map_default.png"
 }
 trample_center={
 "type": "vec3",
