@@ -78,7 +78,12 @@ toward the new direction.
 			 Blender or terrain plugin needed; open it in the editor and drag things around like any
 			 other scene), TestLevel (a code-built mechanics-testing blockout, not a designed place —
 			 still there if you want it, see main.gd's `level_scene` default),
-			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
+			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters),
+			 water/ (water.tscn — a plain PlaneMesh/MeshInstance3D with water.gdshader already
+			 assigned: toon-stepped shallow/deep color blend, layered sine-wave vertex motion, and
+			 a fresnel rim; resize/instance it like any other prop, no script or extra setup needed.
+			 No shoreline foam or real depth-based shading yet — the color banding is driven by the
+			 wave height itself as a stand-in)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
 			 later). Static layout for all of these lives in their matching .tscn (hud.tscn,
