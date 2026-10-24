@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://cxq5uev4mffcc"]
 
-[ext_resource type="CompressedTexture3D" uid="uid://bpipx5va4rkqu" path="res://assets/luts/sakura_lut.png" id="1_q3pbs"]
+[ext_resource type="CompressedTexture3D" uid="uid://dhupkpgmtg20t" path="res://assets/luts/pastry_wonderland_lut.png" id="1_q3pbs"]
 [ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="1_v032n"]
 
 [resource]
