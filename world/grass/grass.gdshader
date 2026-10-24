@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, diffuse_toon, billboard_keep_y, depth_prepass_alpha;
+render_mode cull_disabled, diffuse_toon, billboard_y, depth_prepass_alpha;
 // Billboard grass blade: always faces the camera around the Y axis (stays
 // rooted upright) while bending away from anything carrying a TrampleMarker
 // and swaying in a constant ambient "wind". See world/grass/trample_map.gd
