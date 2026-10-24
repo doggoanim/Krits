@@ -37,13 +37,13 @@ import/blender/enabled=false
 
 [layer_names]
 
+3d_render/layer_20="trample_marker"
 3d_physics/layer_1="world"
 3d_physics/layer_2="player"
 3d_physics/layer_3="enemy"
 3d_physics/layer_4="bullet"
 3d_physics/layer_5="orb"
 3d_physics/layer_6="trigger"
-3d_render/layer_20="trample_marker"
 
 [physics]
 
