@@ -15,6 +15,7 @@ render_mode cull_disabled, diffuse_toon, depth_prepass_alpha;
 // shader only ever reads it through the global uniforms below.
 
 uniform sampler2D albedo_texture : source_color;
+uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);   // multiplies the texture, like StandardMaterial3D's Albedo Color
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.5;
 uniform float blade_height = 1.0;      // local-space quad height, base at y=0
 uniform float trample_strength : hint_range(0.0, 1.0) = 0.85;
@@ -76,7 +77,7 @@ void vertex() {
 
 void fragment() {
 	vec4 tex = texture(albedo_texture, UV);
-	ALBEDO = tex.rgb;
-	ALPHA = tex.a;
+	ALBEDO = tex.rgb * albedo_color.rgb;
+	ALPHA = tex.a * albedo_color.a;
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
 }
