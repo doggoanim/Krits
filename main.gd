@@ -34,6 +34,15 @@ func _ready() -> void:
 	cam.target = player
 	player.camera_rig = cam
 
+	# Lets any grass using world/grass/grass.gdshader bend away from the
+	# player — see TrampleMap for how. Add a TrampleMarker to any other
+	# mover (enemies, rolling props) later and it'll be picked up the same
+	# way, with nothing here needing to change.
+	var trample := TrampleMap.new()
+	trample.follow_target = player
+	add_child(trample)
+	player.add_child(TrampleMarker.new())
+
 	encounters = EncounterManager.new()
 	add_child(encounters)
 	encounters.setup(player, level)

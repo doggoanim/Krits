@@ -78,7 +78,16 @@ toward the new direction.
 			 Blender or terrain plugin needed; open it in the editor and drag things around like any
 			 other scene), TestLevel (a code-built mechanics-testing blockout, not a designed place —
 			 still there if you want it, see main.gd's `level_scene` default),
-			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters)
+			 WorldDissolver + world_dissolve.gdshader (world-space noise dissolve used by encounters),
+			 grass/ (TrampleMap + TrampleMarker + grass.gdshader — BotW-style interactive billboard
+			 grass: TrampleMap renders a tiny top-down texture of every TrampleMarker in the scene
+			 and publishes it as global shader uniforms every frame; grass.gdshader reads that to
+			 bend/flatten blades near a marker, plus a constant ambient sway. main.gd wires one
+			 TrampleMap following the player and gives the player a TrampleMarker; add a
+			 TrampleMarker to any other mover (enemies, rolling props) to make grass react to it
+			 too — nothing else needs to change. Scatter the actual blades with the ProtonScatter
+			 addon (addons/proton_scatter/), output type MultiMeshInstance3D, material using
+			 grass.gdshader)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
 			 later). Static layout for all of these lives in their matching .tscn (hud.tscn,

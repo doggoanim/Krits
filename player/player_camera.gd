@@ -50,6 +50,10 @@ func _ready() -> void:
 	_cam = Camera3D.new()
 	_cam.current = true
 	_cam.fov = 70.0
+	# TrampleMap's top-down capture camera renders TrampleMarker meshes on
+	# this one layer so grass can bend away from movers — the real game
+	# camera must never show them.
+	_cam.cull_mask = (1 << 20) - 1 & ~TrampleMap.TRAMPLE_LAYER
 	_arm.add_child(_cam)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 

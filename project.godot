@@ -43,7 +43,23 @@ import/blender/enabled=false
 3d_physics/layer_4="bullet"
 3d_physics/layer_5="orb"
 3d_physics/layer_6="trigger"
+3d_render/layer_20="trample_marker"
 
 [physics]
 
 common/physics_ticks_per_second=120
+
+[shader_globals]
+
+trample_map={
+"type": "sampler2D",
+"value": null
+}
+trample_center={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+trample_area_size={
+"type": "float",
+"value": 24.0
+}
