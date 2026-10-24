@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btn5ycdmg3px0"
-path.s3tc="res://.godot/imported/grass_blade_Untitled.png-aaa9ad843bae36d8fc318607677437d5.s3tc.ctex"
+uid="uid://rwknygbchgmi"
+path.s3tc="res://.godot/imported/trample_map_default.png-7b740fa9e64dbaa080e6820016824732.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "2dce1cedf4d4d97ef781066b37ae784b"
-}
 
 [deps]
 
-source_file="res://assets/world/grass_blade_Untitled.png"
-dest_files=["res://.godot/imported/grass_blade_Untitled.png-aaa9ad843bae36d8fc318607677437d5.s3tc.ctex"]
+source_file="res://world/grass/trample_map_default.png"
+dest_files=["res://.godot/imported/trample_map_default.png-7b740fa9e64dbaa080e6820016824732.s3tc.ctex"]
 
 [params]
 
