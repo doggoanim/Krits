@@ -1,11 +1,18 @@
 shader_type spatial;
-render_mode cull_disabled, diffuse_toon, billboard_y, depth_prepass_alpha;
+render_mode cull_disabled, diffuse_toon, depth_prepass_alpha;
 // Billboard grass blade: always faces the camera around the Y axis (stays
 // rooted upright) while bending away from anything carrying a TrampleMarker
-// and swaying in a constant ambient "wind". See world/grass/trample_map.gd
-// for how the bending data is produced — this shader only ever reads it
-// through the global uniforms below, so any grass material using this
-// shader gets trample-bending for free with no extra wiring.
+// and swaying in a constant ambient "wind".
+//
+// Godot's spatial shaders have no render_mode for billboarding - that's a
+// StandardMaterial3D-only feature - so the Y-axis facing below is done by
+// hand: build a basis whose forward vector points horizontally at the
+// camera (camera position minus this instance's position, Y zeroed out)
+// and whose up vector stays world-up, then feed that into MODELVIEW_MATRIX
+// ourselves instead of the engine's default.
+//
+// See world/grass/trample_map.gd for how the bending data gets here - this
+// shader only ever reads it through the global uniforms below.
 
 uniform sampler2D albedo_texture : source_color;
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.5;
@@ -40,6 +47,31 @@ void vertex() {
 	// Flatten toward the ground when trampled; sway/lean at the tip.
 	VERTEX.y -= VERTEX.y * trample_amount * trample_strength;
 	VERTEX.x += (wind - trample_amount * 0.3) * tip;
+
+	// Y-axis billboard. Each MultiMesh instance can have its own scale, so
+	// pull that out of MODEL_MATRIX first and reapply it to the new basis
+	// rather than assuming every blade is the same size.
+	vec3 scale = vec3(
+		length(MODEL_MATRIX[0].xyz),
+		length(MODEL_MATRIX[1].xyz),
+		length(MODEL_MATRIX[2].xyz)
+	);
+	vec3 cam_pos = INV_VIEW_MATRIX[3].xyz;
+	vec3 to_camera = cam_pos - world_origin;
+	to_camera.y = 0.0;
+	float to_camera_len = length(to_camera);
+	vec3 forward = to_camera_len > 0.0001 ? to_camera / to_camera_len : vec3(0.0, 0.0, 1.0);
+	vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
+	vec3 up = vec3(0.0, 1.0, 0.0);
+
+	mat4 billboard_model = mat4(
+		vec4(right * scale.x, 0.0),
+		vec4(up * scale.y, 0.0),
+		vec4(forward * scale.z, 0.0),
+		vec4(world_origin, 1.0)
+	);
+	MODELVIEW_MATRIX = VIEW_MATRIX * billboard_model;
+	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 }
 
 void fragment() {
