@@ -11,6 +11,14 @@ extends RefCounted
 
 const CEL_SHADER := preload("res://shading/toon.gdshader")
 
+## Some character materials (krits.glb's among them) are authored with
+## baseColorFactor deliberately black and the real, often pre-shaded color
+## living entirely in emission - meant to be rendered unshaded. _shade_recursive()
+## detects `emission_enabled` and sources color/texture from there instead of
+## albedo in that case, so the dynamic banded lighting below still has an
+## actual color to work with instead of reading the (intentionally black)
+## base color.
+
 ## A model with no actual albedo texture (flat-colored or vertex-painted)
 ## has `albedo_texture == null`. Explicitly binding a shader's sampler2D
 ## parameter to null reads back as solid black rather than falling back to
@@ -75,20 +83,41 @@ static func _shade_recursive(n: Node, outline_thickness: float, outline_color: C
 				var base := mat as BaseMaterial3D
 				var cel := ShaderMaterial.new()
 				cel.shader = CEL_SHADER
-				cel.set_shader_parameter(&"albedo_texture", base.albedo_texture if base.albedo_texture else _get_white_texture())
-				cel.set_shader_parameter(&"use_vertex_color", base.vertex_color_use_as_albedo)
-				# A model whose actual color comes from vertex colors (common
-				# for simple/stylized exports) often leaves albedo_color at a
-				# literal black rather than white, since the source material
-				# never meant it to be read on its own — it's only a factor
-				# multiplied with the vertex color. If nothing else is going
-				# to supply color (no texture, no vertex color) a flat black
-				# tint is never actually intentional, so fall back to white.
-				var tint := base.albedo_color
-				if tint.r < 0.001 and tint.g < 0.001 and tint.b < 0.001 \
-						and not base.vertex_color_use_as_albedo and base.albedo_texture == null:
-					tint = Color.WHITE
+
+				var color_tex: Texture2D
+				var tint: Color
+				var use_vertex_color := base.vertex_color_use_as_albedo
+				if base.emission_enabled:
+					# Some models (krits.glb among them) are authored with
+					# baseColorFactor deliberately black and their actual,
+					# often pre-shaded color living entirely in emission —
+					# meant to render unshaded. Feeding that into our normal
+					# albedo pipeline instead lets the dynamic banded
+					# lighting/shadow below apply to it like any other
+					# material, rather than reading the (intentionally
+					# black) base color and rendering nothing.
+					color_tex = base.emission_texture if base.emission_texture else _get_white_texture()
+					var mult := base.emission_energy_multiplier
+					tint = Color(base.emission.r * mult, base.emission.g * mult, base.emission.b * mult, base.albedo_color.a)
+					use_vertex_color = false
+				else:
+					color_tex = base.albedo_texture if base.albedo_texture else _get_white_texture()
+					tint = base.albedo_color
+					# A model whose actual color comes from vertex colors
+					# (common for simple/stylized exports) often leaves
+					# albedo_color at a literal black, since the source
+					# material never meant it to be read on its own — it's
+					# only a factor multiplied with the vertex color. If
+					# nothing else is going to supply color (no texture, no
+					# vertex color either) a flat black tint is never
+					# actually intentional, so fall back to white.
+					if tint.r < 0.001 and tint.g < 0.001 and tint.b < 0.001 \
+							and not use_vertex_color and base.albedo_texture == null:
+						tint = Color.WHITE
+
+				cel.set_shader_parameter(&"albedo_texture", color_tex)
 				cel.set_shader_parameter(&"albedo_color", tint)
+				cel.set_shader_parameter(&"use_vertex_color", use_vertex_color)
 				mi.set_surface_override_material(i, cel)
 				out_materials.append(cel)
 		if outline_thickness > 0.0:
