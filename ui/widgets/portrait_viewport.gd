@@ -3,9 +3,14 @@ extends Control
 ## Live 3D headshot for the HUD portrait. Renders a *second*, independent
 ## copy of the player model into an isolated SubViewport (its own lights,
 ## camera and World3D — never the gameplay scene) and displays it through a
-## TextureRect. Looping the idle clip keeps it in sync with the in-game
-## character without ever touching Player or the live PlayerVisual, so
-## nothing here can affect — or be affected by — gameplay.
+## TextureRect. Looping the idle clip keeps the pose in sync with the in-game
+## character without ever touching Player or driving the live PlayerVisual —
+## the one exception is the face (see _sync_face): every frame this reads
+## (never writes) the real PlayerVisual's current expression() and mirrors
+## the same texture onto this copy's own face material, so the portrait
+## blinks/winces in lockstep with the actual character instead of running an
+## independent blink timer of its own that could drift out of sync. Strictly
+## one-way — nothing here can affect gameplay, only observe it.
 ##
 ## Composited on top of the portrait frame art by Hud._build_meter_cluster();
 ## the viewport's background is transparent, and the render itself is
@@ -68,6 +73,8 @@ void fragment() {
 var _viewport: SubViewport
 var _model: Node3D
 var _anim: AnimationPlayer
+var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
+var _synced_expression: StringName = &""   ## last expression copied from the live player (see _sync_face)
 
 func _ready() -> void:
 	_viewport = SubViewport.new()
@@ -125,7 +132,9 @@ func _build_scene() -> void:
 	# No outline_hook here — the outline is drawn entirely by
 	# CIRCLE_MASK_SHADER_CODE above, against this render's own alpha, rather
 	# than by giving any mesh a hook callback that builds outline geometry.
-	ModelUtil.apply_cel_shading(_model)
+	var face_materials: Dictionary = {}
+	ModelUtil.apply_cel_shading(_model, [], face_materials)
+	_face_material = face_materials.values()[0] if not face_materials.is_empty() else null
 
 	if _anim != null and _anim.has_animation(PlayerVisual.ANIM_IDLE):
 		_anim.get_animation(PlayerVisual.ANIM_IDLE).loop_mode = Animation.LOOP_LINEAR
@@ -140,3 +149,29 @@ func _build_scene() -> void:
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
+
+func _process(_delta: float) -> void:
+	_sync_face()
+
+## Mirrors the live player's current face expression (blink, hurt, ...) onto
+## this copy's own face material — read-only, see this file's header comment.
+## Looked up by group each frame rather than cached once, since the actual
+## Player node may not exist yet when this HUD element is first ready (e.g.
+## shown briefly before the player spawns) and `get_first_node_in_group` is
+## cheap. A no-op (same as set_expression()'s own unknown-name handling) if
+## there's no player, no face material on either model, or the expression
+## hasn't changed since last frame.
+func _sync_face() -> void:
+	if _face_material == null:
+		return
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player == null or player.visual == null:
+		return
+	var expr := player.visual.expression()
+	if expr == _synced_expression:
+		return
+	var tex: Texture2D = PlayerVisual.FACE_EXPRESSIONS.get(expr)
+	if tex == null:
+		return
+	_synced_expression = expr
+	ModelUtil.set_albedo_texture(_face_material, tex)
