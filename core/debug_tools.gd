@@ -25,6 +25,17 @@ func _ready() -> void:
 		return
 	var layer := CanvasLayer.new()
 	add_child(layer)
+
+	# TEMPORARY — pull-sync sanity check, remove once confirmed: if you don't
+	# see this huge red "PULLED OK" banner on screen, Godot is still running
+	# old code regardless of what `git pull` reported.
+	var sanity := Label.new()
+	sanity.text = "PULLED OK"
+	sanity.add_theme_font_size_override("font_size", 120)
+	sanity.add_theme_color_override("font_color", Color.RED)
+	sanity.position = Vector2(100, 100)
+	layer.add_child(sanity)
+
 	_label = Label.new()
 	_label.position = Vector2(20, 640)
 	layer.add_child(_label)
