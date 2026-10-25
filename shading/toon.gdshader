@@ -46,9 +46,15 @@ uniform float specular_threshold : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 specular_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void fragment() {
+	// TEMPORARY DIAGNOSTIC — hardcoded red, bypassing texture/color entirely,
+	// to confirm the ShaderMaterial pipeline itself is even rendering this
+	// mesh at all before suspecting anything subtler. Restore once confirmed.
+	ALBEDO = vec3(1.0, 0.0, 0.0);
+	ALPHA = 1.0;
+
 	vec4 tex = texture(albedo_texture, UV);
-	ALBEDO = tex.rgb * albedo_color.rgb;
-	ALPHA = tex.a * albedo_color.a;
+	// ALBEDO = tex.rgb * albedo_color.rgb;
+	// ALPHA = tex.a * albedo_color.a;
 
 	if (rim_strength > 0.0) {
 		float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), max(rim_power, 0.001));
