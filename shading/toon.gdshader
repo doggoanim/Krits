@@ -1,4 +1,13 @@
 shader_type spatial;
+render_mode depth_draw_opaque;
+// Writing to ALPHA below (even though it's normally 1.0) makes Godot treat
+// this as a transparent material by default, which skips writing to the
+// depth buffer — that breaks CelOutline's inverted-hull outline technique,
+// since the real mesh then fails to occlude the black outline shell behind
+// it and the whole character renders as a solid black silhouette instead of
+// a thin rim. depth_draw_opaque forces normal depth writing regardless of
+// the alpha value, restoring correct occlusion.
+//
 // Project-wide cel/toon shader. The reason this exists instead of just using
 // the built-in `diffuse_toon` render mode (still used by a few one-off
 // materials elsewhere, e.g. the water shader): that mode only bands the
