@@ -1,13 +1,16 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://qdf5uqbes74a"]
 
-[ext_resource type="Shader" path="res://shading/toon.gdshader" id="1_shader"]
+[ext_resource type="Shader" uid="uid://csv4kg304rl1m" path="res://shading/toon.gdshader" id="1_shader"]
 
 [resource]
+render_priority = 0
 shader = ExtResource("1_shader")
 shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/use_vertex_color = false
+shader_parameter/alpha_scissor_threshold = 0.0
 shader_parameter/shadow_threshold = 0.5
 shader_parameter/shadow_softness = 0.05
-shader_parameter/shadow_tint = Color(0.42, 0.42, 0.55, 1)
+shader_parameter/shadow_tint = Color(0.17236015, 0.17190814, 0.24308372, 1)
 shader_parameter/rim_strength = 0.0
 shader_parameter/rim_power = 4.0
 shader_parameter/rim_color = Color(1, 1, 1, 1)
