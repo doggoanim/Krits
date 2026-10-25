@@ -15,6 +15,13 @@
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
 
+[sub_resource type="CylinderShape3D" id="Shape_TreeChesburg1"]
+radius = 2.4
+height = 9.0
+
+[sub_resource type="BoxShape3D" id="Shape_HouseChesburg1"]
+size = Vector3(9.65, 6.62, 6.26)
+
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
 albedo_texture = ExtResource("1_epjlq")
@@ -492,6 +499,13 @@ mesh = SubResource("Mesh_ShopBody")
 [node name="tree_chesburg_1" parent="." unique_id=1966005799 instance=ExtResource("2_d7qjq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17825747)
 
+[node name="tree_chesburg_1_collision" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17825747)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tree_chesburg_1_collision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 4.5, -0.1)
+shape = SubResource("Shape_TreeChesburg1")
+
 [node name="tree_chesburg_2" parent="." unique_id=1230524719 instance=ExtResource("9_o8fgi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36624956, 0.035000093, 0.09244442)
 
@@ -509,3 +523,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
 
 [node name="house_chesburg_1" parent="." unique_id=1220902196 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.667704, 0, -5.7526135)
+
+[node name="house_chesburg_1_collision" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.667704, 0, -5.7526135)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="house_chesburg_1_collision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.33, 0)
+shape = SubResource("Shape_HouseChesburg1")
