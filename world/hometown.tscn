@@ -6,14 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/tree_chesburg_1.glb" id="2_d7qjq"]
 [ext_resource type="Texture2D" uid="uid://biqs2l4jk2u38" path="res://assets/textures/dirt_1.jpg" id="2_dvlkn"]
-[ext_resource type="PackedScene" uid="uid://bgi0nckpg0qug" path="res://assets/world/tree_chesburg_2.glb" id="9_o8fgi"]
-[ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/tree_chesburg_3.glb" id="10_8ru6n"]
-[ext_resource type="PackedScene" uid="uid://dwsqlkkxwt0wo" path="res://assets/world/tree_chesburg_4.glb" id="11_6yx7h"]
-[ext_resource type="PackedScene" uid="uid://b7yepay0t2k7j" path="res://assets/world/tree_chesburg_5.glb" id="12_ombpp"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
-[ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -206,9 +200,6 @@ mesh = SubResource("Mesh_Ground")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=228417280]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
 shape = SubResource("BoxShape3D_d7qjq")
-
-[node name="tree_chesburg_1" parent="Ground" unique_id=1409168974 instance=ExtResource("2_d7qjq")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.398499, 0.5000005, 41.85545)
 
 [node name="PathNS" type="StaticBody3D" parent="." unique_id=665892165]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
@@ -489,39 +480,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 material_override = SubResource("Mat_ShopRobe")
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="tree_chesburg_1" parent="." unique_id=1966005799 instance=ExtResource("2_d7qjq")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17825747)
-
-[node name="tree_chesburg_1_collision" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17825747)
-collision_layer = 129
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="tree_chesburg_1_collision"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 4.5, -0.1)
-shape = SubResource("Shape_TreeChesburg1")
-
-[node name="tree_chesburg_2" parent="." unique_id=1230524719 instance=ExtResource("9_o8fgi")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36624956, 0.035000093, 0.09244442)
-
-[node name="tree_chesburg_3" parent="." unique_id=1554313049 instance=ExtResource("10_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8665452, 0.034999616, 11.598287)
-
-[node name="tree_chesburg_4" parent="." unique_id=134999843 instance=ExtResource("11_6yx7h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.430904, 0, 11.322882)
-
-[node name="tree_chesburg_5" parent="." unique_id=1946119887 instance=ExtResource("12_ombpp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3683157, 0, 15.948387)
-
 [node name="Water" parent="." unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
-
-[node name="house_chesburg_1" parent="." unique_id=1457119358 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.745583, 0, -7.299604)
-
-[node name="house_chesburg_1_collision" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.745583, 0, -7.299604)
-collision_layer = 129
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="house_chesburg_1_collision"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.33, 0)
-shape = SubResource("Shape_HouseChesburg1")
