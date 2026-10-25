@@ -8,13 +8,6 @@ extends EditorNode3DGizmoPlugin
 ## own center (same convention the built-in BoxShape3D gizmo uses), rather
 ## than anchoring one face and growing away from it.
 ##
-## Multi-select: if other MeshInstance3D/BoxMesh nodes are selected alongside
-## the one whose handle you actually drag, they're resized too — to the same
-## final size on that axis (matching how Godot's own Inspector multi-edit
-## behaves when you change one shared numeric field with several nodes
-## selected), not by the same relative delta. See _get_handle_value (where
-## the group snapshot is taken, once per drag) and _group_originals.
-##
 ## Registered by plugin.gd — not meant to be used standalone.
 
 const HANDLE_COLOR := Color(1.0, 0.6, 0.0)
@@ -22,13 +15,6 @@ const LINE_COLOR := Color(1.0, 0.6, 0.0, 0.5)
 const MIN_HALF_SIZE := 0.01   ## never let a drag collapse an axis to zero/negative
 
 var _undo_redo: EditorUndoRedoManager
-
-## Other selected boxes being dragged along with the one the handle actually
-## belongs to, captured once at the start of the current drag (see
-## _get_handle_value) — MeshInstance3D -> its BoxMesh's original size, so
-## _commit_handle can both finalize and build one combined undo action, and
-## cancel can restore everyone, not just the primary node.
-var _group_originals: Dictionary = {}
 
 func _init(undo_redo: EditorUndoRedoManager) -> void:
 	_undo_redo = undo_redo
@@ -63,16 +49,6 @@ func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: boo
 	return ["Size X", "Size Y", "Size Z"][handle_id]
 
 func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool) -> Variant:
-	# Called exactly once per drag, right as it starts — the right moment to
-	# snapshot every OTHER selected box too, so a multi-selected drag has
-	# something to restore on cancel and something to diff against for the
-	# combined undo action in _commit_handle.
-	var mi := gizmo.get_node_3d() as MeshInstance3D
-	_group_originals.clear()
-	for node in EditorInterface.get_selection().get_selected_nodes():
-		if node != mi and node is MeshInstance3D and (node as MeshInstance3D).mesh is BoxMesh:
-			_group_originals[node] = (node.mesh as BoxMesh).size
-
 	# Returns the whole size, not just the one axis — simplest thing that's
 	# still enough to fully restore on cancel/undo (see _commit_handle).
 	return _get_box(gizmo).size
@@ -94,20 +70,10 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 	var closest_world := _closest_point_on_line_to_ray(center_world, axis_world, ray_origin, ray_dir)
 	var closest_local: Vector3 = gt.affine_inverse() * closest_world
 
-	var new_axis_size := maxf(MIN_HALF_SIZE, absf(closest_local[handle_id])) * 2.0
+	var new_half := maxf(MIN_HALF_SIZE, absf(closest_local[handle_id]))
 	var new_size := box.size
-	new_size[handle_id] = new_axis_size
+	new_size[handle_id] = new_half * 2.0
 	box.size = new_size
-
-	# Same final size on this axis for every other selected box, live during
-	# the drag — update_gizmos() forces each one's own gizmo to redraw
-	# immediately instead of waiting for whatever would normally mark it dirty.
-	for node: MeshInstance3D in _group_originals:
-		var other_box := node.mesh as BoxMesh
-		var other_size := other_box.size
-		other_size[handle_id] = new_axis_size
-		other_box.size = other_size
-		node.update_gizmos()
 
 func _commit_handle(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool, restore: Variant, cancel: bool) -> void:
 	var box := _get_box(gizmo)
@@ -115,24 +81,12 @@ func _commit_handle(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool,
 		return
 	if cancel:
 		box.size = restore
-		for node: MeshInstance3D in _group_originals:
-			(node.mesh as BoxMesh).size = _group_originals[node]
-			node.update_gizmos()
-		_group_originals.clear()
 		return
-
 	var final_size: Vector3 = box.size
-	var action_name := "Resize BoxMesh" if _group_originals.is_empty() else \
-			"Resize BoxMesh (%d selected)" % (_group_originals.size() + 1)
-	_undo_redo.create_action(action_name)
+	_undo_redo.create_action("Resize BoxMesh")
 	_undo_redo.add_do_property(box, &"size", final_size)
 	_undo_redo.add_undo_property(box, &"size", restore)
-	for node: MeshInstance3D in _group_originals:
-		var other_box := node.mesh as BoxMesh
-		_undo_redo.add_do_property(other_box, &"size", other_box.size)
-		_undo_redo.add_undo_property(other_box, &"size", _group_originals[node])
-	_undo_redo.commit_action(false)   ## false: the live edit already applied the do-values, don't reapply
-	_group_originals.clear()
+	_undo_redo.commit_action(false)   ## false: the live edit already applied the do-value, don't reapply
 
 func _get_box(gizmo: EditorNode3DGizmo) -> BoxMesh:
 	var mi := gizmo.get_node_3d() as MeshInstance3D
