@@ -1,5 +1,4 @@
 shader_type spatial;
-render_mode depth_draw_opaque;
 // Project-wide cel/toon shader. The reason this exists instead of just using
 // the built-in `diffuse_toon` render mode (still used by a few one-off
 // materials elsewhere, e.g. the water shader): that mode only bands the
@@ -10,13 +9,23 @@ render_mode depth_draw_opaque;
 // exactly the same hard/soft treatment as the lit/dark band, because both
 // come from thresholding the same `lit` value below.
 //
-// depth_draw_opaque: writing to ALPHA below (even though it's normally 1.0)
-// makes Godot treat this as a transparent material by default, which skips
-// writing to the depth buffer — that breaks CelOutline's inverted-hull
-// outline technique, since the real mesh then fails to occlude the black
-// outline shell behind it and the whole character renders as a solid black
-// silhouette instead of a thin rim. This render mode forces normal depth
-// writing regardless of the alpha value, restoring correct occlusion.
+// Alpha handling: every texture this shader is actually used with
+// (character skins, world props) is fully opaque — there's no cutout art
+// anywhere yet. Writing straight to ALPHA regardless still makes Godot
+// classify the material as a *blended* transparent material, which has a
+// cascade of side effects this project doesn't want: no depth-prepass
+// contribution, no reliable shadow receiving, and — since a rigged
+// character here is ~11 separate skinned MeshInstance3Ds (torso, each
+// limb, hair, head, ...) all roughly the same distance from the camera —
+// the transparent queue's per-*object* (not per-pixel) back-to-front sort
+// between them, which flips as the camera/pose moves, which read as the
+// model "clipping"/popping as parts swap draw order. ALPHA_SCISSOR_THRESHOLD
+// below sidesteps all of that: it puts the material back in the opaque/
+// depth-prepass pipeline (correct shadows, no sort-order flicker) while
+// still supporting a hard cutout if `alpha_scissor_threshold` is ever
+// raised above 0 for something that actually needs one (a leaf card, say) —
+// default 0 never discards, which is correct for every opaque texture in
+// the project today.
 //
 // Usage: duplicate shading/toon_material.tres (or make a fresh
 // ShaderMaterial pointed at this shader) and assign it as a mesh surface's
@@ -32,6 +41,7 @@ render_mode depth_draw_opaque;
 uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex colors, matching BaseMaterial3D.vertex_color_use_as_albedo
+uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opaque, never discards; raise it only for an actual cutout texture
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.05;   // width of that edge; 0 = razor-sharp
@@ -53,6 +63,7 @@ void fragment() {
 	}
 	ALBEDO = tex.rgb * color;
 	ALPHA = tex.a * albedo_color.a;
+	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
 
 	if (rim_strength > 0.0) {
 		float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), max(rim_power, 0.001));
