@@ -6,17 +6,10 @@
 [ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="Texture2D" uid="uid://biqs2l4jk2u38" path="res://assets/textures/dirt_1.jpg" id="2_dvlkn"]
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
-[ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/tree_chesburg_1.glb" id="10_qjukg"]
-[ext_resource type="PackedScene" uid="uid://bgi0nckpg0qug" path="res://assets/world/tree_chesburg_2.glb" id="11_o8fgi"]
-[ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/tree_chesburg_3.glb" id="12_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
-[ext_resource type="PackedScene" uid="uid://b7yepay0t2k7j" path="res://assets/world/tree_chesburg_5.glb" id="13_b2jir"]
 [ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
-[ext_resource type="PackedScene" uid="uid://dwsqlkkxwt0wo" path="res://assets/world/tree_chesburg_4.glb" id="14_l8gsu"]
-[ext_resource type="PackedScene" uid="uid://clkm5ngwo17ku" path="res://assets/world/tree_chesburg_６.glb" id="15_qxovf"]
-[ext_resource type="PackedScene" uid="uid://bkxlyousnd7ld" path="res://assets/world/tree_chesburg_7.glb" id="16_cx2cw"]
+[ext_resource type="PackedScene" uid="uid://chhgtlftglyvi" path="res://assets/world/house_chesburg_2.glb" id="17_qxovf"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -31,17 +24,7 @@ size = Vector3(49.15, 1, 39.48)
 [sub_resource type="BoxShape3D" id="Shape_PathNS"]
 size = Vector3(4, 0.05, 44)
 
-[sub_resource type="StandardMaterial3D" id="Mat_DirtPath"]
-albedo_color = Color(0.99872035, 0.9740259, 0.9471552, 1)
-albedo_texture = ExtResource("2_dvlkn")
-
-[sub_resource type="BoxMesh" id="Mesh_PathNS"]
-size = Vector3(4, 0.05, 44)
-
 [sub_resource type="BoxShape3D" id="Shape_PathEW"]
-size = Vector3(44, 0.05, 4)
-
-[sub_resource type="BoxMesh" id="Mesh_PathEW"]
 size = Vector3(44, 0.05, 4)
 
 [sub_resource type="BoxShape3D" id="Shape_Step1"]
@@ -85,69 +68,12 @@ size = Vector3(10.715, 0.35, 12.595)
 [sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
 size = Vector3(10.715, 0.35, 12.595)
 
-[sub_resource type="BoxShape3D" id="Shape_House1Walls"]
-size = Vector3(6, 4, 6)
-
-[sub_resource type="StandardMaterial3D" id="Mat_Stone"]
-albedo_color = Color(0.62, 0.6, 0.58, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_House1Walls"]
-size = Vector3(6, 4, 6)
-
-[sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
-albedo_color = Color(0.8487937, 0, 0.047033705, 1)
-
-[sub_resource type="PrismMesh" id="Mesh_House1Roof"]
-size = Vector3(6.9, 2.4, 6.9)
-
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_gka81"]
-data = PackedVector3Array(0, 1.1999999, 3.4499998, 3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, -3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 0, 1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, 0, 1.1999999, 3.4499998, -3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, -3.4499998, -1.1999999, 3.4499998, 3.4499998, -1.1999999, 3.4499998, -3.4499998, -1.1999999, -3.4499998, 3.4499998, -1.1999999, 3.4499998, 3.4499998, -1.1999999, -3.4499998, -3.4499998, -1.1999999, -3.4499998)
-
-[sub_resource type="BoxShape3D" id="Shape_House2Walls"]
-size = Vector3(7, 5, 5)
-
-[sub_resource type="StandardMaterial3D" id="Mat_StoneLight"]
-albedo_color = Color(0.7, 0.65, 0.55, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_House2Walls"]
-size = Vector3(7, 5, 5)
-
-[sub_resource type="StandardMaterial3D" id="Mat_RoofBlue"]
-albedo_color = Color(0.2886788, 0.553356, 0.7931672, 1)
-
-[sub_resource type="PrismMesh" id="Mesh_House2Roof"]
-size = Vector3(8.05, 3, 5.75)
-
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_70bq6"]
-data = PackedVector3Array(0, 1.5, 2.875, 4.025, -1.5, 2.875, -4.025, -1.5, 2.875, 0, 1.5, -2.875, -4.025, -1.5, -2.875, 4.025, -1.5, -2.875, 0, 1.5, 2.875, 0, 1.5, -2.875, 4.025, -1.5, 2.875, 0, 1.5, -2.875, 4.025, -1.5, -2.875, 4.025, -1.5, 2.875, 0, 1.5, -2.875, 0, 1.5, 2.875, -4.025, -1.5, -2.875, 0, 1.5, 2.875, -4.025, -1.5, 2.875, -4.025, -1.5, -2.875, -4.025, -1.5, 2.875, 4.025, -1.5, 2.875, -4.025, -1.5, -2.875, 4.025, -1.5, 2.875, 4.025, -1.5, -2.875, -4.025, -1.5, -2.875)
-
-[sub_resource type="BoxShape3D" id="Shape_House3Walls"]
-size = Vector3(5, 3.5, 5)
-
-[sub_resource type="BoxMesh" id="Mesh_House3Walls"]
-size = Vector3(5, 3.5, 5)
-
-[sub_resource type="PrismMesh" id="Mesh_House3Roof"]
-size = Vector3(5.75, 2.1, 5.75)
-
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_bf34x"]
-data = PackedVector3Array(0, 1.05, 2.875, 2.875, -1.05, 2.875, -2.875, -1.05, 2.875, 0, 1.05, -2.875, -2.875, -1.05, -2.875, 2.875, -1.05, -2.875, 0, 1.05, 2.875, 0, 1.05, -2.875, 2.875, -1.05, 2.875, 0, 1.05, -2.875, 2.875, -1.05, -2.875, 2.875, -1.05, 2.875, 0, 1.05, -2.875, 0, 1.05, 2.875, -2.875, -1.05, -2.875, 0, 1.05, 2.875, -2.875, -1.05, 2.875, -2.875, -1.05, -2.875, -2.875, -1.05, 2.875, 2.875, -1.05, 2.875, -2.875, -1.05, -2.875, 2.875, -1.05, 2.875, 2.875, -1.05, -2.875, -2.875, -1.05, -2.875)
-
-[sub_resource type="BoxShape3D" id="Shape_House4Walls"]
-size = Vector3(6, 4.5, 6)
-
-[sub_resource type="BoxMesh" id="Mesh_House4Walls"]
-size = Vector3(6, 4.5, 6)
-
-[sub_resource type="PrismMesh" id="Mesh_House4Roof"]
-size = Vector3(6.9, 2.7, 6.9)
-
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_8mbmp"]
-data = PackedVector3Array(0, 1.35, 3.4499998, 3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, -3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, -3.4499998, 0, 1.35, 3.4499998, 0, 1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, 3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 0, 1.35, -3.4499998, 0, 1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, 0, 1.35, 3.4499998, -3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, -3.4499998, -1.35, 3.4499998, 3.4499998, -1.35, 3.4499998, -3.4499998, -1.35, -3.4499998, 3.4499998, -1.35, 3.4499998, 3.4499998, -1.35, -3.4499998, -3.4499998, -1.35, -3.4499998)
-
 [sub_resource type="CylinderShape3D" id="Shape_WellRim"]
 height = 1.0
 radius = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Stone"]
+albedo_color = Color(0.62, 0.6, 0.58, 1)
 
 [sub_resource type="CylinderMesh" id="Mesh_WellRim"]
 top_radius = 1.2
@@ -161,6 +87,9 @@ albedo_color = Color(0.5, 0.35, 0.22, 1)
 top_radius = 0.08
 bottom_radius = 0.08
 height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_RoofRed"]
+albedo_color = Color(0.8487937, 0, 0.047033705, 1)
 
 [sub_resource type="CylinderMesh" id="Mesh_WellRoof"]
 top_radius = 0.0
@@ -219,20 +148,12 @@ collision_layer = 129
 [node name="Collision" type="CollisionShape3D" parent="Terrain/PathNS" unique_id=971774053]
 shape = SubResource("Shape_PathNS")
 
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/PathNS" unique_id=1346726324]
-material_override = SubResource("Mat_DirtPath")
-mesh = SubResource("Mesh_PathNS")
-
 [node name="PathEW" type="StaticBody3D" parent="Terrain" unique_id=2008051788]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
 collision_layer = 129
 
 [node name="Collision" type="CollisionShape3D" parent="Terrain/PathEW" unique_id=1809330523]
 shape = SubResource("Shape_PathEW")
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/PathEW" unique_id=366163986]
-material_override = SubResource("Mat_DirtPath")
-mesh = SubResource("Mesh_PathEW")
 
 [node name="Hill" type="Node3D" parent="Terrain" unique_id=993983351]
 
@@ -302,102 +223,6 @@ shape = SubResource("BoxShape3D_70bq6")
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
-[node name="House1" type="Node3D" parent="Buildings" unique_id=4247218]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -11)
-
-[node name="Walls" type="StaticBody3D" parent="Buildings/House1" unique_id=563810001]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Buildings/House1/Walls" unique_id=350307365]
-shape = SubResource("Shape_House1Walls")
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House1/Walls" unique_id=880856283]
-material_override = SubResource("Mat_Stone")
-mesh = SubResource("Mesh_House1Walls")
-
-[node name="Roof" type="StaticBody3D" parent="Buildings/House1" unique_id=2128008774]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House1/Roof" unique_id=1345513660]
-material_override = SubResource("Mat_RoofRed")
-mesh = SubResource("Mesh_House1Roof")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House1/Roof" unique_id=1097758306]
-shape = SubResource("ConcavePolygonShape3D_gka81")
-
-[node name="House2" type="Node3D" parent="Buildings" unique_id=1894083705]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -13)
-
-[node name="Walls" type="StaticBody3D" parent="Buildings/House2" unique_id=1486149932]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Buildings/House2/Walls" unique_id=1443175958]
-shape = SubResource("Shape_House2Walls")
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House2/Walls" unique_id=18673173]
-material_override = SubResource("Mat_StoneLight")
-mesh = SubResource("Mesh_House2Walls")
-
-[node name="Roof" type="StaticBody3D" parent="Buildings/House2" unique_id=309675523]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House2/Roof" unique_id=996289975]
-material_override = SubResource("Mat_RoofBlue")
-mesh = SubResource("Mesh_House2Roof")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House2/Roof" unique_id=1197262942]
-shape = SubResource("ConcavePolygonShape3D_70bq6")
-
-[node name="House3" type="Node3D" parent="Buildings" unique_id=1523153923]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 9)
-
-[node name="Walls" type="StaticBody3D" parent="Buildings/House3" unique_id=1236577525]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Buildings/House3/Walls" unique_id=41833309]
-shape = SubResource("Shape_House3Walls")
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House3/Walls" unique_id=1925582531]
-material_override = SubResource("Mat_Stone")
-mesh = SubResource("Mesh_House3Walls")
-
-[node name="Roof" type="StaticBody3D" parent="Buildings/House3" unique_id=150323235]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House3/Roof" unique_id=639735868]
-material_override = SubResource("Mat_RoofRed")
-mesh = SubResource("Mesh_House3Roof")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House3/Roof" unique_id=1160644741]
-shape = SubResource("ConcavePolygonShape3D_bf34x")
-
-[node name="House4" type="Node3D" parent="Buildings" unique_id=1343661762]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 11)
-
-[node name="Walls" type="StaticBody3D" parent="Buildings/House4" unique_id=2143004544]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
-
-[node name="Collision" type="CollisionShape3D" parent="Buildings/House4/Walls" unique_id=38109507]
-shape = SubResource("Shape_House4Walls")
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House4/Walls" unique_id=1197539957]
-material_override = SubResource("Mat_StoneLight")
-mesh = SubResource("Mesh_House4Walls")
-
-[node name="Roof" type="StaticBody3D" parent="Buildings/House4" unique_id=424030005]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.85, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Buildings/House4/Roof" unique_id=1039251097]
-material_override = SubResource("Mat_RoofBlue")
-mesh = SubResource("Mesh_House4Roof")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House4/Roof" unique_id=187202882]
-shape = SubResource("ConcavePolygonShape3D_8mbmp")
-
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.971166, 0, -3.766163)
 
@@ -430,6 +255,9 @@ mesh = SubResource("Mesh_WellRoof")
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+
+[node name="Water2" parent="Props" unique_id=691222566 instance=ExtResource("13_8ru6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.20182, 4.0878205, 12.119247)
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
@@ -507,26 +335,8 @@ mesh = SubResource("BoxMesh_wgm46")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test3" unique_id=259425761]
 shape = SubResource("BoxShape3D_bf34x")
 
-[node name="tree_chesburg_1" parent="." unique_id=1584612525 instance=ExtResource("10_qjukg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.55162, 4.7683716e-07, 4.8198366)
+[node name="house_chesburg_2" parent="." unique_id=1116888906 instance=ExtResource("17_qxovf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.706156, 0, -8.828045)
 
-[node name="tree_chesburg_2" parent="." unique_id=75116022 instance=ExtResource("11_o8fgi")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3346806, 0, 12.403303)
-
-[node name="tree_chesburg_3" parent="." unique_id=538649185 instance=ExtResource("12_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.092019, 0, 6.0025244)
-
-[node name="tree_chesburg_5" parent="." unique_id=1441782480 instance=ExtResource("13_b2jir")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.825775, -4.7683716e-07, 4.0841193)
-
-[node name="tree_chesburg_4" parent="." unique_id=1514547173 instance=ExtResource("14_l8gsu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4792337, 4.7683716e-07, 2.8763103)
-
-[node name="tree_chesburg_６" parent="." unique_id=1709001957 instance=ExtResource("15_qxovf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9661503, 0, -5.2476783)
-
-[node name="tree_chesburg_7" parent="." unique_id=1934332308 instance=ExtResource("16_cx2cw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.380696, 0, -2.08021)
-
-[node name="lake_chesburg" parent="." unique_id=1550830804 instance=ExtResource("2_l8gsu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2930708, 0.034999616, -15.2475395)
+[node name="lake_chesburg" parent="." unique_id=1685882827 instance=ExtResource("2_l8gsu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.785616, 1.2179992, 11.692265)
