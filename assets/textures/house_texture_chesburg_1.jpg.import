@@ -3,15 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3dkxgewhocq7"
-path="res://.godot/imported/house_texture_chesburg_1.jpg-9925d1c26cc7093c24a6b496d30e3a08.ctex"
-metadata={
-"vram_texture": false
-}
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/house_texture_chesburg_1.jpg"
-dest_files=["res://.godot/imported/house_texture_chesburg_1.jpg-9925d1c26cc7093c24a6b496d30e3a08.ctex"]
 
 [params]
 
