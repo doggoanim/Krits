@@ -46,7 +46,7 @@ func physics_update(delta: float) -> void:
 		return
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	if p.try_wall_bounce(prev_h, false, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time):
 		return
 	if p.is_on_floor():

@@ -103,7 +103,7 @@ func physics_update(delta: float) -> void:
 		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
 		p.visual.play(PlayerVisual.ANIM_SLIDE)
 		p.velocity.y = -1.0
-		p.move_and_slide()
+		p.safe_move_and_slide()
 		if not p.is_on_floor():
 			machine.transition_to(&"Air")
 		return
@@ -206,7 +206,7 @@ func physics_update(delta: float) -> void:
 		# clip happened to be paused at.
 		_footstep_phase = -1.0
 	p.velocity.y = -1.0
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	if not p.is_on_floor():
 		machine.transition_to(&"Air")
 

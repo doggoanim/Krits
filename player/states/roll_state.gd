@@ -74,7 +74,7 @@ func physics_update(delta: float) -> void:
 	p.face(h, delta)
 	p.velocity.y = -1.0
 	var prev_h := p.get_hvel()
-	p.move_and_slide()
+	p.safe_move_and_slide()
 
 	# Same launch-into-air bounce Dive/LongJump use, just reachable from the
 	# ground — pops you upward with the collision pose instead of just

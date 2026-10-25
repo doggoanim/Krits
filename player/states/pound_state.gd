@@ -32,6 +32,6 @@ func physics_update(delta: float) -> void:
 			_slamming = true
 			p.velocity.y = -p.config.pound_speed
 		return
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	if p.is_on_floor():
 		machine.transition_to(&"PoundLand", {"jump_queued": _jump_queued})

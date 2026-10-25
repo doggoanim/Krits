@@ -36,7 +36,7 @@ func physics_update(delta: float) -> void:
 	# A wall-bounce collision pose protects itself via play_hold — this call
 	# is simply ignored for the moment and takes back over once it expires.
 	p.visual.play(p.visual.jump_start_anim() if p.velocity.y > c.fall_pose_velocity else PlayerVisual.ANIM_FALLING)
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	# velocity.y <= 0.0 matters here, not just is_on_floor(): right as a jump
 	# starts, move_and_slide() can report a same-frame false-positive floor
 	# touch resolving the body's resting overlap, even while it's already

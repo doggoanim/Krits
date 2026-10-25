@@ -34,6 +34,6 @@ func physics_update(delta: float) -> void:
 		p.face(input, delta)
 	p.visual.play(PlayerVisual.ANIM_CROUCH_WALK if moving else PlayerVisual.ANIM_CROUCH_IDLE)
 	p.velocity.y = -1.0
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	if not p.is_on_floor():
 		machine.transition_to(&"Air")

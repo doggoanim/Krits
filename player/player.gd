@@ -236,6 +236,25 @@ func set_hvel(v: Vector3) -> void:
 	velocity.x = v.x
 	velocity.z = v.z
 
+## Every state calls this instead of the built-in move_and_slide() directly.
+## A genuinely degenerate static collider (zero, not just thin, thickness —
+## e.g. a BoxShape3D imported with one extent rounding to exactly 0) can hand
+## the physics server an ill-defined contact normal, and that can poison
+## `velocity` with NaN/Inf components. Once that happens every future frame's
+## math (move_toward, normalized(), comparisons — NaN compares false against
+## everything) stays NaN forever: the body stops moving AND every pose that's
+## driven by velocity/speed freezes too, which reads exactly like "stuck, no
+## animation change" even though gameplay logic is still running fine. This
+## is a safety net, not a substitute for fixing the actual collider — see the
+## comment on safe_margin above for the real fix.
+func safe_move_and_slide() -> void:
+	if not velocity.is_finite():
+		push_warning("Player velocity went non-finite (%s) — likely a degenerate collision shape nearby. Resetting to zero." % velocity)
+		velocity = Vector3.ZERO
+	move_and_slide()
+	if not velocity.is_finite():
+		velocity = Vector3.ZERO
+
 func apply_gravity(delta: float, mult := 1.0) -> void:
 	var g := config.gravity * mult
 	if velocity.y < 0.0:

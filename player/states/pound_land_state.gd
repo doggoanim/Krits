@@ -37,7 +37,7 @@ func physics_update(delta: float) -> void:
 		p.start_jump(p.config.pound_jump_velocity, true)
 		return
 	p.velocity = Vector3(0.0, -1.0, 0.0)
-	p.move_and_slide()
+	p.safe_move_and_slide()
 	_t -= delta
 	if _t <= 0.0 or not p.is_on_floor():
 		machine.transition_to(&"Ground")
