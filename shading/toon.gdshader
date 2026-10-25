@@ -1,5 +1,9 @@
 shader_type spatial;
-render_mode depth_draw_opaque;
+render_mode depth_draw_opaque, diffuse_lambert;
+// TEMPORARY DIAGNOSTIC: light() commented out below, falling back to
+// Godot's normal built-in lighting, to isolate whether the custom light()
+// override is what's causing characters to render black. Restore once
+// confirmed either way.
 // Writing to ALPHA below (even though it's normally 1.0) makes Godot treat
 // this as a transparent material by default, which skips writing to the
 // depth buffer — that breaks CelOutline's inverted-hull outline technique,
@@ -52,23 +56,23 @@ void fragment() {
 	}
 }
 
-void light() {
-	// ATTENUATION already carries Godot's shadow factor (0 = fully shadowed,
-	// 1 = fully lit, with a soft PCF-blurred gradient across the penumbra).
-	// Folding it into the same value we band below means the shadow's own
-	// edge gets quantized exactly like the light/dark terminator does,
-	// instead of staying a smooth blur next to a hard band.
-	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
-	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
-
-	vec3 lit_color = ALBEDO * LIGHT_COLOR;
-	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * LIGHT_COLOR;
-	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
-
-	if (specular_strength > 0.0) {
-		vec3 half_vec = normalize(LIGHT + VIEW);
-		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
-		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
-		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
-	}
-}
+// void light() {
+// 	// ATTENUATION already carries Godot's shadow factor (0 = fully shadowed,
+// 	// 1 = fully lit, with a soft PCF-blurred gradient across the penumbra).
+// 	// Folding it into the same value we band below means the shadow's own
+// 	// edge gets quantized exactly like the light/dark terminator does,
+// 	// instead of staying a smooth blur next to a hard band.
+// 	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
+// 	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
+//
+// 	vec3 lit_color = ALBEDO * LIGHT_COLOR;
+// 	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * LIGHT_COLOR;
+// 	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
+//
+// 	if (specular_strength > 0.0) {
+// 		vec3 half_vec = normalize(LIGHT + VIEW);
+// 		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
+// 		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
+// 		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
+// 	}
+// }
