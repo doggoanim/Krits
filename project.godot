@@ -29,7 +29,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/proton_scatter/plugin.cfg", "res://addons/mesh_resize_gizmo/plugin.cfg")
+enabled=PackedStringArray("res://addons/mesh_resize_gizmo/plugin.cfg", "res://addons/proton_scatter/plugin.cfg")
 
 [filesystem]
 
