@@ -501,6 +501,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17
 
 [node name="tree_chesburg_1_collision" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9272976, 0.03500057, -0.17825747)
+collision_layer = 129
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="tree_chesburg_1_collision"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 4.5, -0.1)
@@ -526,6 +527,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.667704, 0, -5.7526135)
 
 [node name="house_chesburg_1_collision" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.667704, 0, -5.7526135)
+collision_layer = 129
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="house_chesburg_1_collision"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.33, 0)

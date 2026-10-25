@@ -2,12 +2,17 @@ class_name CameraRig
 extends Node3D
 ## Third-person orbit camera. Top-level node: follows `target` without inheriting rotation.
 
-## Physics layer 8 — walkable floor/ground surfaces only, *not* generic world
-## geometry like walls or props (those all share layer 1, "world", with no
-## way to tell them apart by layer alone). A level's flat, walkable surfaces
-## should carry this bit too (see TestLevel._box()'s `is_floor` param) so the
-## camera collides with the ground under it without also bumping into every
-## ordinary wall that happens to sit on the same general "world" layer.
+## Physics layer 8, "camera_push" in project.godot's layer_names (so it shows
+## a real label instead of a blank checkbox in the Inspector's Collision
+## section) — anything the camera's spring arm should actually be pushed out
+## by, as opposed to generic world geometry (layer 1, "world") which the
+## camera is allowed to clip through, relying on the player's x-ray
+## silhouette to stay visible instead. Originally just walkable floors (see
+## TestLevel._box()'s `is_floor` param) so the camera doesn't dip below the
+## ground, but the same bit works for anything else that should shove the
+## camera away rather than let it clip in — a tree or house trunk, say: tick
+## this layer alongside whatever layer it's already on (still keep layer 1
+## too, so normal raycasts/physics still see it as world geometry).
 const GROUND_LAYER := 1 << 7
 
 @export var mouse_sensitivity := 0.003
