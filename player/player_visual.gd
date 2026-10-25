@@ -83,9 +83,11 @@ var _slimed := false     ## standing in a slime puddle — tints the character g
 const SLIME_TINT_COLOR := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
 const SLIME_TINT_STRENGTH := 0.6
 
+## Whether this character gets the shared outline (see OutlineSystem) at
+## all — its thickness/color are OutlineSystem-wide settings now, not
+## per-character, since it's one screen-space pass shared by everything
+## that opts in, not a per-mesh effect like the old CelOutline technique.
 @export var outline_enabled := true
-@export var outline_thickness_ratio := 0.011   ## outline thickness, as a fraction of the character's height
-@export var outline_color := Color.BLACK
 
 ## Squash & stretch pops. All code-driven (scale the whole model, not the
 ## skeleton), independent of whatever animation clip is playing, so they
@@ -117,12 +119,11 @@ func _ready() -> void:
 	add_child(_model)
 	_model.rotation.y = MODEL_FACING_OFFSET
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
+	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
 	_base_scale = _model.scale.x
-	var height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
 	var face_materials: Dictionary = {}
-	ModelUtil.apply_cel_shading(_model, height * outline_thickness_ratio if outline_enabled else 0.0,
-			outline_color, _materials, face_materials)
+	var outline_hook := Callable(OutlineSystem, &"mark") if outline_enabled else Callable()
+	ModelUtil.apply_cel_shading(_model, _materials, face_materials, outline_hook)
 	_face_material = face_materials.values()[0] if not face_materials.is_empty() else null
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)

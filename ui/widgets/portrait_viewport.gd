@@ -15,7 +15,7 @@ extends Control
 const RENDER_SIZE := 256                ## SubViewport resolution, independent of the Control's size
 const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
-const OUTLINE_THICKNESS_RATIO := 0.011   ## matches PlayerVisual's default
+const OUTLINE_THICKNESS_RATIO := 0.011   ## this viewport's own CelOutline thickness — see apply_cel_shading() call below for why it still uses that technique instead of the shared OutlineSystem
 const PORTRAIT_TURN := 0.32   ## extra yaw (rad) so the portrait isn't a flat mirror-facing
                                ## shot — turns the character slightly left; flip the sign
                                ## if it reads as turning right instead
@@ -99,7 +99,15 @@ func _build_scene() -> void:
 	# model's actual post-scale height, i.e. Player.STAND_HEIGHT itself.
 	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
 	var pre_scale_height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
-	ModelUtil.apply_cel_shading(_model, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK)
+	# Deliberately still CelOutline's old per-mesh technique here, not
+	# OutlineSystem: this viewport renders into its own fully separate
+	# World3D (own_world_3d = true, above), so OutlineSystem's shared
+	# screen-space pass — which only ever sees the MAIN World3D — has
+	# nothing to render here regardless of layer bits. A bust shot at a
+	# fixed close distance also makes the per-mesh seam artifact OutlineSystem
+	# exists to avoid far less noticeable anyway.
+	ModelUtil.apply_cel_shading(_model, [], {},
+			func(mi: MeshInstance3D): CelOutline.apply(mi, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK))
 
 	if _anim != null and _anim.has_animation(PlayerVisual.ANIM_IDLE):
 		_anim.get_animation(PlayerVisual.ANIM_IDLE).loop_mode = Animation.LOOP_LINEAR

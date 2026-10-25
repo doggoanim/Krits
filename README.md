@@ -35,8 +35,15 @@ toward the new direction.
 			 exactly like the lit/dark band does, instead of a hard-banded diffuse term sitting next
 			 to the engine's default soft PCF shadow blur. `rim_strength`/`specular_strength` default
 			 to 0 (both effects off) — raise either to add a rim light or a toon specular highlight
-			 band per-material.
+			 band per-material. outline_overlay.gdshader is OutlineSystem's (core/) screen-space
+			 edge-detect pass — see there for why outlines are a global compositor pass and not a
+			 per-mesh effect.
 - core/      Events (signal bus), Game (stats, flags, spawns, save), InputSetup,
+			 OutlineSystem (one shared screen-space black outline around every character that opts
+			 in via ModelUtil.apply_cel_shading()'s outline_hook — a single outer silhouette per
+			 character rather than one inverted-hull outline per body-part mesh, which could leak a
+			 stray line at seams between touching parts; see its own header comment for the full
+			 technique),
 			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
 			 PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name),

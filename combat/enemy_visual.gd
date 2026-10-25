@@ -6,8 +6,6 @@ extends Node3D
 ## a target height, cel-shaded, outlined — so an animated enemy reads as
 ## part of the same cast as the player, not a different art style bolted on.
 
-const OUTLINE_THICKNESS_RATIO := 0.015   ## black inverted-hull outline, as a fraction of the model's height
-
 var _anim: AnimationPlayer
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
@@ -34,9 +32,8 @@ func setup(data: EnemyData) -> void:
 	add_child(_model)
 	_model.rotation.y = data.model_facing_offset
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	var fit_box := ModelUtil.fit_height(_model, data.model_height)
-	var height := fit_box.size.y if fit_box.size.y > 0.001 else data.model_height
-	ModelUtil.apply_cel_shading(_model, height * OUTLINE_THICKNESS_RATIO, Color.BLACK, _materials)
+	ModelUtil.fit_height(_model, data.model_height)
+	ModelUtil.apply_cel_shading(_model, _materials, {}, Callable(OutlineSystem, &"mark"))
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	if _anim:

@@ -34,6 +34,13 @@ func _ready() -> void:
 	cam.target = player
 	player.camera_rig = cam
 
+	# One shared outline pass for every character (see OutlineSystem) — has
+	# to follow whichever camera is actually live, so it has to exist after
+	# CameraRig does.
+	var outlines := OutlineSystem.new()
+	add_child(outlines)
+	outlines.follow(cam.get_camera())
+
 	encounters = EncounterManager.new()
 	add_child(encounters)
 	encounters.setup(player, level)
