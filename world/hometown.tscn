@@ -8,6 +8,9 @@
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Texture2D" uid="uid://b20u5e8schxwc" path="res://assets/textures/cobblestone_path.jpg" id="2_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
+[ext_resource type="Script" uid="uid://dt5qsgbm5jvvh" path="res://world/terrain_block.gd" id="4_jq25j"]
+[ext_resource type="Material" path="res://assets/materials/dirt.tres" id="5_n20ul"]
+[ext_resource type="Material" path="res://assets/materials/grass.tres" id="6_iolvd"]
 [ext_resource type="PackedScene" uid="uid://bcrwgpmkdcdkv" path="res://assets/world/rock_1.glb" id="8_cx2cw"]
 [ext_resource type="PackedScene" uid="uid://c18rqgadpyua4" path="res://assets/world/rock_2.glb" id="9_38blh"]
 [ext_resource type="PackedScene" uid="uid://cpqakqbcuurt3" path="res://assets/world/rock_3.glb" id="10_jq25j"]
@@ -62,22 +65,6 @@ size = Vector3(4, 3, 10)
 [sub_resource type="BoxShape3D" id="BoxShape3D_23sea"]
 size = Vector3(4, 3, 10)
 
-[sub_resource type="BoxMesh" id="Mesh_Step3"]
-size = Vector3(50, 3, 50)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_cx2cw"]
-size = Vector3(50, 3, 50)
-
-[sub_resource type="StandardMaterial3D" id="Mat_HillTop"]
-albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
-albedo_texture = ExtResource("1_epjlq")
-
-[sub_resource type="BoxMesh" id="Mesh_HillTop"]
-size = Vector3(50, 0.515, 50)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_n20ul"]
-size = Vector3(50, 0.515, 50)
-
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
 
@@ -86,6 +73,15 @@ size = Vector3(10.715, 0.35, 12.595)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
 size = Vector3(10.715, 0.35, 12.595)
+
+[sub_resource type="BoxMesh" id="BoxMesh_aa14t"]
+size = Vector3(4, 2, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_256to"]
+size = Vector3(4, 0.3, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3y8fk"]
+size = Vector3(4, 2.3, 4)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
@@ -210,32 +206,6 @@ mesh = SubResource("Mesh_Step2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
 shape = SubResource("BoxShape3D_23sea")
 
-[node name="Step3" type="StaticBody3D" parent="Terrain/Hill" unique_id=1926949453]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.669548, 1.5101423, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step3" unique_id=395809838]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step3")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Hill/Step3" unique_id=1465866881]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
-shape = SubResource("BoxShape3D_cx2cw")
-
-[node name="Top" type="StaticBody3D" parent="Terrain/Hill" unique_id=1459137163]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.32302, 3.2388124, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Top" unique_id=2135999032]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5142326, 0, 0)
-material_override = SubResource("Mat_HillTop")
-mesh = SubResource("Mesh_HillTop")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Hill/Top" unique_id=1960800072]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5142326, 0, 0)
-shape = SubResource("BoxShape3D_n20ul")
-
 [node name="SLOPE" type="StaticBody3D" parent="Terrain" unique_id=706873338]
 transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
 
@@ -256,6 +226,24 @@ mesh = SubResource("BoxMesh_bf34x")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
 shape = SubResource("BoxShape3D_70bq6")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Terrain" unique_id=776440607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.245708, 0.008936524, 0)
+script = ExtResource("4_jq25j")
+
+[node name="Dirt" type="MeshInstance3D" parent="Terrain/StaticBody3D" unique_id=1850642042]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = ExtResource("5_n20ul")
+mesh = SubResource("BoxMesh_aa14t")
+
+[node name="Grass" type="MeshInstance3D" parent="Terrain/StaticBody3D" unique_id=893305111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
+material_override = ExtResource("6_iolvd")
+mesh = SubResource("BoxMesh_256to")
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain/StaticBody3D" unique_id=533552523]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+shape = SubResource("BoxShape3D_3y8fk")
+
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
@@ -266,7 +254,7 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.47
 [node name="Trees" type="Node3D" parent="Props" unique_id=1738221840]
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
 
 [node name="Water2" parent="Props" unique_id=691222566 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.863918, 2.4982057, 29.406742)
