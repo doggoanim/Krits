@@ -62,6 +62,15 @@ func _ready() -> void:
 	add_to_group(&"player")
 	floor_snap_length = GROUND_FLOOR_SNAP
 	floor_max_angle = deg_to_rad(50.0)
+	# Godot's default (0.001) is tuned for ordinary geometry. Against a very
+	# thin/near-degenerate static collider (a wall-thickness BoxShape3D with
+	# one dimension close to zero, say) it isn't enough margin for
+	# move_and_slide()'s depenetration step to reliably find a way back out,
+	# and the body can stick dead in place on contact with no further motion.
+	# A larger margin costs nothing visually (it's an invisible physics-only
+	# buffer) and makes contact resolution robust against any thin collider
+	# in the level, not just one specific wall.
+	safe_margin = 0.04
 
 	_shape = CapsuleShape3D.new()
 	_shape.radius = RADIUS
