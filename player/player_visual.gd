@@ -66,7 +66,7 @@ var _slimed := false     ## standing in a slime puddle — tints the character g
 const SLIME_TINT_COLOR := Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)
 const SLIME_TINT_STRENGTH := 0.6
 
-@export var outline_enabled := true
+@export var outline_enabled := false   # TEMPORARY — off to isolate whether CelOutline is what's rendering black, see toon.gdshader debugging
 @export var outline_thickness_ratio := 0.011   ## outline thickness, as a fraction of the character's height
 @export var outline_color := Color.BLACK
 
