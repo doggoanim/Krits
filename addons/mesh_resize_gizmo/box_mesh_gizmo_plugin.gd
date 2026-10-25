@@ -3,18 +3,29 @@ extends EditorNode3DGizmoPlugin
 ## Gives any MeshInstance3D whose mesh is a BoxMesh three drag handles in the
 ## 3D viewport — one per axis — that resize mesh.size directly, the same way
 ## Godot's built-in gizmo already lets you drag-resize a CollisionShape3D's
-## BoxShape3D. Each handle sits on one of the box's positive faces and moves
-## along that axis only; dragging it resizes the box symmetrically about its
-## own center (same convention the built-in BoxShape3D gizmo uses), rather
-## than anchoring one face and growing away from it.
+## BoxShape3D. Each handle sits on one of the box's positive faces; dragging
+## it extends ONLY that face outward (and pulls it back in) while the
+## opposite face stays anchored exactly where it was — like resizing a box in
+## Blender by dragging one face, not Godot's own symmetric BoxShape3D gizmo
+## convention. Since BoxMesh itself always centers on the node's own origin,
+## keeping the far face fixed in world space means this moves the node
+## (position) and resizes the mesh together every frame — see _set_handle.
 ##
 ## Registered by plugin.gd — not meant to be used standalone.
 
-const HANDLE_COLOR := Color(1.0, 0.6, 0.0)
 const LINE_COLOR := Color(1.0, 0.6, 0.0, 0.5)
-const MIN_HALF_SIZE := 0.01   ## never let a drag collapse an axis to zero/negative
+const MIN_SIZE := 0.02   ## never let a drag collapse an axis to zero/negative
 
 var _undo_redo: EditorUndoRedoManager
+
+## Snapshotted once at the start of the current drag (see _get_handle_value)
+## and used for every _set_handle call during it, rather than re-reading the
+## node's live, already-moving transform each frame — the far face has to
+## stay anchored relative to where the box STARTED, not wherever it's
+## drifted to a few frames into the drag, or the anchor would creep.
+var _drag_start_position := Vector3.ZERO
+var _drag_start_basis := Basis.IDENTITY
+var _drag_start_size := Vector3.ZERO
 
 func _init(undo_redo: EditorUndoRedoManager) -> void:
 	_undo_redo = undo_redo
@@ -49,44 +60,67 @@ func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: boo
 	return ["Size X", "Size Y", "Size Z"][handle_id]
 
 func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool) -> Variant:
-	# Returns the whole size, not just the one axis — simplest thing that's
+	var mi := gizmo.get_node_3d() as MeshInstance3D
+	var box := _get_box(gizmo)
+	_drag_start_position = mi.position
+	_drag_start_basis = mi.global_transform.basis
+	_drag_start_size = box.size
+	# Bundles both properties this drag can change — simplest thing that's
 	# still enough to fully restore on cancel/undo (see _commit_handle).
-	return _get_box(gizmo).size
+	return {"position": mi.position, "size": box.size}
 
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
 	var box := _get_box(gizmo)
 	if box == null:
 		return
 	var mi := gizmo.get_node_3d() as MeshInstance3D
-	var gt := mi.global_transform
 
-	var axis := Vector3.ZERO
-	axis[handle_id] = 1.0
-	var axis_world := gt.basis * axis
-	var center_world := gt.origin
+	# All of this is computed fresh from the drag-start snapshot every call,
+	# never from the node's current (already-moved) state — see this file's
+	# header comment and _drag_start_* for why.
+	var start_half: float = _drag_start_size[handle_id] * 0.5
+	var axis_world: Vector3 = _drag_start_basis * _unit_axis(handle_id)
+	var anchor_face_offset := -start_half   ## the far face, fixed throughout the drag
+	var start_center_world: Vector3 = mi.get_parent_node_3d().global_transform * _drag_start_position \
+			if mi.get_parent_node_3d() else _drag_start_position
 
 	var ray_origin := camera.project_ray_origin(screen_pos)
 	var ray_dir := camera.project_ray_normal(screen_pos)
-	var closest_world := _closest_point_on_line_to_ray(center_world, axis_world, ray_origin, ray_dir)
-	var closest_local: Vector3 = gt.affine_inverse() * closest_world
+	var closest_world := _closest_point_on_line_to_ray(start_center_world, axis_world, ray_origin, ray_dir)
+	var dragged_face_offset := (closest_world - start_center_world).dot(axis_world.normalized())
+	# Keep the dragged face on its own (positive) side of the anchor, at
+	# least MIN_SIZE away from it — this is what stops the box collapsing or
+	# flipping inside-out as the drag crosses back past the anchored face.
+	dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
 
-	var new_half := maxf(MIN_HALF_SIZE, absf(closest_local[handle_id]))
-	var new_size := box.size
-	new_size[handle_id] = new_half * 2.0
+	var new_axis_size := dragged_face_offset - anchor_face_offset
+	var center_shift_along_axis := (dragged_face_offset + anchor_face_offset) * 0.5
+
+	var new_size := _drag_start_size
+	new_size[handle_id] = new_axis_size
 	box.size = new_size
+	mi.global_position = start_center_world + axis_world.normalized() * center_shift_along_axis
 
 func _commit_handle(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool, restore: Variant, cancel: bool) -> void:
 	var box := _get_box(gizmo)
 	if box == null:
 		return
+	var mi := gizmo.get_node_3d() as MeshInstance3D
 	if cancel:
-		box.size = restore
+		mi.position = restore.position
+		box.size = restore.size
 		return
-	var final_size: Vector3 = box.size
 	_undo_redo.create_action("Resize BoxMesh")
-	_undo_redo.add_do_property(box, &"size", final_size)
-	_undo_redo.add_undo_property(box, &"size", restore)
-	_undo_redo.commit_action(false)   ## false: the live edit already applied the do-value, don't reapply
+	_undo_redo.add_do_property(mi, &"position", mi.position)
+	_undo_redo.add_undo_property(mi, &"position", restore.position)
+	_undo_redo.add_do_property(box, &"size", box.size)
+	_undo_redo.add_undo_property(box, &"size", restore.size)
+	_undo_redo.commit_action(false)   ## false: the live edit already applied the do-values, don't reapply
+
+func _unit_axis(handle_id: int) -> Vector3:
+	var axis := Vector3.ZERO
+	axis[handle_id] = 1.0
+	return axis
 
 func _get_box(gizmo: EditorNode3DGizmo) -> BoxMesh:
 	var mi := gizmo.get_node_3d() as MeshInstance3D
