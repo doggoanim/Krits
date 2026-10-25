@@ -1,17 +1,5 @@
 shader_type spatial;
-render_mode depth_draw_opaque, diffuse_lambert;
-// TEMPORARY DIAGNOSTIC: light() commented out below, falling back to
-// Godot's normal built-in lighting, to isolate whether the custom light()
-// override is what's causing characters to render black. Restore once
-// confirmed either way.
-// Writing to ALPHA below (even though it's normally 1.0) makes Godot treat
-// this as a transparent material by default, which skips writing to the
-// depth buffer — that breaks CelOutline's inverted-hull outline technique,
-// since the real mesh then fails to occlude the black outline shell behind
-// it and the whole character renders as a solid black silhouette instead of
-// a thin rim. depth_draw_opaque forces normal depth writing regardless of
-// the alpha value, restoring correct occlusion.
-//
+render_mode depth_draw_opaque;
 // Project-wide cel/toon shader. The reason this exists instead of just using
 // the built-in `diffuse_toon` render mode (still used by a few one-off
 // materials elsewhere, e.g. the water shader): that mode only bands the
@@ -22,16 +10,28 @@ render_mode depth_draw_opaque, diffuse_lambert;
 // exactly the same hard/soft treatment as the lit/dark band, because both
 // come from thresholding the same `lit` value below.
 //
+// depth_draw_opaque: writing to ALPHA below (even though it's normally 1.0)
+// makes Godot treat this as a transparent material by default, which skips
+// writing to the depth buffer — that breaks CelOutline's inverted-hull
+// outline technique, since the real mesh then fails to occlude the black
+// outline shell behind it and the whole character renders as a solid black
+// silhouette instead of a thin rim. This render mode forces normal depth
+// writing regardless of the alpha value, restoring correct occlusion.
+//
 // Usage: duplicate shading/toon_material.tres (or make a fresh
 // ShaderMaterial pointed at this shader) and assign it as a mesh surface's
 // material/material override — the player model, enemies, world props,
 // anything. ModelUtil.apply_cel_shading() does this automatically for any
 // rigged character model (see core/model_util.gd), one dedicated material
 // per mesh surface so each can be tinted independently (flash-on-hit, slime
-// tint, ...) via ModelUtil.get_tint()/set_tint().
+// tint, ...) via ModelUtil.get_tint()/set_tint(). It also carries over
+// vertex-color-as-albedo from the source material if that's how it was
+// authored (use_vertex_color) rather than assuming every model's actual
+// color lives in albedo_color/albedo_texture.
 
 uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex colors, matching BaseMaterial3D.vertex_color_use_as_albedo
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.05;   // width of that edge; 0 = razor-sharp
@@ -46,16 +46,13 @@ uniform float specular_threshold : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 specular_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void fragment() {
-	// TEMPORARY DIAGNOSTIC — shows the raw albedo_color parameter alone, no
-	// texture involved, to see whether the color passed in from ModelUtil is
-	// itself black (vs. the texture being the black one). Restore once
-	// confirmed.
-	ALBEDO = albedo_color.rgb;
-	ALPHA = 1.0;
-
 	vec4 tex = texture(albedo_texture, UV);
-	// ALBEDO = tex.rgb * albedo_color.rgb;
-	// ALPHA = tex.a * albedo_color.a;
+	vec3 color = albedo_color.rgb;
+	if (use_vertex_color) {
+		color *= COLOR.rgb;
+	}
+	ALBEDO = tex.rgb * color;
+	ALPHA = tex.a * albedo_color.a;
 
 	if (rim_strength > 0.0) {
 		float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), max(rim_power, 0.001));
@@ -63,23 +60,23 @@ void fragment() {
 	}
 }
 
-// void light() {
-// 	// ATTENUATION already carries Godot's shadow factor (0 = fully shadowed,
-// 	// 1 = fully lit, with a soft PCF-blurred gradient across the penumbra).
-// 	// Folding it into the same value we band below means the shadow's own
-// 	// edge gets quantized exactly like the light/dark terminator does,
-// 	// instead of staying a smooth blur next to a hard band.
-// 	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
-// 	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
-//
-// 	vec3 lit_color = ALBEDO * LIGHT_COLOR;
-// 	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * LIGHT_COLOR;
-// 	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
-//
-// 	if (specular_strength > 0.0) {
-// 		vec3 half_vec = normalize(LIGHT + VIEW);
-// 		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
-// 		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
-// 		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
-// 	}
-// }
+void light() {
+	// ATTENUATION already carries Godot's shadow factor (0 = fully shadowed,
+	// 1 = fully lit, with a soft PCF-blurred gradient across the penumbra).
+	// Folding it into the same value we band below means the shadow's own
+	// edge gets quantized exactly like the light/dark terminator does,
+	// instead of staying a smooth blur next to a hard band.
+	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
+	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
+
+	vec3 lit_color = ALBEDO * LIGHT_COLOR;
+	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * LIGHT_COLOR;
+	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
+
+	if (specular_strength > 0.0) {
+		vec3 half_vec = normalize(LIGHT + VIEW);
+		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
+		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
+		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
+	}
+}

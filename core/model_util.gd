@@ -76,7 +76,19 @@ static func _shade_recursive(n: Node, outline_thickness: float, outline_color: C
 				var cel := ShaderMaterial.new()
 				cel.shader = CEL_SHADER
 				cel.set_shader_parameter(&"albedo_texture", base.albedo_texture if base.albedo_texture else _get_white_texture())
-				cel.set_shader_parameter(&"albedo_color", base.albedo_color)
+				cel.set_shader_parameter(&"use_vertex_color", base.vertex_color_use_as_albedo)
+				# A model whose actual color comes from vertex colors (common
+				# for simple/stylized exports) often leaves albedo_color at a
+				# literal black rather than white, since the source material
+				# never meant it to be read on its own — it's only a factor
+				# multiplied with the vertex color. If nothing else is going
+				# to supply color (no texture, no vertex color) a flat black
+				# tint is never actually intentional, so fall back to white.
+				var tint := base.albedo_color
+				if tint.r < 0.001 and tint.g < 0.001 and tint.b < 0.001 \
+						and not base.vertex_color_use_as_albedo and base.albedo_texture == null:
+					tint = Color.WHITE
+				cel.set_shader_parameter(&"albedo_color", tint)
 				mi.set_surface_override_material(i, cel)
 				out_materials.append(cel)
 		if outline_thickness > 0.0:
