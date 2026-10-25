@@ -10,8 +10,8 @@ const OUTLINE_THICKNESS_RATIO := 0.015   ## black inverted-hull outline, as a fr
 
 var _anim: AnimationPlayer
 var _model: Node3D
-var _materials: Array[BaseMaterial3D] = []
-var _base_colors: Dictionary = {}   # BaseMaterial3D -> Color, the non-flash color
+var _materials: Array[ShaderMaterial] = []
+var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
 var _anim_idle: StringName
 var _anim_move: StringName
@@ -38,7 +38,7 @@ func setup(data: EnemyData) -> void:
 	var height := fit_box.size.y if fit_box.size.y > 0.001 else data.model_height
 	ModelUtil.apply_cel_shading(_model, height * OUTLINE_THICKNESS_RATIO, Color.BLACK, _materials)
 	for m in _materials:
-		_base_colors[m] = m.albedo_color
+		_base_colors[m] = ModelUtil.get_tint(m)
 	if _anim:
 		for clip in [_anim_idle, _anim_move]:
 			if _anim.has_animation(clip):
@@ -86,8 +86,9 @@ func _process(delta: float) -> void:
 	if _flash_t > 0.0:
 		_flash_t -= delta
 		for m in _materials:
-			m.albedo_color = Color.WHITE
+			ModelUtil.set_tint(m, Color.WHITE)
 	else:
 		for m in _materials:
-			if m.albedo_color != _base_colors.get(m, m.albedo_color):
-				m.albedo_color = _base_colors[m]
+			var base: Color = _base_colors.get(m, ModelUtil.get_tint(m))
+			if ModelUtil.get_tint(m) != base:
+				ModelUtil.set_tint(m, base)

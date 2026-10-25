@@ -12,14 +12,13 @@ shader_type spatial;
 // Usage: duplicate shading/toon_material.tres (or make a fresh
 // ShaderMaterial pointed at this shader) and assign it as a mesh surface's
 // material/material override — the player model, enemies, world props,
-// anything. `albedo_color` is an `instance uniform`, so many different
-// objects can share one ShaderMaterial resource and still each have their
-// own tint without duplicating the material; give an object its own
-// ShaderMaterial only if it needs a different texture or shading settings
-// (shadow softness, rim, etc.), not just a different color.
+// anything. ModelUtil.apply_cel_shading() does this automatically for any
+// rigged character model (see core/model_util.gd), one dedicated material
+// per mesh surface so each can be tinted independently (flash-on-hit, slime
+// tint, ...) via ModelUtil.get_tint()/set_tint().
 
 uniform sampler2D albedo_texture : source_color;
-instance uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.05;   // width of that edge; 0 = razor-sharp

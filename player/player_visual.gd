@@ -48,8 +48,8 @@ const MODEL_FACING_OFFSET := PI
 
 var _anim: AnimationPlayer
 var _model: Node3D
-var _materials: Array[BaseMaterial3D] = []
-var _base_colors: Dictionary = {}   # BaseMaterial3D -> Color, the non-flash color
+var _materials: Array[ShaderMaterial] = []
+var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
@@ -106,7 +106,7 @@ func _ready() -> void:
 	ModelUtil.apply_cel_shading(_model, height * outline_thickness_ratio if outline_enabled else 0.0,
 			outline_color, _materials)
 	for m in _materials:
-		_base_colors[m] = m.albedo_color
+		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
@@ -307,11 +307,13 @@ func _process(delta: float) -> void:
 		_flash_t -= delta
 		var white := int(_flash_t * 30.0) % 2 == 0
 		for m in _materials:
-			m.albedo_color = Color.WHITE if white else _base_colors.get(m, m.albedo_color)
+			ModelUtil.set_tint(m, Color.WHITE if white else _base_colors.get(m, ModelUtil.get_tint(m)))
 	elif _slimed:
 		for m in _materials:
-			m.albedo_color = _base_colors.get(m, m.albedo_color).lerp(SLIME_TINT_COLOR, SLIME_TINT_STRENGTH)
+			var base: Color = _base_colors.get(m, ModelUtil.get_tint(m))
+			ModelUtil.set_tint(m, base.lerp(SLIME_TINT_COLOR, SLIME_TINT_STRENGTH))
 	else:
 		for m in _materials:
-			if m.albedo_color != _base_colors.get(m, m.albedo_color):
-				m.albedo_color = _base_colors[m]
+			var base: Color = _base_colors.get(m, ModelUtil.get_tint(m))
+			if ModelUtil.get_tint(m) != base:
+				ModelUtil.set_tint(m, base)
