@@ -11,6 +11,21 @@ extends RefCounted
 
 const CEL_SHADER := preload("res://shading/toon.gdshader")
 
+## A model with no actual albedo texture (flat-colored or vertex-painted)
+## has `albedo_texture == null`. Explicitly binding a shader's sampler2D
+## parameter to null reads back as solid black rather than falling back to
+## white the way an *untouched* parameter would — learned the hard way with
+## TrampleMap's grass bending — so untextured materials get this instead of
+## null, rather than relying on that fallback behavior at all.
+static var _white_texture: Texture2D
+
+static func _get_white_texture() -> Texture2D:
+	if _white_texture == null:
+		var img := Image.create(1, 1, false, Image.FORMAT_RGB8)
+		img.fill(Color.WHITE)
+		_white_texture = ImageTexture.create_from_image(img)
+	return _white_texture
+
 ## Scales `model` uniformly so its current rest-pose bounding-box height
 ## matches `target_height`. Returns the AABB measured *before* scaling, so
 ## callers can size other things (like outline thickness) proportionally to
@@ -60,7 +75,7 @@ static func _shade_recursive(n: Node, outline_thickness: float, outline_color: C
 				var base := mat as BaseMaterial3D
 				var cel := ShaderMaterial.new()
 				cel.shader = CEL_SHADER
-				cel.set_shader_parameter(&"albedo_texture", base.albedo_texture)
+				cel.set_shader_parameter(&"albedo_texture", base.albedo_texture if base.albedo_texture else _get_white_texture())
 				cel.set_shader_parameter(&"albedo_color", base.albedo_color)
 				mi.set_surface_override_material(i, cel)
 				out_materials.append(cel)
