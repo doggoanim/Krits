@@ -45,7 +45,7 @@ uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opa
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.05;   // width of that edge; 0 = razor-sharp
-uniform vec4 shadow_tint : source_color = vec4(0.6, 0.6, 0.75, 1.0);   // multiplies ALBEDO in the shadow band
+uniform vec4 shadow_tint : source_color = vec4(0.42, 0.42, 0.55, 1.0);   // multiplies ALBEDO in the shadow band
 
 uniform float rim_strength : hint_range(0.0, 1.0) = 0.0;   // 0 disables the rim light entirely
 uniform float rim_power : hint_range(0.5, 16.0) = 4.0;
