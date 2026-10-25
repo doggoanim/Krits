@@ -7,8 +7,16 @@
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Texture2D" uid="uid://biqs2l4jk2u38" path="res://assets/textures/dirt_1.jpg" id="2_dvlkn"]
+[ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
+[ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/tree_chesburg_1.glb" id="10_qjukg"]
+[ext_resource type="PackedScene" uid="uid://bgi0nckpg0qug" path="res://assets/world/tree_chesburg_2.glb" id="11_o8fgi"]
+[ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/tree_chesburg_3.glb" id="12_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
+[ext_resource type="PackedScene" uid="uid://b7yepay0t2k7j" path="res://assets/world/tree_chesburg_5.glb" id="13_b2jir"]
 [ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
+[ext_resource type="PackedScene" uid="uid://dwsqlkkxwt0wo" path="res://assets/world/tree_chesburg_4.glb" id="14_l8gsu"]
+[ext_resource type="PackedScene" uid="uid://clkm5ngwo17ku" path="res://assets/world/tree_chesburg_６.glb" id="15_qxovf"]
+[ext_resource type="PackedScene" uid="uid://bkxlyousnd7ld" path="res://assets/world/tree_chesburg_7.glb" id="16_cx2cw"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -35,6 +43,47 @@ size = Vector3(44, 0.05, 4)
 
 [sub_resource type="BoxMesh" id="Mesh_PathEW"]
 size = Vector3(44, 0.05, 4)
+
+[sub_resource type="BoxShape3D" id="Shape_Step1"]
+size = Vector3(4, 1.5, 10)
+
+[sub_resource type="StandardMaterial3D" id="Mat_HillStep"]
+albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
+albedo_texture = ExtResource("1_o4qy2")
+
+[sub_resource type="BoxMesh" id="Mesh_Step1"]
+size = Vector3(4, 1.5, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_Step2"]
+size = Vector3(4, 3, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_Step2"]
+size = Vector3(4, 3, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_Step3"]
+size = Vector3(4, 4.5, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_Step3"]
+size = Vector3(4, 4.5, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_HillTop"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="StandardMaterial3D" id="Mat_HillTop"]
+albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
+albedo_texture = ExtResource("1_epjlq")
+
+[sub_resource type="BoxMesh" id="Mesh_HillTop"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
+size = Vector3(10.715, 0.35, 12.595)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gka81"]
+size = Vector3(10.715, 0.35, 12.595)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
+size = Vector3(10.715, 0.35, 12.595)
 
 [sub_resource type="BoxShape3D" id="Shape_House1Walls"]
 size = Vector3(6, 4, 6)
@@ -118,53 +167,6 @@ top_radius = 0.0
 bottom_radius = 1.6
 height = 1.0
 
-[sub_resource type="BoxShape3D" id="Shape_Step1"]
-size = Vector3(4, 1.5, 10)
-
-[sub_resource type="StandardMaterial3D" id="Mat_HillStep"]
-albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
-albedo_texture = ExtResource("1_o4qy2")
-
-[sub_resource type="BoxMesh" id="Mesh_Step1"]
-size = Vector3(4, 1.5, 10)
-
-[sub_resource type="BoxShape3D" id="Shape_Step2"]
-size = Vector3(4, 3, 10)
-
-[sub_resource type="BoxMesh" id="Mesh_Step2"]
-size = Vector3(4, 3, 10)
-
-[sub_resource type="BoxShape3D" id="Shape_Step3"]
-size = Vector3(4, 4.5, 10)
-
-[sub_resource type="BoxMesh" id="Mesh_Step3"]
-size = Vector3(4, 4.5, 10)
-
-[sub_resource type="BoxShape3D" id="Shape_HillTop"]
-size = Vector3(10, 1, 10)
-
-[sub_resource type="StandardMaterial3D" id="Mat_HillTop"]
-albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
-albedo_texture = ExtResource("1_epjlq")
-
-[sub_resource type="BoxMesh" id="Mesh_HillTop"]
-size = Vector3(10, 1, 10)
-
-[sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
-size = Vector3(10.715, 0.35, 12.595)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_gka81"]
-size = Vector3(10.715, 0.35, 12.595)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
-size = Vector3(10.715, 0.35, 12.595)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wgm46"]
-size = Vector3(0.63, 11.65, 7.895)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_bf34x"]
-size = Vector3(0.63, 11.65, 7.895)
-
 [sub_resource type="CapsuleShape3D" id="Shape_MiraBody"]
 radius = 0.4
 height = 1.8
@@ -187,19 +189,15 @@ albedo_color = Color(0.8117647, 0.6627451, 0.19215687, 1)
 radius = 0.4
 height = 1.8
 
+[sub_resource type="BoxMesh" id="BoxMesh_wgm46"]
+size = Vector3(0.63, 11.65, 7.895)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bf34x"]
+size = Vector3(0.63, 11.65, 7.895)
+
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
-[node name="Terrain" type="Node3D" parent="."]
-
-[node name="Buildings" type="Node3D" parent="."]
-
-[node name="Props" type="Node3D" parent="."]
-
-[node name="NPCs" type="Node3D" parent="."]
-
-[node name="Spawnpoints" type="Node3D" parent="."]
-
-[node name="Debug" type="Node3D" parent="."]
+[node name="Terrain" type="Node3D" parent="." unique_id=523119175]
 
 [node name="Ground" type="StaticBody3D" parent="Terrain" unique_id=376223182]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -235,6 +233,74 @@ shape = SubResource("Shape_PathEW")
 [node name="Mesh" type="MeshInstance3D" parent="Terrain/PathEW" unique_id=366163986]
 material_override = SubResource("Mat_DirtPath")
 mesh = SubResource("Mesh_PathEW")
+
+[node name="Hill" type="Node3D" parent="Terrain" unique_id=993983351]
+
+[node name="Step1" type="StaticBody3D" parent="Terrain/Hill" unique_id=467105897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.75, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step1" unique_id=1305188359]
+shape = SubResource("Shape_Step1")
+
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step1" unique_id=1670024902]
+material_override = SubResource("Mat_HillStep")
+mesh = SubResource("Mesh_Step1")
+
+[node name="Step2" type="StaticBody3D" parent="Terrain/Hill" unique_id=1560727371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.5, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step2" unique_id=2074909451]
+shape = SubResource("Shape_Step2")
+
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step2" unique_id=1764182827]
+material_override = SubResource("Mat_HillStep")
+mesh = SubResource("Mesh_Step2")
+
+[node name="Step3" type="StaticBody3D" parent="Terrain/Hill" unique_id=1926949453]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 2.25, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step3" unique_id=83181022]
+shape = SubResource("Shape_Step3")
+
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step3" unique_id=395809838]
+material_override = SubResource("Mat_HillStep")
+mesh = SubResource("Mesh_Step3")
+
+[node name="Top" type="StaticBody3D" parent="Terrain/Hill" unique_id=1459137163]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4.5, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Top" unique_id=2079429613]
+shape = SubResource("Shape_HillTop")
+
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Top" unique_id=2135999032]
+material_override = SubResource("Mat_HillTop")
+mesh = SubResource("Mesh_HillTop")
+
+[node name="SLOPE" type="StaticBody3D" parent="Terrain" unique_id=706873338]
+transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE" unique_id=1707694586]
+mesh = SubResource("BoxMesh_bf34x")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE" unique_id=382698887]
+shape = SubResource("BoxShape3D_gka81")
+
+[node name="SLOPE2" type="StaticBody3D" parent="Terrain" unique_id=1264340287]
+transform = Transform3D(1, 0, 0, 0, 0.999347, -0.036133796, 0, 0.036133796, 0.999347, -15.957043, 1.6517792, -36.796364)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE2" unique_id=1197038778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
+mesh = SubResource("BoxMesh_bf34x")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE2" unique_id=958427448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
+shape = SubResource("BoxShape3D_70bq6")
+
+[node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
 [node name="House1" type="Node3D" parent="Buildings" unique_id=4247218]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -11)
@@ -332,6 +398,11 @@ mesh = SubResource("Mesh_House4Roof")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House4/Roof" unique_id=187202882]
 shape = SubResource("ConcavePolygonShape3D_8mbmp")
 
+[node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.971166, 0, -3.766163)
+
+[node name="Props" type="Node3D" parent="." unique_id=1770766056]
+
 [node name="Well" type="Node3D" parent="Props" unique_id=1249735749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
 
@@ -355,53 +426,42 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_WellRoof")
 
-[node name="Hill" type="Node3D" parent="Terrain" unique_id=993983351]
-
-[node name="Step1" type="StaticBody3D" parent="Terrain/Hill" unique_id=467105897]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.75, 0)
-collision_layer = 129
-
-[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step1" unique_id=1305188359]
-shape = SubResource("Shape_Step1")
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step1" unique_id=1670024902]
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step1")
-
-[node name="Step2" type="StaticBody3D" parent="Terrain/Hill" unique_id=1560727371]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.5, 0)
-collision_layer = 129
-
-[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step2" unique_id=2074909451]
-shape = SubResource("Shape_Step2")
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step2" unique_id=1764182827]
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step2")
-
-[node name="Step3" type="StaticBody3D" parent="Terrain/Hill" unique_id=1926949453]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 2.25, 0)
-collision_layer = 129
-
-[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step3" unique_id=83181022]
-shape = SubResource("Shape_Step3")
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step3" unique_id=395809838]
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step3")
-
-[node name="Top" type="StaticBody3D" parent="Terrain/Hill" unique_id=1459137163]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4.5, 0)
-collision_layer = 129
-
-[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Top" unique_id=2079429613]
-shape = SubResource("Shape_HillTop")
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Top" unique_id=2135999032]
-material_override = SubResource("Mat_HillTop")
-mesh = SubResource("Mesh_HillTop")
-
 [node name="Trees" type="Node3D" parent="Props" unique_id=1738221840]
+
+[node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+
+[node name="NPCs" type="Node3D" parent="." unique_id=298095596]
+
+[node name="ElderMira" type="StaticBody3D" parent="NPCs" unique_id=-1165481586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -6)
+script = ExtResource("1_npc")
+dialogue = ExtResource("1_mira_dialogue")
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/ElderMira" unique_id=-1165481585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_MiraBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/ElderMira" unique_id=-1165481584]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("Mat_MiraRobe")
+mesh = SubResource("Mesh_MiraBody")
+
+[node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -6)
+script = ExtResource("1_shopkeeper")
+prompt_text = "Press E to shop"
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_ShopBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("Mat_ShopRobe")
+mesh = SubResource("Mesh_ShopBody")
+
+[node name="Spawnpoints" type="Node3D" parent="." unique_id=607103561]
 
 [node name="StartSpawn" type="Area3D" parent="Spawnpoints" unique_id=1738210625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 14)
@@ -414,25 +474,7 @@ script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
 
-[node name="SLOPE" type="StaticBody3D" parent="Terrain" unique_id=706873338]
-transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE" unique_id=1707694586]
-mesh = SubResource("BoxMesh_bf34x")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE" unique_id=382698887]
-shape = SubResource("BoxShape3D_gka81")
-
-[node name="SLOPE2" type="StaticBody3D" parent="Terrain" unique_id=1264340287]
-transform = Transform3D(1, 0, 0, 0, 0.999347, -0.036133796, 0, 0.036133796, 0.999347, -15.957043, 1.6517792, -36.796364)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE2" unique_id=1197038778]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
-mesh = SubResource("BoxMesh_bf34x")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE2" unique_id=958427448]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
-shape = SubResource("BoxShape3D_70bq6")
+[node name="Debug" type="Node3D" parent="." unique_id=419982432]
 
 [node name="test" type="StaticBody3D" parent="Debug" unique_id=911434677]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 33.856796, 5.193923, -14.587875)
@@ -465,36 +507,26 @@ mesh = SubResource("BoxMesh_wgm46")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test3" unique_id=259425761]
 shape = SubResource("BoxShape3D_bf34x")
 
-[node name="ElderMira" type="StaticBody3D" parent="NPCs" unique_id=-1165481586]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -6)
-script = ExtResource("1_npc")
-dialogue = ExtResource("1_mira_dialogue")
+[node name="tree_chesburg_1" parent="." unique_id=1584612525 instance=ExtResource("10_qjukg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.55162, 4.7683716e-07, 4.8198366)
 
-[node name="Collision" type="CollisionShape3D" parent="NPCs/ElderMira" unique_id=-1165481585]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("Shape_MiraBody")
+[node name="tree_chesburg_2" parent="." unique_id=75116022 instance=ExtResource("11_o8fgi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3346806, 0, 12.403303)
 
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/ElderMira" unique_id=-1165481584]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("Mat_MiraRobe")
-mesh = SubResource("Mesh_MiraBody")
+[node name="tree_chesburg_3" parent="." unique_id=538649185 instance=ExtResource("12_8ru6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.092019, 0, 6.0025244)
 
-[node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -6)
-script = ExtResource("1_shopkeeper")
-prompt_text = "Press E to shop"
+[node name="tree_chesburg_5" parent="." unique_id=1441782480 instance=ExtResource("13_b2jir")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.825775, -4.7683716e-07, 4.0841193)
 
-[node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("Shape_ShopBody")
+[node name="tree_chesburg_4" parent="." unique_id=1514547173 instance=ExtResource("14_l8gsu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4792337, 4.7683716e-07, 2.8763103)
 
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("Mat_ShopRobe")
-mesh = SubResource("Mesh_ShopBody")
+[node name="tree_chesburg_６" parent="." unique_id=1709001957 instance=ExtResource("15_qxovf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.9661503, 0, -5.2476783)
 
-[node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+[node name="tree_chesburg_7" parent="." unique_id=1934332308 instance=ExtResource("16_cx2cw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.380696, 0, -2.08021)
 
-[node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.971166, 0, -3.766163)
+[node name="lake_chesburg" parent="." unique_id=1550830804 instance=ExtResource("2_l8gsu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2930708, 0.034999616, -15.2475395)
