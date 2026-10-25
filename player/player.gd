@@ -650,7 +650,17 @@ func hit(amount: float, pierces_shield := false) -> void:
 		return
 	invuln = HIT_INVULN
 	visual.flash()
-	if Game.stats.take_damage(amount, pierces_shield):
+	var hp_before := Game.stats.hp
+	var died := Game.stats.take_damage(amount, pierces_shield)
+	# Only the "hurt" face, not flash() above — that stays on every hit
+	# regardless of shield, same as before. A hit fully absorbed by shield
+	# (hp unchanged) shouldn't show a pain reaction; checking the actual
+	# before/after hp here is more robust than just branching on
+	# pierces_shield, since a non-piercing hit can still dip into hp once
+	# shield runs out, and that should show hurt too.
+	if Game.stats.hp < hp_before:
+		visual.show_hurt()
+	if died:
 		dead = true
 		velocity = Vector3.ZERO
 		Events.player_died.emit()

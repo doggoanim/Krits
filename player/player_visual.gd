@@ -58,14 +58,30 @@ const MODEL_FACING_OFFSET := PI
 ## crashing, so this stays safe to call speculatively from anywhere.
 const FACE_EXPRESSIONS: Dictionary[StringName, Texture2D] = {
 	&"idle": preload("res://assets/player/krits_Face_Idle.png"),
+	&"blink": preload("res://assets/player/krits_Face_Blink.png"),
+	&"hurt": preload("res://assets/player/krits_Face_Hurt.png"),
 }
 const DEFAULT_EXPRESSION := &"idle"
+
+## Random idle blinking (see _update_face) — how long between blinks, and how
+## long the blink texture itself stays up before reverting to idle. Randomized
+## per-blink rather than a fixed interval so it doesn't read as mechanical.
+const BLINK_INTERVAL_MIN := 2.0
+const BLINK_INTERVAL_MAX := 5.0
+const BLINK_DURATION := 0.12
+
+## How long the hurt face shows after a health-damaging hit (see show_hurt())
+## before reverting back to idle/resuming the blink cycle.
+const HURT_EXPRESSION_DURATION := 0.5
 
 var _anim: AnimationPlayer
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
 var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
 var _expression: StringName = DEFAULT_EXPRESSION
+var _blink_cd := 0.0        ## seconds until the next scheduled blink (see _update_face)
+var _blink_hold_t := 0.0    ## >0 while the blink texture is currently showing
+var _hurt_hold_t := 0.0     ## >0 while the hurt face is protected from blinking (see show_hurt)
 var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
@@ -125,6 +141,8 @@ func _ready() -> void:
 	var outline_hook := Callable(OutlineSystem, &"mark") if outline_enabled else Callable()
 	ModelUtil.apply_cel_shading(_model, _materials, face_materials, outline_hook)
 	_face_material = face_materials.values()[0] if not face_materials.is_empty() else null
+	if _face_material != null:
+		_reset_blink_timer()
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
@@ -215,6 +233,46 @@ func set_expression(name: StringName) -> void:
 
 func expression() -> StringName:
 	return _expression
+
+## Briefly swaps to the "hurt" face — call only when a hit actually reduces
+## HP (see Player.hit(), which checks this against a shield-only absorb
+## before calling), not on every incoming hit regardless of whether it did
+## anything to health. Takes priority over whatever blink state is active
+## and suppresses blinking until it's done; _update_face() resumes the
+## normal blink cycle (with a fresh randomized interval) once this expires.
+func show_hurt() -> void:
+	_hurt_hold_t = HURT_EXPRESSION_DURATION
+	_blink_hold_t = 0.0
+	set_expression(&"hurt")
+
+func _reset_blink_timer() -> void:
+	_blink_cd = randf_range(BLINK_INTERVAL_MIN, BLINK_INTERVAL_MAX)
+
+## Random idle blinking, plus timing out show_hurt()'s hold — both automatic/
+## timer-driven, as opposed to set_expression()'s direct, caller-decided
+## swaps. Hurt always wins over blinking (a hit lands mid-blink shows hurt
+## immediately instead of waiting the blink out); nothing else currently
+## calls set_expression() while this is running, but if something did, it
+## would simply override whichever of these last touched the texture, same
+## as any other set_expression() call.
+func _update_face(delta: float) -> void:
+	if _face_material == null:
+		return
+	if _hurt_hold_t > 0.0:
+		_hurt_hold_t -= delta
+		if _hurt_hold_t <= 0.0:
+			set_expression(DEFAULT_EXPRESSION)
+		return
+	if _blink_hold_t > 0.0:
+		_blink_hold_t -= delta
+		if _blink_hold_t <= 0.0:
+			set_expression(DEFAULT_EXPRESSION)
+			_reset_blink_timer()
+		return
+	_blink_cd -= delta
+	if _blink_cd <= 0.0:
+		_blink_hold_t = BLINK_DURATION
+		set_expression(&"blink")
 
 ## Standing in a slime puddle: tints the character green for as long as this
 ## stays true (the dripping particles are PlayerEffects.set_slime_drip,
@@ -341,6 +399,7 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 	rotation.z = _lean_bank
 
 func _process(delta: float) -> void:
+	_update_face(delta)
 	if _hold_t > 0.0:
 		_hold_t = maxf(0.0, _hold_t - delta)
 	if _flash_t > 0.0:
