@@ -46,9 +46,26 @@ const ANIM_CLIMB_RIGHT := &"climb_right"
 ## already faces -Z and this turns it backwards instead.
 const MODEL_FACING_OFFSET := PI
 
+## Face expressions: krits.glb's head mesh has one flat face material
+## ("Face_Idle") and no blend shapes/morph targets, so an "expression" here
+## is just a different baked texture swapped onto that one material (see
+## ModelUtil.set_albedo_texture) — the same 1024x1024 UV layout as
+## krits_Face_Idle.png, repainted. To add a new one: drop a new
+## krits_Face_<Name>.png next to it (same layout, just the eyes/mouth region
+## redrawn) and add it here — set_expression() picks it up by name, no other
+## code changes needed. Unknown names and a model with no face surface at
+## all (see _face_material) both just no-op with a warning instead of
+## crashing, so this stays safe to call speculatively from anywhere.
+const FACE_EXPRESSIONS: Dictionary[StringName, Texture2D] = {
+	&"idle": preload("res://assets/player/krits_Face_Idle.png"),
+}
+const DEFAULT_EXPRESSION := &"idle"
+
 var _anim: AnimationPlayer
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
+var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
+var _expression: StringName = DEFAULT_EXPRESSION
 var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
@@ -103,8 +120,10 @@ func _ready() -> void:
 	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
 	_base_scale = _model.scale.x
 	var height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
+	var face_materials: Dictionary = {}
 	ModelUtil.apply_cel_shading(_model, height * outline_thickness_ratio if outline_enabled else 0.0,
-			outline_color, _materials)
+			outline_color, _materials, face_materials)
+	_face_material = face_materials.values()[0] if not face_materials.is_empty() else null
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
@@ -175,6 +194,26 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) ->
 
 func flash() -> void:
 	_flash_t = 0.25
+
+## Swaps the face to `name` (a key of FACE_EXPRESSIONS, e.g. &"idle"). Safe to
+## call every frame like play() — a no-op once that expression is already
+## showing. Silently (with a warning) ignores an unknown name or a model with
+## no face surface at all, rather than failing, so callers can call this
+## speculatively (e.g. "happy on pickup") without first checking the art
+## actually exists yet.
+func set_expression(name: StringName) -> void:
+	if _face_material == null or _expression == name:
+		return
+	var tex: Texture2D = FACE_EXPRESSIONS.get(name)
+	if tex == null:
+		push_warning("PlayerVisual.set_expression(): no expression named '%s' (have: %s)" %
+				[name, FACE_EXPRESSIONS.keys()])
+		return
+	_expression = name
+	ModelUtil.set_albedo_texture(_face_material, tex)
+
+func expression() -> StringName:
+	return _expression
 
 ## Standing in a slime puddle: tints the character green for as long as this
 ## stays true (the dripping particles are PlayerEffects.set_slime_drip,
