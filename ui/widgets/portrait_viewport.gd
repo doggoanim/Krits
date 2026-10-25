@@ -15,24 +15,53 @@ extends Control
 const RENDER_SIZE := 256                ## SubViewport resolution, independent of the Control's size
 const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
-const OUTLINE_THICKNESS_RATIO := 0.011   ## this viewport's own CelOutline thickness — see apply_cel_shading() call below for why it still uses that technique instead of the shared OutlineSystem
+const OUTLINE_WIDTH_PX := 2.0   ## same screen-space-dilation idea as OutlineSystem, just sized for this render's 256x256, not the main viewport's
+const OUTLINE_COLOR := Color.BLACK
 const PORTRAIT_TURN := 0.32   ## extra yaw (rad) so the portrait isn't a flat mirror-facing
                                ## shot — turns the character slightly left; flip the sign
                                ## if it reads as turning right instead
 
-## Clips the render to a circle inscribed in the TextureRect's own rect — a
+## Clips the render to a circle inscribed in the TextureRect's own rect (a
 ## true circle only when that rect is square, which is how Hud sizes
-## PORTRAIT_VIEW_SIZE. Without this, a wide pose (shoulders, elbows out)
-## could reach the render's square corners and poke past the frame art's
-## circular border instead of being cropped by it.
+## PORTRAIT_VIEW_SIZE — without this, a wide pose could reach the render's
+## square corners and poke past the frame art's circular border instead of
+## being cropped by it) AND draws the character's outline — same technique
+## as OutlineSystem (core/outline_system.gd), just folded into this one
+## shader instead of a separate camera/viewport/compositor: this render
+## already contains nothing but the character on a transparent background
+## (see _build_scene — no world geometry, no second camera needed), so its
+## own TEXTURE *is* already the clean silhouette to dilate. No per-mesh
+## CelOutline hulls here at all anymore, so no seam between body parts to
+## worry about either.
 const CIRCLE_MASK_SHADER_CODE := """
 shader_type canvas_item;
 
+uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform float outline_width_px : hint_range(0.0, 16.0) = 2.0;
+
 void fragment() {
+	vec2 texel_size = 1.0 / vec2(textureSize(TEXTURE, 0));
+	vec4 tex = texture(TEXTURE, UV);
+
+	// Approximate circular dilation of TEXTURE's own alpha (see
+	// outline_overlay.gdshader for the same technique at full-screen scale) —
+	// wherever that's stronger than this pixel's own alpha, an outline ring
+	// belongs here.
+	float dilated = tex.a;
+	for (int i = 0; i < 8; i++) {
+		float angle = float(i) * (TAU / 8.0);
+		vec2 dir = vec2(cos(angle), sin(angle));
+		dilated = max(dilated, texture(TEXTURE, UV + dir * outline_width_px * texel_size).a);
+		dilated = max(dilated, texture(TEXTURE, UV + dir * outline_width_px * 0.5 * texel_size).a);
+	}
+	float ring = clamp(dilated - tex.a, 0.0, 1.0);
+
+	vec3 rgb = mix(tex.rgb, outline_color.rgb, ring);
+	float alpha = max(tex.a, ring * outline_color.a);
+
 	float dist = length(UV - vec2(0.5));
-	float edge = 1.0 - smoothstep(0.48, 0.5, dist);
-	COLOR = texture(TEXTURE, UV);
-	COLOR.a *= edge;
+	float circle_edge = 1.0 - smoothstep(0.48, 0.5, dist);
+	COLOR = vec4(rgb, alpha * circle_edge);
 }
 """
 
@@ -59,6 +88,8 @@ func _ready() -> void:
 	circle_shader.code = CIRCLE_MASK_SHADER_CODE
 	var circle_mat := ShaderMaterial.new()
 	circle_mat.shader = circle_shader
+	circle_mat.set_shader_parameter(&"outline_color", OUTLINE_COLOR)
+	circle_mat.set_shader_parameter(&"outline_width_px", OUTLINE_WIDTH_PX)
 	tex_rect.material = circle_mat
 	add_child(tex_rect)
 
@@ -90,24 +121,11 @@ func _build_scene() -> void:
 	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET + PORTRAIT_TURN
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 
-	# fit_height scales _model so it's Player.STAND_HEIGHT tall in world space,
-	# but it returns the AABB it measured *before* that scaling — still the
-	# right thing to size the outline from (CelOutline's grow_amount is
-	# applied inside the model's own pre-scale local space, so it ends up
-	# visually correct either way), but the WRONG thing to frame the camera
-	# with: the camera sits outside the model in world space, so it needs the
-	# model's actual post-scale height, i.e. Player.STAND_HEIGHT itself.
-	var fit_box := ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
-	var pre_scale_height := fit_box.size.y if fit_box.size.y > 0.001 else Player.STAND_HEIGHT
-	# Deliberately still CelOutline's old per-mesh technique here, not
-	# OutlineSystem: this viewport renders into its own fully separate
-	# World3D (own_world_3d = true, above), so OutlineSystem's shared
-	# screen-space pass — which only ever sees the MAIN World3D — has
-	# nothing to render here regardless of layer bits. A bust shot at a
-	# fixed close distance also makes the per-mesh seam artifact OutlineSystem
-	# exists to avoid far less noticeable anyway.
-	ModelUtil.apply_cel_shading(_model, [], {},
-			func(mi: MeshInstance3D): CelOutline.apply(mi, pre_scale_height * OUTLINE_THICKNESS_RATIO, Color.BLACK))
+	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
+	# No outline_hook here — the outline is drawn entirely by
+	# CIRCLE_MASK_SHADER_CODE above, against this render's own alpha, rather
+	# than by giving any mesh a hook callback that builds outline geometry.
+	ModelUtil.apply_cel_shading(_model)
 
 	if _anim != null and _anim.has_animation(PlayerVisual.ANIM_IDLE):
 		_anim.get_animation(PlayerVisual.ANIM_IDLE).loop_mode = Animation.LOOP_LINEAR
