@@ -24,6 +24,17 @@ a Mario 64-style side flip instead of a plain jump — higher arc, launches
 toward the new direction.
 
 ## Layout
+- shading/   toon.gdshader + toon_material.tres — the project-wide cel-shading look. Assign
+			 toon_material.tres (or a copy of it) to any mesh surface/material override: player,
+			 enemies, world props, all of it. Its `albedo_color` is an `instance uniform`, so many
+			 different objects can share the one .tres and still each have their own tint — only
+			 duplicate the material if an object needs its own texture or different shadow/rim/
+			 specular settings. The shadow edge is the main reason this exists over just using
+			 `diffuse_toon`: it overrides light() so the shadow's own edge gets quantized by
+			 `shadow_threshold`/`shadow_softness` exactly like the lit/dark band does, instead of
+			 a hard-banded diffuse term sitting next to the engine's default soft PCF shadow blur.
+			 `rim_strength`/`specular_strength` default to 0 (both effects off) — raise either to
+			 add a rim light or a toon specular highlight band per-material.
 - core/      Events (signal bus), Game (stats, flags, spawns, save), InputSetup,
 			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,

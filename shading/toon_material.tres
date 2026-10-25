@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shading/toon.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/shadow_threshold = 0.5
+shader_parameter/shadow_softness = 0.05
+shader_parameter/shadow_tint = Color(0.6, 0.6, 0.75, 1)
+shader_parameter/rim_strength = 0.0
+shader_parameter/rim_power = 4.0
+shader_parameter/rim_color = Color(1, 1, 1, 1)
+shader_parameter/specular_strength = 0.0
+shader_parameter/specular_threshold = 0.9
+shader_parameter/specular_color = Color(1, 1, 1, 1)
