@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Texture2D" uid="uid://biqs2l4jk2u38" path="res://assets/textures/dirt_1.jpg" id="2_dvlkn"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
+[ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -482,3 +483,6 @@ mesh = SubResource("Mesh_ShopBody")
 
 [node name="Water" parent="." unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+
+[node name="house_chesburg_1" parent="." unique_id=666560511 instance=ExtResource("14_6yx7h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.971166, 0, -3.766163)

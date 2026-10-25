@@ -38,7 +38,6 @@ import/blender/enabled=false
 [layer_names]
 
 3d_render/layer_2="character_outline"
-
 3d_physics/layer_1="world"
 3d_physics/layer_2="player"
 3d_physics/layer_3="enemy"
