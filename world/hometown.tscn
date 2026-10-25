@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
 [ext_resource type="PackedScene" uid="uid://chhgtlftglyvi" path="res://assets/world/house_chesburg_2.glb" id="17_qxovf"]
+[ext_resource type="Shader" uid="uid://cr440h5lag4q3" path="res://world/water/water.gdshader" id="18_water2_shader"]
+[ext_resource type="Texture2D" uid="uid://dkrydxsdd4k7r" path="res://assets/textures/water.jpg" id="19_water2_tex"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -123,6 +125,24 @@ size = Vector3(0.63, 11.65, 7.895)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bf34x"]
 size = Vector3(0.63, 11.65, 7.895)
+
+## Water2-only override (see its node below): same look as the shared
+## water.tscn material, but uv_scroll_speed zeroed out so a still, lake-sized
+## body of water doesn't visibly flow like the river/pond uses of water.tscn
+## elsewhere do. Lives here rather than in water.tscn itself so it only
+## affects this one instance — see MeshInstance3D.material_override.
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_Water2Lake"]
+render_priority = 0
+shader = ExtResource("18_water2_shader")
+shader_parameter/albedo_texture = ExtResource("19_water2_tex")
+shader_parameter/uv_scroll_speed = Vector2(0, 0)
+shader_parameter/shallow_color = Color(1, 1, 1, 1)
+shader_parameter/deep_color = Color(1, 1, 1, 0.9019608)
+shader_parameter/wave_height = 0.08
+shader_parameter/wave_scale = 1.3
+shader_parameter/wave_speed = 0.6
+shader_parameter/fresnel_power = 3.0
+shader_parameter/color_bands = 3.0
 
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
@@ -258,6 +278,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
 
 [node name="Water2" parent="Props" unique_id=691222566 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.20182, 4.0878205, 12.119247)
+material_override = SubResource("ShaderMaterial_Water2Lake")
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
