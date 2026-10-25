@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/tree_chesburg_3.glb" id="10_8ru6n"]
 [ext_resource type="PackedScene" uid="uid://dwsqlkkxwt0wo" path="res://assets/world/tree_chesburg_4.glb" id="11_6yx7h"]
 [ext_resource type="PackedScene" uid="uid://b7yepay0t2k7j" path="res://assets/world/tree_chesburg_5.glb" id="12_ombpp"]
+[ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="13_8ru6n"]
+[ext_resource type="PackedScene" uid="uid://ivt8hkai4lc4" path="res://assets/world/house_chesburg_1.glb" id="14_6yx7h"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Grass"]
 albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
@@ -501,3 +503,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.430904, 0, 11.322882)
 
 [node name="tree_chesburg_5" parent="." unique_id=1946119887 instance=ExtResource("12_ombpp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3683157, 0, 15.948387)
+
+[node name="Water" parent="." unique_id=2126579471 instance=ExtResource("13_8ru6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
+
+[node name="house_chesburg_1" parent="." unique_id=1220902196 instance=ExtResource("14_6yx7h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.667704, 0, -5.7526135)
