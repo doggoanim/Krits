@@ -189,300 +189,312 @@ height = 1.8
 
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
-[node name="Ground" type="StaticBody3D" parent="." unique_id=376223182]
+[node name="Terrain" type="Node3D" parent="."]
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="NPCs" type="Node3D" parent="."]
+
+[node name="Spawnpoints" type="Node3D" parent="."]
+
+[node name="Debug" type="Node3D" parent="."]
+
+[node name="Ground" type="StaticBody3D" parent="Terrain" unique_id=376223182]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 collision_layer = 129
 
-[node name="Mesh" type="MeshInstance3D" parent="Ground" unique_id=2028200518]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Ground" unique_id=2028200518]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
 material_override = SubResource("Mat_Grass")
 mesh = SubResource("Mesh_Ground")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=228417280]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Ground" unique_id=228417280]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
 shape = SubResource("BoxShape3D_d7qjq")
 
-[node name="PathNS" type="StaticBody3D" parent="." unique_id=665892165]
+[node name="PathNS" type="StaticBody3D" parent="Terrain" unique_id=665892165]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="PathNS" unique_id=971774053]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/PathNS" unique_id=971774053]
 shape = SubResource("Shape_PathNS")
 
-[node name="Mesh" type="MeshInstance3D" parent="PathNS" unique_id=1346726324]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/PathNS" unique_id=1346726324]
 material_override = SubResource("Mat_DirtPath")
 mesh = SubResource("Mesh_PathNS")
 
-[node name="PathEW" type="StaticBody3D" parent="." unique_id=2008051788]
+[node name="PathEW" type="StaticBody3D" parent="Terrain" unique_id=2008051788]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="PathEW" unique_id=1809330523]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/PathEW" unique_id=1809330523]
 shape = SubResource("Shape_PathEW")
 
-[node name="Mesh" type="MeshInstance3D" parent="PathEW" unique_id=366163986]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/PathEW" unique_id=366163986]
 material_override = SubResource("Mat_DirtPath")
 mesh = SubResource("Mesh_PathEW")
 
-[node name="House1" type="Node3D" parent="." unique_id=4247218]
+[node name="House1" type="Node3D" parent="Buildings" unique_id=4247218]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -11)
 
-[node name="Walls" type="StaticBody3D" parent="House1" unique_id=563810001]
+[node name="Walls" type="StaticBody3D" parent="Buildings/House1" unique_id=563810001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="House1/Walls" unique_id=350307365]
+[node name="Collision" type="CollisionShape3D" parent="Buildings/House1/Walls" unique_id=350307365]
 shape = SubResource("Shape_House1Walls")
 
-[node name="Mesh" type="MeshInstance3D" parent="House1/Walls" unique_id=880856283]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House1/Walls" unique_id=880856283]
 material_override = SubResource("Mat_Stone")
 mesh = SubResource("Mesh_House1Walls")
 
-[node name="Roof" type="StaticBody3D" parent="House1" unique_id=2128008774]
+[node name="Roof" type="StaticBody3D" parent="Buildings/House1" unique_id=2128008774]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, 0)
 collision_layer = 129
 
-[node name="Mesh" type="MeshInstance3D" parent="House1/Roof" unique_id=1345513660]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House1/Roof" unique_id=1345513660]
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_House1Roof")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="House1/Roof" unique_id=1097758306]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House1/Roof" unique_id=1097758306]
 shape = SubResource("ConcavePolygonShape3D_gka81")
 
-[node name="House2" type="Node3D" parent="." unique_id=1894083705]
+[node name="House2" type="Node3D" parent="Buildings" unique_id=1894083705]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -13)
 
-[node name="Walls" type="StaticBody3D" parent="House2" unique_id=1486149932]
+[node name="Walls" type="StaticBody3D" parent="Buildings/House2" unique_id=1486149932]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="House2/Walls" unique_id=1443175958]
+[node name="Collision" type="CollisionShape3D" parent="Buildings/House2/Walls" unique_id=1443175958]
 shape = SubResource("Shape_House2Walls")
 
-[node name="Mesh" type="MeshInstance3D" parent="House2/Walls" unique_id=18673173]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House2/Walls" unique_id=18673173]
 material_override = SubResource("Mat_StoneLight")
 mesh = SubResource("Mesh_House2Walls")
 
-[node name="Roof" type="StaticBody3D" parent="House2" unique_id=309675523]
+[node name="Roof" type="StaticBody3D" parent="Buildings/House2" unique_id=309675523]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
 collision_layer = 129
 
-[node name="Mesh" type="MeshInstance3D" parent="House2/Roof" unique_id=996289975]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House2/Roof" unique_id=996289975]
 material_override = SubResource("Mat_RoofBlue")
 mesh = SubResource("Mesh_House2Roof")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="House2/Roof" unique_id=1197262942]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House2/Roof" unique_id=1197262942]
 shape = SubResource("ConcavePolygonShape3D_70bq6")
 
-[node name="House3" type="Node3D" parent="." unique_id=1523153923]
+[node name="House3" type="Node3D" parent="Buildings" unique_id=1523153923]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 9)
 
-[node name="Walls" type="StaticBody3D" parent="House3" unique_id=1236577525]
+[node name="Walls" type="StaticBody3D" parent="Buildings/House3" unique_id=1236577525]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="House3/Walls" unique_id=41833309]
+[node name="Collision" type="CollisionShape3D" parent="Buildings/House3/Walls" unique_id=41833309]
 shape = SubResource("Shape_House3Walls")
 
-[node name="Mesh" type="MeshInstance3D" parent="House3/Walls" unique_id=1925582531]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House3/Walls" unique_id=1925582531]
 material_override = SubResource("Mat_Stone")
 mesh = SubResource("Mesh_House3Walls")
 
-[node name="Roof" type="StaticBody3D" parent="House3" unique_id=150323235]
+[node name="Roof" type="StaticBody3D" parent="Buildings/House3" unique_id=150323235]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55, 0)
 collision_layer = 129
 
-[node name="Mesh" type="MeshInstance3D" parent="House3/Roof" unique_id=639735868]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House3/Roof" unique_id=639735868]
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_House3Roof")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="House3/Roof" unique_id=1160644741]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House3/Roof" unique_id=1160644741]
 shape = SubResource("ConcavePolygonShape3D_bf34x")
 
-[node name="House4" type="Node3D" parent="." unique_id=1343661762]
+[node name="House4" type="Node3D" parent="Buildings" unique_id=1343661762]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 11)
 
-[node name="Walls" type="StaticBody3D" parent="House4" unique_id=2143004544]
+[node name="Walls" type="StaticBody3D" parent="Buildings/House4" unique_id=2143004544]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="House4/Walls" unique_id=38109507]
+[node name="Collision" type="CollisionShape3D" parent="Buildings/House4/Walls" unique_id=38109507]
 shape = SubResource("Shape_House4Walls")
 
-[node name="Mesh" type="MeshInstance3D" parent="House4/Walls" unique_id=1197539957]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House4/Walls" unique_id=1197539957]
 material_override = SubResource("Mat_StoneLight")
 mesh = SubResource("Mesh_House4Walls")
 
-[node name="Roof" type="StaticBody3D" parent="House4" unique_id=424030005]
+[node name="Roof" type="StaticBody3D" parent="Buildings/House4" unique_id=424030005]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.85, 0)
 collision_layer = 129
 
-[node name="Mesh" type="MeshInstance3D" parent="House4/Roof" unique_id=1039251097]
+[node name="Mesh" type="MeshInstance3D" parent="Buildings/House4/Roof" unique_id=1039251097]
 material_override = SubResource("Mat_RoofBlue")
 mesh = SubResource("Mesh_House4Roof")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="House4/Roof" unique_id=187202882]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/House4/Roof" unique_id=187202882]
 shape = SubResource("ConcavePolygonShape3D_8mbmp")
 
-[node name="Well" type="Node3D" parent="." unique_id=1249735749]
+[node name="Well" type="Node3D" parent="Props" unique_id=1249735749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
 
-[node name="Rim" type="StaticBody3D" parent="Well" unique_id=793902583]
+[node name="Rim" type="StaticBody3D" parent="Props/Well" unique_id=793902583]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="Well/Rim" unique_id=1525099989]
+[node name="Collision" type="CollisionShape3D" parent="Props/Well/Rim" unique_id=1525099989]
 shape = SubResource("Shape_WellRim")
 
-[node name="Mesh" type="MeshInstance3D" parent="Well/Rim" unique_id=916392779]
+[node name="Mesh" type="MeshInstance3D" parent="Props/Well/Rim" unique_id=916392779]
 material_override = SubResource("Mat_Stone")
 mesh = SubResource("Mesh_WellRim")
 
-[node name="Pole" type="MeshInstance3D" parent="Well" unique_id=66778349]
+[node name="Pole" type="MeshInstance3D" parent="Props/Well" unique_id=66778349]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
 material_override = SubResource("Mat_Wood")
 mesh = SubResource("Mesh_WellPole")
 
-[node name="Roof" type="MeshInstance3D" parent="Well" unique_id=1019510663]
+[node name="Roof" type="MeshInstance3D" parent="Props/Well" unique_id=1019510663]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)
 material_override = SubResource("Mat_RoofRed")
 mesh = SubResource("Mesh_WellRoof")
 
-[node name="Hill" type="Node3D" parent="." unique_id=993983351]
+[node name="Hill" type="Node3D" parent="Terrain" unique_id=993983351]
 
-[node name="Step1" type="StaticBody3D" parent="Hill" unique_id=467105897]
+[node name="Step1" type="StaticBody3D" parent="Terrain/Hill" unique_id=467105897]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.75, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="Hill/Step1" unique_id=1305188359]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step1" unique_id=1305188359]
 shape = SubResource("Shape_Step1")
 
-[node name="Mesh" type="MeshInstance3D" parent="Hill/Step1" unique_id=1670024902]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step1" unique_id=1670024902]
 material_override = SubResource("Mat_HillStep")
 mesh = SubResource("Mesh_Step1")
 
-[node name="Step2" type="StaticBody3D" parent="Hill" unique_id=1560727371]
+[node name="Step2" type="StaticBody3D" parent="Terrain/Hill" unique_id=1560727371]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 1.5, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="Hill/Step2" unique_id=2074909451]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step2" unique_id=2074909451]
 shape = SubResource("Shape_Step2")
 
-[node name="Mesh" type="MeshInstance3D" parent="Hill/Step2" unique_id=1764182827]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step2" unique_id=1764182827]
 material_override = SubResource("Mat_HillStep")
 mesh = SubResource("Mesh_Step2")
 
-[node name="Step3" type="StaticBody3D" parent="Hill" unique_id=1926949453]
+[node name="Step3" type="StaticBody3D" parent="Terrain/Hill" unique_id=1926949453]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 2.25, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="Hill/Step3" unique_id=83181022]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Step3" unique_id=83181022]
 shape = SubResource("Shape_Step3")
 
-[node name="Mesh" type="MeshInstance3D" parent="Hill/Step3" unique_id=395809838]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Step3" unique_id=395809838]
 material_override = SubResource("Mat_HillStep")
 mesh = SubResource("Mesh_Step3")
 
-[node name="Top" type="StaticBody3D" parent="Hill" unique_id=1459137163]
+[node name="Top" type="StaticBody3D" parent="Terrain/Hill" unique_id=1459137163]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4.5, 0)
 collision_layer = 129
 
-[node name="Collision" type="CollisionShape3D" parent="Hill/Top" unique_id=2079429613]
+[node name="Collision" type="CollisionShape3D" parent="Terrain/Hill/Top" unique_id=2079429613]
 shape = SubResource("Shape_HillTop")
 
-[node name="Mesh" type="MeshInstance3D" parent="Hill/Top" unique_id=2135999032]
+[node name="Mesh" type="MeshInstance3D" parent="Terrain/Hill/Top" unique_id=2135999032]
 material_override = SubResource("Mat_HillTop")
 mesh = SubResource("Mesh_HillTop")
 
-[node name="Trees" type="Node3D" parent="." unique_id=1738221840]
+[node name="Trees" type="Node3D" parent="Props" unique_id=1738221840]
 
-[node name="StartSpawn" type="Area3D" parent="." unique_id=1738210625]
+[node name="StartSpawn" type="Area3D" parent="Spawnpoints" unique_id=1738210625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 14)
 script = ExtResource("1_spawn")
 display_name = "Town Square"
 
-[node name="OverlookSpawn" type="Area3D" parent="." unique_id=1205227977]
+[node name="OverlookSpawn" type="Area3D" parent="Spawnpoints" unique_id=1205227977]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 5, 0)
 script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
 
-[node name="SLOPE" type="StaticBody3D" parent="." unique_id=706873338]
+[node name="SLOPE" type="StaticBody3D" parent="Terrain" unique_id=706873338]
 transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SLOPE" unique_id=1707694586]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE" unique_id=1707694586]
 mesh = SubResource("BoxMesh_bf34x")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SLOPE" unique_id=382698887]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE" unique_id=382698887]
 shape = SubResource("BoxShape3D_gka81")
 
-[node name="SLOPE2" type="StaticBody3D" parent="." unique_id=1264340287]
+[node name="SLOPE2" type="StaticBody3D" parent="Terrain" unique_id=1264340287]
 transform = Transform3D(1, 0, 0, 0, 0.999347, -0.036133796, 0, 0.036133796, 0.999347, -15.957043, 1.6517792, -36.796364)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SLOPE2" unique_id=1197038778]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/SLOPE2" unique_id=1197038778]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
 mesh = SubResource("BoxMesh_bf34x")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SLOPE2" unique_id=958427448]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/SLOPE2" unique_id=958427448]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
 shape = SubResource("BoxShape3D_70bq6")
 
-[node name="test" type="StaticBody3D" parent="." unique_id=911434677]
+[node name="test" type="StaticBody3D" parent="Debug" unique_id=911434677]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 33.856796, 5.193923, -14.587875)
 collision_layer = 257
 collision_mask = 257
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="test" unique_id=963138141]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Debug/test" unique_id=963138141]
 mesh = SubResource("BoxMesh_wgm46")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="test" unique_id=2036173153]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test" unique_id=2036173153]
 shape = SubResource("BoxShape3D_bf34x")
 
-[node name="test2" type="StaticBody3D" parent="." unique_id=154162387]
+[node name="test2" type="StaticBody3D" parent="Debug" unique_id=154162387]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 29.93472, 5.193923, -18.553587)
 collision_layer = 257
 collision_mask = 257
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="test2" unique_id=1426599119]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Debug/test2" unique_id=1426599119]
 mesh = SubResource("BoxMesh_wgm46")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="test2" unique_id=1778246945]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test2" unique_id=1778246945]
 shape = SubResource("BoxShape3D_bf34x")
 
-[node name="test3" type="StaticBody3D" parent="." unique_id=1070608973]
+[node name="test3" type="StaticBody3D" parent="Debug" unique_id=1070608973]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 32.41536, 5.193923, -13.115128)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="test3" unique_id=1249565175]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Debug/test3" unique_id=1249565175]
 mesh = SubResource("BoxMesh_wgm46")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="test3" unique_id=259425761]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test3" unique_id=259425761]
 shape = SubResource("BoxShape3D_bf34x")
 
-[node name="ElderMira" type="StaticBody3D" parent="." unique_id=-1165481586]
+[node name="ElderMira" type="StaticBody3D" parent="NPCs" unique_id=-1165481586]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -6)
 script = ExtResource("1_npc")
 dialogue = ExtResource("1_mira_dialogue")
 
-[node name="Collision" type="CollisionShape3D" parent="ElderMira" unique_id=-1165481585]
+[node name="Collision" type="CollisionShape3D" parent="NPCs/ElderMira" unique_id=-1165481585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_MiraBody")
 
-[node name="Mesh" type="MeshInstance3D" parent="ElderMira" unique_id=-1165481584]
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/ElderMira" unique_id=-1165481584]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 material_override = SubResource("Mat_MiraRobe")
 mesh = SubResource("Mesh_MiraBody")
 
-[node name="ShopKeeper" type="StaticBody3D" parent="." unique_id=-1165481583]
+[node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -6)
 script = ExtResource("1_shopkeeper")
 prompt_text = "Press E to shop"
 
-[node name="Collision" type="CollisionShape3D" parent="ShopKeeper" unique_id=-1165481582]
+[node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_ShopBody")
 
-[node name="Mesh" type="MeshInstance3D" parent="ShopKeeper" unique_id=-1165481581]
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 material_override = SubResource("Mat_ShopRobe")
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="Water" parent="." unique_id=2126579471 instance=ExtResource("13_8ru6n")]
+[node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 0, 34.901344)
 
-[node name="house_chesburg_1" parent="." unique_id=666560511 instance=ExtResource("14_6yx7h")]
+[node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.971166, 0, -3.766163)
