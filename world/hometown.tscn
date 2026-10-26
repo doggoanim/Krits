@@ -1,13 +1,12 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
-[ext_resource type="Texture2D" uid="uid://8rimybdfgoy2" path="res://assets/textures/grass.jpg" id="1_epjlq"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
-[ext_resource type="Texture2D" uid="uid://dnow7nufbdxah" path="res://assets/textures/dirt.jpg" id="1_o4qy2"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
-[ext_resource type="Texture2D" uid="uid://c2w2a0xs5ukn6" path="res://assets/world/rock_1_Rock.png" id="2_aa14t"]
+[ext_resource type="PackedScene" uid="uid://bqxxfugls4puo" path="res://assets/world/terrain/grass_terrain.glb" id="2_256to"]
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
+[ext_resource type="PackedScene" uid="uid://b17cmgjxs20u7" path="res://assets/world/terrain/nocol_darkened_grass_terrain.glb" id="4_256to"]
 [ext_resource type="PackedScene" uid="uid://bcrwgpmkdcdkv" path="res://assets/world/rock_1.glb" id="8_cx2cw"]
 [ext_resource type="PackedScene" uid="uid://c18rqgadpyua4" path="res://assets/world/rock_2.glb" id="9_38blh"]
 [ext_resource type="PackedScene" uid="uid://cpqakqbcuurt3" path="res://assets/world/rock_3.glb" id="10_jq25j"]
@@ -25,48 +24,10 @@
 [ext_resource type="PackedScene" uid="uid://1wp1ik5osfqg" path="res://assets/world/well.glb" id="20_38blh"]
 [ext_resource type="PackedScene" uid="uid://bdjiv52blcoau" path="res://assets/world/tree_stump_2.glb" id="20_jq25j"]
 [ext_resource type="PackedScene" uid="uid://dsfqxgni7uamq" path="res://assets/world/house_chesburg_3.glb" id="24_iolvd"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_Grass"]
-albedo_color = Color(0.5686275, 0.73333335, 0.30588236, 1)
-albedo_texture = ExtResource("1_epjlq")
-
-[sub_resource type="BoxMesh" id="Mesh_Ground"]
-size = Vector3(80.625, 1, 66.97)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3y8fk"]
-albedo_color = Color(0.36603698, 0.4807816, 0.17946365, 1)
-albedo_texture = ExtResource("1_epjlq")
-
-[sub_resource type="BoxMesh" id="BoxMesh_2m3w5"]
-size = Vector3(9, 0.18430497, 26)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_aa14t"]
-load_path = "res://.godot/imported/dirt.jpg-eb4f7b21298ca3bfea99ac51b4ec8125.s3tc.ctex"
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_256to"]
-albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
-albedo_texture = SubResource("CompressedTexture2D_aa14t")
-
-[sub_resource type="BoxMesh" id="BoxMesh_3y8fk"]
-size = Vector3(80.625, 7, 66.97)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_38blh"]
-size = Vector3(80.625, 1, 66.97)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6yx7h"]
-albedo_color = Color(0.74138474, 0.7413847, 0.74138457, 1)
-albedo_texture = ExtResource("2_aa14t")
-uv1_scale = Vector3(0.19, 0.19, 0.19)
-uv1_triplanar = true
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_8ru6n"]
-size = Vector2(21.015, 6.185)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_aa14t"]
-size = Vector2(21.015, 6.185)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_256to"]
-size = Vector2(21.015, 6.185)
+[ext_resource type="PackedScene" uid="uid://cjy6rhmkjqyp2" path="res://assets/world/terrain/nocol_rock_terrain.glb" id="25_3y8fk"]
+[ext_resource type="PackedScene" uid="uid://bdapi1jubbeut" path="res://assets/world/terrain/rock_terrain.glb" id="26_lybmh"]
+[ext_resource type="PackedScene" uid="uid://dtqtsqwvyd4jm" path="res://assets/world/terrain/dirt_terrain.glb" id="27_2m3w5"]
+[ext_resource type="PackedScene" uid="uid://pj45bqvbl54i" path="res://assets/world/house_chesburg_4.glb" id="28_lybmh"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -76,46 +37,6 @@ size = Vector3(10.715, 0.35, 12.595)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
 size = Vector3(10.715, 0.35, 12.595)
-
-[sub_resource type="StandardMaterial3D" id="Mat_HillStep"]
-albedo_color = Color(0.6509804, 0.42745098, 0.11372549, 1)
-albedo_texture = ExtResource("1_o4qy2")
-
-[sub_resource type="BoxMesh" id="Mesh_Step1"]
-size = Vector3(4, 1.5, 10)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_jq25j"]
-size = Vector3(4, 1.9360352, 10)
-
-[sub_resource type="BoxMesh" id="BoxMesh_iolvd"]
-size = Vector3(4.0473633, 0.5242285, 10.28019)
-
-[sub_resource type="BoxMesh" id="Mesh_Step2"]
-size = Vector3(8.15181, 3.4977093, 9.263184)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_3y8fk"]
-size = Vector3(8.15181, 3.5372314, 9.263184)
-
-[sub_resource type="BoxMesh" id="BoxMesh_lybmh"]
-size = Vector3(8.0849, 0.5242285, 9.320946)
-
-[sub_resource type="BoxMesh" id="BoxMesh_jq25j"]
-size = Vector3(14.243564, 3, 38)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_23sea"]
-size = Vector3(14.243564, 4.0009766, 38)
-
-[sub_resource type="BoxMesh" id="BoxMesh_23sea"]
-size = Vector3(14.243564, 1, 38)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_n20ul"]
-size = Vector3(4, 1.5, 10)
-
-[sub_resource type="BoxMesh" id="BoxMesh_n20ul"]
-size = Vector3(12.253815, 3, 10)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_iolvd"]
-size = Vector3(12.253815, 3, 10)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
@@ -170,85 +91,6 @@ size = Vector3(0.63, 11.65, 7.895)
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
 
-[node name="Ground" type="StaticBody3D" parent="Terrain" unique_id=376223182]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Ground" unique_id=2028200518]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
-material_override = SubResource("Mat_Grass")
-mesh = SubResource("Mesh_Ground")
-
-[node name="Mesh3" type="MeshInstance3D" parent="Terrain/Ground" unique_id=1376292498]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.163155, 0.59215254, -17.604464)
-material_override = SubResource("StandardMaterial3D_3y8fk")
-mesh = SubResource("BoxMesh_2m3w5")
-
-[node name="Mesh2" type="MeshInstance3D" parent="Terrain/Ground" unique_id=247710429]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, -4, 0.022073746)
-material_override = SubResource("StandardMaterial3D_256to")
-mesh = SubResource("BoxMesh_3y8fk")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Ground" unique_id=26156260]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 0.022073746)
-shape = SubResource("BoxShape3D_38blh")
-
-[node name="Path" type="StaticBody3D" parent="Terrain" unique_id=1989698062]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015129685, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Path" unique_id=2031044646]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.89062, 0, -17.511608)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_8ru6n")
-
-[node name="Path4" type="StaticBody3D" parent="Terrain" unique_id=983156601]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.015129685, 18)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Path4" unique_id=148033664]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.89062, 0, -17.511608)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_8ru6n")
-
-[node name="Mesh4" type="MeshInstance3D" parent="Terrain/Path4" unique_id=1708337535]
-transform = Transform3D(0.53424793, 0, 0, 0, 1, 0, 0, 0, 1, -14.6906185, 0, -29.111609)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_aa14t")
-
-[node name="Mesh5" type="MeshInstance3D" parent="Terrain/Path4" unique_id=415387804]
-transform = Transform3D(-1.2309125e-08, 0, 1, 0, 1, 0, -0.2816, 0, -4.371139e-08, -12.090619, 0, -23.39161)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_aa14t")
-
-[node name="Mesh2" type="MeshInstance3D" parent="Terrain/Path4" unique_id=849952605]
-transform = Transform3D(0.19500001, 0, 0, 0, 1, 0, 0, 0, 1, -4.145619, 1.9999999, -17.511608)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_256to")
-
-[node name="Mesh3" type="MeshInstance3D" parent="Terrain/Path4" unique_id=614733775]
-transform = Transform3D(0.40755004, 0, 0, 0, 1, 0, 0, 0, 1, 2.0304213, 3.5188646, -17.511608)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_256to")
-
-[node name="Path2" type="StaticBody3D" parent="Terrain" unique_id=535180128]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -3.2953312, 0.015129685, -13.535654)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Path2" unique_id=1857851808]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45304394, 0, 0.022073746)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_8ru6n")
-
-[node name="Path3" type="StaticBody3D" parent="Terrain" unique_id=1494339214]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 34.70467, 4.0151296, -5.5785627)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Path3" unique_id=1473080266]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00048160553, 0, 1.0220757)
-material_override = SubResource("StandardMaterial3D_6yx7h")
-mesh = SubResource("PlaneMesh_8ru6n")
-
 [node name="SLOPE" type="StaticBody3D" parent="Terrain" unique_id=706873338]
 transform = Transform3D(1, 0, 0, 0, 0.7175379, -0.6965196, 0, 0.6965196, 0.7175379, -15.957043, 1.6517792, -36.796364)
 
@@ -269,90 +111,25 @@ mesh = SubResource("BoxMesh_bf34x")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870823)
 shape = SubResource("BoxShape3D_70bq6")
 
-[node name="Step1" type="StaticBody3D" parent="Terrain" unique_id=467105897]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.64595, 0.75, 0)
-collision_layer = 129
+[node name="grass_terrain" parent="Terrain" unique_id=1134780653 instance=ExtResource("2_256to")]
+transform = Transform3D(37.440002, 0, 0, 0, 1, 0, 0, 0, 40.7484, 2.748478, -1, 6.742401)
 
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Step1" unique_id=1670024902]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step1")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Step1" unique_id=49821174]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0.21801758, 0)
-shape = SubResource("BoxShape3D_jq25j")
-
-[node name="Mesh4" type="MeshInstance3D" parent="Terrain/Step1" unique_id=650264295]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1230335, 0.9310019, -0.072203875)
-material_override = SubResource("Mat_Grass")
-mesh = SubResource("BoxMesh_iolvd")
-
-[node name="Step2" type="StaticBody3D" parent="Terrain" unique_id=1560727371]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.64595, 1.5, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Step2" unique_id=1764182827]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2032948, 0.24885464, 0.091501)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step2")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Step2" unique_id=449657257]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2032948, 0.26861572, 0.091501)
-shape = SubResource("BoxShape3D_3y8fk")
-
-[node name="Mesh3" type="MeshInstance3D" parent="Terrain/Step2" unique_id=956271447]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.145855, 1.7621138, 0.07311559)
-material_override = SubResource("Mat_Grass")
-mesh = SubResource("BoxMesh_lybmh")
-
-[node name="Step5" type="StaticBody3D" parent="Terrain" unique_id=1796732452]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.64595, 1.5, 0)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Step5" unique_id=1618336749]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.274075, 0, -13.433002)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("BoxMesh_jq25j")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Step5" unique_id=273783327]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.274075, 0.5004883, -13.433002)
-shape = SubResource("BoxShape3D_23sea")
-
-[node name="Mesh2" type="MeshInstance3D" parent="Terrain/Step5" unique_id=129783174]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.274075, 2, -13.433002)
-material_override = SubResource("Mat_Grass")
-mesh = SubResource("BoxMesh_23sea")
-
-[node name="Step3" type="StaticBody3D" parent="Terrain" unique_id=484370805]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.55571, 4.289325, -13)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Step3" unique_id=1068675109]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("Mesh_Step1")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Step3" unique_id=1333029340]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1522923, 0, 0)
-shape = SubResource("BoxShape3D_n20ul")
-
-[node name="Step4" type="StaticBody3D" parent="Terrain" unique_id=1910765987]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.55571, 5.039325, -17)
-collision_layer = 129
-
-[node name="Mesh" type="MeshInstance3D" parent="Terrain/Step4" unique_id=1160764313]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1522923, 0, 1.1339912)
-material_override = SubResource("Mat_HillStep")
-mesh = SubResource("BoxMesh_n20ul")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/Step4" unique_id=1560313973]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1522923, 0, 1.1339912)
-shape = SubResource("BoxShape3D_iolvd")
+[node name="nocol_darkened_grass_terrain" parent="Terrain" unique_id=316777790 instance=ExtResource("4_256to")]
+transform = Transform3D(4.32, 0, 0, 0, 0.07445519, 0, 0, 0, 14.256001, 22.7, 0.032082558, -17.704)
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
+
+[node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.706156, 0, -7.0017056)
+
+[node name="house_chesburg_3" parent="Buildings" unique_id=1391076820 instance=ExtResource("24_iolvd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.33178, 5.9844084, -24.818865)
+
+[node name="house_chesburg_4" parent="Buildings" unique_id=1975904037 instance=ExtResource("28_lybmh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -21)
 
 [node name="Props" type="Node3D" parent="." unique_id=1770766056]
 
@@ -370,11 +147,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.384615, 0, -5.26506)
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
 
-[node name="Water2" parent="Props" unique_id=691222566 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.863918, 2.4982057, 29.406742)
-material_override = SubResource("ShaderMaterial_qjukg")
-mesh = SubResource("CylinderMesh_o8fgi")
-
 [node name="rock_1" parent="Props" unique_id=211568896 instance=ExtResource("8_cx2cw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4109068, 0.040555716, 4.4515524)
 
@@ -391,7 +163,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4, -29)
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 22, 0, -29)
 
 [node name="tree_chesburg_5" parent="Props" unique_id=1693697992 instance=ExtResource("13_b2jir")]
-transform = Transform3D(0.80999994, 0, 0, 0, 0.8, 0, 0, 0, 0.80999994, 22, 0, -24)
+transform = Transform3D(0.80999994, 0, 0, 0, 0.8, 0, 0, 0, 0.80999994, 22, 0, -23.19)
 
 [node name="tree_chesburg_1" parent="Props" unique_id=1483444084 instance=ExtResource("10_qjukg")]
 transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 1, 22, 0, -17)
@@ -400,10 +172,18 @@ transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 1, 22, 0, -17)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, -11)
 
 [node name="rock_5" parent="Props" unique_id=201820813 instance=ExtResource("16_3y8fk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 3.586278, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 2.586278, 2)
 
 [node name="rock_4" parent="Props" unique_id=163732373 instance=ExtResource("17_lybmh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 3.586125, -2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 2.586125, -3)
+
+[node name="lake_chesburg" parent="Props" unique_id=1685882827 instance=ExtResource("2_l8gsu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.280123, 1.2179992, 28.97976)
+
+[node name="Water2" parent="Props/lake_chesburg" unique_id=691222566 instance=ExtResource("13_8ru6n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.41620445, 1.2802064, 0.42698288)
+material_override = SubResource("ShaderMaterial_qjukg")
+mesh = SubResource("CylinderMesh_o8fgi")
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
@@ -477,14 +257,14 @@ mesh = SubResource("BoxMesh_wgm46")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.509651, 0, -10.17687)
 shape = SubResource("BoxShape3D_256to")
 
-[node name="house_chesburg_2" parent="." unique_id=1116888906 instance=ExtResource("17_qxovf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.706156, 0, -7.0017056)
-
-[node name="lake_chesburg" parent="." unique_id=1685882827 instance=ExtResource("2_l8gsu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.280123, 1.2179992, 28.97976)
-
 [node name="well" parent="." unique_id=1061802426 instance=ExtResource("20_38blh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4198782, 0.034999855, -5.3904057)
 
-[node name="house_chesburg_3" parent="." unique_id=1391076820 instance=ExtResource("24_iolvd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.33178, 5.9844084, -24.818865)
+[node name="nocol_rock_terrain" parent="." unique_id=1837949577 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(0.19999999, 0, 0, 0, 0.044796467, 0, 0, 0, 0.19999999, 0.9999999, 0.01447773, -4)
+
+[node name="rock_terrain" parent="." unique_id=1604554837 instance=ExtResource("26_lybmh")]
+transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 10.72, 47, 1, -25.720001)
+
+[node name="dirt_terrain" parent="." unique_id=1284299051 instance=ExtResource("27_2m3w5")]
+transform = Transform3D(2.9869888, 0, 0, 0, 1, 0, 0, 0, 18.198689, 35.986988, 1, -15.7889595)
