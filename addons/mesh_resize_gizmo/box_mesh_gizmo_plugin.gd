@@ -28,6 +28,11 @@ extends EditorNode3DGizmoPlugin
 ## Registered by plugin.gd — not meant to be used standalone.
 
 const LINE_COLOR := Color(1.0, 0.6, 0.0, 0.5)
+const HANDLE_COLOR := Color(1.0, 0.6, 0.0, 1.0)
+const HANDLE_TEXTURE_SIZE := 24   ## Godot's own default handle dot is tiny (~8px) and easy to
+                                   ## miss-click — a bigger custom texture both looks clearer and,
+                                   ## since the billboard's hit area is sized off the texture's own
+                                   ## pixel dimensions, is noticeably easier to actually grab.
 const MIN_SIZE := 0.02   ## never let a drag collapse an axis to zero/negative
 
 var _undo_redo: EditorUndoRedoManager
@@ -46,7 +51,24 @@ var _drag_is_box := false          ## true only for a lone MeshInstance3D using 
 func _init(undo_redo: EditorUndoRedoManager) -> void:
 	_undo_redo = undo_redo
 	create_material(&"mesh_resize_lines", LINE_COLOR)
-	create_handle_material(&"mesh_resize_handles", true)
+	create_handle_material(&"mesh_resize_handles", true, _make_handle_texture())
+
+## A plain filled circle, solid-color with a 1px antialiased edge — built at
+## runtime instead of shipped as an image file, same idea as
+## core/soft_circle_texture.gd elsewhere in the project, just not reusing
+## that one directly: this addon stays self-contained rather than reaching
+## into the game's own core/ scripts.
+func _make_handle_texture() -> ImageTexture:
+	var size := HANDLE_TEXTURE_SIZE
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var center := Vector2(size, size) * 0.5
+	var radius := size * 0.5 - 1.0
+	for y in size:
+		for x in size:
+			var dist := Vector2(x + 0.5, y + 0.5).distance_to(center)
+			var alpha := clampf(radius + 1.0 - dist, 0.0, 1.0)   ## 1px soft edge, solid inside
+			img.set_pixel(x, y, Color(HANDLE_COLOR.r, HANDLE_COLOR.g, HANDLE_COLOR.b, HANDLE_COLOR.a * alpha))
+	return ImageTexture.create_from_image(img)
 
 func _get_gizmo_name() -> String:
 	return "MeshResize"
