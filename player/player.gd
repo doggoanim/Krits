@@ -393,6 +393,15 @@ func ground_height_below(from: Vector3, max_dist: float) -> Variant:
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.position.y if not hit.is_empty() else null
 
+## Same probe as ground_height_below(), but returns the collider node itself
+## instead of the hit height — used by GroundState to work out which
+## footstep sound set to play (see FootstepSurfaces.detect()). Null if
+## nothing's found in range.
+func floor_collider_below(from: Vector3, max_dist: float) -> Node:
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * max_dist, 1)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.collider if not hit.is_empty() else null
+
 ## Looks for a climbable wall directly ahead — called from Ground/Air/Dive/
 ## LongJump every frame to auto-grab on touch or on landing into one, same
 ## spirit as the old ledge/pole triggers but done with a probe instead of an

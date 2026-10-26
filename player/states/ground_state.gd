@@ -27,6 +27,12 @@ var _slope_sliding := false   ## true while forced into the steep-slope slide be
 const FOOTSTEP_PHASES := [0.0, 0.25, 0.5, 0.75]
 var _footstep_phase := -1.0   ## last-seen run_phase(), for edge-crossing detection; -1 = not tracking
 
+## Short straight-down probe for picking a footstep's sound (see
+## FootstepSurfaces) — the player's origin already sits at foot level (see
+## Player._shape_node's own offset), so this only needs to clear a small
+## floor-snap/safe_margin gap, not the character's full height.
+const FOOTSTEP_PROBE_DIST := 0.6
+
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	if player.can_stand():
 		player.set_crouching(false)
@@ -229,5 +235,11 @@ func _update_footsteps(p: Player) -> void:
 		cur += 1.0   # looped back around since the last frame
 	for step in FOOTSTEP_PHASES:
 		if (_footstep_phase <= step and step < cur) or (_footstep_phase <= step + 1.0 and step + 1.0 < cur):
-			p.audio.play_footstep()
+			_play_footstep(p)
 	_footstep_phase = phase
+
+## Looks at what's actually underfoot right now and plays the matching
+## sound — see FootstepSurfaces for how the collider maps to a surface.
+func _play_footstep(p: Player) -> void:
+	var collider := p.floor_collider_below(p.global_position, FOOTSTEP_PROBE_DIST)
+	p.audio.play_footstep(FootstepSurfaces.detect(collider))

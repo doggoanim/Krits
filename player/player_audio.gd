@@ -35,7 +35,12 @@ const AIR_DIVE_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "air_dive_1.wav"),
 	preload(SFX_DIR + "air_dive_2.wav"),
 ]
-const FOOTSTEP_SFX: Array[AudioStream] = [
+## One set per FootstepSurfaces.Surface (see that file for how a surface is
+## detected from whatever the player's standing on). Add a new surface's
+## sound files here and list it in FOOTSTEP_SFX_BY_SURFACE below — nothing
+## else needs to change; GroundState already passes through whichever
+## surface it detects.
+const FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_1.wav"),
 	preload(SFX_DIR + "footsteps_grass_2.wav"),
 	preload(SFX_DIR + "footsteps_grass_3.wav"),
@@ -44,6 +49,17 @@ const FOOTSTEP_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_6.wav"),
 	preload(SFX_DIR + "footsteps_grass_7.wav"),
 ]
+## No recordings yet — play_footstep() falls back to FOOTSTEP_SFX_GRASS for
+## any surface whose array is still empty, rather than playing nothing.
+## Drop in sound files and list them here once you have them.
+const FOOTSTEP_SFX_DIRT: Array[AudioStream] = []
+const FOOTSTEP_SFX_ROCK: Array[AudioStream] = []
+
+const FOOTSTEP_SFX_BY_SURFACE := {
+	FootstepSurfaces.Surface.GRASS: FOOTSTEP_SFX_GRASS,
+	FootstepSurfaces.Surface.DIRT: FOOTSTEP_SFX_DIRT,
+	FootstepSurfaces.Surface.ROCK: FOOTSTEP_SFX_ROCK,
+}
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
@@ -116,8 +132,14 @@ func play_orb_attack(combo := 1) -> void:
 	var base_pitch := minf(1.0 + float(maxi(combo, 1) - 1) * ORB_COMBO_PITCH_STEP, ORB_COMBO_PITCH_MAX)
 	_play(ORB_ATTACK_SFX, PITCH_VARIANCE, base_pitch)
 
-func play_footstep() -> void:
-	_play(FOOTSTEP_SFX.pick_random(), PITCH_VARIANCE)
+## `surface` comes from FootstepSurfaces.detect() — see GroundState, which
+## raycasts straight down each step and passes whatever it finds through.
+## Falls back to the grass set if nothing's recorded for that surface yet.
+func play_footstep(surface := FootstepSurfaces.Surface.GRASS) -> void:
+	var pool: Array = FOOTSTEP_SFX_BY_SURFACE.get(surface, FOOTSTEP_SFX_GRASS)
+	if pool.is_empty():
+		pool = FOOTSTEP_SFX_GRASS
+	_play(pool.pick_random(), PITCH_VARIANCE)
 
 func play_side_flip() -> void:
 	_play(SIDE_FLIP_SFX, PITCH_VARIANCE)
