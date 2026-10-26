@@ -34,6 +34,12 @@ const HANDLE_TEXTURE_SIZE := 24   ## Godot's own default handle dot is tiny (~8p
                                    ## since the billboard's hit area is sized off the texture's own
                                    ## pixel dimensions, is noticeably easier to actually grab.
 const MIN_SIZE := 0.02   ## never let a drag collapse an axis to zero/negative
+const HANDLE_OFFSET_FRACTION := 0.3   ## how far out from its face each handle floats,
+                                        ## as a fraction of the bounds' size on that axis
+const MIN_HANDLE_OFFSET := 0.2         ## ...and a flat floor on top of that, so a small
+                                        ## object's handles don't end up bunched together
+                                        ## or sitting right on Godot's own move/scale gizmo
+                                        ## at the node's pivot
 
 ## handle_id 0..5 -> which axis (0/1/2 = X/Y/Z) and which face of it (+1 = max
 ## face, -1 = min face). Every place that used to assume "axis == handle_id"
@@ -121,19 +127,30 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 
 	var lines := PackedVector3Array()
 	_append_box_wireframe(lines, bounds)
-	gizmo.add_lines(lines, get_material(&"mesh_resize_lines", gizmo), false)
 
 	# One handle per face: handle_id 0..5 -> (axis, sign) via HANDLE_AXIS/
-	# HANDLE_SIGN. Each sits centered on the other two axes, on its own face
-	# (max face for sign +1, min face for sign -1).
+	# HANDLE_SIGN. Each sits centered on the other two axes, floated outward
+	# past its own face (see HANDLE_OFFSET_FRACTION/MIN_HANDLE_OFFSET) rather
+	# than exactly on it — close together handles are easy to miss-grab, and
+	# a handle sitting right on the face tends to land on top of Godot's own
+	# move/scale gizmo when that's near the object's pivot. A thin stem line
+	# from the face out to the handle keeps it visually obvious which face
+	# each floating handle still belongs to.
 	var center := bounds.position + bounds.size * 0.5
 	var handles := PackedVector3Array()
 	for handle_id in range(6):
 		var axis: int = HANDLE_AXIS[handle_id]
 		var face_sign: float = HANDLE_SIGN[handle_id]
-		var p := center
-		p[axis] = bounds.position[axis] + bounds.size[axis] if face_sign > 0.0 else bounds.position[axis]
-		handles.append(p)
+		var face_point := center
+		face_point[axis] = bounds.position[axis] + bounds.size[axis] if face_sign > 0.0 else bounds.position[axis]
+		var offset: float = maxf(bounds.size[axis] * HANDLE_OFFSET_FRACTION, MIN_HANDLE_OFFSET)
+		var handle_point := face_point
+		handle_point[axis] += face_sign * offset
+		handles.append(handle_point)
+		lines.append(face_point)
+		lines.append(handle_point)
+
+	gizmo.add_lines(lines, get_material(&"mesh_resize_lines", gizmo), false)
 	gizmo.add_handles(handles, get_material(&"mesh_resize_handles", gizmo), PackedInt32Array())
 
 func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool) -> String:
