@@ -41,6 +41,14 @@ func _ready() -> void:
 	add_child(outlines)
 	outlines.follow(cam.get_camera())
 
+	# Optional whole-frame edge-detection outline (see core/world_outline.gd)
+	# — off by default, just a toggle to try. Flip this to true to see it, or
+	# delete these 3 lines when you're done experimenting.
+	if false:
+		var world_outline := WorldOutline.new()
+		add_child(world_outline)
+		world_outline.follow(cam.get_camera())
+
 	encounters = EncounterManager.new()
 	add_child(encounters)
 	encounters.setup(player, level)
