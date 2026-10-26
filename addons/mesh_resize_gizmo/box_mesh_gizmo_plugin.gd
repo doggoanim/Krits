@@ -40,6 +40,9 @@ const MIN_HANDLE_OFFSET := 0.2         ## ...and a flat floor on top of that, so
                                         ## object's handles don't end up bunched together
                                         ## or sitting right on Godot's own move/scale gizmo
                                         ## at the node's pivot
+const NUDGE_FRACTION := 0.15   ## sideways nudge for a handle, as a fraction of the
+                                ## bounds' size on the nudge axis — see _redraw
+const MIN_NUDGE := 0.1         ## ...and its own flat floor
 
 ## handle_id 0..5 -> which axis (0/1/2 = X/Y/Z) and which face of it (+1 = max
 ## face, -1 = min face). Every place that used to assume "axis == handle_id"
@@ -136,6 +139,17 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	# move/scale gizmo when that's near the object's pivot. A thin stem line
 	# from the face out to the handle keeps it visually obvious which face
 	# each floating handle still belongs to.
+	#
+	# On top of that outward float, each handle also gets a small SIDEWAYS
+	# nudge on one of the other two axes (nudge_axis, cyclic: X->Y, Y->Z,
+	# Z->X), in the +/- direction matching its own sign. Without this, a
+	# +axis/-axis pair (e.g. the top and bottom handle on a thin, flat object)
+	# sit on the exact same 3D line through the center — looking straight
+	# down that axis (the very common top-down editor view) projects both to
+	# the identical screen pixel, so they look like one stuck handle and only
+	# one of the pair is ever clickable. The nudge is on an axis that's
+	# always visible on-screen when looking straight down the handle's own
+	# axis, so the pair can never fully overlap from any camera angle.
 	var center := bounds.position + bounds.size * 0.5
 	var handles := PackedVector3Array()
 	for handle_id in range(6):
@@ -146,6 +160,8 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		var offset: float = maxf(bounds.size[axis] * HANDLE_OFFSET_FRACTION, MIN_HANDLE_OFFSET)
 		var handle_point := face_point
 		handle_point[axis] += face_sign * offset
+		var nudge_axis := (axis + 1) % 3
+		handle_point[nudge_axis] += face_sign * maxf(bounds.size[nudge_axis] * NUDGE_FRACTION, MIN_NUDGE)
 		handles.append(handle_point)
 		lines.append(face_point)
 		lines.append(handle_point)
