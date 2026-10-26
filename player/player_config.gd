@@ -3,6 +3,10 @@ extends Resource
 ## All movement tunables in one place. Duplicate/edit the .tres to tweak the feel.
 
 @export_group("Ground")
+@export var max_step_height := 0.4   ## tallest riser Player._try_step_up() will climb automatically
+									  ## (stairs, a curb) instead of treating it as a wall — see
+									  ## that method's own doc comment. Taller than this still blocks
+									  ## normally and needs an actual jump.
 @export var walk_speed := 8.0
 @export var ground_accel := 70.0
 @export var ground_decel := 90.0

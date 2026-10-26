@@ -251,9 +251,60 @@ func safe_move_and_slide() -> void:
 	if not velocity.is_finite():
 		push_warning("Player velocity went non-finite (%s) — likely a degenerate collision shape nearby. Resetting to zero." % velocity)
 		velocity = Vector3.ZERO
+	_try_step_up()
 	move_and_slide()
 	if not velocity.is_finite():
 		velocity = Vector3.ZERO
+
+## Stepped stairs are a series of small vertical risers, and a riser is just
+## a wall as far as move_and_slide() is concerned — without this, climbing a
+## staircase would mean bonking into every single step instead of walking up
+## them, unless you also jumped at exactly the right moments. This runs
+## right before the real move_and_slide() each physics frame and, if this
+## frame's horizontal motion would be blocked by something no taller than
+## config.max_step_height, teleports the body up onto it first — standard
+## "stair-stepper" technique for a CharacterBody3D (Godot has no automatic
+## step-offset like some other engines' character controllers):
+##
+## 1. Would the intended horizontal motion actually be blocked at the
+##    current height? If not, there's no step to climb — bail immediately so
+##    flat ground is never touched by this at all.
+## 2. Is the same motion clear once raised by max_step_height? If it's STILL
+##    blocked, whatever's ahead is taller than a climbable step (a real wall,
+##    or too-tall a ledge) — bail and let the ordinary wall collision happen.
+## 3. Settle back down from there onto whatever's actually underneath, so the
+##    body ends up resting on the stair's tread instead of floating at a
+##    fixed height above the old floor. Checked against floor_max_angle too,
+##    so this can't snap the body onto a steep surface or a low overhang edge
+##    that merely happened to be within step range.
+##
+## Only runs while already grounded and actually moving horizontally — never
+## kicks in mid-air, so it doesn't interfere with jump arcs or falling.
+func _try_step_up() -> void:
+	if not is_on_floor():
+		return
+	var horizontal := velocity * Vector3(1.0, 0.0, 1.0)
+	if horizontal.length() < 0.01:
+		return
+
+	var motion := horizontal * get_physics_process_delta_time()
+	var step := config.max_step_height
+
+	if not test_move(global_transform, motion):
+		return   # nothing in the way at ground level — no step needed
+
+	var raised := global_transform.translated(Vector3.UP * step)
+	if test_move(raised, motion):
+		return   # still blocked even raised this high — too tall a riser, or just a wall
+
+	var advanced := raised.translated(motion)
+	var settle := KinematicCollision3D.new()
+	if not test_move(advanced, Vector3.DOWN * step, settle):
+		return   # nothing solid within range right below — don't commit to a blind step
+	if settle.get_normal().angle_to(Vector3.UP) > floor_max_angle:
+		return   # not walkable floor (e.g. the underside of a low ledge) — don't snap onto it
+
+	global_position = advanced.origin + settle.get_travel()
 
 func apply_gravity(delta: float, mult := 1.0) -> void:
 	var g := config.gravity * mult
