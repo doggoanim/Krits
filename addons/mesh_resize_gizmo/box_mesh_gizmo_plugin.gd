@@ -1,12 +1,12 @@
 @tool
 extends EditorNode3DGizmoPlugin
-## Gives a Node3D three drag handles in the 3D viewport — one per axis — for
+## Gives a Node3D six drag handles in the 3D viewport — one per face — for
 ## resizing it by dragging a face, the same way Godot's built-in gizmo
-## already lets you drag-resize a CollisionShape3D's BoxShape3D. Each handle
-## sits on the combined mesh bounds' positive face along that axis; dragging
-## it extends ONLY that face outward (and pulls it back in) while the
-## opposite face stays anchored exactly where it was — like resizing a box
-## in Blender by dragging one face.
+## already lets you drag-resize a CollisionShape3D's BoxShape3D. Dragging a
+## handle extends ONLY that face outward (and pulls it back in) while the
+## OPPOSITE face stays anchored exactly where it was — like resizing a box
+## in Blender by dragging one face. handle_id 0..5 pairs up as
+## (+X,-X,+Y,-Y,+Z,-Z) throughout this file — see HANDLE_AXIS/HANDLE_SIGN.
 ##
 ## Applies to two kinds of selection, both driven through the same shared
 ## drag/anchor math (_get_local_bounds, _set_handle):
@@ -34,6 +34,13 @@ const HANDLE_TEXTURE_SIZE := 24   ## Godot's own default handle dot is tiny (~8p
                                    ## since the billboard's hit area is sized off the texture's own
                                    ## pixel dimensions, is noticeably easier to actually grab.
 const MIN_SIZE := 0.02   ## never let a drag collapse an axis to zero/negative
+
+## handle_id 0..5 -> which axis (0/1/2 = X/Y/Z) and which face of it (+1 = max
+## face, -1 = min face). Every place that used to assume "axis == handle_id"
+## and "always the positive face" now goes through these two instead.
+const HANDLE_AXIS := [0, 0, 1, 1, 2, 2]
+const HANDLE_SIGN := [1.0, -1.0, 1.0, -1.0, 1.0, -1.0]
+const HANDLE_NAMES := ["Size +X", "Size -X", "Size +Y", "Size -Y", "Size +Z", "Size -Z"]
 
 var _undo_redo: EditorUndoRedoManager
 
@@ -116,19 +123,21 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	_append_box_wireframe(lines, bounds)
 	gizmo.add_lines(lines, get_material(&"mesh_resize_lines", gizmo), false)
 
-	# One handle per axis, centered on the other two axes and sitting on this
-	# axis's own positive (max) face. handle_id 0/1/2 = X/Y/Z throughout this
-	# whole file — keep them in that order.
+	# One handle per face: handle_id 0..5 -> (axis, sign) via HANDLE_AXIS/
+	# HANDLE_SIGN. Each sits centered on the other two axes, on its own face
+	# (max face for sign +1, min face for sign -1).
 	var center := bounds.position + bounds.size * 0.5
 	var handles := PackedVector3Array()
-	for axis in range(3):
+	for handle_id in range(6):
+		var axis: int = HANDLE_AXIS[handle_id]
+		var sign: float = HANDLE_SIGN[handle_id]
 		var p := center
-		p[axis] = bounds.position[axis] + bounds.size[axis]
+		p[axis] = bounds.position[axis] + bounds.size[axis] if sign > 0.0 else bounds.position[axis]
 		handles.append(p)
 	gizmo.add_handles(handles, get_material(&"mesh_resize_handles", gizmo), PackedInt32Array())
 
 func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool) -> String:
-	return ["Size X", "Size Y", "Size Z"][handle_id]
+	return HANDLE_NAMES[handle_id]
 
 func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool) -> Variant:
 	var node := gizmo.get_node_3d()
@@ -144,12 +153,14 @@ func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bo
 
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
 	var node := gizmo.get_node_3d()
+	var axis: int = HANDLE_AXIS[handle_id]
+	var sign: float = HANDLE_SIGN[handle_id]
 
 	# Shared by both paths: where the drag-start anchor/dragged faces sit in
 	# WORLD space, measured along the axis from the drag-start origin — all
 	# computed fresh from the drag-start snapshot every call, never from the
 	# node's current (already-moved) state, so the anchor can't creep.
-	var axis_world: Vector3 = _drag_start_basis * _unit_axis(handle_id)
+	var axis_world: Vector3 = _drag_start_basis * _unit_axis(axis)
 	var axis_world_unit := axis_world.normalized()
 	var start_center_world := _parent_relative_to_world(node, _drag_start_position)
 
@@ -161,17 +172,24 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 	if _drag_is_box:
 		# Lone BoxMesh: the anchor/dragged faces ARE the geometry itself
 		# (size is mutable), so their offsets are just ±half the drag-start
-		# size.
-		var start_half: float = _drag_start_bounds.size[handle_id] * 0.5
-		var anchor_face_offset := -start_half
-		dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
+		# size — on whichever side `sign` says is the one being dragged, with
+		# the OTHER side (-sign) staying anchored.
+		var start_half: float = _drag_start_bounds.size[axis] * 0.5
+		var anchor_face_offset := -sign * start_half
+		# Dragging the +face can only push it further in the +direction past
+		# the anchor (clamp from below); dragging the -face only further in
+		# the -direction (clamp from above) — same MIN_SIZE floor either way.
+		if sign > 0.0:
+			dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
+		else:
+			dragged_face_offset = minf(dragged_face_offset, anchor_face_offset - MIN_SIZE)
 
-		var new_axis_size := dragged_face_offset - anchor_face_offset
+		var new_axis_size := absf(dragged_face_offset - anchor_face_offset)
 		var center_shift := (dragged_face_offset + anchor_face_offset) * 0.5
 
 		var box := (node as MeshInstance3D).mesh as BoxMesh
 		var new_size := box.size
-		new_size[handle_id] = new_axis_size
+		new_size[axis] = new_axis_size
 		box.size = new_size
 		node.global_position = start_center_world + axis_world_unit * center_shift
 	else:
@@ -183,22 +201,37 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 		# whether `node` is a single non-box MeshInstance3D or the root of a
 		# whole multi-part instanced scene, since scale/position are both
 		# plain Node3D properties either way.
-		var aabb_min: float = _drag_start_bounds.position[handle_id]
-		var aabb_max: float = aabb_min + _drag_start_bounds.size[handle_id]
+		var aabb_min: float = _drag_start_bounds.position[axis]
+		var aabb_max: float = aabb_min + _drag_start_bounds.size[axis]
 		var local_extent := aabb_max - aabb_min
 		if absf(local_extent) < 0.0001:
 			return   ## degenerate bounds (zero thickness on this axis) — nothing sensible to drag
 
-		var anchor_face_offset := aabb_min * _drag_start_scale[handle_id]
-		dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
+		# The anchor is whichever local extreme is OPPOSITE the face being
+		# dragged: dragging the +face (sign>0) anchors aabb_min, dragging the
+		# -face (sign<0) anchors aabb_max.
+		var anchor_local: float = aabb_min if sign > 0.0 else aabb_max
+		var anchor_face_offset := anchor_local * _drag_start_scale[axis]
+		if sign > 0.0:
+			dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
+		else:
+			dragged_face_offset = minf(dragged_face_offset, anchor_face_offset - MIN_SIZE)
 
-		var new_scale_axis := (dragged_face_offset - anchor_face_offset) / local_extent
-		var origin_shift := anchor_face_offset - aabb_min * new_scale_axis
+		# Reduces exactly to the old sign=+1 formulas (anchor_local = aabb_min,
+		# local_extent unchanged) when sign is +1.
+		var new_scale_axis := (dragged_face_offset - anchor_face_offset) / (local_extent * sign)
+		var origin_shift := anchor_face_offset - anchor_local * new_scale_axis
 
 		var new_scale := node.scale
-		new_scale[handle_id] = new_scale_axis
+		new_scale[axis] = new_scale_axis
 		node.scale = new_scale
 		node.global_position = start_center_world + axis_world_unit * origin_shift
+
+	# Force the gizmo's own overlay (wireframe + handle dots) to redraw this
+	# frame instead of waiting for the editor's next independent refresh —
+	# without this, the underlying mesh/node transform updates live but the
+	# orange overlay visibly lags a frame or more behind it during a fast drag.
+	node.update_gizmos()
 
 func _commit_handle(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bool, restore: Variant, cancel: bool) -> void:
 	var node := gizmo.get_node_3d()
@@ -284,9 +317,9 @@ func _parent_relative_to_world(node: Node3D, local_position: Vector3) -> Vector3
 	var parent := node.get_parent_node_3d()
 	return parent.global_transform * local_position if parent else local_position
 
-func _unit_axis(handle_id: int) -> Vector3:
+func _unit_axis(axis_index: int) -> Vector3:
 	var axis := Vector3.ZERO
-	axis[handle_id] = 1.0
+	axis[axis_index] = 1.0
 	return axis
 
 func _append_box_wireframe(lines: PackedVector3Array, bounds: AABB) -> void:
