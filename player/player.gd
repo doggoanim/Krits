@@ -397,8 +397,20 @@ func ground_height_below(from: Vector3, max_dist: float) -> Variant:
 ## instead of the hit height — used by GroundState to work out which
 ## footstep sound set to play (see FootstepSurfaces.detect()). Null if
 ## nothing's found in range.
+##
+## Unlike ground_height_below(), this also hits Area3Ds (collide_with_areas)
+## on the same world layer — a surface that's visually there but whose real
+## collision is deliberately off (e.g. a decorative flat rock path mesh that
+## just rides on the terrain collider underneath it) can still be given a
+## marker Area3D of its own, purely so footsteps can detect it; since an
+## Area3D never affects movement, it's safe to add without changing how the
+## ground itself actually collides. Give the marker a shape matching the
+## mesh's footprint, collision_layer = 1 (world), and either name it so
+## FootstepSurfaces' keyword guess picks it up or put it straight in a
+## "surface_<name>" group for an explicit override — see that file.
 func floor_collider_below(from: Vector3, max_dist: float) -> Node:
 	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * max_dist, 1)
+	query.collide_with_areas = true
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.collider if not hit.is_empty() else null
 
