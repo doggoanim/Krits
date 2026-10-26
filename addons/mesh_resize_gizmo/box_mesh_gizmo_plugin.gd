@@ -130,9 +130,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var handles := PackedVector3Array()
 	for handle_id in range(6):
 		var axis: int = HANDLE_AXIS[handle_id]
-		var sign: float = HANDLE_SIGN[handle_id]
+		var face_sign: float = HANDLE_SIGN[handle_id]
 		var p := center
-		p[axis] = bounds.position[axis] + bounds.size[axis] if sign > 0.0 else bounds.position[axis]
+		p[axis] = bounds.position[axis] + bounds.size[axis] if face_sign > 0.0 else bounds.position[axis]
 		handles.append(p)
 	gizmo.add_handles(handles, get_material(&"mesh_resize_handles", gizmo), PackedInt32Array())
 
@@ -154,7 +154,7 @@ func _get_handle_value(gizmo: EditorNode3DGizmo, _handle_id: int, _secondary: bo
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
 	var node := gizmo.get_node_3d()
 	var axis: int = HANDLE_AXIS[handle_id]
-	var sign: float = HANDLE_SIGN[handle_id]
+	var face_sign: float = HANDLE_SIGN[handle_id]
 
 	# Shared by both paths: where the drag-start anchor/dragged faces sit in
 	# WORLD space, measured along the axis from the drag-start origin — all
@@ -175,11 +175,11 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 		# size — on whichever side `sign` says is the one being dragged, with
 		# the OTHER side (-sign) staying anchored.
 		var start_half: float = _drag_start_bounds.size[axis] * 0.5
-		var anchor_face_offset := -sign * start_half
+		var anchor_face_offset := -face_sign * start_half
 		# Dragging the +face can only push it further in the +direction past
 		# the anchor (clamp from below); dragging the -face only further in
 		# the -direction (clamp from above) — same MIN_SIZE floor either way.
-		if sign > 0.0:
+		if face_sign > 0.0:
 			dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
 		else:
 			dragged_face_offset = minf(dragged_face_offset, anchor_face_offset - MIN_SIZE)
@@ -210,16 +210,16 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool, cam
 		# The anchor is whichever local extreme is OPPOSITE the face being
 		# dragged: dragging the +face (sign>0) anchors aabb_min, dragging the
 		# -face (sign<0) anchors aabb_max.
-		var anchor_local: float = aabb_min if sign > 0.0 else aabb_max
+		var anchor_local: float = aabb_min if face_sign > 0.0 else aabb_max
 		var anchor_face_offset := anchor_local * _drag_start_scale[axis]
-		if sign > 0.0:
+		if face_sign > 0.0:
 			dragged_face_offset = maxf(dragged_face_offset, anchor_face_offset + MIN_SIZE)
 		else:
 			dragged_face_offset = minf(dragged_face_offset, anchor_face_offset - MIN_SIZE)
 
 		# Reduces exactly to the old sign=+1 formulas (anchor_local = aabb_min,
 		# local_extent unchanged) when sign is +1.
-		var new_scale_axis := (dragged_face_offset - anchor_face_offset) / (local_extent * sign)
+		var new_scale_axis := (dragged_face_offset - anchor_face_offset) / (local_extent * face_sign)
 		var origin_shift := anchor_face_offset - anchor_local * new_scale_axis
 
 		var new_scale := node.scale
