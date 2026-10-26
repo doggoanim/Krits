@@ -2,20 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cejoqhktwxh7w" path="res://main.gd" id="1"]
 [ext_resource type="Resource" uid="uid://cxq5uev4mffcc" path="res://world/grass_biome_lighting.tres" id="2_0xm2m"]
-[ext_resource type="AudioStream" uid="uid://ba1q6bpnjftk2" path="res://sounds/SFX/footsteps/dirt/footsteps_dirt_1.wav" id="3_dg77c"]
-[ext_resource type="AudioStream" uid="uid://mp2vh281qvxa" path="res://sounds/SFX/footsteps/dirt/footsteps_dirt_2.wav" id="4_ycdy4"]
-[ext_resource type="AudioStream" uid="uid://bwoghgxpd2lut" path="res://sounds/SFX/footsteps/dirt/footsteps_dirt_3.wav" id="5_w48qg"]
-[ext_resource type="AudioStream" uid="uid://bcoqg8o04lpgw" path="res://sounds/SFX/footsteps/dirt/footsteps_dirt_4.wav" id="6_vivmo"]
-[ext_resource type="AudioStream" uid="uid://cd0w3t6ultw4f" path="res://sounds/SFX/footsteps/rock/footsteps_rock_1.wav" id="7_2cqfq"]
-[ext_resource type="AudioStream" uid="uid://deu7gr7b6e8p2" path="res://sounds/SFX/footsteps/rock/footsteps_rock_2.wav" id="8_yaehf"]
-[ext_resource type="AudioStream" uid="uid://0w14ahyv5kju" path="res://sounds/SFX/footsteps/rock/footsteps_rock_3.wav" id="9_074og"]
-[ext_resource type="AudioStream" uid="uid://byfcq23c12xme" path="res://sounds/SFX/footsteps/rock/footsteps_rock_4.wav" id="10_cegan"]
-[ext_resource type="AudioStream" uid="uid://bbnvdlppthw0y" path="res://sounds/SFX/footsteps/rock/footsteps_rock_5.wav" id="11_82xsv"]
-[ext_resource type="AudioStream" uid="uid://df4uh3hk3w1eo" path="res://sounds/SFX/footsteps/rock/footsteps_rock_6.wav" id="12_getpj"]
 
 [node name="Main" type="Node3D" unique_id=1201764531]
 script = ExtResource("1")
 env_config = ExtResource("2_0xm2m")
 pixelate_size = 3.0
-footstep_sfx_dirt = Array[AudioStream]([ExtResource("3_dg77c"), ExtResource("4_ycdy4"), ExtResource("5_w48qg"), ExtResource("6_vivmo")])
-footstep_sfx_rock = Array[AudioStream]([ExtResource("7_2cqfq"), ExtResource("8_yaehf"), ExtResource("9_074og"), ExtResource("10_cegan"), ExtResource("11_82xsv"), ExtResource("12_getpj")])
