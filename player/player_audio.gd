@@ -35,12 +35,10 @@ const AIR_DIVE_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "air_dive_1.wav"),
 	preload(SFX_DIR + "air_dive_2.wav"),
 ]
-## One set per FootstepSurfaces.Surface (see that file for how a surface is
-## detected from whatever the player's standing on). Add a new surface's
-## sound files here and list it in FOOTSTEP_SFX_BY_SURFACE below — nothing
-## else needs to change; GroundState already passes through whichever
-## surface it detects.
-const FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
+## Built-in default for footstep_sfx_grass below — pulled out as its own
+## const so Main (main.gd) can also use it as the default value of its own
+## exported footstep_sfx_grass, without duplicating this list in two files.
+const DEFAULT_FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_1.wav"),
 	preload(SFX_DIR + "footsteps_grass_2.wav"),
 	preload(SFX_DIR + "footsteps_grass_3.wav"),
@@ -49,17 +47,22 @@ const FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
 	preload(SFX_DIR + "footsteps_grass_6.wav"),
 	preload(SFX_DIR + "footsteps_grass_7.wav"),
 ]
-## No recordings yet — play_footstep() falls back to FOOTSTEP_SFX_GRASS for
-## any surface whose array is still empty, rather than playing nothing.
-## Drop in sound files and list them here once you have them.
-const FOOTSTEP_SFX_DIRT: Array[AudioStream] = []
-const FOOTSTEP_SFX_ROCK: Array[AudioStream] = []
 
-const FOOTSTEP_SFX_BY_SURFACE := {
-	FootstepSurfaces.Surface.GRASS: FOOTSTEP_SFX_GRASS,
-	FootstepSurfaces.Surface.DIRT: FOOTSTEP_SFX_DIRT,
-	FootstepSurfaces.Surface.ROCK: FOOTSTEP_SFX_ROCK,
-}
+## One array per FootstepSurfaces.Surface (see that file for how a surface
+## is detected from whatever the player's standing on). @export rather than
+## const so these are actually editable: PlayerAudio is built entirely in
+## code (Player._ready() does `PlayerAudio.new()`) and never appears as its
+## own node in a saved scene, so Main re-exports these three and pushes them
+## down after creating Player — see main.gd's footstep_sfx_* exports. These
+## defaults just mean the sounds still work if something ever builds a
+## PlayerAudio without going through Main (e.g. a test scene).
+##
+## Dirt and rock start empty (no recordings yet) — play_footstep() falls
+## back to footstep_sfx_grass for any surface whose array is empty, rather
+## than playing nothing.
+@export var footstep_sfx_grass: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_GRASS
+@export var footstep_sfx_dirt: Array[AudioStream] = []
+@export var footstep_sfx_rock: Array[AudioStream] = []
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
@@ -136,10 +139,19 @@ func play_orb_attack(combo := 1) -> void:
 ## raycasts straight down each step and passes whatever it finds through.
 ## Falls back to the grass set if nothing's recorded for that surface yet.
 func play_footstep(surface := FootstepSurfaces.Surface.GRASS) -> void:
-	var pool: Array = FOOTSTEP_SFX_BY_SURFACE.get(surface, FOOTSTEP_SFX_GRASS)
+	var pool := _sfx_for(surface)
 	if pool.is_empty():
-		pool = FOOTSTEP_SFX_GRASS
+		pool = footstep_sfx_grass
 	_play(pool.pick_random(), PITCH_VARIANCE)
+
+func _sfx_for(surface: FootstepSurfaces.Surface) -> Array[AudioStream]:
+	match surface:
+		FootstepSurfaces.Surface.DIRT:
+			return footstep_sfx_dirt
+		FootstepSurfaces.Surface.ROCK:
+			return footstep_sfx_rock
+		_:
+			return footstep_sfx_grass
 
 func play_side_flip() -> void:
 	_play(SIDE_FLIP_SFX, PITCH_VARIANCE)
