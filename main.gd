@@ -25,12 +25,11 @@ extends Node3D
 ## core/footstep_surfaces.gd for how a surface is detected underfoot).
 ## Editable here, not in player_audio.gd, because Player/PlayerAudio are
 ## built entirely in code and never exist as their own node in a saved
-## scene — this is the only Inspector they're ever reachable from. Dirt and
-## rock start empty (no recordings yet); PlayerAudio falls back to the
-## grass set for any surface left empty.
+## scene — this is the only Inspector they're ever reachable from.
+## play_footstep() falls back to the grass set for any surface left empty.
 @export var footstep_sfx_grass: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_GRASS
-@export var footstep_sfx_dirt: Array[AudioStream] = []
-@export var footstep_sfx_rock: Array[AudioStream] = []
+@export var footstep_sfx_dirt: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_DIRT
+@export var footstep_sfx_rock: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_ROCK
 
 var player: Player
 var cam: CameraRig

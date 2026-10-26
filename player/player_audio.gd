@@ -35,17 +35,34 @@ const AIR_DIVE_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "air_dive_1.wav"),
 	preload(SFX_DIR + "air_dive_2.wav"),
 ]
-## Built-in default for footstep_sfx_grass below — pulled out as its own
-## const so Main (main.gd) can also use it as the default value of its own
-## exported footstep_sfx_grass, without duplicating this list in two files.
+const FOOTSTEPS_DIR := SFX_DIR + "footsteps/"
+
+## Built-in defaults for the footstep_sfx_* exports below — pulled out as
+## their own consts so Main (main.gd) can also use them as the default
+## values of its own exported footstep_sfx_* vars, without duplicating these
+## lists in two files.
 const DEFAULT_FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
-	preload(SFX_DIR + "footsteps_grass_1.wav"),
-	preload(SFX_DIR + "footsteps_grass_2.wav"),
-	preload(SFX_DIR + "footsteps_grass_3.wav"),
-	preload(SFX_DIR + "footsteps_grass_4.wav"),
-	preload(SFX_DIR + "footsteps_grass_5.wav"),
-	preload(SFX_DIR + "footsteps_grass_6.wav"),
-	preload(SFX_DIR + "footsteps_grass_7.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_1.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_2.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_3.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_4.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_5.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_6.wav"),
+	preload(FOOTSTEPS_DIR + "grass/footsteps_grass_7.wav"),
+]
+const DEFAULT_FOOTSTEP_SFX_DIRT: Array[AudioStream] = [
+	preload(FOOTSTEPS_DIR + "dirt/footsteps_dirt_1.wav"),
+	preload(FOOTSTEPS_DIR + "dirt/footsteps_dirt_2.wav"),
+	preload(FOOTSTEPS_DIR + "dirt/footsteps_dirt_3.wav"),
+	preload(FOOTSTEPS_DIR + "dirt/footsteps_dirt_4.wav"),
+]
+const DEFAULT_FOOTSTEP_SFX_ROCK: Array[AudioStream] = [
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_1.wav"),
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_2.wav"),
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_3.wav"),
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_4.wav"),
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_5.wav"),
+	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_6.wav"),
 ]
 
 ## One array per FootstepSurfaces.Surface (see that file for how a surface
@@ -57,12 +74,12 @@ const DEFAULT_FOOTSTEP_SFX_GRASS: Array[AudioStream] = [
 ## defaults just mean the sounds still work if something ever builds a
 ## PlayerAudio without going through Main (e.g. a test scene).
 ##
-## Dirt and rock start empty (no recordings yet) — play_footstep() falls
-## back to footstep_sfx_grass for any surface whose array is empty, rather
+## play_footstep() falls back to footstep_sfx_grass for any surface whose
+## array ends up empty (e.g. if you clear one out in the Inspector), rather
 ## than playing nothing.
 @export var footstep_sfx_grass: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_GRASS
-@export var footstep_sfx_dirt: Array[AudioStream] = []
-@export var footstep_sfx_rock: Array[AudioStream] = []
+@export var footstep_sfx_dirt: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_DIRT
+@export var footstep_sfx_rock: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_ROCK
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
