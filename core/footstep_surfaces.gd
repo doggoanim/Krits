@@ -50,7 +50,7 @@ const NAME_KEYWORDS := {
 static func detect(collider: Node) -> Surface:
 	if collider == null:
 		return Surface.GRASS
-	var by_group := _from_groups(collider)
+	var by_group: Variant = _from_groups(collider)
 	if by_group != null:
 		return by_group
 	return _from_names(collider)
