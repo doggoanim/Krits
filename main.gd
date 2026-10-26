@@ -41,6 +41,11 @@ func _ready() -> void:
 	add_child(outlines)
 	outlines.follow(cam.get_camera())
 
+	# Retro pixelation overlay — sits above the outline pass, below the HUD
+	# (see PixelateEffect's header comment). Purely cosmetic; doesn't need
+	# anything set up before it.
+	add_child(PixelateEffect.new())
+
 	encounters = EncounterManager.new()
 	add_child(encounters)
 	encounters.setup(player, level)
