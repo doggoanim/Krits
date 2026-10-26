@@ -74,6 +74,16 @@ func _get_gizmo_name() -> String:
 	return "MeshResize"
 
 func _has_gizmo(for_node_3d: Node3D) -> bool:
+	# A mesh part nested inside an already-instanced scene (a wall or roof
+	# MeshInstance3D inside a multi-part .glb, say — only reachable at all
+	# with "Editable Children" on) defers entirely to that instance's own
+	# root gizmo below, rather than also getting its own: without this, a
+	# multi-part model shows one gizmo per part PLUS the whole-object one,
+	# each sized to that one part's own small edge instead of the model's
+	# actual outer bounds — looks like a scattered, inconsistent mess of
+	# handles instead of one clean set of 3.
+	if for_node_3d.scene_file_path.is_empty() and _has_instanced_ancestor(for_node_3d):
+		return false
 	if for_node_3d is MeshInstance3D:
 		return (for_node_3d as MeshInstance3D).mesh != null
 	# A plain organizational Node3D (an empty group like "Props") shouldn't
@@ -83,6 +93,17 @@ func _has_gizmo(for_node_3d: Node3D) -> bool:
 	if for_node_3d.scene_file_path.is_empty():
 		return false
 	return not _find_mesh_instances(for_node_3d).is_empty()
+
+## True if some ancestor (not `node` itself) is the root of an instanced
+## scene — i.e. `node` is one of that instance's own internal nodes, as
+## opposed to a standalone node authored directly in the scene being edited.
+func _has_instanced_ancestor(node: Node) -> bool:
+	var p := node.get_parent()
+	while p != null:
+		if p is Node3D and not (p as Node3D).scene_file_path.is_empty():
+			return true
+		p = p.get_parent()
+	return false
 
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
