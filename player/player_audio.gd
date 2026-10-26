@@ -155,7 +155,7 @@ func play_orb_attack(combo := 1) -> void:
 ## `surface` comes from FootstepSurfaces.detect() — see GroundState, which
 ## raycasts straight down each step and passes whatever it finds through.
 ## Falls back to the grass set if nothing's recorded for that surface yet.
-func play_footstep(surface := FootstepSurfaces.Surface.GRASS) -> void:
+func play_footstep(surface := FootstepSurfaces.DEFAULT_SURFACE) -> void:
 	var pool := _sfx_for(surface)
 	if pool.is_empty():
 		pool = footstep_sfx_grass

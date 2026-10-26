@@ -21,13 +21,15 @@ extends RefCounted
 ##    works for free for every asset following the project's existing
 ##    *_terrain.glb / grass_*, dirt_*, rock_* naming convention.
 ##
-## Falls back to GRASS (not a NONE/unknown surface) if nothing matches at
-## all, since that's the only sound set actually recorded so far — see
-## PlayerAudio.FOOTSTEP_SFX_BY_SURFACE. Adding a new surface: add it to
-## Surface, GROUP_NAMES and NAME_KEYWORDS below, then give PlayerAudio a
-## sound set for it.
+## Falls back to DEFAULT_SURFACE (not a NONE/unknown value) if nothing
+## matches at all — most of the world here is rock/stone underneath, so
+## that's the safer guess than grass for whatever's left unrecognized.
+## Adding a new surface: add it to Surface, GROUP_NAMES and NAME_KEYWORDS
+## below, then give PlayerAudio a sound set for it.
 
 enum Surface { GRASS, DIRT, ROCK }
+
+const DEFAULT_SURFACE := Surface.ROCK
 
 const GROUP_NAMES := {
 	Surface.GRASS: &"surface_grass",
@@ -45,11 +47,11 @@ const NAME_KEYWORDS := {
 }
 
 ## `collider` is whatever CollisionObject3D (or any Node) a floor raycast hit
-## — see Player.floor_collider_below(). Null is treated as GRASS, same as
-## "nothing matched".
+## — see Player.floor_collider_below(). Null is treated the same as "nothing
+## matched" — see DEFAULT_SURFACE.
 static func detect(collider: Node) -> Surface:
 	if collider == null:
-		return Surface.GRASS
+		return DEFAULT_SURFACE
 	var by_group: Variant = _from_groups(collider)
 	if by_group != null:
 		return by_group
@@ -77,4 +79,4 @@ static func _from_names(node: Node) -> Surface:
 				if haystack.contains(keyword):
 					return surface
 		n = n.get_parent()
-	return Surface.GRASS
+	return DEFAULT_SURFACE
