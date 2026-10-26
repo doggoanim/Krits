@@ -78,6 +78,12 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		pos[axis] = half[axis]
 		handles.append(pos)
 		ids.append(axis)
+	if mesh is PlaneMesh:
+		# TEMP debug — remove once the plane handle positioning is confirmed
+		# fixed. Prints every time this gizmo redraws (selecting the node,
+		# and continuously while dragging).
+		print("[MeshResizeGizmo] mesh=%s native_size=%s half=%s axes=%s handles=%s ids=%s" %
+				[mesh, mesh.size, half, _mesh_axes(mesh), handles, ids])
 	gizmo.add_handles(handles, get_material(&"mesh_resize_handles", gizmo), ids)
 
 func _get_handle_name(_gizmo: EditorNode3DGizmo, handle_id: int, _secondary: bool) -> String:
