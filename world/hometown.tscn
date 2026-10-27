@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bqxxfugls4puo" path="res://assets/world/terrain/grass_terrain.glb" id="2_256to"]
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
 [ext_resource type="PackedScene" uid="uid://b17cmgjxs20u7" path="res://assets/world/terrain/nocol_darkened_grass_terrain.glb" id="4_256to"]
+[ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="6_b0hj8"]
 [ext_resource type="PackedScene" uid="uid://bcrwgpmkdcdkv" path="res://assets/world/nature/rock_1.glb" id="8_cx2cw"]
 [ext_resource type="PackedScene" uid="uid://c18rqgadpyua4" path="res://assets/world/nature/rock_2.glb" id="9_38blh"]
 [ext_resource type="PackedScene" uid="uid://hoc3sbkq44s2" path="res://assets/world/terrain/nocol_dirt_terrain.glb" id="10_a5ueg"]
@@ -40,11 +41,15 @@
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
 [ext_resource type="Script" uid="uid://mgy577jf1cdb" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
+[ext_resource type="PackedScene" uid="uid://dnytx8tbjvl2g" path="res://assets/world/nature/blue_flower.glb" id="41_qie8l"]
+[ext_resource type="PackedScene" uid="uid://dvi68k8hrbjdt" path="res://assets/world/nature/green_flower.glb" id="42_186l7"]
 [ext_resource type="Script" uid="uid://mxhompivr0pn" path="res://world/wind_lines.gd" id="42_wind_lines"]
 [ext_resource type="Script" uid="uid://bv377biwti3hs" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
+[ext_resource type="PackedScene" uid="uid://c0yeh1bs8b8gt" path="res://assets/world/nature/red_flower.glb" id="43_qssed"]
+[ext_resource type="PackedScene" uid="uid://kni1e3ga44vm" path="res://assets/world/nature/yellow_flower.glb" id="44_36x1p"]
 [ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 [ext_resource type="Script" uid="uid://corr3uvd0biec" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
-[ext_resource type="Script" path="res://world/water/water_volume.gd" id="46_water_volume"]
+[ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -54,6 +59,16 @@ size = Vector3(10.715, 0.35, 12.595)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_70bq6"]
 size = Vector3(10.715, 0.35, 12.595)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
+albedo_color = Color(0.30980393, 0.72156864, 0.05882353, 1)
+albedo_texture = ExtResource("6_b0hj8")
+
+[sub_resource type="BoxMesh" id="BoxMesh_wgm46"]
+size = Vector3(4, 20, 0.15)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qie8l"]
+size = Vector3(4, 20, 0.15)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
@@ -134,6 +149,12 @@ transform = Transform3D(-3.3045808e-07, 0, 6.6718087, 0, 0.07445519, 0, -7.56000
 
 [node name="nocol_darkened_grass_terrain2" parent="Terrain" unique_id=1776744755 instance=ExtResource("4_256to")]
 transform = Transform3D(3.0240002, 0, 0, 0, 0.07445519, 0, 0, 0, 3.4214406, 10.400001, 0.032082558, -9.004001)
+
+[node name="nocol_darkened_grass_terrain3" parent="Terrain" unique_id=136856141 instance=ExtResource("4_256to")]
+transform = Transform3D(-1.3218325e-07, 0, 3.4214406, 0, 0.07445519, 0, -3.0240006, 0, -1.4955593e-07, 10.400001, 0.032082558, 5.6817617)
+
+[node name="nocol_darkened_grass_terrain5" parent="Terrain" unique_id=841430811 instance=ExtResource("4_256to")]
+transform = Transform3D(-1.3218325e-07, 0, 3.4214406, 0, 0.07445519, 0, -3.0240006, 0, -1.4955593e-07, -2.5999994, 0.032082558, 5.6817617)
 
 [node name="nocol_rock_terrain" parent="Terrain" unique_id=1837949577 instance=ExtResource("25_3y8fk")]
 transform = Transform3D(0.19999999, 0, 0, 0, 0.044796467, 0, 0, 0, 0.19999999, 0.9999999, 0.01447773, -4)
@@ -236,6 +257,20 @@ transform = Transform3D(1.26, 0, 0, 0, 0.95903975, 0, 0, 0, 0.59400004, 19.28999
 
 [node name="rock_terrain8" parent="Terrain" unique_id=401667874 instance=ExtResource("26_lybmh")]
 transform = Transform3D(1.2, 0, 0, 0, 0.11099998, 0, 0, 0, 1.1880001, 16.3, 0.10000001, -1.9860001)
+
+[node name="climbable_wall" type="StaticBody3D" parent="Terrain" unique_id=982767974]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.356556, 8.7, 18)
+collision_layer = 257
+collision_mask = 257
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain/climbable_wall" unique_id=2133738145]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0.8225002)
+material_override = SubResource("StandardMaterial3D_m7dut")
+mesh = SubResource("BoxMesh_wgm46")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/climbable_wall" unique_id=1268352759]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0.8225002)
+shape = SubResource("BoxShape3D_qie8l")
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
@@ -419,7 +454,7 @@ trail_fraction = 1.0
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
 
-[node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=3177004512]
+[node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
 size = Vector3(20, 3, 20)
 
@@ -431,7 +466,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.41620445, 1.2802064, 0.4269
 material_override = SubResource("ShaderMaterial_qjukg")
 mesh = SubResource("CylinderMesh_o8fgi")
 
-[node name="WaterVolume" type="Area3D" parent="Props/lake_chesburg/Water2" unique_id=3177004513]
+[node name="WaterVolume" type="Area3D" parent="Props/lake_chesburg/Water2" unique_id=-1117962783]
 script = ExtResource("46_water_volume")
 size = Vector3(20, 3, 20)
 surface_y = 0.3465
@@ -445,13 +480,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -8)
 transform = Transform3D(1.4, 0, 0, 0, 1.4399999, 0, 0, 0, 1.5, 10.8, 0, -8.3)
 
 [node name="rock_1" parent="Props/eyecandies" unique_id=211568896 instance=ExtResource("8_cx2cw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4109068, 0.040555716, 4.4515524)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4109068, 0.040555716, 3.4515524)
 
 [node name="rock_2" parent="Props/eyecandies" unique_id=1686040358 instance=ExtResource("9_38blh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0166259, 0.037769556, 4.2396927)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.016626, 0.037769556, 3.2396927)
 
 [node name="rock_3" parent="Props/eyecandies" unique_id=2115035763 instance=ExtResource("10_jq25j")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.90913105, 0.043483734, 4.8624578)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.909131, 0.043483734, 3.8624578)
 
 [node name="rock_6" parent="Props/eyecandies" unique_id=2106869582 instance=ExtResource("16_3y8fk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.739195, 0.64848197, -2.9766304)
@@ -529,6 +564,36 @@ script = ExtResource("40_foliage_wind")
 transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.0583986e-08, 20.3, 0, 13.1)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/berry_bush5" unique_id=1523019782]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower" parent="Props/eyecandies" unique_id=704144394 instance=ExtResource("41_qie8l")]
+transform = Transform3D(1, 0, 0, 0, 1.4, 0, 0, 0, 1, 12, 0, -7)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower" unique_id=374990695]
+script = ExtResource("40_foliage_wind")
+
+[node name="green_flower" parent="Props/eyecandies" unique_id=415691239 instance=ExtResource("42_186l7")]
+transform = Transform3D(-4.222196e-08, -1.131334e-08, 1, -0.25881904, 0.9659258, 0, -0.9659258, -0.25881904, -4.371139e-08, 12.5, 0, -6.5)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/green_flower" unique_id=752385656]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower" parent="Props/eyecandies" unique_id=1260108625 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1.2, 0, -0.5, 0, 0.8660254, 12.3, 0, -6.1)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower" unique_id=53316323]
+script = ExtResource("40_foliage_wind")
+
+[node name="yellow_flower" parent="Props/eyecandies" unique_id=188559562 instance=ExtResource("44_36x1p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -6)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/yellow_flower" unique_id=494087206]
+script = ExtResource("40_foliage_wind")
+
+[node name="yellow_flower2" parent="Props/eyecandies" unique_id=1880363135 instance=ExtResource("44_36x1p")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1.3, 0, -0.5, 0, 0.8660254, 20, 0, -7)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/yellow_flower2" unique_id=472261053]
 script = ExtResource("40_foliage_wind")
 
 [node name="CloudShadows" type="Node3D" parent="." unique_id=2069795992]
