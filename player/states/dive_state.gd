@@ -18,7 +18,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	# either wait that pose out or (per play()'s hold guard) silently not
 	# play at all until the old hold expired on its own.
 	p.visual.cancel_hold()
-	p.visual.play(PlayerVisual.ANIM_DIVE)
+	p.visual.play(PlayerVisual.ANIM_DIVE, 0.0)   # instant cut — a lunge should snap into pose, not ease in
 	p.speed_trail.set_active(true)
 	p.audio.play_air_dive()
 

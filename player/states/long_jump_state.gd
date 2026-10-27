@@ -8,7 +8,7 @@ var _jump_queued := false   ## a jump pressed anytime during the flight — see 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_jump_queued = false
 	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
-	player.visual.play(PlayerVisual.ANIM_LONG_JUMP)
+	player.visual.play(PlayerVisual.ANIM_LONG_JUMP, 0.0)   # instant cut — a lunge should snap into pose, not ease in
 	player.speed_trail.set_active(true)
 	player.audio.play_long_jump()
 
