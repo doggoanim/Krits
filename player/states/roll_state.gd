@@ -65,6 +65,19 @@ func physics_update(delta: float) -> void:
 		if angle > 0.001:
 			var normal := p.get_floor_normal()
 			var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)
+			# h is a horizontal-only speed (get_hvel()/set_hvel() never touch
+			# velocity.y), but down_slope as computed is the full 3D tangential
+			# gravity vector, which dips downward along with the slope — on a
+			# steep ramp that's a sizeable Y component. Leaving it in meant
+			# h.length() below picked up that extra (fixed, direction-
+			# independent) magnitude regardless of whether you were rolling up
+			# or down the slope, which diluted how much the uphill case actually
+			# slowed you down — worse the steeper the slope, i.e. the opposite
+			# of "scaling up with steepness" this is meant to do. Flattening it
+			# to the slope's horizontal downhill direction before use fixes
+			# that: the correction then only ever affects horizontal speed, by
+			# exactly the amount described below.
+			down_slope.y = 0.0
 			if down_slope.length() > 0.001:
 				h += down_slope.normalized() * (c.gravity * sin(angle)) * delta
 	var spd := maxf(0.0, h.length() - c.roll_decay * delta)
@@ -74,7 +87,14 @@ func physics_update(delta: float) -> void:
 	# at roll_stop_speed (about to end), full by roll_speed (fresh launch).
 	p.audio.set_rolling(true, inverse_lerp(c.roll_stop_speed, c.roll_speed, spd))
 	p.face(h, delta)
-	p.velocity.y = -1.0
+	# Grounded rolling just hugs the floor (the same small constant GroundState
+	# uses) rather than needing real gravity — but rolling off a ledge still
+	# has to actually fall, not hang at that same tiny downward speed, hence
+	# the branch.
+	if p.is_on_floor():
+		p.velocity.y = -1.0
+	else:
+		p.apply_gravity(delta)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
 
@@ -85,7 +105,13 @@ func physics_update(delta: float) -> void:
 		return
 
 	if not p.is_on_floor():
-		machine.transition_to(&"Air")
+		# Rolling off a ledge used to cancel straight into Air, losing the roll
+		# the instant the ground dropped out from under you — even for a small
+		# gap or a bump you'd barely notice walking over. Just keep rolling
+		# through the air instead (full steering, decay, and gravity above all
+		# still apply) and land naturally; every stop condition below only
+		# makes sense once there's actually a floor to stand on, so it's simply
+		# skipped — not evaluated against mid-air — until that's true again.
 		return
 	_elapsed += delta
 	var held := Input.is_action_pressed(&"roll_dive")
