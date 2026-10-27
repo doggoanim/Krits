@@ -64,6 +64,14 @@ const DEFAULT_FOOTSTEP_SFX_ROCK: Array[AudioStream] = [
 	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_5.wav"),
 	preload(FOOTSTEPS_DIR + "rock/footsteps_rock_6.wav"),
 ]
+const DEFAULT_FOOTSTEP_SFX_WATER: Array[AudioStream] = [
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_1.wav"),
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_2.wav"),
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_3.wav"),
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_4.wav"),
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_5.wav"),
+	preload(FOOTSTEPS_DIR + "water/footsteps_water_6.wav"),
+]
 
 ## One array per FootstepSurfaces.Surface (see that file for how a surface
 ## is detected from whatever the player's standing on). @export rather than
@@ -80,18 +88,25 @@ const DEFAULT_FOOTSTEP_SFX_ROCK: Array[AudioStream] = [
 @export var footstep_sfx_grass: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_GRASS
 @export var footstep_sfx_dirt: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_ROCK
-## No dedicated splash-footstep recordings exist yet, so this defaults empty
-## rather than preloading files that aren't there — play_water_footstep()
-## falls back to footstep_sfx_grass, same as any other surface left empty.
-## Drop .wav files in and assign them here (same Inspector as the other
-## footstep_sfx_* exports, see their shared comment above) once they exist.
-@export var footstep_sfx_water: Array[AudioStream] = []
+@export var footstep_sfx_water: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_WATER
 ## Continuous swim stroke loop, same toggled-on/off idiom as ROLL_SFX/
-## set_rolling() below — also empty by default for the same reason as
-## footstep_sfx_water. set_swimming() simply does nothing while this is
-## empty, rather than falling back to anything, since an ambient stroke loop
-## (unlike a one-shot footstep) has no sensible substitute sound.
-@export var swim_sfx: Array[AudioStream] = []
+## set_rolling() below — a const rather than another Main-wired @export like
+## the footstep_sfx_* sets above, same reasoning as ROLL_SFX (a full
+## continuous loop to pick once per swim, not a per-surface set anything else
+## needs to override).
+const SWIM_SFX: Array[AudioStream] = [
+	preload(FOOTSTEPS_DIR + "water/swimming_1.wav"),
+	preload(FOOTSTEPS_DIR + "water/swimming_2.wav"),
+	preload(FOOTSTEPS_DIR + "water/swimming_3.wav"),
+	preload(FOOTSTEPS_DIR + "water/swimming_4.wav"),
+	preload(FOOTSTEPS_DIR + "water/swimming_5.wav"),
+]
+## Splashing in/out of a WaterVolume (see play_water_splash()) — two takes,
+## picked at random each time like AIR_DIVE_SFX.
+const WATER_SPLASH_SFX: Array[AudioStream] = [
+	preload(SFX_DIR + "water_splash_1.wav"),
+	preload(SFX_DIR + "water_splash_2.wav"),
+]
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
@@ -123,9 +138,7 @@ const ORB_COMBO_PITCH_MAX := 2.2
 ## uses for its continuous particle emitters (running dust, trails), rather
 ## than the fire-and-forget _play() pattern every other sound here uses.
 var _roll_player: AudioStreamPlayer3D
-## swim_sfx's own looping player — see set_swimming(). Built the same way as
-## _roll_player even though swim_sfx starts empty, so assigning streams to it
-## later (in the Inspector, at runtime) just works with no further code changes.
+## SWIM_SFX's own looping player — see set_swimming(). Same idiom as _roll_player.
 var _swim_player: AudioStreamPlayer3D
 
 func _ready() -> void:
@@ -143,6 +156,11 @@ func _ready() -> void:
 	# without needing format-specific math (8-bit/16-bit/ADPCM/QOA all differ
 	# in bytes-per-frame, but get_length() already accounts for that).
 	for stream in ROLL_SFX:
+		if stream is AudioStreamWAV:
+			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			stream.loop_begin = 0
+			stream.loop_end = int(round(stream.get_length() * stream.mix_rate))
+	for stream in SWIM_SFX:
 		if stream is AudioStreamWAV:
 			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 			stream.loop_begin = 0
@@ -234,14 +252,18 @@ func set_rolling(active: bool, speed_ratio := 0.0) -> void:
 ## swim stroke doesn't have roll's wide speed range to track. A no-op for as
 ## long as swim_sfx stays empty (see that export's own doc comment).
 func set_swimming(active: bool) -> void:
-	if swim_sfx.is_empty():
-		return
 	if active:
 		if not _swim_player.playing:
-			_swim_player.stream = swim_sfx.pick_random()
+			_swim_player.stream = SWIM_SFX.pick_random()
 			_swim_player.play()
 	elif _swim_player.playing:
 		_swim_player.stop()
+
+## Entering/exiting a WaterVolume (see WaterVolume._on_body_entered/_exited) —
+## one call site for both since the splash sound doesn't need entering's
+## distinction the way burst_water_splash()'s particle amount does.
+func play_water_splash() -> void:
+	_play(WATER_SPLASH_SFX.pick_random(), PITCH_VARIANCE)
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)

@@ -59,6 +59,7 @@ func _on_body_entered(body: Node3D) -> void:
 		if not _player_inside:
 			_player_inside = true
 			(body as Player).effects.burst_water_splash(_waterline_pos(body), true)
+			(body as Player).audio.play_water_splash()
 
 func _on_body_exited(body: Node3D) -> void:
 	if body is Player:
@@ -66,6 +67,7 @@ func _on_body_exited(body: Node3D) -> void:
 		if _player_inside:
 			_player_inside = false
 			(body as Player).effects.burst_water_splash(_waterline_pos(body), false)
+			(body as Player).audio.play_water_splash()
 
 ## The splash plays at the player's horizontal position but the water's own
 ## surface height — not the player's current Y, which on entry is usually

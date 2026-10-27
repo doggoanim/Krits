@@ -35,17 +35,21 @@ func physics_update(delta: float) -> void:
 		vertical -= 1.0
 	p.velocity.y = move_toward(p.velocity.y, vertical * c.swim_vertical_speed, c.swim_vertical_accel * delta)
 
+	var h := p.get_hvel()
 	# Vertical pose takes priority over the horizontal one whenever actively
 	# rising/diving — reads as "swimming up/down" rather than a flat paddle
-	# that merely happens to also be gaining height.
+	# that merely happens to also be gaining height. Treading water (neither
+	# held) falls back to its own idle loop instead of the paddling one.
 	if absf(vertical) > 0.1:
 		p.visual.set_upside_down(vertical < 0.0)
 		p.visual.play(PlayerVisual.ANIM_SWIM_VERTICAL)
-	else:
+	elif h.length() > 0.1:
 		p.visual.set_upside_down(false)
 		p.visual.play(PlayerVisual.ANIM_SWIM)
+	else:
+		p.visual.set_upside_down(false)
+		p.visual.play(PlayerVisual.ANIM_SWIM_IDLE)
 
-	var h := p.get_hvel()
 	if h.length() > 0.1:
 		p.face(h, delta)
 

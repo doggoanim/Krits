@@ -30,8 +30,7 @@ extends Node3D
 @export var footstep_sfx_grass: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_GRASS
 @export var footstep_sfx_dirt: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_ROCK
-## Empty by default — see PlayerAudio.footstep_sfx_water's own doc comment.
-@export var footstep_sfx_water: Array[AudioStream] = []
+@export var footstep_sfx_water: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_WATER
 
 ## Low-HP warning vignette (see core/low_hp_vignette.gd) — hp/max_hp fraction
 ## below which the screen edges start darkening, and the color they darken

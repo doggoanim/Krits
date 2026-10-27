@@ -37,10 +37,9 @@ const ANIM_CLIMB_RIGHT := &"climb_right"
 ## Placeholder clip names — not baked into the model yet (see WallClimbState).
 ## play() just warns and no-ops until the real clips exist, so the feature
 ## works mechanically in the meantime, just with no pose.
-const ANIM_SWIM := &"swim"                  ## horizontal paddling loop — see SwimState
-const ANIM_SWIM_VERTICAL := &"swim_vertical"   ## rising OR diving — see set_upside_down() below.
-## Neither clip is baked into the model yet (see the Placeholder comment just
-## above) — swimming works mechanically with no pose until they're added.
+const ANIM_SWIM := &"swimming"                    ## horizontal paddling loop — see SwimState
+const ANIM_SWIM_IDLE := &"swimming_idle"          ## treading water — no horizontal or vertical input
+const ANIM_SWIM_VERTICAL := &"swimming_vertical"  ## rising OR diving — see set_upside_down() below.
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,
@@ -133,7 +132,7 @@ var _squash_tween: Tween
 ## ground_pound, ...) is meant to play exactly once and hold its last frame.
 const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING,
 	ANIM_CLIMB_IDLE, ANIM_CLIMB_UP, ANIM_CLIMB_DOWN, ANIM_CLIMB_LEFT, ANIM_CLIMB_RIGHT,
-	ANIM_SWIM, ANIM_SWIM_VERTICAL]
+	ANIM_SWIM, ANIM_SWIM_IDLE, ANIM_SWIM_VERTICAL]
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
