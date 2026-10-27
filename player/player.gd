@@ -601,9 +601,30 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 		if not _is_wall_normal(normal):
 			continue
 		normal.y = 0.0
-		return {"point": _wall_cast.get_collision_point(0), "normal": normal.normalized(),
+		var hit_point: Vector3 = _wall_cast.get_collision_point(0)
+		if not _wall_wide_enough(hit_point, -dir, config.wall_probe_reach):
+			continue
+		return {"point": hit_point, "normal": normal.normalized(),
 				"body": _wall_cast.get_collider(0)}
 	return {}
+
+## True if a climbable surface is still there `wall_min_width * 0.5` to
+## EITHER side of `point` along the wall's own tangent (perpendicular to
+## `probe_dir`, the direction a probe just swept IN TO reach the wall at
+## `point`) — see wall_min_width's own doc comment in PlayerConfig for why
+## this check exists at all. Reuses _wall_cast (whatever hit it already
+## recorded for the real grab/wrap has already been read out by the caller
+## by the time this runs, so overwriting its state here is safe).
+func _wall_wide_enough(point: Vector3, probe_dir: Vector3, reach: float) -> bool:
+	var tangent := Vector3(-probe_dir.z, 0.0, probe_dir.x)
+	var half := config.wall_min_width * 0.5
+	for s in [1.0, -1.0]:
+		_wall_cast.global_position = point - probe_dir * reach + tangent * s * half
+		_wall_cast.target_position = probe_dir * (reach + 0.1)
+		_wall_cast.force_shapecast_update()
+		if not _wall_cast.is_colliding():
+			return false
+	return true
 
 ## True for a normal that's actually a wall's, not a floor, ceiling, or a
 ## wall's own top/bottom edge. Checked on the RAW normal, before zeroing its
@@ -709,8 +730,9 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 		return {}
 	dir = dir.normalized()
 	var probe_origin := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
+	var reach := RADIUS + config.wall_grab_reach
 	_wall_cast.global_position = probe_origin
-	_wall_cast.target_position = dir * (RADIUS + config.wall_grab_reach)
+	_wall_cast.target_position = dir * reach
 	_wall_cast.force_shapecast_update()
 	if not _wall_cast.is_colliding():
 		return {}
@@ -718,6 +740,9 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	if not _is_wall_normal(normal):
 		return {}
 	normal.y = 0.0
+	var raw_point: Vector3 = _wall_cast.get_collision_point(0)
+	if not _wall_wide_enough(raw_point, dir, reach):
+		return {}
 	# The probe sweeps at chest height (probe_origin above), but global_position
 	# itself is the player's feet — returning the hit point as-is would plant
 	# the player's feet at chest height once WallClimbState applies it
@@ -725,7 +750,7 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	# visibly popping them up by STAND_HEIGHT * 0.5 on every grab. Undo that
 	# offset here so the returned point lines up with the player's own origin
 	# height instead of the probe's.
-	var point: Vector3 = _wall_cast.get_collision_point(0)
+	var point := raw_point
 	point.y -= STAND_HEIGHT * 0.5
 	return {"point": point, "normal": normal.normalized(), "body": _wall_cast.get_collider(0)}
 

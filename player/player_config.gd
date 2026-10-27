@@ -65,6 +65,14 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## a touch off from where the probe expected it still registers,
 											## but kept small so the grab doesn't trigger from well off to
 											## the side or well short of the actual wall
+@export var wall_min_width := 1.0          ## a climbable surface must still be climbable this far to
+											## EITHER side of wherever the probe actually hit (not just at
+											## that one point) — rejects grabbing/wrapping onto something
+											## technically tagged climbable but too narrow to read as a
+											## real wall (a thin fence post, a pole): the probe's own small
+											## sphere sweep can't tell that apart from a proper wall on its
+											## own, since it only needs to touch SOME part of the collider
+											## within reach, regardless of how wide that collider actually is
 @export var wall_wrap_time := 0.15         ## how long a corner transition eases over, once the probe's
 											## normal changes meaningfully — keeps a wrap from looking like
 											## an instant snap. Ordinary flat-wall movement isn't affected,
