@@ -172,13 +172,6 @@ func _physics_process(delta: float) -> void:
 		if _air_t >= config.min_air_time_for_land_squash:
 			visual.squash_stretch(visual.land_squash_y, visual.land_squash_xz)
 			effects.burst_land_dust()
-			if _air_t >= config.hard_landing_air_time:
-				# No reliable impact velocity left to read here (move_and_slide
-				# already resolved it against the floor this frame) — gravity *
-				# the time spent falling is a close enough stand-in for "how
-				# hard did that landing hit" to scale the ring by.
-				var approx_fall_speed := config.gravity * config.fall_gravity_mult * _air_t
-				VFX.landing_ring(self, global_position, clampf(approx_fall_speed / 18.0, 1.0, 2.5))
 		Events.player_landed.emit()
 	_air_t = 0.0 if on_floor else _air_t + delta
 	_was_on_floor = on_floor

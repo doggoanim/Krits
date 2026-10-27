@@ -110,9 +110,6 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 @export var jump_buffer := 0.12
 @export var min_air_time_for_land_squash := 0.12   ## skip the landing squash for brief floor-contact
 													 ## flicker (slopes, stairs, small bumps) that isn't a real fall
-@export var hard_landing_air_time := 0.5   ## air time needed before a landing also spawns VFX.landing_ring()
-											## (see player.gd) — a plain jump squashes/dusts but doesn't need
-											## a shockwave ring; only a real fall from height does
 
 @export_group("Roll / Long Jump")
 @export var roll_speed := 15.0
