@@ -19,6 +19,18 @@ const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime p
 const CLIMBABLE_MASK := 1 << 8   # layer 9: climbable walls
 const WALL_CLIMB_REGRAB_COOLDOWN := 0.3   ## see wall_climb_cd
 
+## Opt a StaticBody3D/other collider out of the stair-step-up assist (see
+## _try_step_up()) by adding IT (not the player) to this group in the editor.
+## Meant for short-but-narrow decorative props: the stepper can successfully
+## climb onto something shorter than max_step_height, but if it's also
+## narrower than the player's stride, the player immediately walks off the
+## far edge, falls back to ground level right in front of it, and triggers
+## the same step-up again next frame — a tight climb/fall-off loop that reads
+## as "stuck jittering in place" rather than a clean bonk against a wall.
+## Tag the prop's collider with this group to make it collide like an
+## ordinary wall instead of a climbable step.
+const NO_STEP_UP_GROUP := &"no_step_up"
+
 ## Godot's automatic floor-snap re-grounds the body if it's within this
 ## distance of a floor after move_and_slide() — see _update_floor_snap().
 const GROUND_FLOOR_SNAP := 0.3
@@ -285,6 +297,10 @@ func safe_move_and_slide() -> void:
 ##
 ## Only runs while already grounded and actually moving horizontally — never
 ## kicks in mid-air, so it doesn't interfere with jump arcs or falling.
+##
+## Whatever's actually blocking ground-level motion gets one more check before
+## any of the above: if it's tagged NO_STEP_UP_GROUP, bail immediately and let
+## it collide like an ordinary wall — see that constant's comment for why.
 func _try_step_up() -> void:
 	if not is_on_floor():
 		return
@@ -295,8 +311,12 @@ func _try_step_up() -> void:
 	var motion := horizontal * get_physics_process_delta_time()
 	var step := config.max_step_height
 
-	if not test_move(global_transform, motion):
+	var blocked := KinematicCollision3D.new()
+	if not test_move(global_transform, motion, blocked):
 		return   # nothing in the way at ground level — no step needed
+	var collider := blocked.get_collider()
+	if collider and collider.is_in_group(NO_STEP_UP_GROUP):
+		return   # explicitly opted out — treat as a plain wall, don't attempt to climb it
 
 	var raised := global_transform.translated(Vector3.UP * step)
 	if test_move(raised, motion):
