@@ -6,4 +6,4 @@
 [node name="Main" type="Node3D" unique_id=1201764531]
 script = ExtResource("1")
 env_config = ExtResource("2_0xm2m")
-pixelate_size = 0.01
+pixelate_size = 3.0
