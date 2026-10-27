@@ -262,7 +262,15 @@ func _update_lean(delta: float) -> void:
 		# yaw increases when turning left (see face()/atan2 convention below), and
 		# a positive rotation.z already tips the body toward -X (the character's
 		# left), so banking into the turn means matching yaw_rate's sign directly.
-		target_bank = clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
+		#
+		# Suppressed for a moment right after _try_step_up() commits a step
+		# (step_up_grace): climbing a step at anything but a dead-straight
+		# angle can deflect the collision response against the riser's edge
+		# just enough to wobble hvel's own direction for a frame, and since
+		# facing tracks hvel (see face()), that read as a yaw_rate spike and
+		# banked the body into a spurious tilt right as each step resolved.
+		target_bank = 0.0 if step_up_grace > 0.0 \
+				else clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
 
 	visual.set_lean(target_pitch, target_bank, LEAN_SMOOTH, delta)
 
