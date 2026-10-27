@@ -34,6 +34,10 @@ const NO_STEP_UP_GROUP := &"no_step_up"
 ## See the registration comment in _ready() and _unstick() below.
 const UNSTICK_ACTION := &"debug_unstick"   ## bound to F9
 
+## See _update_auto_unstick().
+const AUTO_UNSTICK_TIME := 1.2      ## seconds of near-zero drift while airborne before it self-corrects
+const AUTO_UNSTICK_EPSILON := 0.05  ## total movement below this over that window still counts as "not moving"
+
 ## Godot's automatic floor-snap re-grounds the body if it's within this
 ## distance of a floor after move_and_slide() — see _update_floor_snap().
 const GROUND_FLOOR_SNAP := 0.3
@@ -69,6 +73,8 @@ var _wall_cast: ShapeCast3D   ## see find_climbable_wall()/probe_wall_near()
 var _obstruction_cast: ShapeCast3D   ## see is_path_clear()
 var _was_on_floor := true
 var _last_safe_position: Vector3   ## most recent on_floor() position — see _unstick()
+var _auto_stuck_pos: Vector3       ## see _update_auto_unstick()
+var _auto_stuck_t := 0.0
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
 var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
@@ -208,6 +214,7 @@ func _physics_process(delta: float) -> void:
 	var on_floor := is_on_floor()
 	if on_floor:
 		_last_safe_position = global_position   ## see _unstick()
+	_update_auto_unstick(delta, on_floor)
 	if on_floor and not _was_on_floor:
 		can_dive = true
 		# Only squash for a real fall, not a split-second floor-contact flicker
@@ -362,6 +369,33 @@ func _unstick() -> void:
 	global_position = _last_safe_position
 	velocity = Vector3.ZERO
 	_wedge_t = 0.0
+
+## The automatic counterpart to _unstick() — same recovery, triggered by
+## actually being stuck rather than a key press. Skips two states on
+## purpose, both of which are SUPPOSED to leave the player motionless off
+## the ground for as long as they like, not bugs to correct:
+## - WallClimb: hanging still on a wall without pressing anything is normal.
+## - Frozen: a scripted cinematic hold with gravity off; a cutscene can run
+##   as long as it wants.
+## Every other state's own holds (wall-bounce reaction, pound windup, the
+## various jump-pose locks — see PlayerConfig's *_hold_time/*_windup fields)
+## top out well under a second, so "airborne, not meaningfully moving, for
+## over AUTO_UNSTICK_TIME" has no legitimate reason to happen anywhere else
+## and is a safe signal something's gone wrong, without needing to know what.
+func _update_auto_unstick(delta: float, on_floor: bool) -> void:
+	var exempt := machine.current_name == &"WallClimb" or machine.current_name == &"Frozen"
+	if on_floor or exempt:
+		_auto_stuck_t = 0.0
+		_auto_stuck_pos = global_position
+		return
+	if global_position.distance_to(_auto_stuck_pos) > AUTO_UNSTICK_EPSILON:
+		_auto_stuck_t = 0.0
+		_auto_stuck_pos = global_position
+		return
+	_auto_stuck_t += delta
+	if _auto_stuck_t >= AUTO_UNSTICK_TIME:
+		_auto_stuck_t = 0.0
+		_unstick()
 
 ## Stepped stairs are a series of small vertical risers, and a riser is just
 ## a wall as far as move_and_slide() is concerned — without this, climbing a
