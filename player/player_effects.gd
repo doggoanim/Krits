@@ -1,11 +1,16 @@
 class_name PlayerEffects
 extends Node3D
 ## Movement particle effects — dust, dirt, smoke. Every ParticleProcessMaterial
-## is built in code, but the sprite each particle wears is one of two hand-
-## drawn textures (assets/sprites/): dirt_texture.png for anything dust/dirt,
-## smoke_puff.png for anything smoke/air or that needs its color_ramp tint to
-## actually read as that color (dirt_texture.png's own brown base muddies
-## any tint multiplied over it — see the slime drip).
+## is built in code; every emitter's sprite is the same hand-drawn
+## smoke_puff.png (assets/sprites/) regardless of what the effect is meant to
+## read as (dust, dirt, smoke, water spray), recolored per effect via each
+## one's own color_ramp (vertex_color_use_as_albedo). A separate grainy
+## dirt_texture.png used to back the dust-specific effects, but its own
+## baked-in brown base didn't take a tint cleanly (see _slime_drip_material_for()'s
+## identical reasoning, which is what led here) and read inconsistently next
+## to everything else once there were enough differently-tinted dust variants
+## (grass/rock/dirt footsteps, water splash) to notice the mismatch — one
+## texture, tinted every time, keeps all of it visually consistent.
 ##
 ## Two kinds of emitter:
 ## - Persistent, toggled on/off for as long as a move lasts (running dust,
@@ -56,10 +61,8 @@ const SPLASH_RAMP := [
 	Color(0.8, 0.9, 1.0, 0.0),
 ]
 
-const DUST_TEXTURE_PATH := "res://assets/sprites/dirt_texture.png"
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 
-var _dust_quad: QuadMesh
 var _smoke_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
@@ -74,7 +77,6 @@ var _run_dust: GPUParticles3D
 var _slime_drip: GPUParticles3D
 
 func _ready() -> void:
-	_dust_quad = _make_quad_mesh(load(DUST_TEXTURE_PATH))
 	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
@@ -84,18 +86,9 @@ func _ready() -> void:
 	_splash_ramp_tex = _make_ramp(SPLASH_RAMP)
 	_ring_texture = SoftCircleTexture.make_ring()
 
-	# _smoke_quad, not _dust_quad: dirt_texture.png's own grainy, brown-baked
-	# look read fine for a discrete kicked-up puff, but as a CONTINUOUS haze
-	# trailing behind a run it was too busy/dark — smoke_puff.png's softer,
-	# near-white puff (recolored by _dust_ramp_tex below, same trick the
-	# slime drip already relies on) reads as a lighter dust haze instead.
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _smoke_quad)
 	add_child(_run_dust)
 	_slime_drip_material = _slime_drip_material_for(PlayerVisual.SLIME_TINT_COLOR)
-	# _smoke_quad, not _dust_quad: dirt_texture.png is itself brown, and
-	# multiplying that by the color_ramp tint (vertex_color_use_as_albedo)
-	# always skewed muddy brown no matter what color was requested.
-	# smoke_puff.png's soft, near-white base actually shows the tint.
 	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _smoke_quad)
 	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
 	add_child(_slime_drip)
@@ -124,10 +117,10 @@ func set_slime_drip(active: bool, color := PlayerVisual.SLIME_TINT_COLOR) -> voi
 # ---------------------------------------------------------------- one-shot bursts
 
 func burst_jump_dust() -> void:
-	_burst(global_position, Vector3.UP, 35.0, _dust_material(4.0, 7.0, 0.3, 0.75), 8, 0.35, _dust_quad)
+	_burst(global_position, Vector3.UP, 35.0, _dust_material(4.0, 7.0, 0.3, 0.75), 8, 0.35, _smoke_quad)
 
 func burst_land_dust() -> void:
-	_burst(global_position, Vector3.UP, 60.0, _dust_material(5.5, 9.0, 0.5, 1.2), 16, 0.45, _dust_quad)
+	_burst(global_position, Vector3.UP, 60.0, _dust_material(5.5, 9.0, 0.5, 1.2), 16, 0.45, _smoke_quad)
 
 ## A small discrete puff synced to each footstep — see GroundState._play_footstep(),
 ## which already looks up the surface underfoot for PlayerAudio; this reuses
@@ -158,7 +151,7 @@ func burst_footstep_dust(pos: Vector3, surface: FootstepSurfaces.Surface) -> voi
 	# spot while running, essentially invisible as its own accent. This still
 	# reads as a quick accent, not a cloud — one-shot at 0.4s lifetime — just
 	# large enough to actually see land and settle each step.
-	_burst(pos, Vector3.UP, 55.0, _material(5.0, 5.0, 0.4, scale_max, ramp), amount, 0.4, _dust_quad)
+	_burst(pos, Vector3.UP, 55.0, _material(5.0, 5.0, 0.4, scale_max, ramp), amount, 0.4, _smoke_quad)
 
 ## Entering/exiting a WaterVolume (see world/water/water_volume.gd): a droplet
 ## spray plus an expanding ring ripple, both at `pos` (the waterline, not the
@@ -208,7 +201,7 @@ func burst_wall_impact(pos: Vector3, normal: Vector3) -> void:
 ## Rolling into a wall on the ground — a punchier, dirtier burst than the
 ## airborne wall bounce above.
 func burst_roll_collision(pos: Vector3, normal: Vector3) -> void:
-	_burst(pos, normal, 60.0, _dust_material(6.0, 10.0, 0.55, 1.3), 18, 0.45, _dust_quad)
+	_burst(pos, normal, 60.0, _dust_material(6.0, 10.0, 0.55, 1.3), 18, 0.45, _smoke_quad)
 
 # ---------------------------------------------------------------- building blocks
 
