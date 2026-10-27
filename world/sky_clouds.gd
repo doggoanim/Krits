@@ -54,11 +54,16 @@ func _build() -> void:
 	mat.gravity = Vector3.ZERO
 	# Explicit jittered points rather than one big box: every lobe's spawn
 	# point is baked close to its own cluster's siblings (see
-	# _make_cluster_points), which is what makes several overlapping soft
-	# circles actually overlap instead of scattering independently and
-	# rarely landing near each other.
+	# _make_cluster_points/_make_point_texture), which is what makes several
+	# overlapping soft circles actually overlap instead of scattering
+	# independently and rarely landing near each other. ParticleProcessMaterial
+	# has no plain settable emission_points array from script — point-cloud
+	# emission only works through a texture encoding each point's position
+	# (emission_point_texture), hence the extra bake step.
+	var points := _make_cluster_points()
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_POINTS
-	mat.emission_points = _make_cluster_points()
+	mat.emission_point_count = points.size()
+	mat.emission_point_texture = _make_point_texture(points)
 	mat.scale_min = 0.6
 	mat.scale_max = 1.2
 	mat.color_ramp = _make_fade_ramp(cloud_color)
@@ -116,6 +121,17 @@ func _make_cluster_points() -> PackedVector3Array:
 				randf_range(-cluster_spread, cluster_spread),
 			))
 	return points
+
+## Bakes `points` into a 1-pixel-tall RGBF image — ParticleProcessMaterial's
+## emission_point_texture reads each pixel's RGB as one point's raw XYZ
+## position, so FORMAT_RGBF (unclamped float channels) is required here:
+## the regular 0..1-per-channel formats couldn't hold real world-space
+## coordinates like this node's own height.
+func _make_point_texture(points: PackedVector3Array) -> ImageTexture:
+	var img := Image.create(maxi(points.size(), 1), 1, false, Image.FORMAT_RGBF)
+	for i in points.size():
+		img.set_pixel(i, 0, Color(points[i].x, points[i].y, points[i].z))
+	return ImageTexture.create_from_image(img)
 
 static func _make_fade_ramp(c: Color) -> GradientTexture1D:
 	var g := Gradient.new()
