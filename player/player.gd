@@ -521,11 +521,24 @@ func _try_step_up() -> void:
 	if collider and collider.is_in_group(NO_STEP_UP_GROUP):
 		return   # explicitly opted out — treat as a plain wall, don't attempt to climb it
 
+	# How far THIS probe actually got before hitting the riser, plus a small
+	# fixed clearance margin — used for the raised/landing checks below
+	# instead of the fixed `motion` above, so how far past the riser's own
+	# face gets tested adapts to exactly where that face actually was. A
+	# single flat distance can't satisfy both ends at once: long enough to
+	# clear a chunkier riser's own lip reliably overshoots clean onto the
+	# NEXT riser up on a shallow-tread staircase, and short enough not to
+	# overshoot wasn't always enough clearance past a taller step's lip —
+	# which read as the step intermittently failing (and the player briefly
+	# colliding/falling against it like a plain wall) depending on exactly
+	# how tall that particular riser happened to be.
+	var clear_motion := dir * (blocked.get_travel().length() + config.step_clearance_margin)
+
 	var raised := global_transform.translated(Vector3.UP * step)
-	if test_move(raised, motion):
+	if test_move(raised, clear_motion):
 		return   # still blocked even raised this high — too tall a riser, or just a wall
 
-	var advanced := raised.translated(motion)
+	var advanced := raised.translated(clear_motion)
 	var settle := KinematicCollision3D.new()
 	if not test_move(advanced, Vector3.DOWN * step, settle):
 		return   # nothing solid within range right below — don't commit to a blind step

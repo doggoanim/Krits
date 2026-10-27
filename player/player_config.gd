@@ -16,6 +16,11 @@ extends Resource
 										## tread onto the NEXT riser up, making the whole staircase
 										## briefly read as one unclimbable wall instead of a series
 										## of small steps.
+@export var step_clearance_margin := 0.1   ## how far PAST wherever the step-up probe actually hit
+										## the riser's own face it tests the raised/landing checks —
+										## see _try_step_up()'s own doc comment for why this is
+										## measured from the real hit point rather than being another
+										## flat distance like step_probe_reach above
 @export var step_up_grace_time := 0.15   ## how long GroundState ignores a possible forced
 										## slope-slide right after _try_step_up() commits a step —
 										## see Player.step_up_grace's own doc comment for why a step's

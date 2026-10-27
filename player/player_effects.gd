@@ -449,8 +449,8 @@ func _bubble_material() -> ParticleProcessMaterial:
 	m.gravity = Vector3(0.0, BUBBLE_BASE_GRAVITY, 0.0)
 	m.damping_min = 0.0
 	m.damping_max = 0.3
-	m.scale_min = 0.08
-	m.scale_max = 0.4
+	m.scale_min = 0.04
+	m.scale_max = 0.34
 	m.color_ramp = _bubble_ramp_tex
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.3
