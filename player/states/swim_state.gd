@@ -39,11 +39,12 @@ func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
 
-	# A plain press (not a hold — that's the swim-up case below) while
-	# already close to resurfacing launches a real jump out of the water
-	# instead of just rising toward the surface — same pose/dust/sound as
-	# any other jump, straight into AirState.
-	if Input.is_action_just_pressed(&"jump") and p.water_submersion() <= c.water_swim_depth_ratio + c.swim_surface_jump_margin:
+	# Jump launches you out of the water for real once you're already close
+	# to resurfacing — a plain press near the top does it immediately, and
+	# holding it to swim up (the vertical-input case below) does it the
+	# instant that rise actually crosses into the margin too, instead of
+	# requiring a fresh press right as you reach the top.
+	if Input.is_action_pressed(&"jump") and p.water_submersion() <= c.water_swim_depth_ratio + c.swim_surface_jump_margin:
 		# Without this, _update_water() (which runs before this very state
 		# machine transition even takes effect, next physics frame) reads the
 		# same still-"deep enough" submersion — global_position hasn't
