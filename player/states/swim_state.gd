@@ -11,10 +11,13 @@ extends PlayerState
 ## needing a separate "swim down" animation. See that method's doc comment.
 
 ## Stroke sfx fire whenever whichever swim clip is currently playing crosses
-## one of these points in its own loop — same "fire on phase crossing"
-## idiom as GroundState's FOOTSTEP_PHASES/_update_footsteps(), just with one
-## stroke per loop instead of four footstep contacts.
-const STROKE_PHASES := [0.0]
+## one of these points in its own loop — same "fire on phase crossing" idiom
+## as GroundState's FOOTSTEP_PHASES/_update_footsteps(). Each swim clip's own
+## loop runs ~4 seconds; a single phase point only fired a stroke once per
+## full loop, which read as the sound having stopped entirely — four evenly
+## spaced points instead gives roughly one stroke per second, same spacing
+## reasoning as FOOTSTEP_PHASES.
+const STROKE_PHASES := [0.0, 0.25, 0.5, 0.75]
 var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — see _update_stroke_sfx()
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
