@@ -43,7 +43,7 @@
 [ext_resource type="Script" uid="uid://mxhompivr0pn" path="res://world/wind_lines.gd" id="42_wind_lines"]
 [ext_resource type="Script" uid="uid://bv377biwti3hs" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
 [ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
-[ext_resource type="Script" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
+[ext_resource type="Script" uid="uid://corr3uvd0biec" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -525,7 +525,7 @@ script = ExtResource("40_foliage_wind")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
 script = ExtResource("44_cloud_shadows")
 
-[node name="SkyClouds" type="GPUParticles3D" parent="."]
+[node name="SkyClouds" type="GPUParticles3D" parent="." unique_id=454784756]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
 script = ExtResource("45_sky_clouds")
 
