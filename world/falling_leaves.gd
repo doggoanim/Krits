@@ -14,6 +14,12 @@ extends GPUParticles3D
 ## gives it the fluttering tumble a falling leaf actually has, rather than
 ## dropping face-first in a straight line. Reacts to WindGusts the same way
 ## AmbientMotes does, so a gust visibly carries the leaves sideways with it.
+##
+## cull_distance makes it cheap to drop one of these under every tree in a
+## large forest instead of hand-picking a few: past that distance from the
+## active camera, it stops emitting/simulating/drawing entirely rather than
+## running 200 of these at once regardless of how many are actually in view.
+## 0 disables culling (the default for a level with only a couple of these).
 
 @export var area_size := Vector3(6.0, 5.0, 6.0)
 @export var leaf_count := 20
@@ -23,14 +29,27 @@ extends GPUParticles3D
 @export var sway_strength := 0.35      ## how much turbulence pushes leaves side to side on the way down
 @export var tumble_speed := 90.0       ## degrees/sec billboard spin, randomized up to this per leaf
 @export var react_to_gusts := true
+@export var cull_distance := 0.0       ## >0: stop simulating/drawing past this distance from the camera
 
 var _mat: ParticleProcessMaterial
+var _culled := false
 
 func _ready() -> void:
 	_build()
-	set_process(react_to_gusts)
+	set_process(true)
 
 func _process(_delta: float) -> void:
+	if cull_distance > 0.0:
+		var cam := get_viewport().get_camera_3d()
+		var far := cam != null and global_position.distance_to(cam.global_position) > cull_distance
+		if far != _culled:
+			_culled = far
+			visible = not far
+			emitting = not far
+		if far:
+			return   # nothing else to update while culled — skip the gust sample too
+	if not react_to_gusts:
+		return
 	var pos := global_position
 	var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
 	_mat.turbulence_noise_strength = sway_strength * gust
