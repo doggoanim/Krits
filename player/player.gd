@@ -84,15 +84,19 @@ func _ready() -> void:
 	# buffer) and makes contact resolution robust against any thin collider
 	# in the level, not just one specific wall.
 	safe_margin = 0.04
-	# Landing on TOP of a thin wall/ledge is a different failure mode than
-	# hitting its side: the capsule (0.8 diameter, see RADIUS) can easily be
+	# Landing on TOP of a thin wall/ledge is one failure mode of the same
+	# underlying problem: the capsule (0.8 diameter, see RADIUS) can easily be
 	# wider than the ledge is thick, so it contacts the top face (floor
-	# normal) and a side face (wall normal) in the same physics step. The
-	# default max_slides (4) can run out of iterations resolving two
-	# near-perpendicular contacts like that, collapsing velocity to ~zero and
-	# wedging the body in the corner. A few extra iterations gives
-	# move_and_slide() room to actually resolve it instead of freezing.
-	max_slides = 6
+	# normal) and a side face (wall normal) in the same physics step. Jumping
+	# UP into the edge of an overhang/roof is the mirrored case — the capsule's
+	# top hits the underside (ceiling normal) and its side hits the roof's
+	# edge (wall normal) at the same time. Either way it's two near-
+	# perpendicular contacts resolved in one step, and the default max_slides
+	# (4) can run out of iterations on that, collapsing velocity to ~zero and
+	# wedging the body in the corner instead of sliding off it. A larger
+	# safe_margin (above) plus extra slide iterations gives move_and_slide()
+	# room to actually resolve both variants instead of freezing.
+	max_slides = 10
 
 	_shape = CapsuleShape3D.new()
 	_shape.radius = RADIUS
