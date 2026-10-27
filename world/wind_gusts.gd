@@ -14,10 +14,10 @@ extends RefCounted
 ## further along a little later than ones near X=0, the same way a real
 ## gust of wind arrives.
 
-const BASE_LEVEL := 1.0     ## the idle multiplier between gusts — matches a prop's plain configured sway
-const PEAK := 3.2           ## the multiplier at a gust's strongest moment — clearly stronger than idle
-const GUST_PERIOD := 5.0    ## seconds between gust peaks, at a fixed world X
-const GUST_SHARPNESS := 4.0 ## higher = a shorter, punchier bump with more calm in between; lower = longer-lasting
+const BASE_LEVEL := 0.5     ## the idle multiplier between gusts — never fully still
+const PEAK := 1.8           ## the multiplier at a gust's strongest moment
+const GUST_PERIOD := 8.5    ## seconds between gust peaks, at a fixed world X — within the 7-10s feel
+const GUST_SHARPNESS := 6.0 ## higher = a shorter, punchier bump with more calm in between
 const TRAVEL_SPEED := 6.0   ## world units/sec the gust front sweeps along X
 
 ## Returns a multiplier (BASE_LEVEL..PEAK) for whatever a caller wants to
