@@ -11,6 +11,8 @@ const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 static var _smoke_quad: QuadMesh
 static var _smoke_ramp: GradientTexture1D
 static var _shard_mesh: BoxMesh
+static var _ring_quad: QuadMesh
+static var _ring_texture: Texture2D
 
 ## A puff of smoke at `pos`, parented under `parent` so it's cleaned up if
 ## `parent` is (freed itself once its particles finish). `scale` multiplies
@@ -86,6 +88,35 @@ static func shatter(parent: Node3D, pos: Vector3, color: Color, scale := 1.0) ->
 	p.restart()
 	parent.get_tree().create_timer(p.lifetime + 0.3).timeout.connect(p.queue_free)
 
+## A flat ring shockwave at `pos`, expanding and fading over a third of a
+## second — the landing-impact companion to smoke_puff/shatter above. Unlike
+## those two, this isn't a particle burst (a ring reads better as one clean
+## shape than a cloud of them), just a single quad tweened directly: scale up
+## with an ease-out, alpha down, then free itself. `scale` sizes the ring —
+## pass something derived from fall speed so a harder landing visibly leaves
+## a bigger ring, same idiom as smoke_puff/shatter's own `scale` param.
+static func landing_ring(parent: Node3D, pos: Vector3, scale := 1.0) -> void:
+	_ensure_resources()
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.mesh = _ring_quad
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_texture = _ring_texture
+	mat.albedo_color = Color(1.0, 1.0, 1.0, 0.6)
+	mesh_inst.material_override = mat
+	parent.add_child(mesh_inst)
+	mesh_inst.global_position = pos + Vector3.UP * 0.02   # clear z-fighting with the ground underneath
+	mesh_inst.rotation_degrees = Vector3(-90.0, 0.0, 0.0)   # lay flat, facing up
+	mesh_inst.scale = Vector3.ONE * 0.3 * scale
+
+	var tween := mesh_inst.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(mesh_inst, "scale", Vector3.ONE * 1.8 * scale, 0.35) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.35)
+	tween.finished.connect(mesh_inst.queue_free)
+
 static func _ensure_resources() -> void:
 	if _smoke_quad != null:
 		return
@@ -96,6 +127,9 @@ static func _ensure_resources() -> void:
 		Color(0.8, 0.8, 0.85, 0.0),
 	])
 	_shard_mesh = _make_shard_mesh()
+	_ring_quad = QuadMesh.new()
+	_ring_quad.size = Vector2.ONE
+	_ring_texture = SoftCircleTexture.make_ring(64)
 
 static func _make_shard_mesh() -> BoxMesh:
 	var b := BoxMesh.new()

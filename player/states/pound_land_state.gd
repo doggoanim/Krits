@@ -14,6 +14,7 @@ func enter(_prev: StringName, msg: Dictionary = {}) -> void:
 	player.audio.play_pound_land()
 	if player.camera_rig:
 		player.camera_rig.shake(0.25)
+	VFX.landing_ring(player, player.global_position, 2.2)   # a pound always hits hard — no need to scale it
 	if msg.get("jump_queued", false):
 		# A jump pressed during the fall (see PoundState.physics_update()) —
 		# honor it right away instead of making the player land, let go of
