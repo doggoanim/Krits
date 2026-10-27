@@ -457,6 +457,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.9013
 [node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
 size = Vector3(20, 3, 20)
+surface_y = 14.88
 
 [node name="lake_chesburg" parent="Props" unique_id=1685882827 instance=ExtResource("2_l8gsu")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -27.280123, 0.017999172, 0.9797595)
