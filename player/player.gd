@@ -18,6 +18,14 @@ const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime p
 ## player/states/wall_climb_state.gd.
 const CLIMBABLE_MASK := 1 << 8   # layer 9: climbable walls
 const WALL_CLIMB_REGRAB_COOLDOWN := 0.3   ## see wall_climb_cd
+## See swim_exit_cd. Long enough for a surface jump's own upward speed to
+## actually clear the water before _update_water() starts checking
+## submersion again — without this, jumping out near the surface
+## transitioned to Air, but global_position hadn't moved yet that same
+## frame, so the very next _update_water() call (still reading the same
+## "deep enough" submersion) immediately transitioned straight back into
+## Swim before the jump could ever actually leave the water.
+const SWIM_EXIT_GRACE := 0.5
 
 ## Opt a StaticBody3D/other collider out of the stair-step-up assist (see
 ## _try_step_up()) by adding IT (not the player) to this group in the editor.
@@ -61,6 +69,8 @@ var invuln := 0.0
 var roll_cd := 0.0
 var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per-frame
 						   ## find_climbable_wall() check can't instantly re-grab it
+var swim_exit_cd := 0.0   ## >0 right after jumping out of the water, so _update_water()
+						   ## can't instantly transition straight back into Swim — see SWIM_EXIT_GRACE
 
 const LEAN_PITCH_MAX := 0.18     ## ~10 degrees, forward/back lean at full speed
 const LEAN_BANK_MAX := 0.28      ## ~16 degrees, side bank at the fastest turns
@@ -263,6 +273,7 @@ func _update_timers(delta: float) -> void:
 	invuln = maxf(0.0, invuln - delta)
 	roll_cd = maxf(0.0, roll_cd - delta)
 	wall_climb_cd = maxf(0.0, wall_climb_cd - delta)
+	swim_exit_cd = maxf(0.0, swim_exit_cd - delta)
 
 ## Every jump/bounce/pound-jump sets velocity.y and switches state WITHOUT
 ## calling move_and_slide() that same frame — the new state's own
@@ -294,7 +305,7 @@ func _update_water() -> void:
 	var exempt := machine.current_name == &"Frozen" or machine.current_name == &"WallClimb"
 	if exempt:
 		return
-	if deep and machine.current_name != &"Swim":
+	if deep and machine.current_name != &"Swim" and swim_exit_cd <= 0.0:
 		machine.transition_to(&"Swim")
 	elif not deep and machine.current_name == &"Swim":
 		# Air's own on-floor check next frame settles whether this is a true

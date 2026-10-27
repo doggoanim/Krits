@@ -44,6 +44,13 @@ func physics_update(delta: float) -> void:
 	# instead of just rising toward the surface — same pose/dust/sound as
 	# any other jump, straight into AirState.
 	if Input.is_action_just_pressed(&"jump") and p.water_submersion() <= c.water_swim_depth_ratio + c.swim_surface_jump_margin:
+		# Without this, _update_water() (which runs before this very state
+		# machine transition even takes effect, next physics frame) reads the
+		# same still-"deep enough" submersion — global_position hasn't
+		# actually moved yet — and immediately transitions straight back
+		# into Swim before the jump's own upward speed ever clears the
+		# surface. See Player.SWIM_EXIT_GRACE.
+		p.swim_exit_cd = Player.SWIM_EXIT_GRACE
 		p.start_jump(c.jump_velocity)
 		return
 
