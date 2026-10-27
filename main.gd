@@ -146,7 +146,7 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 	for n in level.find_children("*", "", true, false):
 		if n is WorldEnemy:
 			encounters.register_world_enemy(n)
-	var pos := _find_spawn_in(level, spawn_id)
+	var pos: Variant = _find_spawn_in(level, spawn_id)
 	player.teleport(pos if pos != null else level.global_position)
 	cam.global_position = player.global_position
 
