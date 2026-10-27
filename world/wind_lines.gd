@@ -22,6 +22,7 @@ extends GPUParticles3D
 @export var area_size := Vector3(14.0, 3.0, 14.0)
 @export var max_lines := 18
 @export var line_color := Color(1.0, 1.0, 1.0, 0.35)
+@export var line_thickness := 0.12     ## cross-section width of the streak, before trailing stretches it out
 @export var line_speed := 5.0          ## world units/sec a line travels at full gust strength
 @export var curve_strength := 1.2      ## how hard turbulence bends each line's path
 @export var trail_fraction := 0.3      ## 0..1 — how much of a line's travel its visible trail covers
@@ -61,7 +62,7 @@ func _build() -> void:
 	mat.color_ramp = _make_fade_ramp(line_color)
 
 	var quad := QuadMesh.new()
-	quad.size = Vector2(0.03, 0.5)   # thin sliver — trail_enabled below stretches it into a line
+	quad.size = Vector2(line_thickness, 0.5)   # a sliver — trail_enabled below stretches it into a line
 	var surf := StandardMaterial3D.new()
 	surf.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
