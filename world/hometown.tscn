@@ -50,9 +50,6 @@
 [ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 [ext_resource type="Script" uid="uid://corr3uvd0biec" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
-[ext_resource type="Script" path="res://world/door.gd" id="47_door"]
-[ext_resource type="Script" path="res://world/door_spawn.gd" id="47_door_spawn"]
-[ext_resource type="PackedScene" path="res://world/house_1_interior.tscn" id="47_house1_interior"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -279,18 +276,6 @@ shape = SubResource("BoxShape3D_qie8l")
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
-
-[node name="Door_House1" type="StaticBody3D" parent="Buildings/house_chesburg_1" unique_id=470001001]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.2)
-script = ExtResource("47_door")
-target_level = ExtResource("47_house1_interior")
-target_spawn_id = &"enter"
-prompt_text = "Press E to enter"
-
-[node name="House1EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_1" unique_id=470001002]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.6)
-script = ExtResource("47_door_spawn")
-spawn_id = &"house_1_entrance"
 
 [node name="house_chesburg_5" parent="Buildings" unique_id=2135377020 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 4.479099, 0, -10.312209)
