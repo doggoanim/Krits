@@ -16,6 +16,14 @@ extends Node3D
 ## without touching code.
 @export var env_config: EnvironmentConfig
 
+## Levels in the "interior_level" group (see world/interior_room.tscn's own
+## root node) swap the outdoor sky out for solid black and switch the sun
+## off — see _apply_level_lighting(). An interior is still lit, just by its
+## own OmniLight3D lamp instead of the outdoor sun/ambient, which would
+## otherwise keep shining in through walls that have no outdoor geometry on
+## the other side of them to actually block it.
+const INTERIOR_GROUP := &"interior_level"
+
 ## Retro pixelation overlay (see core/pixelate_effect.gd) — block size in
 ## real screen pixels. Lower = subtler, higher = chunkier. Set to 1.0 to
 ## effectively turn it off without removing the node.
@@ -44,12 +52,19 @@ var cam: CameraRig
 var encounters: EncounterManager
 var level: Node3D   ## the currently active level root — see _swap_level()
 
+## See _build_environment()/_apply_level_lighting().
+var _sun: DirectionalLight3D
+var _env: Environment
+var _outdoor_bg_mode: Environment.BGMode
+var _outdoor_ambient_energy: float
+
 func _ready() -> void:
 	Game.load_game()
 	_build_environment()
 
 	level = level_scene.instantiate() if level_scene else TestLevel.new()
 	add_child(level)
+	_apply_level_lighting(level)
 
 	player = Player.new()
 	add_child(player)
@@ -142,6 +157,7 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 		level.queue_free()   # deferred — see _find_spawn_in()'s doc comment for why that matters here
 	level = next_level.instantiate()
 	add_child(level)
+	_apply_level_lighting(level)
 	encounters.setup(player, level)
 	for n in level.find_children("*", "", true, false):
 		if n is WorldEnemy:
@@ -237,3 +253,26 @@ func _build_environment() -> void:
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
+
+	# Captured so _apply_level_lighting() can swap between this and a solid-
+	# black indoor look, and restore the outdoor one exactly rather than
+	# guessing back at the sky/ambient values env_config originally set.
+	_sun = sun
+	_env = env
+	_outdoor_bg_mode = env.background_mode
+	_outdoor_ambient_energy = env.ambient_light_energy
+
+## Switches the sky/sun out for a plain black void, and the ambient wash off
+## entirely, whenever the just-loaded level is in the INTERIOR_GROUP — called
+## right after instancing a level, both on first load and on every Door swap.
+## An interior still gets lit; it's just lit by its own OmniLight3D lamp
+## (see world/interior_room.tscn) rather than by anything outdoor, since
+## there's no outdoor geometry on the far side of its walls to block the sun/
+## sky from shining straight through otherwise. Restores the exact outdoor
+## values _build_environment() set up the moment you're back outside.
+func _apply_level_lighting(lvl: Node) -> void:
+	var indoor := lvl.is_in_group(INTERIOR_GROUP)
+	_env.background_mode = Environment.BG_COLOR if indoor else _outdoor_bg_mode
+	_env.background_color = Color.BLACK
+	_env.ambient_light_energy = 0.0 if indoor else _outdoor_ambient_energy
+	_sun.visible = not indoor
