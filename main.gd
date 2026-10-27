@@ -30,6 +30,8 @@ extends Node3D
 @export var footstep_sfx_grass: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_GRASS
 @export var footstep_sfx_dirt: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_ROCK
+## Empty by default — see PlayerAudio.footstep_sfx_water's own doc comment.
+@export var footstep_sfx_water: Array[AudioStream] = []
 
 ## Low-HP warning vignette (see core/low_hp_vignette.gd) — hp/max_hp fraction
 ## below which the screen edges start darkening, and the color they darken
@@ -53,6 +55,7 @@ func _ready() -> void:
 	player.audio.footstep_sfx_grass = footstep_sfx_grass
 	player.audio.footstep_sfx_dirt = footstep_sfx_dirt
 	player.audio.footstep_sfx_rock = footstep_sfx_rock
+	player.audio.footstep_sfx_water = footstep_sfx_water
 	cam = CameraRig.new()
 	add_child(cam)
 	cam.target = player
@@ -78,6 +81,14 @@ func _ready() -> void:
 	low_hp_vignette.low_hp_threshold = low_hp_vignette_threshold
 	low_hp_vignette.vignette_color = low_hp_vignette_color
 	add_child(low_hp_vignette)
+
+	# Underwater screen tint + audio muffle — keyed off the CAMERA's own
+	# position (see UnderwaterOverlay's header comment for why that's not the
+	# same thing as the player's own submersion), so it needs the CameraRig
+	# that already exists by this point.
+	var underwater := UnderwaterOverlay.new()
+	underwater.setup(cam)
+	add_child(underwater)
 
 	encounters = EncounterManager.new()
 	add_child(encounters)

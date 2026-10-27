@@ -80,6 +80,18 @@ const DEFAULT_FOOTSTEP_SFX_ROCK: Array[AudioStream] = [
 @export var footstep_sfx_grass: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_GRASS
 @export var footstep_sfx_dirt: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_ROCK
+## No dedicated splash-footstep recordings exist yet, so this defaults empty
+## rather than preloading files that aren't there — play_water_footstep()
+## falls back to footstep_sfx_grass, same as any other surface left empty.
+## Drop .wav files in and assign them here (same Inspector as the other
+## footstep_sfx_* exports, see their shared comment above) once they exist.
+@export var footstep_sfx_water: Array[AudioStream] = []
+## Continuous swim stroke loop, same toggled-on/off idiom as ROLL_SFX/
+## set_rolling() below — also empty by default for the same reason as
+## footstep_sfx_water. set_swimming() simply does nothing while this is
+## empty, rather than falling back to anything, since an ambient stroke loop
+## (unlike a one-shot footstep) has no sensible substitute sound.
+@export var swim_sfx: Array[AudioStream] = []
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
@@ -111,10 +123,16 @@ const ORB_COMBO_PITCH_MAX := 2.2
 ## uses for its continuous particle emitters (running dust, trails), rather
 ## than the fire-and-forget _play() pattern every other sound here uses.
 var _roll_player: AudioStreamPlayer3D
+## swim_sfx's own looping player — see set_swimming(). Built the same way as
+## _roll_player even though swim_sfx starts empty, so assigning streams to it
+## later (in the Inspector, at runtime) just works with no further code changes.
+var _swim_player: AudioStreamPlayer3D
 
 func _ready() -> void:
 	_roll_player = AudioStreamPlayer3D.new()
 	add_child(_roll_player)
+	_swim_player = AudioStreamPlayer3D.new()
+	add_child(_swim_player)
 	# Loop each take itself rather than relying on its .wav import settings
 	# already having loop enabled — guarantees it regardless of how the file
 	# was authored/imported. loop_begin/loop_end must be set explicitly too:
@@ -161,6 +179,15 @@ func play_footstep(surface := FootstepSurfaces.DEFAULT_SURFACE) -> void:
 		pool = footstep_sfx_grass
 	_play(pool.pick_random(), PITCH_VARIANCE)
 
+## Walking through water shallow enough to stay in GroundState (below
+## config.water_swim_depth_ratio — see GroundState._play_footstep()), rather
+## than the dirt/grass/rock set that location would otherwise get.
+func play_water_footstep() -> void:
+	var pool := footstep_sfx_water
+	if pool.is_empty():
+		pool = footstep_sfx_grass
+	_play(pool.pick_random(), PITCH_VARIANCE)
+
 func _sfx_for(surface: FootstepSurfaces.Surface) -> Array[AudioStream]:
 	match surface:
 		FootstepSurfaces.Surface.DIRT:
@@ -201,6 +228,20 @@ func set_rolling(active: bool, speed_ratio := 0.0) -> void:
 		_roll_player.pitch_scale = lerpf(ROLL_MIN_PITCH, ROLL_MAX_PITCH, t)
 	elif _roll_player.playing:
 		_roll_player.stop()
+
+## Continuous swim stroke loop for SwimState, same on/off idiom as
+## set_rolling() above — `active` starts/stops it, no speed_ratio since a
+## swim stroke doesn't have roll's wide speed range to track. A no-op for as
+## long as swim_sfx stays empty (see that export's own doc comment).
+func set_swimming(active: bool) -> void:
+	if swim_sfx.is_empty():
+		return
+	if active:
+		if not _swim_player.playing:
+			_swim_player.stream = swim_sfx.pick_random()
+			_swim_player.play()
+	elif _swim_player.playing:
+		_swim_player.stop()
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)

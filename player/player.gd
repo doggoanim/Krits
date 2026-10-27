@@ -78,6 +78,8 @@ var _auto_stuck_t := 0.0
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
 var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
+var _water_volumes: Array[WaterVolume] = []   ## every WaterVolume currently overlapping the player —
+												## see enter_water()/exit_water()/current_water()
 
 func _ready() -> void:
 	collision_layer = 1 << 1   # layer 2: player
@@ -181,6 +183,7 @@ func _ready() -> void:
 		&"LongJump": LongJumpState.new(), &"Dive": DiveState.new(),
 		&"Pound": PoundState.new(), &"PoundLand": PoundLandState.new(),
 		&"Frozen": FrozenState.new(), &"WallClimb": WallClimbState.new(),
+		&"Swim": SwimState.new(),
 	})
 	machine.start(&"Ground")
 
@@ -210,6 +213,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_timers(delta)
 	_update_floor_snap()
+	_update_water()
 	machine.physics_update(delta)
 	var on_floor := is_on_floor()
 	if on_floor:
@@ -275,6 +279,28 @@ func _update_timers(delta: float) -> void:
 ## catching landings on slopes/stairs without a visible bump.
 func _update_floor_snap() -> void:
 	floor_snap_length = JUMP_FLOOR_SNAP if velocity.y > 0.0 else GROUND_FLOOR_SNAP
+
+## Checked every physics frame, before the current state's own physics_update
+## — deep enough water takes over movement outright (SwimState) regardless of
+## what any other state was doing, the same way a climbable wall or a steep
+## slope preempts normal movement elsewhere in this file. Shallower water
+## (below config.water_swim_depth_ratio) is left entirely to whichever
+## grounded state is already running — see GroundState._play_footstep() for
+## the wet-footstep/puddle side of that, which needs no state change at all.
+## Frozen (a cutscene) and WallClimb (deliberately holding a wall) are the
+## only states this won't interrupt, same exemptions _update_auto_unstick() uses.
+func _update_water() -> void:
+	var deep := water_submersion() >= config.water_swim_depth_ratio
+	var exempt := machine.current_name == &"Frozen" or machine.current_name == &"WallClimb"
+	if exempt:
+		return
+	if deep and machine.current_name != &"Swim":
+		machine.transition_to(&"Swim")
+	elif not deep and machine.current_name == &"Swim":
+		# Air's own on-floor check next frame settles whether this is a true
+		# fall or you've actually surfaced onto solid ground — same reasoning
+		# as _unstick() forcing Air rather than guessing Ground directly.
+		machine.transition_to(&"Air")
 
 # ---------------------------------------------------------------- input / motion
 
@@ -898,6 +924,29 @@ func exit_slime_puddle() -> void:
 
 func is_slimed() -> bool:
 	return _slime_overlaps > 0
+
+# ---------------------------------------------------------------- water
+
+## Called by WaterVolume while the player's body overlaps it. An array
+## (rather than slime's plain counter) since the submersion depth below
+## depends on WHICH volume — current_water() needs an actual reference, not
+## just a count — but overlapping more than one at once is rare enough that
+## "whichever was entered most recently" (the array's own back()) is a fine
+## answer when it does happen.
+func enter_water(vol: WaterVolume) -> void:
+	if vol not in _water_volumes:
+		_water_volumes.append(vol)
+
+func exit_water(vol: WaterVolume) -> void:
+	_water_volumes.erase(vol)
+
+func current_water() -> WaterVolume:
+	return _water_volumes.back() if not _water_volumes.is_empty() else null
+
+## 0.0 (dry) to 1.0 (fully underwater) — see WaterVolume.submersion_ratio().
+func water_submersion() -> float:
+	var vol := current_water()
+	return vol.submersion_ratio(global_position.y, STAND_HEIGHT) if vol else 0.0
 
 # ---------------------------------------------------------------- damage
 

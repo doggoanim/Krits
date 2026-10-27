@@ -37,6 +37,10 @@ const ANIM_CLIMB_RIGHT := &"climb_right"
 ## Placeholder clip names — not baked into the model yet (see WallClimbState).
 ## play() just warns and no-ops until the real clips exist, so the feature
 ## works mechanically in the meantime, just with no pose.
+const ANIM_SWIM := &"swim"                  ## horizontal paddling loop — see SwimState
+const ANIM_SWIM_VERTICAL := &"swim_vertical"   ## rising OR diving — see set_upside_down() below.
+## Neither clip is baked into the model yet (see the Placeholder comment just
+## above) — swimming works mechanically with no pose until they're added.
 
 ## Blender's glTF export doesn't always agree with Godot's -Z-forward convention —
 ## a rig authored facing Blender's own "forward" often lands facing +Z in Godot,
@@ -128,7 +132,8 @@ var _squash_tween: Tween
 ## settings. Anything NOT in this list (jump_start1/2/3, air_dive, long_jump,
 ## ground_pound, ...) is meant to play exactly once and hold its last frame.
 const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING,
-	ANIM_CLIMB_IDLE, ANIM_CLIMB_UP, ANIM_CLIMB_DOWN, ANIM_CLIMB_LEFT, ANIM_CLIMB_RIGHT]
+	ANIM_CLIMB_IDLE, ANIM_CLIMB_UP, ANIM_CLIMB_DOWN, ANIM_CLIMB_LEFT, ANIM_CLIMB_RIGHT,
+	ANIM_SWIM, ANIM_SWIM_VERTICAL]
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()
@@ -279,6 +284,16 @@ func _update_face(delta: float) -> void:
 ## driven alongside this from Player.enter_slime_puddle/exit_slime_puddle).
 func set_slimed(active: bool) -> void:
 	_slimed = active
+
+## Flips the model upside-down (180° around its own local X axis — pitch, not
+## roll, so left/right stays put and only up/down + forward/back invert) —
+## used by SwimState to reuse the one vertical swim clip, authored for
+## swimming UP, as a "swimming down" pose too: played upside-down, rising
+## reads as diving instead. _model.rotation.x is otherwise untouched by
+## anything else (lean uses this node's OWN rotation, see set_lean() below,
+## not the model's), so toggling it here can't fight any other system.
+func set_upside_down(flag: bool) -> void:
+	_model.rotation.x = PI if flag else 0.0
 
 ## Plays a one-off reaction pose (a wall collision, say) and protects it from
 ## being overridden by a state's regular per-frame play() calls for

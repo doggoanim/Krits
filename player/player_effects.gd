@@ -165,12 +165,25 @@ func burst_water_splash(pos: Vector3, entering: bool) -> void:
 	_burst(pos, Vector3.UP, 45.0, _material(speed, 7.0, 0.3, 0.7, _splash_ramp_tex), amount, 0.4, _smoke_quad)
 	_spawn_ripple(pos)
 
+## A small puddle ring + light spray at each footstep through shallow water
+## (see GroundState._play_footstep()) — the same splash idiom as
+## burst_water_splash() above, just a lot softer: a footstep barely breaks
+## the surface compared to diving fully in. `surface_y` is the water's own
+## top (WaterVolume.surface_world_y()), not the player's current Y, same
+## reasoning as WaterVolume._waterline_pos().
+func burst_water_footstep(pos: Vector3, surface_y: float) -> void:
+	var waterline := Vector3(pos.x, surface_y, pos.z)
+	_burst(waterline, Vector3.UP, 50.0, _material(3.0, 5.0, 0.25, 0.5, _splash_ramp_tex), 5, 0.3, _smoke_quad)
+	_spawn_ripple(waterline, 2.0, 0.4)
+
 ## A flat ring that grows and fades on the water's surface, independent of the
 ## player (unlike the particle bursts above, a ripple needs to sit still at
 ## the splash point while the player keeps swimming/walking away from it —
 ## see player_speed_trail.gd's identical reasoning for spawning its ghosts
-## under the scene root rather than under the player).
-func _spawn_ripple(pos: Vector3) -> void:
+## under the scene root rather than under the player). `max_scale`/`duration`
+## default to a full splash's size — burst_water_footstep() above passes
+## smaller ones for a puddle-sized ring instead.
+func _spawn_ripple(pos: Vector3, max_scale := 5.0, duration := 0.7) -> void:
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		return
@@ -189,8 +202,8 @@ func _spawn_ripple(pos: Vector3) -> void:
 	mesh_inst.global_position = pos
 
 	var tw := mesh_inst.create_tween()
-	tw.tween_property(mesh_inst, "scale", Vector3.ONE * 5.0, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.7).set_ease(Tween.EASE_IN)
+	tw.tween_property(mesh_inst, "scale", Vector3.ONE * max_scale, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(mat, "albedo_color:a", 0.0, duration).set_ease(Tween.EASE_IN)
 	tw.tween_callback(mesh_inst.queue_free)
 
 ## `normal` points away from the wall — the airborne dive/long-jump bounce,

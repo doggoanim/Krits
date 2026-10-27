@@ -253,7 +253,16 @@ func _update_footsteps(p: Player) -> void:
 ## Looks at what's actually underfoot right now and plays the matching sound
 ## plus a small dust puff — see FootstepSurfaces for how the collider maps to
 ## a surface, and PlayerEffects.burst_footstep_dust() for the per-surface tint.
+##
+## Standing in water at all here means it's too shallow to have triggered
+## SwimState (see Player._update_water()) — a plain wet footstep + puddle
+## ripple instead of whatever's actually on the lakebed underneath.
 func _play_footstep(p: Player) -> void:
+	var water := p.current_water()
+	if water != null:
+		p.audio.play_water_footstep()
+		p.effects.burst_water_footstep(p.global_position, water.surface_world_y())
+		return
 	var collider := p.floor_collider_below(p.global_position, FOOTSTEP_PROBE_DIST)
 	var surface := FootstepSurfaces.detect(collider)
 	p.audio.play_footstep(surface)
