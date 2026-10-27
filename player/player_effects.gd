@@ -60,6 +60,14 @@ const SPLASH_RAMP := [
 	Color(0.8, 0.9, 1.0, 0.6),
 	Color(0.8, 0.9, 1.0, 0.0),
 ]
+## Air bubbles while submerged (see set_swim_bubbles()) — brighter/more
+## opaque than the splash ramp since these sit against dark underwater
+## color, not bright daylight water spray.
+const BUBBLE_RAMP := [
+	Color(0.9, 0.97, 1.0, 0.9),
+	Color(0.9, 0.97, 1.0, 0.55),
+	Color(0.9, 0.97, 1.0, 0.0),
+]
 
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 
@@ -70,11 +78,13 @@ var _smoke_ramp_tex: GradientTexture1D
 var _grass_dust_ramp_tex: GradientTexture1D
 var _rock_dust_ramp_tex: GradientTexture1D
 var _splash_ramp_tex: GradientTexture1D
+var _bubble_ramp_tex: GradientTexture1D
 var _ring_texture: GradientTexture2D
 var _slime_drip_material: ParticleProcessMaterial   ## kept so set_slime_drip() can swap its color_ramp
 
 var _run_dust: GPUParticles3D
 var _slime_drip: GPUParticles3D
+var _swim_bubbles: GPUParticles3D
 
 func _ready() -> void:
 	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
@@ -84,6 +94,7 @@ func _ready() -> void:
 	_grass_dust_ramp_tex = _make_ramp(GRASS_DUST_RAMP)
 	_rock_dust_ramp_tex = _make_ramp(ROCK_DUST_RAMP)
 	_splash_ramp_tex = _make_ramp(SPLASH_RAMP)
+	_bubble_ramp_tex = _make_ramp(BUBBLE_RAMP)
 	_ring_texture = SoftCircleTexture.make_ring()
 
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _smoke_quad)
@@ -92,11 +103,19 @@ func _ready() -> void:
 	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _smoke_quad)
 	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
 	add_child(_slime_drip)
+	_swim_bubbles = _build_emitter(_bubble_material(), 8, 1.2, false, _smoke_quad)
+	_swim_bubbles.position.y = 1.3   # roughly head height, not the feet — bubbles rise off the face/chest
+	add_child(_swim_bubbles)
 
 # ---------------------------------------------------------------- continuous
 
 func set_running_dust(active: bool) -> void:
 	_run_dust.emitting = active
+
+## Toggled by SwimState for as long as it's active — see that state's own
+## enter()/exit().
+func set_swim_bubbles(active: bool) -> void:
+	_swim_bubbles.emitting = active
 
 ## Driven by Player.enter_slime_puddle/exit_slime_puddle, alongside
 ## PlayerVisual.set_slimed — the green tint and the drip particles always
@@ -188,6 +207,15 @@ func burst_water_footstep(pos: Vector3, surface_y: float) -> void:
 	var waterline := Vector3(pos.x, surface_y, pos.z)
 	_burst(waterline, Vector3.UP, 50.0, _material(3.0, 5.0, 0.25, 0.5, _splash_ramp_tex), 5, 0.3, _smoke_quad)
 	_spawn_ripple(waterline, 2.0, 0.4)
+
+## A small wake ripple left periodically while paddling at the surface (see
+## SwimState's own timer — this isn't called every frame, just every so
+## often, same spirit as a footstep). No particle burst at all, unlike the
+## footstep/splash versions above — a continuous swim already reads as
+## "disturbing the water" via the stroke sfx and the paddle animation
+## itself; this is just a trailing ring, not an impact.
+func burst_water_wake(pos: Vector3, surface_y: float) -> void:
+	_spawn_ripple(Vector3(pos.x, surface_y, pos.z), 1.3, 0.6)
 
 ## A flat ring that grows and fades on the water's surface, independent of the
 ## player (unlike the particle bursts above, a ripple needs to sit still at
@@ -347,4 +375,25 @@ func _slime_drip_material_for(color: Color) -> ParticleProcessMaterial:
 	m.color_ramp = _make_ramp(_slime_drip_colors(color))
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.35
+	return m
+
+## Air bubbles for set_swim_bubbles() — the one emitter here that
+## accelerates UPWARD (a positive gravity_y, unlike every other effect's
+## downward pull or the smoke materials' gentle upward drift) since a real
+## bubble speeds up as it rises through water, the opposite of gravity.
+func _bubble_material() -> ParticleProcessMaterial:
+	var m := ParticleProcessMaterial.new()
+	m.direction = Vector3.UP
+	m.spread = 18.0
+	m.initial_velocity_min = 0.5
+	m.initial_velocity_max = 1.0
+	m.gravity = Vector3(0.0, 1.4, 0.0)
+	m.damping_min = 0.0
+	m.damping_max = 0.3
+	m.scale_min = 0.12
+	m.scale_max = 0.3
+	m.scale_curve = _growth_curve
+	m.color_ramp = _bubble_ramp_tex
+	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	m.emission_sphere_radius = 0.3
 	return m

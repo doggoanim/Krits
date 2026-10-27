@@ -20,6 +20,13 @@ extends PlayerState
 const STROKE_PHASES := [0.0, 0.25, 0.5, 0.75]
 var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — see _update_stroke_sfx()
 
+## How often a wake ripple is left behind while paddling at the surface —
+## see the horizontal-swim branch in physics_update(). Not tied to the
+## stroke phase like the sfx above; a flat interval reads fine for a purely
+## cosmetic trailing ring and is simpler than another phase-crossing check.
+const WAKE_INTERVAL := 0.3
+var _wake_t := 0.0
+
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	p.can_dive = true
@@ -30,10 +37,13 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.velocity = Vector3.ZERO
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_SWIM)
+	p.effects.set_swim_bubbles(true)
 	_stroke_phase = -1.0
+	_wake_t = 0.0
 
 func exit(_next: StringName) -> void:
 	player.visual.set_upside_down(false)
+	player.effects.set_swim_bubbles(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -88,6 +98,19 @@ func physics_update(delta: float) -> void:
 	# No stroke sound while idle (active_anim stays ANIM_SWIM_IDLE) — treading
 	# water doesn't stroke. _update_stroke_sfx() resets cleanly either way.
 	_update_stroke_sfx(p, active_anim if active_anim != PlayerVisual.ANIM_SWIM_IDLE else &"")
+
+	# Wake ripple only while actually paddling at the surface — not while
+	# treading water in place, and not while diving/rising vertically
+	# (there's nothing at the surface to leave a wake in either case).
+	if active_anim == PlayerVisual.ANIM_SWIM:
+		_wake_t -= delta
+		if _wake_t <= 0.0:
+			_wake_t = WAKE_INTERVAL
+			var water := p.current_water()
+			if water != null:
+				p.effects.burst_water_wake(p.global_position, water.surface_world_y())
+	else:
+		_wake_t = 0.0
 
 	p.safe_move_and_slide()
 
