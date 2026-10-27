@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://world/door.gd" id="1"]
 [ext_resource type="Script" path="res://world/door_spawn.gd" id="2"]
+[ext_resource type="Script" path="res://world/cutaway_wall.gd" id="3"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(14, 0.2, 14)
@@ -54,6 +55,8 @@ material_override = SubResource("OuterMat")
 [node name="Ceiling" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
 collision_layer = 1
+script = ExtResource("3")
+normal_axis = Vector3(0, 1, 0)
 
 [node name="Collision" type="CollisionShape3D" parent="Ceiling"]
 shape = SubResource("FloorShape")
@@ -65,6 +68,8 @@ material_override = SubResource("InnerMat")
 [node name="WallNorth" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 7)
 collision_layer = 1
+script = ExtResource("3")
+normal_axis = Vector3(0, 0, 1)
 
 [node name="Collision" type="CollisionShape3D" parent="WallNorth"]
 shape = SubResource("NSWallShape")
@@ -76,6 +81,8 @@ material_override = SubResource("InnerMat")
 [node name="WallSouth" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -7)
 collision_layer = 1
+script = ExtResource("3")
+normal_axis = Vector3(0, 0, -1)
 
 [node name="Collision" type="CollisionShape3D" parent="WallSouth"]
 shape = SubResource("NSWallShape")
@@ -87,6 +94,8 @@ material_override = SubResource("InnerMat")
 [node name="WallEast" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.5, 0)
 collision_layer = 1
+script = ExtResource("3")
+normal_axis = Vector3(1, 0, 0)
 
 [node name="Collision" type="CollisionShape3D" parent="WallEast"]
 shape = SubResource("EWWallShape")
@@ -98,6 +107,8 @@ material_override = SubResource("InnerMat")
 [node name="WallWest" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.5, 0)
 collision_layer = 1
+script = ExtResource("3")
+normal_axis = Vector3(-1, 0, 0)
 
 [node name="Collision" type="CollisionShape3D" parent="WallWest"]
 shape = SubResource("EWWallShape")
