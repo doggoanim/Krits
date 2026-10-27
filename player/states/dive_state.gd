@@ -2,11 +2,8 @@ class_name DiveState
 extends PlayerState
 ## One wall bounce max (it does not re-grant the dive). Landing stops you instantly.
 
-var _t := 0.0   ## time since entering — see config.wall_bounce_grace
-
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
-	_t = 0.0
 	p.can_dive = false
 	var dir := p.input_dir()
 	if dir.length() < 0.1:
@@ -30,7 +27,6 @@ func exit(_next: StringName) -> void:
 
 func physics_update(delta: float) -> void:
 	var p := player
-	_t += delta
 	if p.jump_buffer_t > 0.0:
 		p.set_hvel(Vector3.ZERO)   # cancel all momentum, same clean pop as an orb bounce
 		p.start_jump(p.config.dive_cancel_velocity)
@@ -51,7 +47,7 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
-	if _t >= p.config.wall_bounce_grace and p.try_wall_bounce(prev_h, false, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time, false, true):
+	if p.try_wall_bounce(prev_h, false, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time, false, true):
 		return
 	if p.is_on_floor():
 		p.set_hvel(Vector3.ZERO)

@@ -131,15 +131,6 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 @export var wall_bounce_push := 7.0
 @export var wall_min_speed := 6.0
 @export var wall_bounce_roll_time := 0.4   ## how long the roll_collision reaction pose plays after a wall bounce
-## Dive/LongJump/Roll all check try_wall_bounce() every physics frame from the
-## instant they start, so clipping a wall on literally the first frame (easy
-## right next to one, especially now the lunge poses cut in instantly instead
-## of blending) could trigger the bounce reaction before the lunge's own pose
-## had rendered for more than a frame — reads as skipping straight to the
-## bounce instead of lunging into the wall first. Each state tracks its own
-## elapsed time since entering and holds off calling try_wall_bounce() until
-## it's past this.
-@export var wall_bounce_grace := 0.08
 
 @export_group("Ground Pound")
 @export var pound_windup := 0.22

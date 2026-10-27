@@ -6,16 +6,11 @@ extends PlayerState
 var _elapsed := 0.0
 var _finished_t := 0.0   ## how long the roll has wanted to end but couldn't stand up —
                           ## see the can_stand() escape hatch at the bottom of physics_update()
-## Separate from _elapsed (which only counts grounded time, toward roll_time)
-## — this counts every frame since entering, purely to gate try_wall_bounce()
-## below. See config.wall_bounce_grace.
-var _t := 0.0
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	_elapsed = 0.0
 	_finished_t = 0.0
-	_t = 0.0
 	p.set_crouching(true)
 	# A deliberately-triggered move always takes over immediately, regardless
 	# of whatever reaction pose (a wall-bounce tumble, a side flip, ...) might
@@ -39,7 +34,6 @@ func exit(_next: StringName) -> void:
 func physics_update(delta: float) -> void:
 	var p := player
 	var c := p.config
-	_t += delta
 	# A no-op once already rolling; resumes the loop on its own once a
 	# wall-collision reaction pose (play_hold, below) has run its course.
 	p.visual.play(PlayerVisual.ANIM_ROLL)
@@ -107,7 +101,7 @@ func physics_update(delta: float) -> void:
 	# Same launch-into-air bounce Dive/LongJump use, just reachable from the
 	# ground — pops you upward with the collision pose instead of just
 	# stopping dead against the wall.
-	if _t >= c.wall_bounce_grace and p.try_wall_bounce(prev_h, true, PlayerVisual.ANIM_ROLL_COLLISION, c.roll_collision_time, true):
+	if p.try_wall_bounce(prev_h, true, PlayerVisual.ANIM_ROLL_COLLISION, c.roll_collision_time, true):
 		return
 
 	if not p.is_on_floor():
