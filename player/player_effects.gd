@@ -145,18 +145,24 @@ func burst_land_dust() -> void:
 ## exact foot-level point its own floor probe found.
 func burst_footstep_dust(pos: Vector3, surface: FootstepSurfaces.Surface) -> void:
 	var ramp := _dust_ramp_tex
-	var amount := 5
-	var scale_max := 0.6
+	var amount := 9
+	var scale_max := 1.0
 	match surface:
 		FootstepSurfaces.Surface.GRASS:
 			ramp = _grass_dust_ramp_tex
-			amount = 4
-			scale_max = 0.5
+			amount = 7
+			scale_max = 0.85
 		FootstepSurfaces.Surface.ROCK:
 			ramp = _rock_dust_ramp_tex
-			amount = 3
-			scale_max = 0.4
-	_burst(pos, Vector3.UP, 50.0, _material(3.5, 5.0, 0.25, scale_max, ramp), amount, 0.3, _dust_quad)
+			amount = 6
+			scale_max = 0.7
+	# Noticeably bigger/more numerous than a first pass at this (originally
+	# scale_max 0.4-0.6, amount 3-5): at those sizes it was indistinguishable
+	# from set_running_dust()'s own continuous haze already filling the same
+	# spot while running, essentially invisible as its own accent. This still
+	# reads as a quick accent, not a cloud — one-shot at 0.4s lifetime — just
+	# large enough to actually see land and settle each step.
+	_burst(pos, Vector3.UP, 55.0, _material(5.0, 5.0, 0.4, scale_max, ramp), amount, 0.4, _dust_quad)
 
 ## Entering/exiting a WaterVolume (see world/water/water_volume.gd): a droplet
 ## spray plus an expanding ring ripple, both at `pos` (the waterline, not the
