@@ -147,6 +147,10 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 @export var swim_accel := 10.0
 @export var swim_vertical_speed := 4.0      ## straight up/down speed while holding jump/crouch_pound
 @export var swim_vertical_accel := 12.0
+@export var swim_surface_jump_margin := 0.1   ## pressing jump (not holding) while this close to
+												## resurfacing (water_submersion() within this of
+												## water_swim_depth_ratio) does a real jump out of the
+												## water instead of just swimming up — see SwimState.
 
 @export_group("Ground Pound")
 @export var pound_windup := 0.22
