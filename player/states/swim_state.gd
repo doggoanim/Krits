@@ -23,6 +23,11 @@ var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	p.can_dive = true
+	# Whatever speed you were carrying in (a dive, a long fall, a running
+	# jump off the shore) is killed outright rather than left to bleed off
+	# via swim_accel/swim_vertical_accel — hitting the water is what stops
+	# you, not the water's own drag over the next several frames.
+	p.velocity = Vector3.ZERO
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_SWIM)
 	_stroke_phase = -1.0
