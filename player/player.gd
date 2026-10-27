@@ -397,19 +397,26 @@ func _unstick() -> void:
 	_wedge_t = 0.0
 
 ## The automatic counterpart to _unstick() — same recovery, triggered by
-## actually being stuck rather than a key press. Skips two states on
-## purpose, both of which are SUPPOSED to leave the player motionless off
+## actually being stuck rather than a key press. Skips three states on
+## purpose, all of which are SUPPOSED to leave the player motionless off
 ## the ground for as long as they like, not bugs to correct:
 ## - WallClimb: hanging still on a wall without pressing anything is normal.
 ## - Frozen: a scripted cinematic hold with gravity off; a cutscene can run
 ##   as long as it wants.
+## - Swim: treading water (or just holding depth with no input) is normal
+##   too — buoyant, not falling, however long it sits still.
 ## Every other state's own holds (wall-bounce reaction, pound windup, the
 ## various jump-pose locks — see PlayerConfig's *_hold_time/*_windup fields)
 ## top out well under a second, so "airborne, not meaningfully moving, for
 ## over AUTO_UNSTICK_TIME" has no legitimate reason to happen anywhere else
 ## and is a safe signal something's gone wrong, without needing to know what.
 func _update_auto_unstick(delta: float, on_floor: bool) -> void:
-	var exempt := machine.current_name == &"WallClimb" or machine.current_name == &"Frozen"
+	# Swim is deliberately motionless off the floor too — treading water in
+	# place (or just holding depth with no input at all) is normal there,
+	# same exemption reasoning as WallClimb/Frozen below, not a sign of
+	# being stuck.
+	var exempt := machine.current_name == &"WallClimb" or machine.current_name == &"Frozen" \
+			or machine.current_name == &"Swim"
 	if on_floor or exempt:
 		_auto_stuck_t = 0.0
 		_auto_stuck_pos = global_position
