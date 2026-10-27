@@ -550,14 +550,23 @@ func _try_step_up() -> void:
 	# own the horizontal half fixes both cases at once without this function
 	# needing to know or care which one it's looking at.
 	global_position.y = (advanced.origin + settle.get_travel()).y
-	# A step's own corner (the lip between riser and tread) can hand
-	# move_and_slide()'s own collision response a blended normal for a single
-	# frame right as it resolves this same step — steep enough, briefly, to
-	# misread as GroundState's forced slope-slide and spin the player to face
-	# "downhill" for a frame before the normal settles back to the tread's
-	# actual (flat) angle. This grace window suppresses that check for a
-	# moment right after a step without touching the slope-slide logic itself.
-	step_up_grace = config.step_up_grace_time
+	# Only arm the grace window (see its own doc comment) when what was just
+	# stepped onto is a genuinely near-flat tread — NOT whenever this function
+	# succeeds at all, since (per the comment above) it reads any continuous
+	# upward incline as a "step" too, and would otherwise re-arm this every
+	# single frame for as long as you're walking up a real slope, which
+	# permanently suppressed GroundState's forced slope-slide the one time it
+	# actually needs to fire — exactly the case this must NOT interfere with.
+	if settle.get_normal().angle_to(Vector3.UP) < deg_to_rad(config.slope_slide_angle_deg):
+		# A step's own corner (the lip between riser and tread) can hand
+		# move_and_slide()'s own collision response a blended normal for a
+		# single frame right as it resolves this same step — steep enough,
+		# briefly, to misread as GroundState's forced slope-slide and spin the
+		# player to face "downhill" for a frame before the normal settles back
+		# to the tread's actual (flat) angle. This grace window suppresses
+		# that check for a moment right after a step without touching the
+		# slope-slide logic itself.
+		step_up_grace = config.step_up_grace_time
 
 func apply_gravity(delta: float, mult := 1.0) -> void:
 	var g := config.gravity * mult
