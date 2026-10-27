@@ -89,6 +89,17 @@ var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash col
 var _flash_t := 0.0
 var _lean_pitch := 0.0   ## current smoothed forward/back lean (rad), this node's rotation.x
 var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node's rotation.z
+
+## Opposite-signed local Y offset that masks Player._try_step_up()'s instant
+## global_position.y teleport — see absorb_vertical_pop()'s own doc comment.
+## Decays back to 0 in _process() below. This node's own `position` is never
+## touched anywhere else (only _model.position.y, for the swim flip), so
+## using it as an additive offset layer here is safe.
+var _step_pop_offset := 0.0
+const STEP_POP_DECAY := 10.0   ## how fast _step_pop_offset eases back to 0 —
+								## higher is snappier; tuned so a typical
+								## step-height pop settles out well within
+								## step_up_grace_time
 var _base_scale := 1.0   ## uniform scale from ModelUtil.fit_height, read back after _ready()
 var _hold_t := 0.0              ## >0 while a one-off reaction pose must not be interrupted
 var _held_anim := &""           ## the anim play_hold() is currently protecting
@@ -428,8 +439,21 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 	rotation.x = _lean_pitch
 	rotation.z = _lean_bank
 
+## Call right after Player._try_step_up() commits a step, passing the exact
+## Y delta it just applied to global_position (positive = stepped up). The
+## physics body itself still snaps instantly — that's needed so it doesn't
+## get pinned against the step's riser face while "catching up" — but the
+## rendered model offsets itself downward by the same amount and eases back
+## to 0 over STEP_POP_DECAY, so what's actually visible is a quick smoothed
+## rise instead of an instant hop.
+func absorb_vertical_pop(dy: float) -> void:
+	_step_pop_offset -= dy
+
 func _process(delta: float) -> void:
 	_update_face(delta)
+	if _step_pop_offset != 0.0:
+		_step_pop_offset = move_toward(_step_pop_offset, 0.0, STEP_POP_DECAY * absf(_step_pop_offset) * delta + 0.01)
+		position.y = _step_pop_offset
 	if _hold_t > 0.0:
 		_hold_t = maxf(0.0, _hold_t - delta)
 	if _flash_t > 0.0:

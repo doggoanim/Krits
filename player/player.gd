@@ -254,7 +254,15 @@ func _update_lean(delta: float) -> void:
 
 	var target_pitch := 0.0
 	var target_bank := 0.0
-	if machine.current_name == &"Ground" or machine.current_name == &"Crouch":
+	# Suppressed entirely (both pitch and bank) for a moment right after
+	# _try_step_up() commits a step — see Player.step_up_grace's own doc
+	# comment. Climbing a step at anything but a dead-straight angle can
+	# disturb hvel/facing just enough for a frame that this lean read it as a
+	# real forward/turn change and visibly tipped the body right as each step
+	# resolved; relaxing all the way back to upright and letting set_lean()'s
+	# own smoothing ease out of that reads better than trying to guess which
+	# single axis was actually the one wobbling.
+	if (machine.current_name == &"Ground" or machine.current_name == &"Crouch") and step_up_grace <= 0.0:
 		var speed_ratio := clampf(get_hvel().length() / config.walk_speed, 0.0, 1.6)
 		# Facing is -Z, so tipping the body's +Y axis toward -Z (lean forward,
 		# into the movement) is a NEGATIVE rotation.x — positive would lean back.
@@ -262,15 +270,7 @@ func _update_lean(delta: float) -> void:
 		# yaw increases when turning left (see face()/atan2 convention below), and
 		# a positive rotation.z already tips the body toward -X (the character's
 		# left), so banking into the turn means matching yaw_rate's sign directly.
-		#
-		# Suppressed for a moment right after _try_step_up() commits a step
-		# (step_up_grace): climbing a step at anything but a dead-straight
-		# angle can deflect the collision response against the riser's edge
-		# just enough to wobble hvel's own direction for a frame, and since
-		# facing tracks hvel (see face()), that read as a yaw_rate spike and
-		# banked the body into a spurious tilt right as each step resolved.
-		target_bank = 0.0 if step_up_grace > 0.0 \
-				else clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
+		target_bank = clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
 
 	visual.set_lean(target_pitch, target_bank, LEAN_SMOOTH, delta)
 
@@ -570,7 +570,16 @@ func _try_step_up() -> void:
 	# more likely to actually clip the slope ahead. Letting move_and_slide()
 	# own the horizontal half fixes both cases at once without this function
 	# needing to know or care which one it's looking at.
-	global_position.y = (advanced.origin + settle.get_travel()).y
+	var new_y := (advanced.origin + settle.get_travel()).y
+	# The physics body's own Y must snap instantly (committed above) rather
+	# than ease in — easing it would leave the body's collider still
+	# overlapping/pinned against the riser's face for the next several
+	# frames instead of actually standing on the tread. But that instant
+	# teleport, applied straight to global_position, reads on screen as the
+	# character visibly hopping — see PlayerVisual.absorb_vertical_pop()'s
+	# own doc comment for how the rendered model masks it instead.
+	visual.absorb_vertical_pop(new_y - global_position.y)
+	global_position.y = new_y
 	# Only arm the grace window (see its own doc comment) when what was just
 	# stepped onto is a genuinely near-flat tread — NOT whenever this function
 	# succeeds at all, since (per the comment above) it reads any continuous
