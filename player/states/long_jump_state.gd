@@ -4,9 +4,11 @@ extends PlayerState
 ## or a ground pound, and wall-bounces re-grant the dive just like a normal jump.
 
 var _jump_queued := false   ## a jump pressed anytime during the flight — see physics_update()
+var _t := 0.0   ## time since entering — see config.wall_bounce_grace
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_jump_queued = false
+	_t = 0.0
 	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_LONG_JUMP, 0.0)   # instant cut — a lunge should snap into pose, not ease in
 	player.speed_trail.set_active(true)
@@ -17,6 +19,7 @@ func exit(_next: StringName) -> void:
 
 func physics_update(delta: float) -> void:
 	var p := player
+	_t += delta
 	# A long jump's arc comfortably outlasts jump_buffer_t's own short window
 	# (0.12s) — this state never spends it, unlike every other airborne state
 	# (Air/Dive/Roll all check it every frame), so a jump pressed mid-flight
@@ -42,7 +45,7 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta, p.config.long_jump_gravity_mult)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
-	if p.try_wall_bounce(prev_h, true, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time):
+	if _t >= p.config.wall_bounce_grace and p.try_wall_bounce(prev_h, true, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time):
 		return
 	if p.is_on_floor():
 		machine.transition_to(&"Ground", {"jump_queued": _jump_queued})
