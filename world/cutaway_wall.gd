@@ -63,6 +63,6 @@ func _process(_delta: float) -> void:
 	# casting a shadow), so it can see through to the room without the
 	# room's own lighting changing. Camera still on the inward side -> show,
 	# same as a normal wall.
-	var outward := to_cam.dot(world_normal) <= 0.0
+	var outward := to_cam.dot(world_normal) > 0.0
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
 		if outward else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
