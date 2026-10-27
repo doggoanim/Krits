@@ -9,7 +9,10 @@ extends Node3D
 ##
 ## Two kinds of emitter:
 ## - Persistent, toggled on/off for as long as a move lasts (running dust,
-##   dive smoke trail, long-jump dirt trail). Built once in _ready().
+##   the slime drip). Built once in _ready(). Dive/long-jump used to each
+##   have their own continuous smoke/dust trail here too; removed once
+##   PlayerSpeedTrail's ghost-afterimage trail covered the same "you're
+##   moving fast" read on its own, so there was no need for both.
 ## - One-shot bursts (jump/land dust, wall-bounce and roll-collision
 ##   impacts): a fresh GPUParticles3D spawned per call and freed once it's
 ##   done playing, since these are rare, discrete events, not every frame.
@@ -68,8 +71,6 @@ var _ring_texture: GradientTexture2D
 var _slime_drip_material: ParticleProcessMaterial   ## kept so set_slime_drip() can swap its color_ramp
 
 var _run_dust: GPUParticles3D
-var _dive_trail: GPUParticles3D
-var _long_jump_trail: GPUParticles3D
 var _slime_drip: GPUParticles3D
 
 func _ready() -> void:
@@ -83,12 +84,13 @@ func _ready() -> void:
 	_splash_ramp_tex = _make_ramp(SPLASH_RAMP)
 	_ring_texture = SoftCircleTexture.make_ring()
 
-	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
+	# _smoke_quad, not _dust_quad: dirt_texture.png's own grainy, brown-baked
+	# look read fine for a discrete kicked-up puff, but as a CONTINUOUS haze
+	# trailing behind a run it was too busy/dark — smoke_puff.png's softer,
+	# near-white puff (recolored by _dust_ramp_tex below, same trick the
+	# slime drip already relies on) reads as a lighter dust haze instead.
+	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _smoke_quad)
 	add_child(_run_dust)
-	_dive_trail = _build_emitter(_smoke_material(1.5, -1.5, 0.7, 1.6), 18, 0.8, false, _smoke_quad)
-	add_child(_dive_trail)
-	_long_jump_trail = _build_emitter(_dust_material(4.0, 8.0, 0.6, 1.3), 18, 0.55, false, _dust_quad)
-	add_child(_long_jump_trail)
 	_slime_drip_material = _slime_drip_material_for(PlayerVisual.SLIME_TINT_COLOR)
 	# _smoke_quad, not _dust_quad: dirt_texture.png is itself brown, and
 	# multiplying that by the color_ramp tint (vertex_color_use_as_albedo)
@@ -102,12 +104,6 @@ func _ready() -> void:
 
 func set_running_dust(active: bool) -> void:
 	_run_dust.emitting = active
-
-func set_dive_trail(active: bool) -> void:
-	_dive_trail.emitting = active
-
-func set_long_jump_trail(active: bool) -> void:
-	_long_jump_trail.emitting = active
 
 ## Driven by Player.enter_slime_puddle/exit_slime_puddle, alongside
 ## PlayerVisual.set_slimed — the green tint and the drip particles always

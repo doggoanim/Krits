@@ -19,12 +19,10 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	# play at all until the old hold expired on its own.
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_DIVE)
-	p.effects.set_dive_trail(true)
 	p.speed_trail.set_active(true)
 	p.audio.play_air_dive()
 
 func exit(_next: StringName) -> void:
-	player.effects.set_dive_trail(false)
 	player.speed_trail.set_active(false)
 
 func physics_update(delta: float) -> void:

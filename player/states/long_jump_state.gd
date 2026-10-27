@@ -9,12 +9,10 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_jump_queued = false
 	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_LONG_JUMP)
-	player.effects.set_long_jump_trail(true)
 	player.speed_trail.set_active(true)
 	player.audio.play_long_jump()
 
 func exit(_next: StringName) -> void:
-	player.effects.set_long_jump_trail(false)
 	player.speed_trail.set_active(false)
 
 func physics_update(delta: float) -> void:
