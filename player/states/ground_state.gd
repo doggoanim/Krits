@@ -84,7 +84,13 @@ func physics_update(delta: float) -> void:
 	# jump never touches horizontal velocity, so it carries the slide's
 	# momentum into the air for free.
 	var floor_angle := p.get_floor_angle()
-	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg)
+	# step_up_grace: right after _try_step_up() commits a step, a stair's own
+	# corner can hand move_and_slide() a blended, briefly-steep-looking normal
+	# for a single frame — see Player.step_up_grace's own doc comment. Without
+	# this, that one frame read as a real forced slope-slide and spun the
+	# player to face "downhill" right as they finished climbing the step.
+	var on_steep_slope := p.is_on_floor() and floor_angle >= deg_to_rad(c.slope_slide_angle_deg) \
+			and p.step_up_grace <= 0.0
 	if on_steep_slope:
 		var normal := p.get_floor_normal()
 		var down_slope := Vector3.DOWN - normal * Vector3.DOWN.dot(normal)

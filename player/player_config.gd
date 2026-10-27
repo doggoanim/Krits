@@ -7,10 +7,19 @@ extends Resource
 									  ## (stairs, a curb) instead of treating it as a wall — see
 									  ## that method's own doc comment. Taller than this still blocks
 									  ## normally and needs an actual jump.
-@export var step_probe_reach := 0.4   ## how far ahead _try_step_up() checks for a step, regardless
+@export var step_probe_reach := 0.2   ## how far ahead _try_step_up() checks for a step, regardless
 										## of current speed — see that method's own doc comment for
 										## why this is a fixed distance rather than however far this
-										## frame's own velocity happens to cover
+										## frame's own velocity happens to cover. Kept noticeably
+										## shorter than a typical stair's tread depth on purpose: too
+										## long and the probe can overshoot clean past a shallow
+										## tread onto the NEXT riser up, making the whole staircase
+										## briefly read as one unclimbable wall instead of a series
+										## of small steps.
+@export var step_up_grace_time := 0.15   ## how long GroundState ignores a possible forced
+										## slope-slide right after _try_step_up() commits a step —
+										## see Player.step_up_grace's own doc comment for why a step's
+										## own corner needs this
 @export var walk_speed := 8.0
 @export var ground_accel := 70.0
 @export var ground_decel := 90.0

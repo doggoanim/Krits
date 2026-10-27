@@ -71,6 +71,8 @@ var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per
 						   ## find_climbable_wall() check can't instantly re-grab it
 var swim_exit_cd := 0.0   ## >0 right after jumping out of the water, so _update_water()
 						   ## can't instantly transition straight back into Swim — see SWIM_EXIT_GRACE
+var step_up_grace := 0.0   ## >0 for a short window right after _try_step_up() commits a step —
+							## see that method's own doc comment and GroundState's on_steep_slope check
 
 const LEAN_PITCH_MAX := 0.18     ## ~10 degrees, forward/back lean at full speed
 const LEAN_BANK_MAX := 0.28      ## ~16 degrees, side bank at the fastest turns
@@ -274,6 +276,7 @@ func _update_timers(delta: float) -> void:
 	roll_cd = maxf(0.0, roll_cd - delta)
 	wall_climb_cd = maxf(0.0, wall_climb_cd - delta)
 	swim_exit_cd = maxf(0.0, swim_exit_cd - delta)
+	step_up_grace = maxf(0.0, step_up_grace - delta)
 
 ## Every jump/bounce/pound-jump sets velocity.y and switches state WITHOUT
 ## calling move_and_slide() that same frame — the new state's own
@@ -547,6 +550,14 @@ func _try_step_up() -> void:
 	# own the horizontal half fixes both cases at once without this function
 	# needing to know or care which one it's looking at.
 	global_position.y = (advanced.origin + settle.get_travel()).y
+	# A step's own corner (the lip between riser and tread) can hand
+	# move_and_slide()'s own collision response a blended normal for a single
+	# frame right as it resolves this same step — steep enough, briefly, to
+	# misread as GroundState's forced slope-slide and spin the player to face
+	# "downhill" for a frame before the normal settles back to the tread's
+	# actual (flat) angle. This grace window suppresses that check for a
+	# moment right after a step without touching the slope-slide logic itself.
+	step_up_grace = config.step_up_grace_time
 
 func apply_gravity(delta: float, mult := 1.0) -> void:
 	var g := config.gravity * mult
@@ -741,6 +752,16 @@ func floor_collider_below(from: Vector3, max_dist: float) -> Node:
 ## deliberate action skip that block: DiveState passes it so launching off a
 ## wall and immediately diving back into it climbs again right away, instead
 ## of being treated as the very re-grab the cooldown exists to prevent.
+##
+## Tries straight toward `dir` first, then increasingly wide angles to either
+## side (see WALL_GRAB_SEARCH_ANGLES_DEG) — lets a wall be grabbed while
+## approaching it at a diagonal, not only when running almost exactly
+## perpendicular into its face. A single straight-ahead probe's own reach
+## (RADIUS + wall_grab_reach, deliberately short — see that export's own
+## comment) is measured along `dir` itself, so the more oblique the approach
+## angle is relative to the wall's actual surface, the less of that reach
+## ever actually closes the gap to it — in practice that meant a wall just
+## wouldn't register at all unless you were running almost dead-on into it.
 func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	if wall_climb_cd > 0.0 and not ignore_cooldown:
 		return {}
@@ -756,7 +777,40 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	dir = dir.normalized()
 	var probe_origin := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
 	var reach := RADIUS + config.wall_grab_reach
-	_wall_cast.global_position = probe_origin
+	for angle_deg in WALL_GRAB_SEARCH_ANGLES_DEG:
+		var probe_dir := dir.rotated(Vector3.UP, deg_to_rad(angle_deg))
+		var hit := _probe_wall(probe_origin, probe_dir, reach)
+		if hit.is_empty():
+			continue
+		# The probe sweeps at chest height (probe_origin above), but
+		# global_position itself is the player's feet — returning the hit
+		# point as-is would plant the player's feet at chest height once
+		# WallClimbState applies it (point + normal * hug_distance becomes
+		# the new global_position), visibly popping them up by
+		# STAND_HEIGHT * 0.5 on every grab. Undo that offset here so the
+		# returned point lines up with the player's own origin height
+		# instead of the probe's.
+		var point: Vector3 = hit.point
+		point.y -= STAND_HEIGHT * 0.5
+		return {"point": point, "normal": hit.normal, "body": hit.body}
+	return {}
+
+## The angle fan find_climbable_wall() searches, in order — 0° (straight
+## toward `dir`) first, then each magnitude to both sides before the next,
+## widest last. Kept modest compared to probe_wall_near()'s own
+## WALL_WRAP_MAGNITUDES_DEG (which searches a full 120° — it's hunting for
+## ANY adjacent wall at a corner, already mid-climb): this is just forgiving
+## an imperfect approach angle into a wall still roughly ahead of you, not
+## finding a wall off to the side or behind.
+const WALL_GRAB_SEARCH_ANGLES_DEG: Array[float] = [0.0, 20.0, -20.0, 40.0, -40.0]
+
+## One grab probe: sweeps _wall_cast's sphere from `origin` toward `dir` out
+## to `reach`, and returns {point, normal, body} if it finds a real,
+## wide-enough climbable surface (see _is_wall_normal()/_wall_wide_enough()),
+## or {} otherwise. Shared by find_climbable_wall()'s angle fan above — each
+## angle is just this same check aimed a little differently.
+func _probe_wall(origin: Vector3, dir: Vector3, reach: float) -> Dictionary:
+	_wall_cast.global_position = origin
 	_wall_cast.target_position = dir * reach
 	_wall_cast.force_shapecast_update()
 	if not _wall_cast.is_colliding():
@@ -765,18 +819,9 @@ func find_climbable_wall(ignore_cooldown := false) -> Dictionary:
 	if not _is_wall_normal(normal):
 		return {}
 	normal.y = 0.0
-	var raw_point: Vector3 = _wall_cast.get_collision_point(0)
-	if not _wall_wide_enough(raw_point, dir, reach):
+	var point: Vector3 = _wall_cast.get_collision_point(0)
+	if not _wall_wide_enough(point, dir, reach):
 		return {}
-	# The probe sweeps at chest height (probe_origin above), but global_position
-	# itself is the player's feet — returning the hit point as-is would plant
-	# the player's feet at chest height once WallClimbState applies it
-	# (point + normal * hug_distance becomes the new global_position),
-	# visibly popping them up by STAND_HEIGHT * 0.5 on every grab. Undo that
-	# offset here so the returned point lines up with the player's own origin
-	# height instead of the probe's.
-	var point := raw_point
-	point.y -= STAND_HEIGHT * 0.5
 	return {"point": point, "normal": normal.normalized(), "body": _wall_cast.get_collider(0)}
 
 # ---------------------------------------------------------------- actions

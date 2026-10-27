@@ -429,6 +429,17 @@ func _slime_drip_material_for(color: Color) -> ParticleProcessMaterial:
 ## accelerates UPWARD (a positive gravity_y, unlike every other effect's
 ## downward pull or the smoke materials' gentle upward drift) since a real
 ## bubble speeds up as it rises through water, the opposite of gravity.
+##
+## Deliberately skips scale_curve (every other emitter here uses
+## _growth_curve so dust/smoke reads as expanding outward) — real bubbles
+## don't swell from a pinprick over their lifetime, and sharing that curve
+## actually hid the size variety scale_min/scale_max already rolls per
+## particle: early in their short life every bubble sat near the curve's own
+## small starting value regardless of its own random scale, so they all read
+## as roughly the same size at a glance. Leaving scale_curve unset makes each
+## bubble a constant size for its whole life, picked once at spawn — small
+## and large bubbles both stay visibly themselves the entire time instead of
+## briefly looking alike while still "growing in."
 func _bubble_material() -> ParticleProcessMaterial:
 	var m := ParticleProcessMaterial.new()
 	m.direction = Vector3.UP
@@ -438,9 +449,8 @@ func _bubble_material() -> ParticleProcessMaterial:
 	m.gravity = Vector3(0.0, BUBBLE_BASE_GRAVITY, 0.0)
 	m.damping_min = 0.0
 	m.damping_max = 0.3
-	m.scale_min = 0.12
-	m.scale_max = 0.3
-	m.scale_curve = _growth_curve
+	m.scale_min = 0.08
+	m.scale_max = 0.4
 	m.color_ramp = _bubble_ramp_tex
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.3
