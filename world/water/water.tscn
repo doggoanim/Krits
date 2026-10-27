@@ -15,6 +15,10 @@ shader_parameter/wave_scale = 1.3
 shader_parameter/wave_speed = 0.6
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
+shader_parameter/sparkle_strength = 0.8
+shader_parameter/sparkle_density = 40.0
+shader_parameter/sparkle_speed = 2.5
+shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_water"]
 material = SubResource("ShaderMaterial_water")
