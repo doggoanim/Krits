@@ -74,7 +74,7 @@ func _build() -> void:
 	amount = mote_count
 	lifetime = 8.0
 	preprocess = lifetime   # pre-roll so the field looks lived-in immediately on load,
-	                        # not empty for the first lifetime's worth of seconds
+							# not empty for the first lifetime's worth of seconds
 	randomness = 1.0
 	local_coords = false
 	draw_pass_1 = quad
