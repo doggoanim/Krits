@@ -44,6 +44,22 @@ extends Resource
 @export var ssao_intensity := 0.8                    ## light touch — heavy AO reads as gritty/realistic, not cartoony
 @export var ssao_radius := 0.8
 
+@export_group("Volumetric Fog")
+## Godot's native volumetric fog — turned on, this is what actually produces
+## visible sun shafts/god rays through trees and gaps: the fog scatters the
+## sun's own light, so it lights up brightly wherever nothing's blocking the
+## sun and stays dark in shadow, reading as visible beams rather than a flat
+## haze. Kept deliberately light by default (low density, no fixed emission
+## color of its own) so it adds shafts without fogging up the whole scene.
+@export var volumetric_fog_enabled := true
+@export var volumetric_fog_density := 0.025         ## higher = thicker haze overall, muddies the shaft look past a point
+@export var volumetric_fog_albedo := Color(1.0, 1.0, 1.0)   ## tints the fog itself, independent of the sun's own color
+@export var volumetric_fog_anisotropy := 0.3        ## forward-scattering bias — higher = tighter, more directional-looking shafts
+@export var volumetric_fog_length := 64.0           ## how far the fog volume extends from the camera
+@export var volumetric_fog_gi_inject := 1.0         ## how much the fog also picks up bounced/ambient light, not just the sun directly
+@export var sun_volumetric_fog_energy := 1.5        ## how strongly the sun itself lights up the fog — separate
+													  ## from sun_energy (which only affects regular surface lighting)
+
 @export_group("Color Grading")
 @export var adjustment_enabled := true
 @export var brightness := 0.85

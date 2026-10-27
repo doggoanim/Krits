@@ -124,6 +124,7 @@ func _build_environment() -> void:
 	sun.light_energy = cfg.sun_energy
 	sun.shadow_enabled = cfg.sun_shadows
 	sun.shadow_blur = cfg.sun_shadow_blur
+	sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 	add_child(sun)
 
 	var env := Environment.new()
@@ -153,6 +154,18 @@ func _build_environment() -> void:
 	env.ssao_enabled = cfg.ssao_enabled
 	env.ssao_intensity = cfg.ssao_intensity
 	env.ssao_radius = cfg.ssao_radius
+
+	# Volumetric fog is what actually produces visible sun shafts/god rays
+	# through trees and gaps (see EnvironmentConfig's header comment on the
+	# group) — it's the sun's light_volumetric_fog_energy above, set on the
+	# DirectionalLight itself, that makes this fog volume actually light up
+	# instead of just sitting there as flat haze.
+	env.volumetric_fog_enabled = cfg.volumetric_fog_enabled
+	env.volumetric_fog_density = cfg.volumetric_fog_density
+	env.volumetric_fog_albedo = cfg.volumetric_fog_albedo
+	env.volumetric_fog_anisotropy = cfg.volumetric_fog_anisotropy
+	env.volumetric_fog_length = cfg.volumetric_fog_length
+	env.volumetric_fog_gi_inject = cfg.volumetric_fog_gi_inject
 
 	env.adjustment_enabled = cfg.adjustment_enabled
 	env.adjustment_brightness = cfg.brightness
