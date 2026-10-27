@@ -31,6 +31,9 @@ const WALL_CLIMB_REGRAB_COOLDOWN := 0.3   ## see wall_climb_cd
 ## ordinary wall instead of a climbable step.
 const NO_STEP_UP_GROUP := &"no_step_up"
 
+## See the registration comment in _ready() and _unstick() below.
+const UNSTICK_ACTION := &"debug_unstick"   ## bound to F9
+
 ## Godot's automatic floor-snap re-grounds the body if it's within this
 ## distance of a floor after move_and_slide() — see _update_floor_snap().
 const GROUND_FLOOR_SNAP := 0.3
@@ -65,6 +68,7 @@ var _shape_node: CollisionShape3D
 var _wall_cast: ShapeCast3D   ## see find_climbable_wall()/probe_wall_near()
 var _obstruction_cast: ShapeCast3D   ## see is_path_clear()
 var _was_on_floor := true
+var _last_safe_position: Vector3   ## most recent on_floor() position — see _unstick()
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
 var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
@@ -174,13 +178,36 @@ func _ready() -> void:
 	})
 	machine.start(&"Ground")
 
+	# A last-resort manual escape hatch: whatever gets a player wedged or
+	# stuck (bad collision geometry, an accidental climbable surface like the
+	# one removed from hometown.tscn, something not yet discovered), no
+	# automatic detector can promise to catch every case without also
+	# false-triggering on legitimate holds — WallClimbState, for instance, is
+	# SUPPOSED to let you hang motionless on a wall, so "not moving while
+	# airborne" can't just mean "stuck" on its own. A player-pressed key sidesteps
+	# that entirely: it only ever fires when someone decides they're actually
+	# stuck. Registered here in code (not project.godot) so it works without
+	# any project-settings edit and can't merge-conflict with one; remap by
+	# changing the keycode below or wiring UNSTICK_ACTION into the input map
+	# properly later if it should be player-rebindable.
+	if not InputMap.has_action(UNSTICK_ACTION):
+		InputMap.add_action(UNSTICK_ACTION)
+		var unstick_key := InputEventKey.new()
+		unstick_key.physical_keycode = KEY_F9
+		InputMap.action_add_event(UNSTICK_ACTION, unstick_key)
+
 func _physics_process(delta: float) -> void:
 	if dead:
+		return
+	if Input.is_action_just_pressed(UNSTICK_ACTION):
+		_unstick()
 		return
 	_update_timers(delta)
 	_update_floor_snap()
 	machine.physics_update(delta)
 	var on_floor := is_on_floor()
+	if on_floor:
+		_last_safe_position = global_position   ## see _unstick()
 	if on_floor and not _was_on_floor:
 		can_dive = true
 		# Only squash for a real fall, not a split-second floor-contact flicker
@@ -318,6 +345,23 @@ func _resolve_wedge(pos_before: Vector3) -> void:
 	push_warning("Player wedged in a corner near %s — nudging free." % global_position)
 	velocity = escape.normalized() * WEDGE_NUDGE_SPEED
 	move_and_slide()
+
+## Player-triggered recovery (see UNSTICK_ACTION's registration in _ready()):
+## bail out of whatever state/predicament is holding the player — a climb
+## grab, a wedge neither of the automatic recoveries above caught, anything
+## else not yet discovered — and drop them back at the last position they
+## were actually standing on solid ground. Forces Air rather than Ground
+## directly: _last_safe_position was recorded while on_floor() was true, but
+## teleporting doesn't guarantee it still reads as grounded the instant
+## afterward (the floor could have moved, or safe_margin might not catch it
+## same-frame) — Air's own landing check settles that correctly next frame
+## either way, same as any other fall.
+func _unstick() -> void:
+	push_warning("Player manually unstuck — returning to last safe ground position %s." % _last_safe_position)
+	machine.transition_to(&"Air")
+	global_position = _last_safe_position
+	velocity = Vector3.ZERO
+	_wedge_t = 0.0
 
 ## Stepped stairs are a series of small vertical risers, and a riser is just
 ## a wall as far as move_and_slide() is concerned — without this, climbing a
