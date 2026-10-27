@@ -53,8 +53,11 @@ void vertex() {
 	// Phase depends on world position (not just TIME) so instances of the
 	// same mesh scattered around the level don't all sway in lockstep — each
 	// one samples a slightly different point of the same slow-moving "gust"
-	// field instead.
-	float phase = TIME * wind_speed + dot(world_pos.xz, vec2(wind_scale));
+	// field instead. gust also speeds the flutter itself up, not just its
+	// size — a gust that only got bigger without also getting faster reads
+	// as barely different from the idle sway; a visibly quicker flutter is
+	// what actually sells "a gust just hit this".
+	float phase = TIME * wind_speed * gust + dot(world_pos.xz, vec2(wind_scale));
 	float sway = height * wind_strength * gust;
 	VERTEX.x += sin(phase) * sway;
 	VERTEX.z += cos(phase * 0.7) * sway * 0.6;
