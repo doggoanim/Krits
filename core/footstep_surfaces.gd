@@ -27,7 +27,7 @@ extends RefCounted
 ## Adding a new surface: add it to Surface, GROUP_NAMES and NAME_KEYWORDS
 ## below, then give PlayerAudio a sound set for it.
 
-enum Surface { GRASS, DIRT, ROCK }
+enum Surface { GRASS, DIRT, ROCK, WOOD }
 
 const DEFAULT_SURFACE := Surface.ROCK
 
@@ -35,15 +35,21 @@ const GROUP_NAMES := {
 	Surface.GRASS: &"surface_grass",
 	Surface.DIRT: &"surface_dirt",
 	Surface.ROCK: &"surface_rock",
+	Surface.WOOD: &"surface_wood",
 }
 
 ## Each surface's list of substrings to look for (case-insensitive) in a
 ## name. Checked in Surface enum order, so put a more specific word earlier
-## if two surfaces might ever share a substring.
+## if two surfaces might ever share a substring. WOOD's list is wider than
+## the others on purpose — a tree trunk or a fallen log underfoot reads as
+## "wood" just as much as an actual plank/dock/bridge does, and none of
+## those assets follow a *_wood.glb naming convention the way the terrain
+## sets do, so there's more ground to cover by keyword alone.
 const NAME_KEYWORDS := {
 	Surface.GRASS: ["grass"],
 	Surface.DIRT: ["dirt"],
 	Surface.ROCK: ["rock", "stone"],
+	Surface.WOOD: ["wood", "log", "tree", "trunk", "plank", "dock", "bridge"],
 }
 
 ## `collider` is whatever CollisionObject3D (or any Node) a floor raycast hit

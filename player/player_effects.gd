@@ -159,11 +159,24 @@ func burst_footstep_dust(pos: Vector3, surface: FootstepSurfaces.Surface) -> voi
 ## scales the spray back a bit for the exit case (climbing out kicks up less
 ## than diving in) — the ripple itself is the same either way, since the
 ## water's surface doesn't care which direction broke it.
-func burst_water_splash(pos: Vector3, entering: bool) -> void:
+## `big` is for entering fast enough (a fall from height, a ground pound)
+## that a normal splash reads as too small for the impact — see
+## WaterVolume._on_body_entered()'s own fall-speed check. Only ever true
+## together with `entering`; exiting the water never gets the big version.
+func burst_water_splash(pos: Vector3, entering: bool, big := false) -> void:
 	var amount := 14 if entering else 8
 	var speed := 4.5 if entering else 3.0
-	_burst(pos, Vector3.UP, 45.0, _material(speed, 7.0, 0.3, 0.7, _splash_ramp_tex), amount, 0.4, _smoke_quad)
-	_spawn_ripple(pos)
+	var scale_max := 0.7
+	var ripple_scale := 5.0
+	var ripple_duration := 0.7
+	if big:
+		amount *= 3
+		speed *= 1.8
+		scale_max *= 1.6
+		ripple_scale *= 1.8
+		ripple_duration *= 1.3
+	_burst(pos, Vector3.UP, 45.0, _material(speed, 7.0, 0.3, scale_max, _splash_ramp_tex), amount, 0.4, _smoke_quad)
+	_spawn_ripple(pos, ripple_scale, ripple_duration)
 
 ## A small puddle ring + light spray at each footstep through shallow water
 ## (see GroundState._play_footstep()) — the same splash idiom as

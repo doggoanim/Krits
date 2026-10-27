@@ -33,6 +33,13 @@ extends Area3D
 ## material is using, so looking up through the surface reads as the same
 ## water rather than a generic default.
 @export var tint_color := Color(0.08, 0.32, 0.42, 0.55)
+## Entering while falling at least this fast (velocity.y, so a fall from
+## height or a ground pound diving straight in — PoundState's own dive
+## speed is nowhere near a gentle walk-in's) plays the bigger splash
+## instead of the normal one — see _on_body_entered()/
+## PlayerEffects.burst_water_splash()'s/PlayerAudio.play_water_splash()'s
+## own `big` params.
+@export var big_splash_fall_speed := 15.0
 
 ## Every WaterVolume currently in the tree, for the static at() lookup below
 ## — nothing else (the camera, mainly) has a direct reference to pick the
@@ -72,8 +79,9 @@ func _on_body_entered(body: Node3D) -> void:
 		(body as Player).enter_water(self)
 		if not _player_inside:
 			_player_inside = true
-			(body as Player).effects.burst_water_splash(_waterline_pos(body), true)
-			(body as Player).audio.play_water_splash()
+			var big := body is CharacterBody3D and (body as CharacterBody3D).velocity.y <= -big_splash_fall_speed
+			(body as Player).effects.burst_water_splash(_waterline_pos(body), true, big)
+			(body as Player).audio.play_water_splash(big)
 
 func _on_body_exited(body: Node3D) -> void:
 	if body is Player:

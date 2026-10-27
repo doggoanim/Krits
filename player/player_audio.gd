@@ -72,6 +72,14 @@ const DEFAULT_FOOTSTEP_SFX_WATER: Array[AudioStream] = [
 	preload(FOOTSTEPS_DIR + "water/footsteps_water_5.wav"),
 	preload(FOOTSTEPS_DIR + "water/footsteps_water_6.wav"),
 ]
+const DEFAULT_FOOTSTEP_SFX_WOOD: Array[AudioStream] = [
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_1.wav"),
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_2.wav"),
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_3.wav"),
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_4.wav"),
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_5.wav"),
+	preload(FOOTSTEPS_DIR + "wood/footsteps_wood_6.wav"),
+]
 
 ## One array per FootstepSurfaces.Surface (see that file for how a surface
 ## is detected from whatever the player's standing on). @export rather than
@@ -89,6 +97,7 @@ const DEFAULT_FOOTSTEP_SFX_WATER: Array[AudioStream] = [
 @export var footstep_sfx_dirt: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_ROCK
 @export var footstep_sfx_water: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_WATER
+@export var footstep_sfx_wood: Array[AudioStream] = DEFAULT_FOOTSTEP_SFX_WOOD
 ## Continuous swim stroke loop, same toggled-on/off idiom as ROLL_SFX/
 ## set_rolling() below — a const rather than another Main-wired @export like
 ## the footstep_sfx_* sets above, same reasoning as ROLL_SFX (a full
@@ -205,6 +214,8 @@ func _sfx_for(surface: FootstepSurfaces.Surface) -> Array[AudioStream]:
 			return footstep_sfx_dirt
 		FootstepSurfaces.Surface.ROCK:
 			return footstep_sfx_rock
+		FootstepSurfaces.Surface.WOOD:
+			return footstep_sfx_wood
 		_:
 			return footstep_sfx_grass
 
@@ -254,8 +265,13 @@ func play_swim_stroke() -> void:
 ## Entering/exiting a WaterVolume (see WaterVolume._on_body_entered/_exited) —
 ## one call site for both since the splash sound doesn't need entering's
 ## distinction the way burst_water_splash()'s particle amount does.
-func play_water_splash() -> void:
-	_play(WATER_SPLASH_SFX.pick_random(), PITCH_VARIANCE)
+## `big` (a fall from height, a ground pound into the water — see
+## WaterVolume._on_body_entered()) plays louder and a bit lower-pitched, same
+## "heavier impact" read as a ground-pound land vs. a plain footstep.
+func play_water_splash(big := false) -> void:
+	var base_pitch := 0.85 if big else 1.0
+	var volume_db := 5.0 if big else 0.0
+	_play(WATER_SPLASH_SFX.pick_random(), PITCH_VARIANCE, base_pitch, volume_db)
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)
@@ -266,10 +282,11 @@ func play_pound_jump() -> void:
 func play_pound_land() -> void:
 	_play(POUND_LAND_SFX, PITCH_VARIANCE)
 
-func _play(stream: AudioStream, pitch_variance: float, base_pitch := 1.0) -> void:
+func _play(stream: AudioStream, pitch_variance: float, base_pitch := 1.0, volume_db := 0.0) -> void:
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream
 	p.pitch_scale = base_pitch + randf_range(-pitch_variance, pitch_variance)
+	p.volume_db = volume_db
 	add_child(p)
 	p.play()
 	p.finished.connect(p.queue_free)

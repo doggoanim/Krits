@@ -31,6 +31,7 @@ extends Node3D
 @export var footstep_sfx_dirt: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_ROCK
 @export var footstep_sfx_water: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_WATER
+@export var footstep_sfx_wood: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_WOOD
 
 ## Low-HP warning vignette (see core/low_hp_vignette.gd) — hp/max_hp fraction
 ## below which the screen edges start darkening, and the color they darken
@@ -55,6 +56,7 @@ func _ready() -> void:
 	player.audio.footstep_sfx_dirt = footstep_sfx_dirt
 	player.audio.footstep_sfx_rock = footstep_sfx_rock
 	player.audio.footstep_sfx_water = footstep_sfx_water
+	player.audio.footstep_sfx_wood = footstep_sfx_wood
 	cam = CameraRig.new()
 	add_child(cam)
 	cam.target = player
