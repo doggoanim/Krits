@@ -25,7 +25,7 @@ extends GPUParticles3D
 @export var line_thickness := 0.12     ## cross-section width of the streak, before trailing stretches it out
 @export var line_speed := 5.0          ## world units/sec a line travels at full gust strength
 @export var curve_strength := 1.2      ## how hard turbulence bends each line's path
-@export var trail_fraction := 0.3      ## 0..1 — how much of a line's travel its visible trail covers
+@export var trail_fraction := 0.6      ## 0..1 — how much of a line's travel its visible trail covers
 @export var gust_threshold := 1.2      ## only emit once WindGusts.sample() here climbs above this
 
 var _mat: ParticleProcessMaterial
