@@ -289,6 +289,18 @@ func _update_timers(delta: float) -> void:
 ## negative — well clear of the floor by then, and still wanted for
 ## catching landings on slopes/stairs without a visible bump.
 func _update_floor_snap() -> void:
+	if machine.current_name == &"Swim":
+		# Godot's own floor-snap/floor-slide behavior, not just the custom
+		# _try_step_up() assist (already exempted below), was the other half
+		# of "turning while swimming pushes you up": swimming close enough to
+		# the lake bed to read as is_on_floor() left floor_snap_length at its
+		# normal grounded value, so move_and_slide() kept treating the bed
+		# like a floor to adhere/slide along — turning into a sloped patch of
+		# it could lift the body following the slope, exactly like walking up
+		# a ramp, even though SwimState moves the player by swimming, not
+		# walking. Zeroing it here switches that off entirely while buoyant.
+		floor_snap_length = 0.0
+		return
 	floor_snap_length = JUMP_FLOOR_SNAP if velocity.y > 0.0 else GROUND_FLOOR_SNAP
 
 ## Checked every physics frame, before the current state's own physics_update
@@ -483,7 +495,20 @@ func _try_step_up() -> void:
 	if horizontal.length() < 0.01:
 		return
 
-	var motion := horizontal * get_physics_process_delta_time()
+	# Probed config.step_probe_reach ahead — a FIXED distance, not however far
+	# this exact frame's velocity happens to cover. Using the real per-frame
+	# motion (as this used to) meant a slow approach could take a frame or two
+	# to actually close the gap enough to register as "blocked" at all, and
+	# until it did the capsule just collided with the riser's edge like a
+	# plain wall — a visible stumble/slide right where a step should have
+	# caught cleanly, and inconsistent frame to frame since it depended on
+	# exactly how fast you happened to be moving at that exact distance from
+	# the step. Only the Y correction below is ever committed either way (see
+	# that comment), so the probe's own horizontal distance just needs to
+	# clear the step's lip onto its tread for the settle check — it was never
+	# tied to how far the player should actually move this frame.
+	var dir := horizontal.normalized()
+	var motion := dir * maxf(horizontal.length() * get_physics_process_delta_time(), config.step_probe_reach)
 	var step := config.max_step_height
 
 	var blocked := KinematicCollision3D.new()

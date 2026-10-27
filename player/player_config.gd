@@ -7,6 +7,10 @@ extends Resource
 									  ## (stairs, a curb) instead of treating it as a wall — see
 									  ## that method's own doc comment. Taller than this still blocks
 									  ## normally and needs an actual jump.
+@export var step_probe_reach := 0.4   ## how far ahead _try_step_up() checks for a step, regardless
+										## of current speed — see that method's own doc comment for
+										## why this is a fixed distance rather than however far this
+										## frame's own velocity happens to cover
 @export var walk_speed := 8.0
 @export var ground_accel := 70.0
 @export var ground_decel := 90.0
