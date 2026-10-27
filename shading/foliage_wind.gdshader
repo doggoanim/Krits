@@ -40,6 +40,13 @@ uniform float wind_strength = 0.06;   // world-space sway per world unit of loca
 uniform float wind_speed = 1.5;
 uniform float wind_scale = 0.3;       // world-space frequency of the sway — lower = broader, slower gusts
 
+// Live multiplier on top of wind_strength, pushed every frame by
+// world/foliage_wind.gd from world/wind_gusts.gd's shared gust field — a
+// plain per-prop idle sway the rest of the time, periodically swelling as a
+// gust sweeps through. Not something this shader computes itself: it has no
+// idea what time of day or weather it is, FoliageWind just hands it a number.
+uniform float gust = 1.0;
+
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float height = max(VERTEX.y, 0.0);
@@ -48,7 +55,7 @@ void vertex() {
 	// one samples a slightly different point of the same slow-moving "gust"
 	// field instead.
 	float phase = TIME * wind_speed + dot(world_pos.xz, vec2(wind_scale));
-	float sway = height * wind_strength;
+	float sway = height * wind_strength * gust;
 	VERTEX.x += sin(phase) * sway;
 	VERTEX.z += cos(phase * 0.7) * sway * 0.6;
 }

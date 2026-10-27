@@ -22,17 +22,36 @@ extends Node
 ## no per-asset calibration. The defaults read as a gentle grass flutter;
 ## bump wind_strength down for a prop that reads as too wild (a tall tree's
 ## crown sways further for the same value, being further from its root).
+##
+## Every frame, this also samples WindGusts.sample() (world/wind_gusts.gd)
+## at its own position and pushes the result into each material's `gust`
+## uniform — see that file for how the shared gust field works. Set
+## `react_to_gusts = false` on a particular instance to opt it out and keep
+## a constant idle sway instead (a prop tucked somewhere a sweeping gust
+## wouldn't read as sensible, say).
 
 const SHADER := preload("res://shading/foliage_wind.gdshader")
 
 @export var wind_strength := 0.06
 @export var wind_speed := 1.5
 @export var wind_scale := 0.3
+@export var react_to_gusts := true
+
+var _materials: Array[ShaderMaterial] = []
+var _anchor: Node3D   ## whatever _ready() finds itself attached to, for gust position sampling
 
 func _ready() -> void:
 	var parent := get_parent()
 	if parent:
 		_apply_recursive(parent)
+	_anchor = parent as Node3D
+	set_process(react_to_gusts and _anchor != null)
+
+func _process(_delta: float) -> void:
+	var pos := _anchor.global_position
+	var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
+	for mat in _materials:
+		mat.set_shader_parameter(&"gust", gust)
 
 func _apply_recursive(n: Node) -> void:
 	if n is MeshInstance3D:
@@ -78,3 +97,4 @@ func _wind_ify(mi: MeshInstance3D) -> void:
 		wind_mat.set_shader_parameter(&"wind_speed", wind_speed)
 		wind_mat.set_shader_parameter(&"wind_scale", wind_scale)
 		mi.set_surface_override_material(i, wind_mat)
+		_materials.append(wind_mat)

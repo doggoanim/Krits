@@ -22,9 +22,18 @@ extends GPUParticles3D
 @export var glow_energy := 0.0                     ## 0 = unshaded dust; >0 self-lit, firefly-style
 @export var mote_size := 0.05
 @export var drift_speed := 0.15                    ## both initial velocity and turbulence strength
+@export var react_to_gusts := true                  ## stir harder when a WindGusts gust sweeps through
+
+var _mat: ParticleProcessMaterial
 
 func _ready() -> void:
 	_build()
+	set_process(react_to_gusts)
+
+func _process(_delta: float) -> void:
+	var pos := global_position
+	var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
+	_mat.turbulence_noise_strength = drift_speed * gust
 
 func _build() -> void:
 	var mat := ParticleProcessMaterial.new()
@@ -71,6 +80,7 @@ func _build() -> void:
 	draw_pass_1 = quad
 	process_material = mat
 	emitting = true
+	_mat = mat
 
 static func _make_fade_ramp(c: Color) -> GradientTexture1D:
 	var g := Gradient.new()
