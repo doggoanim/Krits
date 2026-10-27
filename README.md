@@ -97,7 +97,13 @@ toward the new direction.
 			 building-interior blockout in the same spirit as TestLevel: one box mesh with its material
 			 cull_mode flipped (CULL_FRONT) so it renders from the inside instead of the outside — see
 			 its own doc comment — plus a door back out built in automatically; duplicate
-			 interior_room.tscn per distinct building and swap in real assets later. WorldEnemy (pops in
+			 interior_room.tscn per distinct building and swap in real assets later.
+			 house_1_interior.tscn is a worked example of that duplication: an InteriorRoom instance
+			 for house_chesburg_1, wired to a Door + DoorSpawn (both children of that house node in
+			 hometown.tscn, spawn_id `house_1_entrance`) placed just outside its front wall -- nudge
+			 their position in the editor if they don't line up with the model's actual doorway, the
+			 placement here is an estimate since the house's door isn't a separate node in its .glb.
+			 WorldEnemy (pops in
 			 when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
 			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
