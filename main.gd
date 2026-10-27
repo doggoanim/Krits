@@ -276,8 +276,3 @@ func _apply_level_lighting(lvl: Node) -> void:
 	_env.background_color = Color.BLACK
 	_env.ambient_light_energy = 0.0 if indoor else _outdoor_ambient_energy
 	_sun.visible = not indoor
-	# TEMP DIAGNOSTIC — the indoor background isn't going black for reasons
-	# not yet reproduced here; this pins down which half is wrong. Remove
-	# once that's confirmed.
-	print("[lighting] lvl=%s indoor=%s groups=%s bg_mode=%s bg_color=%s" % [
-		lvl.name, indoor, lvl.get_groups(), _env.background_mode, _env.background_color])

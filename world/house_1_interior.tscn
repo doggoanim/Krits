@@ -38,8 +38,7 @@ size = Vector3(1.2, 2.2, 0.2)
 [sub_resource type="StandardMaterial3D" id="DoorMat"]
 albedo_color = Color(0.35, 0.22, 0.12, 1)
 
-[node name="House1Interior" type="Node3D"]
-groups=["interior_level"]
+[node name="House1Interior" type="Node3D" groups=["interior_level"]]
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
