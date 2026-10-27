@@ -24,7 +24,14 @@ extends Node3D
 @export var light_color := Color(1.0, 0.9, 0.75)
 
 @export_group("Return Door")
-@export var exit_level: PackedScene   ## the outdoor (or other) level this room's door leads back to
+## The outdoor (or other) level this room's door leads back to — a PATH, not
+## a PackedScene export. See Door.target_level's own doc comment: this room's
+## return door normally points right back at the very level that placed the
+## entrance Door leading in here, so the two .tscn files reference each
+## other, and a PackedScene export would bake that into a real circular
+## ext_resource dependency (Godot can deadlock loading either one). Passed
+## straight through to the Door built below, which loads it lazily instead.
+@export_file("*.tscn") var exit_level: String = "res://world/hometown.tscn"
 @export var exit_spawn_id: StringName = &"start"   ## Spawnpoint/DoorSpawn id in exit_level to arrive at
 
 func _ready() -> void:

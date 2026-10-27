@@ -52,7 +52,6 @@
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
 [ext_resource type="Script" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" path="res://world/door_spawn.gd" id="47_door_spawn"]
-[ext_resource type="PackedScene" path="res://world/house_1_interior.tscn" id="47_house1_interior"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -283,7 +282,7 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.47
 [node name="Door_House1" type="StaticBody3D" parent="Buildings/house_chesburg_1" unique_id=470001001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.2)
 script = ExtResource("47_door")
-target_level = ExtResource("47_house1_interior")
+target_level = "res://world/house_1_interior.tscn"
 target_spawn_id = &"enter"
 prompt_text = "Press E to enter"
 

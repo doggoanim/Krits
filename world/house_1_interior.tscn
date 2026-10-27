@@ -1,12 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://world/interior_room.gd" id="1"]
-[ext_resource type="PackedScene" path="res://world/hometown.tscn" id="2"]
 
 [node name="House1Interior" type="Node3D"]
 script = ExtResource("1")
 room_size = Vector3(8, 3.2, 8)
 wall_color = Color(0.82, 0.74, 0.6, 1)
 light_color = Color(1, 0.88, 0.7, 1)
-exit_level = ExtResource("2")
+exit_level = "res://world/hometown.tscn"
 exit_spawn_id = &"house_1_entrance"
