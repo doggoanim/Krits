@@ -414,8 +414,10 @@ func _update_auto_unstick(delta: float, on_floor: bool) -> void:
 ##    blocked, whatever's ahead is taller than a climbable step (a real wall,
 ##    or too-tall a ledge) — bail and let the ordinary wall collision happen.
 ## 3. Settle back down from there onto whatever's actually underneath, so the
-##    body ends up resting on the stair's tread instead of floating at a
-##    fixed height above the old floor. Checked against floor_max_angle too,
+##    body's HEIGHT ends up resting on the stair's tread instead of floating
+##    at a fixed height above the old floor — only the vertical correction is
+##    committed here, never the horizontal advance; see the comment at the
+##    bottom of this function for why. Checked against floor_max_angle too,
 ##    so this can't snap the body onto a steep surface or a low overhang edge
 ##    that merely happened to be within step range.
 ##
@@ -453,7 +455,24 @@ func _try_step_up() -> void:
 	if settle.get_normal().angle_to(Vector3.UP) > floor_max_angle:
 		return   # not walkable floor (e.g. the underside of a low ledge) — don't snap onto it
 
-	global_position = advanced.origin + settle.get_travel()
+	# Only the Y correction gets committed here — raise the body to the height
+	# this frame's horizontal motion will actually clear the step at, and leave
+	# X/Z exactly where they already are. `advanced` (this height PLUS motion)
+	# was only ever needed to test whether the far side is walkable, not as a
+	# position to commit outright: committing its horizontal part too (as this
+	# used to) meant the real move_and_slide() call right after this function
+	# returns then applied that SAME frame's velocity-driven horizontal motion
+	# a second time, from the already-advanced spot — silently doubling how far
+	# every step moved you. And "step" here isn't only literal stairs: a probe
+	# this purely horizontal reads ANY continuous upward incline as a blocked
+	# riser too (gravity doesn't stop the sweep from clipping the rising ground
+	# ahead), so this doubling fired, and compounded every single physics
+	# frame, on ordinary smooth ramps as well — faster movement (e.g. rolling)
+	# hits it far more often than walking, since a bigger per-frame motion is
+	# more likely to actually clip the slope ahead. Letting move_and_slide()
+	# own the horizontal half fixes both cases at once without this function
+	# needing to know or care which one it's looking at.
+	global_position.y = (advanced.origin + settle.get_travel()).y
 
 func apply_gravity(delta: float, mult := 1.0) -> void:
 	var g := config.gravity * mult
