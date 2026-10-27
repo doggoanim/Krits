@@ -138,7 +138,7 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 @export var wall_bounce_roll_time := 0.4   ## how long the roll_collision reaction pose plays after a wall bounce
 
 @export_group("Water")
-@export var water_swim_depth_ratio := 0.7   ## fraction (0..1) of the player's own height that must be
+@export var water_swim_depth_ratio := 0.6   ## fraction (0..1) of the player's own height that must be
 											  ## submerged before Player._update_water() switches into
 											  ## SwimState — below this you just keep walking, with wet
 											  ## footstep sfx/puddle ripples instead (see
