@@ -2,7 +2,7 @@ class_name FoliageWind
 extends Node
 ## Drop this in as a CHILD of any world prop you want swaying in the wind —
 ## a tree, a grass clump, a bush, anything with MeshInstance3Ds underneath
-## it (see world/hometown.tscn's Props/Trees and Props/eyecandies for the
+## it (see world/chesburg.tscn's Props/Trees and Props/eyecandies for the
 ## props this is meant for). On ready, it rewrites every mesh surface under
 ## its own parent to shading/foliage_wind.gdshader, copying across that
 ## surface's existing look (albedo texture/color, vertex-color flag,
@@ -10,7 +10,7 @@ extends Node
 ##
 ## Why a sibling-of-the-mesh node instead of a script on the prop: every
 ## tree/grass asset here is an unmodified imported .glb instance with no
-## script of its own (see world/hometown.tscn) — adding this as a plain
+## script of its own (see world/chesburg.tscn) — adding this as a plain
 ## child node opts a prop into wind sway with zero changes to the asset,
 ## the same "bolt it on" idiom as OutlineSystem/PixelateEffect elsewhere in
 ## this project. It's a real scene node (unlike those two), so its tunables

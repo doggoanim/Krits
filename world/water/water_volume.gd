@@ -10,7 +10,7 @@ extends Area3D
 ## underwater independently of whether the player itself currently is).
 ##
 ## Drop one of these as a sibling of a water mesh (world/water/water.tscn or
-## the hometown.tscn lake), sized to its surface via `size`, and set
+## the chesburg.tscn lake), sized to its surface via `size`, and set
 ## `surface_y` to wherever the water's actual top sits relative to THIS
 ## node's own origin — not necessarily its center, since the box is usually
 ## easier to position a bit below the surface so a player walking in is
@@ -21,7 +21,7 @@ extends Area3D
 @export var surface_y := 0.0   ## local Y of the water's top surface, relative to this node's own origin
 ## >0 swaps the box footprint above for a circular one (a CylinderShape3D of
 ## this radius instead of a BoxShape3D sized from size.x/size.z) — set this
-## for a round/cylindrical water mesh like the hometown lake's: a box sized
+## for a round/cylindrical water mesh like the chesburg lake's: a box sized
 ## to the same diameter still reaches size.x*sqrt(2)/2 out to its own
 ## corners, well past the mesh's actual round edge, so the collision read as
 ## "much bigger than the mesh." size.y still sets the collider's depth

@@ -5,10 +5,10 @@ extends Node3D
 ## you've built by hand in the editor instead of the code-built TestLevel
 ## blockout. Any scene works as long as its root contains: StaticBody3D world
 ## geometry on collision_layer 1 (bit 0), one or more Spawnpoint nodes, and
-## any WorldEnemy nodes you want wandering the level — see world/hometown.tscn
+## any WorldEnemy nodes you want wandering the level — see world/chesburg.tscn
 ## (the default, set below) or world/test_level.gd for worked examples of
 ## all three, and README.md for the full contract.
-@export var level_scene: PackedScene = preload("res://world/hometown.tscn")
+@export var level_scene: PackedScene = preload("res://world/chesburg.tscn")
 
 ## Sun/sky/tonemap/glow/color-grading, all in one place — see
 ## world/environment_config.gd. Leave unset to use its defaults; duplicate
@@ -31,6 +31,14 @@ extends Node3D
 ## walls to block the sun from shining straight through, so both would look
 ## broken regardless of which EnvironmentConfig is active.
 const INTERIOR_GROUP := &"interior_level"
+
+## Looping background music for every level OUTSIDE the INTERIOR_GROUP —
+## right now that's always Chesburg, since it's the only outdoor level
+## there is, but this is the one place to point at a different track later
+## (or grow into a per-level mapping) without touching _apply_level_lighting()
+## itself. Interiors are silent until they get a track of their own — see
+## Music (core/music_player.gd) for the actual looping playback.
+@export var outdoor_music: AudioStream = preload("res://sounds/Music/chesburg.ogg")
 
 ## Retro pixelation overlay (see core/pixelate_effect.gd) — block size in
 ## real screen pixels. Lower = subtler, higher = chunkier. Set to 1.0 to
@@ -71,6 +79,7 @@ func _ready() -> void:
 	level = level_scene.instantiate() if level_scene else TestLevel.new()
 	add_child(level)
 	_apply_level_lighting(level)
+	_apply_level_music(level)
 
 	player = Player.new()
 	add_child(player)
@@ -164,6 +173,7 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 	level = next_level.instantiate()
 	add_child(level)
 	_apply_level_lighting(level)
+	_apply_level_music(level)
 	encounters.setup(player, level)
 	for n in level.find_children("*", "", true, false):
 		if n is WorldEnemy:
@@ -298,3 +308,14 @@ func _apply_level_lighting(lvl: Node) -> void:
 		_env.background_mode = Environment.BG_COLOR
 		_env.background_color = Color.BLACK
 	_sun.visible = not indoor
+
+## Starts/stops outdoor_music to match indoor/outdoor, same INTERIOR_GROUP
+## check _apply_level_lighting() uses — called right alongside it, wherever
+## a level is instanced. Music.play() is already a no-op if that track is
+## already playing, so this is safe to call on every level load without
+## restarting the song.
+func _apply_level_music(lvl: Node) -> void:
+	if lvl.is_in_group(INTERIOR_GROUP):
+		Music.stop()
+	else:
+		Music.play(outdoor_music)

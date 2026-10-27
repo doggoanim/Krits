@@ -10,7 +10,7 @@ extends GPUParticles3D
 ##
 ## Usage: add as a plain child node anywhere in a level — an outdoor
 ## clearing, under a tree canopy, a firefly pocket near the water, whatever
-## (see world/hometown.tscn for worked examples). `area_size` is the box
+## (see world/chesburg.tscn for worked examples). `area_size` is the box
 ## region particles drift around inside, centered on this node; scale it to
 ## the space being decorated. Runs entirely on its own once added, no
 ## setup() call needed — unlike systems that must stay wired to the player

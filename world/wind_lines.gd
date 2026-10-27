@@ -16,7 +16,7 @@ extends GPUParticles3D
 ## dash, the turbulence is what makes that ribbon curve as it travels.
 ##
 ## Usage: add as a plain child node in an outdoor area, same idiom as
-## AmbientMotes/FoliageWind — see world/hometown.tscn for a worked example.
+## AmbientMotes/FoliageWind — see world/chesburg.tscn for a worked example.
 ## `area_size` is the box region lines travel across, centered on this node.
 
 @export var area_size := Vector3(14.0, 3.0, 14.0)

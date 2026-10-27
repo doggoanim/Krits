@@ -108,7 +108,7 @@ toward the new direction.
 			 Duplicate the whole scene per distinct building, resize/reposition its panels to the new
 			 room's shape, and swap in real wall/furniture assets later. house_1_interior.tscn is a
 			 worked example of that duplication, for house_chesburg_1 — wired to a Door + DoorSpawn
-			 (both children of that house node in hometown.tscn, spawn_id `house_1_entrance`) placed
+			 (both children of that house node in chesburg.tscn, spawn_id `house_1_entrance`) placed
 			 just outside its front wall; nudge their position in the editor if they don't line up with
 			 the model's actual doorway, since the placement here is an estimate — the house's door
 			 isn't a separate node in its .glb. Door.target_level and ReturnDoor's own target_level are
@@ -120,7 +120,7 @@ toward the new direction.
 			 actually used. WorldEnemy (pops in
 			 when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
-			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
+			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), chesburg.tscn (the default
 			 first area — a small plaza built from plain Godot nodes: boxes, cylinders, prisms, no
 			 Blender or terrain plugin needed; open it in the editor and drag things around like any
 			 other scene), TestLevel (a code-built mechanics-testing blockout, not a designed place —
@@ -169,13 +169,13 @@ PlayerConfig values and fix any small typing errors on first run.
 and nothing requires levels to be built in code. To build a real level visually:
 
 1. Create a new scene (`Scene > New Scene`), root node type `Node3D`. Save it
-   somewhere under `world/` (or wherever you like), e.g. `world/hometown.tscn`.
+   somewhere under `world/` (or wherever you like), e.g. `world/chesburg.tscn`.
 2. Build your geometry normally — meshes, `CSGShape3D`, imported models, whatever
    you like. Godot has no built-in sculptable terrain tool (unlike Unity); for
    basic-shapes environments, `CSGShape3D` primitives, a `GridMap` (tile-based,
    paint a `MeshLibrary` in the editor), or plain `StaticBody3D`+`MeshInstance3D`
-   nodes (what `world/hometown.tscn` uses) all cover this without Blender — see
-   `hometown.tscn` for a whole zone built from nothing but boxes, cylinders
+   nodes (what `world/chesburg.tscn` uses) all cover this without Blender — see
+   `chesburg.tscn` for a whole zone built from nothing but boxes, cylinders
    and prisms, editable like any other scene. For organic rolling terrain, add
    a heightmap plugin (Terrain3D,
    HTerrain, both free via AssetLib) or sculpt a mesh externally and import it.

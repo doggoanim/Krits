@@ -201,7 +201,7 @@ func _ready() -> void:
 
 	# A last-resort manual escape hatch: whatever gets a player wedged or
 	# stuck (bad collision geometry, an accidental climbable surface like the
-	# one removed from hometown.tscn, something not yet discovered), no
+	# one removed from chesburg.tscn, something not yet discovered), no
 	# automatic detector can promise to catch every case without also
 	# false-triggering on legitimate holds — WallClimbState, for instance, is
 	# SUPPOSED to let you hang motionless on a wall, so "not moving while

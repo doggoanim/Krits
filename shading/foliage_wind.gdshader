@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode cull_disabled;
 // Wind-swaying foliage material. Not the project's toon shader
 // (shading/toon.gdshader) — world foliage props (grass, trees; see
-// world/hometown.tscn's Props/Trees and Props/eyecandies) are unmodified
+// world/chesburg.tscn's Props/Trees and Props/eyecandies) are unmodified
 // imported .glb materials rendered with Godot's ordinary PBR lighting, so
 // this is a drop-in replacement for THAT look (same albedo/roughness/
 // metallic, default diffuse+specular lighting via light() left untouched),

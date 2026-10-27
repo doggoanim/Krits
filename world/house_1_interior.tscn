@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://world/door.gd" id="1"]
 [ext_resource type="Script" path="res://world/door_spawn.gd" id="2"]
 [ext_resource type="Script" path="res://world/cutaway_wall.gd" id="3"]
+[ext_resource type="Script" path="res://world/cutaway_room.gd" id="4"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(14, 0.2, 14)
@@ -39,6 +40,7 @@ size = Vector3(1.2, 2.2, 0.2)
 albedo_color = Color(0.35, 0.22, 0.12, 1)
 
 [node name="House1Interior" type="Node3D" groups=["interior_level"]]
+script = ExtResource("4")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
@@ -125,7 +127,7 @@ omni_range = 12.6
 [node name="ReturnDoor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.8)
 script = ExtResource("1")
-target_level = "res://world/hometown.tscn"
+target_level = "res://world/chesburg.tscn"
 target_spawn_id = &"house_1_entrance"
 prompt_text = "Press E to exit"
 

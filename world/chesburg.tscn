@@ -116,7 +116,7 @@ albedo_color = Color(0.8117647, 0.6627451, 0.19215687, 1)
 radius = 0.4
 height = 1.8
 
-[node name="Hometown" type="Node3D" unique_id=1195529557]
+[node name="Chesburg" type="Node3D" unique_id=1195529557]
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
 
