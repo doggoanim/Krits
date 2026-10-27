@@ -238,8 +238,11 @@ func _update_footsteps(p: Player) -> void:
 			_play_footstep(p)
 	_footstep_phase = phase
 
-## Looks at what's actually underfoot right now and plays the matching
-## sound — see FootstepSurfaces for how the collider maps to a surface.
+## Looks at what's actually underfoot right now and plays the matching sound
+## plus a small dust puff — see FootstepSurfaces for how the collider maps to
+## a surface, and PlayerEffects.burst_footstep_dust() for the per-surface tint.
 func _play_footstep(p: Player) -> void:
 	var collider := p.floor_collider_below(p.global_position, FOOTSTEP_PROBE_DIST)
-	p.audio.play_footstep(FootstepSurfaces.detect(collider))
+	var surface := FootstepSurfaces.detect(collider)
+	p.audio.play_footstep(surface)
+	p.effects.burst_footstep_dust(p.global_position, surface)

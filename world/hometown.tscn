@@ -44,6 +44,7 @@
 [ext_resource type="Script" uid="uid://bv377biwti3hs" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
 [ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 [ext_resource type="Script" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
+[ext_resource type="Script" path="res://world/water/water_volume.gd" id="46_water_volume"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -418,6 +419,10 @@ trail_fraction = 1.0
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
 
+[node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=3177004512]
+script = ExtResource("46_water_volume")
+size = Vector3(20, 3, 20)
+
 [node name="lake_chesburg" parent="Props" unique_id=1685882827 instance=ExtResource("2_l8gsu")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -27.280123, 0.017999172, 0.9797595)
 
@@ -425,6 +430,11 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -27.
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.41620445, 1.2802064, 0.42698288)
 material_override = SubResource("ShaderMaterial_qjukg")
 mesh = SubResource("CylinderMesh_o8fgi")
+
+[node name="WaterVolume" type="Area3D" parent="Props/lake_chesburg/Water2" unique_id=3177004513]
+script = ExtResource("46_water_volume")
+size = Vector3(20, 3, 20)
+surface_y = 0.3465
 
 [node name="eyecandies" type="Node3D" parent="Props" unique_id=224415039]
 

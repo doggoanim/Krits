@@ -34,6 +34,25 @@ const SMOKE_RAMP := [
 ## hardcoded green.
 const SLIME_DRIP_ALPHAS := [0.9, 0.6, 0.0]
 
+## Per-surface tints for burst_footstep_dust() — DIRT isn't listed; it reuses
+## DUST_RAMP above (the default brown every other dust effect here already
+## uses), so there's one fewer ramp to keep in sync whenever that changes.
+const GRASS_DUST_RAMP := [
+	Color(0.42, 0.55, 0.26, 0.85),
+	Color(0.58, 0.64, 0.42, 0.5),
+	Color(0.65, 0.68, 0.52, 0.0),
+]
+const ROCK_DUST_RAMP := [
+	Color(0.58, 0.58, 0.6, 0.8),
+	Color(0.68, 0.68, 0.7, 0.45),
+	Color(0.72, 0.72, 0.74, 0.0),
+]
+const SPLASH_RAMP := [
+	Color(0.85, 0.93, 1.0, 0.95),
+	Color(0.8, 0.9, 1.0, 0.6),
+	Color(0.8, 0.9, 1.0, 0.0),
+]
+
 const DUST_TEXTURE_PATH := "res://assets/sprites/dirt_texture.png"
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 
@@ -42,6 +61,10 @@ var _smoke_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
 var _smoke_ramp_tex: GradientTexture1D
+var _grass_dust_ramp_tex: GradientTexture1D
+var _rock_dust_ramp_tex: GradientTexture1D
+var _splash_ramp_tex: GradientTexture1D
+var _ring_texture: GradientTexture2D
 var _slime_drip_material: ParticleProcessMaterial   ## kept so set_slime_drip() can swap its color_ramp
 
 var _run_dust: GPUParticles3D
@@ -55,6 +78,10 @@ func _ready() -> void:
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
+	_grass_dust_ramp_tex = _make_ramp(GRASS_DUST_RAMP)
+	_rock_dust_ramp_tex = _make_ramp(ROCK_DUST_RAMP)
+	_splash_ramp_tex = _make_ramp(SPLASH_RAMP)
+	_ring_texture = SoftCircleTexture.make_ring()
 
 	_run_dust = _build_emitter(_dust_material(3.0, 6.0, 0.35, 0.8), 14, 0.5, false, _dust_quad)
 	add_child(_run_dust)
@@ -105,6 +132,71 @@ func burst_jump_dust() -> void:
 
 func burst_land_dust() -> void:
 	_burst(global_position, Vector3.UP, 60.0, _dust_material(5.5, 9.0, 0.5, 1.2), 16, 0.45, _dust_quad)
+
+## A small discrete puff synced to each footstep — see GroundState._play_footstep(),
+## which already looks up the surface underfoot for PlayerAudio; this reuses
+## that same lookup rather than probing again. Separate from
+## set_running_dust()'s continuous trail above (a light haze for as long as
+## you're sprinting): this adds a punchier per-step accent timed to the exact
+## foot-plant, tinted by what's actually underfoot — dirt keeps the same
+## brown every other dust effect here uses, grass kicks up less and greener,
+## rock kicks up the least (a harder surface) and pale gray. `pos` is passed
+## in rather than read from global_position since the caller already has the
+## exact foot-level point its own floor probe found.
+func burst_footstep_dust(pos: Vector3, surface: FootstepSurfaces.Surface) -> void:
+	var ramp := _dust_ramp_tex
+	var amount := 5
+	var scale_max := 0.6
+	match surface:
+		FootstepSurfaces.Surface.GRASS:
+			ramp = _grass_dust_ramp_tex
+			amount = 4
+			scale_max = 0.5
+		FootstepSurfaces.Surface.ROCK:
+			ramp = _rock_dust_ramp_tex
+			amount = 3
+			scale_max = 0.4
+	_burst(pos, Vector3.UP, 50.0, _material(3.5, 5.0, 0.25, scale_max, ramp), amount, 0.3, _dust_quad)
+
+## Entering/exiting a WaterVolume (see world/water/water_volume.gd): a droplet
+## spray plus an expanding ring ripple, both at `pos` (the waterline, not the
+## player's own position — see WaterVolume._waterline_pos()). `entering` only
+## scales the spray back a bit for the exit case (climbing out kicks up less
+## than diving in) — the ripple itself is the same either way, since the
+## water's surface doesn't care which direction broke it.
+func burst_water_splash(pos: Vector3, entering: bool) -> void:
+	var amount := 14 if entering else 8
+	var speed := 4.5 if entering else 3.0
+	_burst(pos, Vector3.UP, 45.0, _material(speed, 7.0, 0.3, 0.7, _splash_ramp_tex), amount, 0.4, _smoke_quad)
+	_spawn_ripple(pos)
+
+## A flat ring that grows and fades on the water's surface, independent of the
+## player (unlike the particle bursts above, a ripple needs to sit still at
+## the splash point while the player keeps swimming/walking away from it —
+## see player_speed_trail.gd's identical reasoning for spawning its ghosts
+## under the scene root rather than under the player).
+func _spawn_ripple(pos: Vector3) -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var mesh_inst := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.5, 0.5)
+	mesh_inst.mesh = quad
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_texture = _ring_texture
+	mat.albedo_color = Color(0.85, 0.93, 1.0, 0.85)
+	mesh_inst.material_override = mat
+	mesh_inst.rotation_degrees.x = -90.0   # lie flat, facing up out of the water
+	scene_root.add_child(mesh_inst)
+	mesh_inst.global_position = pos
+
+	var tw := mesh_inst.create_tween()
+	tw.tween_property(mesh_inst, "scale", Vector3.ONE * 5.0, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.7).set_ease(Tween.EASE_IN)
+	tw.tween_callback(mesh_inst.queue_free)
 
 ## `normal` points away from the wall — the airborne dive/long-jump bounce,
 ## a softer puff of air/smoke since nothing solid hit the ground.
