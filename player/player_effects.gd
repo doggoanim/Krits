@@ -60,18 +60,34 @@ const SPLASH_RAMP := [
 	Color(0.8, 0.9, 1.0, 0.6),
 	Color(0.8, 0.9, 1.0, 0.0),
 ]
-## Air bubbles while submerged (see set_swim_bubbles()) — brighter/more
-## opaque than the splash ramp since these sit against dark underwater
-## color, not bright daylight water spray.
+## Air bubbles while submerged (see set_swim_bubbles()) — unlike every other
+## ramp here, this tints toward plain white/fading-alpha rather than a real
+## color: bubble.png (see BUBBLE_TEXTURE_PATH) is a hand-drawn bubble with its
+## own outline and highlight already painted in, and vertex_color_use_as_albedo
+## multiplies that art by this ramp — a blue tint (what every other water
+## effect's ramp uses) would just muddy its outline instead of recoloring a
+## plain soft blob the way it does for the shared smoke_puff.png sprite.
 const BUBBLE_RAMP := [
-	Color(0.9, 0.97, 1.0, 0.9),
-	Color(0.9, 0.97, 1.0, 0.55),
-	Color(0.9, 0.97, 1.0, 0.0),
+	Color(1.0, 1.0, 1.0, 0.95),
+	Color(1.0, 1.0, 1.0, 0.75),
+	Color(1.0, 1.0, 1.0, 0.0),
 ]
 
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
+const BUBBLE_TEXTURE_PATH := "res://assets/textures/bubble.png"
+
+## Bubbles' own base rise speed/accel before update_bubble_ceiling() scales
+## them down near the surface — see that method and _bubble_material().
+const BUBBLE_BASE_VELOCITY_MIN := 0.5
+const BUBBLE_BASE_VELOCITY_MAX := 1.0
+const BUBBLE_BASE_GRAVITY := 1.4
+## How far below the water's surface (meters) a bubble needs to be before
+## update_bubble_ceiling() stops slowing it down at all — inside this margin
+## its speed scales toward (but never quite reaches) zero. See that method.
+const BUBBLE_CEILING_REFERENCE := 1.0
 
 var _smoke_quad: QuadMesh
+var _bubble_quad: QuadMesh
 var _growth_curve: CurveTexture
 var _dust_ramp_tex: GradientTexture1D
 var _smoke_ramp_tex: GradientTexture1D
@@ -88,6 +104,7 @@ var _swim_bubbles: GPUParticles3D
 
 func _ready() -> void:
 	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
+	_bubble_quad = _make_quad_mesh(load(BUBBLE_TEXTURE_PATH))
 	_growth_curve = _make_growth_curve()
 	_dust_ramp_tex = _make_ramp(DUST_RAMP)
 	_smoke_ramp_tex = _make_ramp(SMOKE_RAMP)
@@ -103,7 +120,7 @@ func _ready() -> void:
 	_slime_drip = _build_emitter(_slime_drip_material, 10, 0.6, false, _smoke_quad)
 	_slime_drip.position.y = 1.0   # emit from around the torso, not the feet, so it reads as dripping off the character
 	add_child(_slime_drip)
-	_swim_bubbles = _build_emitter(_bubble_material(), 8, 1.2, false, _smoke_quad)
+	_swim_bubbles = _build_emitter(_bubble_material(), 8, 1.2, false, _bubble_quad)
 	_swim_bubbles.position.y = 1.3   # roughly head height, not the feet — bubbles rise off the face/chest
 	add_child(_swim_bubbles)
 
@@ -116,6 +133,37 @@ func set_running_dust(active: bool) -> void:
 ## enter()/exit().
 func set_swim_bubbles(active: bool) -> void:
 	_swim_bubbles.emitting = active
+
+## Keeps bubbles from visibly rising past the water's own surface — unlike
+## every other particle effect here, GPUParticles3D knows nothing about the
+## world around it, so a bubble emitted underwater would just keep climbing
+## along its programmed trajectory straight through the surface and out into
+## open air. Called every physics frame while swimming (see
+## SwimState.physics_update()), not just once on enter, since how close the
+## emitter sits to the surface keeps changing as the player moves vertically
+## through the water. `water` null (surfaced, or between WaterVolumes for a
+## frame) just resets to the normal full rise speed — SwimState already stops
+## emitting entirely in that case anyway, this just leaves nothing stale set
+## for whenever it starts again.
+##
+## The process material's speed/gravity are read live by the GPU sim every
+## frame, not just baked in once at spawn, so scaling them down here reaches
+## bubbles already mid-flight too: `t` scales both toward (but never quite
+## to) zero as the remaining margin below the surface shrinks, so a bubble
+## crawls to a near-stop right as it nears the surface instead of sailing
+## through it.
+func update_bubble_ceiling(water: WaterVolume) -> void:
+	var mat := _swim_bubbles.process_material as ParticleProcessMaterial
+	if water == null:
+		mat.initial_velocity_min = BUBBLE_BASE_VELOCITY_MIN
+		mat.initial_velocity_max = BUBBLE_BASE_VELOCITY_MAX
+		mat.gravity.y = BUBBLE_BASE_GRAVITY
+		return
+	var margin := water.surface_world_y() - (global_position.y + _swim_bubbles.position.y)
+	var t := clampf(margin / BUBBLE_CEILING_REFERENCE, 0.08, 1.0)
+	mat.initial_velocity_min = BUBBLE_BASE_VELOCITY_MIN * t
+	mat.initial_velocity_max = BUBBLE_BASE_VELOCITY_MAX * t
+	mat.gravity.y = BUBBLE_BASE_GRAVITY * t
 
 ## Driven by Player.enter_slime_puddle/exit_slime_puddle, alongside
 ## PlayerVisual.set_slimed — the green tint and the drip particles always
@@ -385,9 +433,9 @@ func _bubble_material() -> ParticleProcessMaterial:
 	var m := ParticleProcessMaterial.new()
 	m.direction = Vector3.UP
 	m.spread = 18.0
-	m.initial_velocity_min = 0.5
-	m.initial_velocity_max = 1.0
-	m.gravity = Vector3(0.0, 1.4, 0.0)
+	m.initial_velocity_min = BUBBLE_BASE_VELOCITY_MIN
+	m.initial_velocity_max = BUBBLE_BASE_VELOCITY_MAX
+	m.gravity = Vector3(0.0, BUBBLE_BASE_GRAVITY, 0.0)
 	m.damping_min = 0.0
 	m.damping_max = 0.3
 	m.scale_min = 0.12

@@ -102,15 +102,21 @@ func physics_update(delta: float) -> void:
 	# Wake ripple only while actually paddling at the surface — not while
 	# treading water in place, and not while diving/rising vertically
 	# (there's nothing at the surface to leave a wake in either case).
+	var water := p.current_water()
 	if active_anim == PlayerVisual.ANIM_SWIM:
 		_wake_t -= delta
 		if _wake_t <= 0.0:
 			_wake_t = WAKE_INTERVAL
-			var water := p.current_water()
 			if water != null:
 				p.effects.burst_water_wake(p.global_position, water.surface_world_y())
 	else:
 		_wake_t = 0.0
+
+	# Keeps the air-bubble trail from visibly rising past the surface — see
+	# PlayerEffects.update_bubble_ceiling()'s own doc comment. Every frame,
+	# not just on enter(), since the margin to the surface keeps changing as
+	# the player moves vertically through the water.
+	p.effects.update_bubble_ceiling(water)
 
 	p.safe_move_and_slide()
 
