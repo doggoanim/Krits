@@ -42,6 +42,7 @@
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
 [ext_resource type="Script" uid="uid://mxhompivr0pn" path="res://world/wind_lines.gd" id="42_wind_lines"]
 [ext_resource type="Script" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
+[ext_resource type="Script" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -452,6 +453,10 @@ transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.
 
 [node name="Wind" type="Node" parent="Props/eyecandies/berry_bush5" unique_id=1523019782]
 script = ExtResource("40_foliage_wind")
+
+[node name="CloudShadows" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
+script = ExtResource("44_cloud_shadows")
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
