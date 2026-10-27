@@ -562,7 +562,7 @@ transform = Transform3D(1.5454813, 0, 0.5124617, 0, 2.5000002, 0, -0.4141105, 0,
 script = ExtResource("40_foliage_wind")
 
 [node name="berry_bush5" parent="Props/eyecandies" unique_id=1981813892 instance=ExtResource("28_52qkm")]
-transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.0583986e-08, 20.3, 0, 13.1)
+transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.0583986e-08, 18.3, 0, 13.1)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/berry_bush5" unique_id=1523019782]
 script = ExtResource("40_foliage_wind")
@@ -571,6 +571,18 @@ script = ExtResource("40_foliage_wind")
 transform = Transform3D(1, 0, 0, 0, 1.4, 0, 0, 0, 1, 12, 0, -7)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/blue_flower" unique_id=374990695]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower2" parent="Props/eyecandies" unique_id=2054940050 instance=ExtResource("41_qie8l")]
+transform = Transform3D(0.9396926, 0.47882816, 0, -0.34202012, 1.3155696, 0, 0, 0, 1, 21.599998, 0, 13.4)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower2" unique_id=1834697840]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower3" parent="Props/eyecandies" unique_id=1289484321 instance=ExtResource("41_qie8l")]
+transform = Transform3D(0.57357645, 0, 0.81915206, 0, 1.89, 0, -0.81915206, 0, 0.57357645, 21.4, 0, 13.4)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower3" unique_id=1752053992]
 script = ExtResource("40_foliage_wind")
 
 [node name="green_flower" parent="Props/eyecandies" unique_id=415691239 instance=ExtResource("42_186l7")]
@@ -583,6 +595,24 @@ script = ExtResource("40_foliage_wind")
 transform = Transform3D(0.8660254, 0, 0.5, 0, 1.2, 0, -0.5, 0, 0.8660254, 12.3, 0, -6.1)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/red_flower" unique_id=53316323]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower2" parent="Props/eyecandies" unique_id=1417812405 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.8660254, 0, -0.5, 0, 1.2, 0, 0.5, 0, 0.8660254, 19.032053, 0, 1.5602541)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower2" unique_id=1306423985]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower3" parent="Props/eyecandies" unique_id=1495374318 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.8660253, -0.23293714, -0.4829629, 0, 1.7386665, -0.25881904, 0.5, 0.40345898, 0.8365163, 18.732054, -0.1, 1.6262795)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower3" unique_id=926638948]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower4" parent="Props/eyecandies" unique_id=34536328 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.8660252, -0.27793714, -0.45796287, 0.12940949, 2.1284578, -0.031759858, 0.4829629, -0.071935356, 0.82970643, 18.632053, -0.1, 1.4262795)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower4" unique_id=2143391318]
 script = ExtResource("40_foliage_wind")
 
 [node name="yellow_flower" parent="Props/eyecandies" unique_id=188559562 instance=ExtResource("44_36x1p")]
