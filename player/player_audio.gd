@@ -116,6 +116,11 @@ const WATER_SPLASH_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "water_splash_1.wav"),
 	preload(SFX_DIR + "water_splash_2.wav"),
 ]
+## The `big` case (a fall from height, a ground pound into the water) gets
+## its own dedicated recording instead of just a louder/lower-pitched take
+## of WATER_SPLASH_SFX above — fixed pitch, same reasoning as AIR_DIVE_SFX/
+## LONG_JUMP_SFX: a single heavy impact should land the same every time.
+const BIG_WATER_SPLASH_SFX: AudioStream = preload(SFX_DIR + "big_water_splash.wav")
 ## Four alternate full takes of the same continuous tumble loop (not short
 ## one-shots to fire repeatedly like footsteps) — one is picked at random
 ## when a roll starts and plays for the roll's whole duration. See
@@ -269,9 +274,10 @@ func play_swim_stroke() -> void:
 ## WaterVolume._on_body_entered()) plays louder and a bit lower-pitched, same
 ## "heavier impact" read as a ground-pound land vs. a plain footstep.
 func play_water_splash(big := false) -> void:
-	var base_pitch := 0.85 if big else 1.0
-	var volume_db := 5.0 if big else 0.0
-	_play(WATER_SPLASH_SFX.pick_random(), PITCH_VARIANCE, base_pitch, volume_db)
+	if big:
+		_play(BIG_WATER_SPLASH_SFX, 0.0)
+	else:
+		_play(WATER_SPLASH_SFX.pick_random(), PITCH_VARIANCE)
 
 func play_pound_ready() -> void:
 	_play(POUND_READY_SFX, PITCH_VARIANCE)
