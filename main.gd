@@ -31,6 +31,12 @@ extends Node3D
 @export var footstep_sfx_dirt: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_DIRT
 @export var footstep_sfx_rock: Array[AudioStream] = PlayerAudio.DEFAULT_FOOTSTEP_SFX_ROCK
 
+## Low-HP warning vignette (see core/low_hp_vignette.gd) — hp/max_hp fraction
+## below which the screen edges start darkening, and the color they darken
+## toward.
+@export var low_hp_vignette_threshold := 0.3
+@export var low_hp_vignette_color := Color(0.5, 0.0, 0.0)
+
 var player: Player
 var cam: CameraRig
 var encounters: EncounterManager
@@ -67,6 +73,11 @@ func _ready() -> void:
 	var pixelate := PixelateEffect.new()
 	pixelate.pixel_size = pixelate_size
 	add_child(pixelate)
+
+	var low_hp_vignette := LowHpVignette.new()
+	low_hp_vignette.low_hp_threshold = low_hp_vignette_threshold
+	low_hp_vignette.vignette_color = low_hp_vignette_color
+	add_child(low_hp_vignette)
 
 	encounters = EncounterManager.new()
 	add_child(encounters)
