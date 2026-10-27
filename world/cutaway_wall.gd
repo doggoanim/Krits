@@ -16,6 +16,20 @@ extends StaticBody3D
 ## side, Vector3.UP for the ceiling. Multiplied through this node's own
 ## global_transform.basis each frame, so it keeps pointing the right way
 ## even if the whole room is rotated or moved.
+##
+## The mesh itself stays `visible = true` at all times — only its
+## `cast_shadow` mode flips, between SHADOWS_ONLY (renders no color, so the
+## camera sees straight through it, but still occludes) and ON (rendered
+## normally). That's deliberate, not just a smaller way to hide it: a plain
+## `visible = false` drops the panel from the shadow pass too, so the
+## room's own Lamp would start spilling its light straight out through the
+## open side into the outside void the moment a wall disappeared — visibly
+## changing how the room itself looks depending on where the camera stands,
+## which is backwards (the interior's lighting should read the same
+## regardless of which wall the camera currently has cut away).
+## SHADOWS_ONLY keeps the panel fully "in" the scene for lighting purposes
+## while making it render nothing to color, which is exactly the split we
+## need.
 
 @export var normal_axis := Vector3.BACK
 
@@ -45,6 +59,10 @@ func _process(_delta: float) -> void:
 		return
 	var world_normal := (global_transform.basis * normal_axis).normalized()
 	var to_cam := cam.global_position - global_position
-	# Camera on (or past) the outward side -> hide, so it can see through to
-	# the room. Camera still on the inward side -> show, same as a normal wall.
-	_mesh.visible = to_cam.dot(world_normal) <= 0.0
+	# Camera on (or past) the outward side -> render nothing (but keep
+	# casting a shadow), so it can see through to the room without the
+	# room's own lighting changing. Camera still on the inward side -> show,
+	# same as a normal wall.
+	var outward := to_cam.dot(world_normal) <= 0.0
+	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
+		if outward else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
