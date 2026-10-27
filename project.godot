@@ -47,6 +47,10 @@ import/blender/enabled=false
 3d_physics/layer_6="trigger"
 3d_physics/layer_8="camera_push"
 
+[gui]
+
+theme/custom_font="res://assets/fonts/zyzol/Zyzol.otf"
+
 [physics]
 
 common/physics_ticks_per_second=120
