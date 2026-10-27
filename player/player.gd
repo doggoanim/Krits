@@ -819,7 +819,13 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 		velocity = n * config.wall_bounce_push
 		velocity.y = config.wall_bounce_up
 	face(n)
-	visual.play_hold(bounce_anim, bounce_time)
+	# blocks_control=false for the vertical-only case, same reasoning as
+	# WallClimbState._jump()'s _at_top hold: the pose is purely cosmetic here,
+	# not a reaction you're meant to ride out — AirState's own air_control()
+	# check (is_holding_control()) lets steering through immediately instead
+	# of waiting the full bounce_time out, so the dive still feels responsive
+	# on the way up rather than momentarily taking control away from you.
+	visual.play_hold(bounce_anim, bounce_time, 1.0, not vertical_only)
 	var impact_pos := global_position + n * RADIUS + Vector3.UP * (STAND_HEIGHT * 0.5)
 	if bounce_anim == PlayerVisual.ANIM_ROLL_COLLISION:
 		effects.burst_roll_collision(impact_pos, n)
