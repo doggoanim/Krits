@@ -138,14 +138,10 @@ const ORB_COMBO_PITCH_MAX := 2.2
 ## uses for its continuous particle emitters (running dust, trails), rather
 ## than the fire-and-forget _play() pattern every other sound here uses.
 var _roll_player: AudioStreamPlayer3D
-## SWIM_SFX's own looping player — see set_swimming(). Same idiom as _roll_player.
-var _swim_player: AudioStreamPlayer3D
 
 func _ready() -> void:
 	_roll_player = AudioStreamPlayer3D.new()
 	add_child(_roll_player)
-	_swim_player = AudioStreamPlayer3D.new()
-	add_child(_swim_player)
 	# Loop each take itself rather than relying on its .wav import settings
 	# already having loop enabled — guarantees it regardless of how the file
 	# was authored/imported. loop_begin/loop_end must be set explicitly too:
@@ -155,12 +151,9 @@ func _ready() -> void:
 	# looping the whole clip. get_length() * mix_rate gives the frame count
 	# without needing format-specific math (8-bit/16-bit/ADPCM/QOA all differ
 	# in bytes-per-frame, but get_length() already accounts for that).
+	# SWIM_SFX is NOT looped like this — see play_swim_stroke()'s own
+	# comment for why those stay one-shot.
 	for stream in ROLL_SFX:
-		if stream is AudioStreamWAV:
-			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			stream.loop_begin = 0
-			stream.loop_end = int(round(stream.get_length() * stream.mix_rate))
-	for stream in SWIM_SFX:
 		if stream is AudioStreamWAV:
 			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 			stream.loop_begin = 0
@@ -247,17 +240,16 @@ func set_rolling(active: bool, speed_ratio := 0.0) -> void:
 	elif _roll_player.playing:
 		_roll_player.stop()
 
-## Continuous swim stroke loop for SwimState, same on/off idiom as
-## set_rolling() above — `active` starts/stops it, no speed_ratio since a
-## swim stroke doesn't have roll's wide speed range to track. A no-op for as
-## long as swim_sfx stays empty (see that export's own doc comment).
-func set_swimming(active: bool) -> void:
-	if active:
-		if not _swim_player.playing:
-			_swim_player.stream = SWIM_SFX.pick_random()
-			_swim_player.play()
-	elif _swim_player.playing:
-		_swim_player.stop()
+## One splash per stroke, timed to the swim animation's own phase — see
+## SwimState._update_stroke_sfx(), the same "fire on a clip's own loop
+## crossing a phase point" idiom GroundState._update_footsteps() uses for
+## footsteps. One-shot and freshly randomized every call (same _play()
+## pattern as play_footstep()) rather than a single looped ambient track:
+## a continuous loop can only ever randomize once per swim (whenever it's
+## (re)started), which reads as the same sound looping the whole time you're
+## actually swimming — picking a fresh take each stroke instead fixes that.
+func play_swim_stroke() -> void:
+	_play(SWIM_SFX.pick_random(), PITCH_VARIANCE)
 
 ## Entering/exiting a WaterVolume (see WaterVolume._on_body_entered/_exited) —
 ## one call site for both since the splash sound doesn't need entering's

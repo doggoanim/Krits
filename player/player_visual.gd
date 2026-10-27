@@ -291,8 +291,20 @@ func set_slimed(active: bool) -> void:
 ## reads as diving instead. _model.rotation.x is otherwise untouched by
 ## anything else (lean uses this node's OWN rotation, see set_lean() below,
 ## not the model's), so toggling it here can't fight any other system.
+##
+## The model's own local origin sits at its FEET (position 0,0,0), not its
+## center — rotating rotation.x alone pivots around that origin, which flips
+## the whole body downward through the floor instead of in place (the feet
+## stay put, the head swings down to where the feet were). Nudging
+## position.y up by the model's own standing height alongside the rotation
+## compensates for that: a 180° turn around a pivot raised to half that
+## height keeps the body centered where it already was, instead of around
+## its feet. (y_new = height - y_old for a point at height y_old — see the
+## rotation/translation combined that way — which is exactly a flip about
+## the midpoint, not the origin.)
 func set_upside_down(flag: bool) -> void:
 	_model.rotation.x = PI if flag else 0.0
+	_model.position.y = Player.STAND_HEIGHT if flag else 0.0
 
 ## Plays a one-off reaction pose (a wall collision, say) and protects it from
 ## being overridden by a state's regular per-frame play() calls for

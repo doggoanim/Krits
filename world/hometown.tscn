@@ -470,6 +470,7 @@ mesh = SubResource("CylinderMesh_o8fgi")
 script = ExtResource("46_water_volume")
 size = Vector3(20, 3, 20)
 surface_y = 0.3465
+radius = 10.0
 
 [node name="eyecandies" type="Node3D" parent="Props" unique_id=224415039]
 

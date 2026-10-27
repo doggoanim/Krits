@@ -19,6 +19,14 @@ extends Area3D
 
 @export var size := Vector3(10.0, 4.0, 10.0)
 @export var surface_y := 0.0   ## local Y of the water's top surface, relative to this node's own origin
+## >0 swaps the box footprint above for a circular one (a CylinderShape3D of
+## this radius instead of a BoxShape3D sized from size.x/size.z) — set this
+## for a round/cylindrical water mesh like the hometown lake's: a box sized
+## to the same diameter still reaches size.x*sqrt(2)/2 out to its own
+## corners, well past the mesh's actual round edge, so the collision read as
+## "much bigger than the mesh." size.y still sets the collider's depth
+## either way; size.x/size.z are simply unused once this is set.
+@export var radius := 0.0
 ## Tint used by the underwater screen overlay while the camera is below this
 ## volume's surface (see core/underwater_overlay.gd) — set this to roughly
 ## match whatever shallow_color/deep_color this body's own water.gdshader
@@ -41,9 +49,15 @@ func _ready() -> void:
 	monitorable = false
 
 	var cs := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = size
-	cs.shape = shape
+	if radius > 0.0:
+		var cyl := CylinderShape3D.new()
+		cyl.radius = radius
+		cyl.height = size.y
+		cs.shape = cyl
+	else:
+		var box := BoxShape3D.new()
+		box.size = size
+		cs.shape = box
 	add_child(cs)
 
 	body_entered.connect(_on_body_entered)
@@ -82,12 +96,16 @@ func surface_world_y() -> float:
 	return global_position.y + surface_y
 
 ## True if `pos` falls inside this volume's horizontal footprint, at or below
-## its surface — a plain box test against `size`/`surface_y`, independent of
-## the Area3D's own physics overlap (which only the player's collider
+## its surface — a plain box/cylinder test against `size`/`radius`/
+## `surface_y` (matching whichever shape _ready() actually built), independent
+## of the Area3D's own physics overlap (which only the player's collider
 ## triggers). Used by the static at() lookup below.
 func contains_point(pos: Vector3) -> bool:
 	var local := to_local(pos)
-	if absf(local.x) > size.x * 0.5 or absf(local.z) > size.z * 0.5:
+	if radius > 0.0:
+		if Vector2(local.x, local.z).length() > radius:
+			return false
+	elif absf(local.x) > size.x * 0.5 or absf(local.z) > size.z * 0.5:
 		return false
 	return local.y <= surface_y and local.y >= surface_y - size.y
 
