@@ -29,6 +29,7 @@ var visual: PlayerVisual
 var effects: PlayerEffects
 var audio: PlayerAudio
 var xray: PlayerXray
+var speed_trail: PlayerSpeedTrail
 var ground_shadow: GroundShadow
 var machine: StateMachine
 
@@ -136,6 +137,10 @@ func _ready() -> void:
 	xray = PlayerXray.new()
 	add_child(xray)
 	xray.setup(self)
+
+	speed_trail = PlayerSpeedTrail.new()
+	add_child(speed_trail)
+	speed_trail.setup(self)
 
 	ground_shadow = GroundShadow.new()
 	add_child(ground_shadow)

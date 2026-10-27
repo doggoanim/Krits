@@ -19,6 +19,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_ROLL)
 	p.audio.play_roll_start()
+	p.speed_trail.set_active(true)
 	var dir := p.input_dir()
 	if dir.length() < 0.1:
 		dir = p.facing
@@ -28,6 +29,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 func exit(_next: StringName) -> void:
 	player.roll_cd = player.config.roll_cooldown
 	player.audio.set_rolling(false)
+	player.speed_trail.set_active(false)
 
 func physics_update(delta: float) -> void:
 	var p := player
