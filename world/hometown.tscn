@@ -38,9 +38,9 @@
 [ext_resource type="PackedScene" uid="uid://bgi0nckpg0qug" path="res://assets/world/nature/tree_chesburg_2.glb" id="30_vgvlt"]
 [ext_resource type="PackedScene" uid="uid://cdviygxdsjeil" path="res://assets/world/fence.glb" id="35_0005w"]
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
-[ext_resource type="Script" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
-[ext_resource type="Script" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
-[ext_resource type="Script" path="res://world/wind_lines.gd" id="42_wind_lines"]
+[ext_resource type="Script" uid="uid://mgy577jf1cdb" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
+[ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
+[ext_resource type="Script" uid="uid://mxhompivr0pn" path="res://world/wind_lines.gd" id="42_wind_lines"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -305,13 +305,22 @@ transform = Transform3D(0.92728883, 0, 0.45655677, 0, 1.368, 0, -0.2484663, 0, 1
 [node name="tree_chesburg_６" parent="Props/Trees" unique_id=1761606458 instance=ExtResource("24_i8mdn")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 0.8, 0, 1, 0, -4.371139e-08, 24, 0, -26)
 
-[node name="DustMotes" type="GPUParticles3D" parent="Props"]
+[node name="tree_chesburg_11" parent="Props/Trees" unique_id=823451885 instance=ExtResource("30_vgvlt")]
+transform = Transform3D(-2.9802322e-08, 0, -1.9000001, 0, 1.3, 0, 1.5999999, 0, -5.9604645e-08, 24, 0, -6)
+
+[node name="tree_chesburg_12" parent="Props/Trees" unique_id=929990572 instance=ExtResource("30_vgvlt")]
+transform = Transform3D(-0.33646473, 0, 1.2557036, 0, 1.3, 0, -1.2557036, 0, -0.33646473, 28, 0, 12)
+
+[node name="tree_chesburg_６2" parent="Props/Trees" unique_id=490283275 instance=ExtResource("24_i8mdn")]
+transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 21, 0, 3)
+
+[node name="DustMotes" type="GPUParticles3D" parent="Props" unique_id=1266064599]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2, -10)
 script = ExtResource("41_ambient_motes")
 area_size = Vector3(16, 4, 16)
 mote_count = 50
 
-[node name="Fireflies" type="GPUParticles3D" parent="Props"]
+[node name="Fireflies" type="GPUParticles3D" parent="Props" unique_id=640155073]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1, -2)
 script = ExtResource("41_ambient_motes")
 area_size = Vector3(10, 2.5, 10)
@@ -321,7 +330,7 @@ glow_energy = 3.5
 mote_size = 0.035
 drift_speed = 0.3
 
-[node name="WindLines" type="GPUParticles3D" parent="Props"]
+[node name="WindLines" type="GPUParticles3D" parent="Props" unique_id=1252742016]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -10)
 script = ExtResource("42_wind_lines")
 area_size = Vector3(20, 3, 20)
@@ -360,7 +369,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.739195, 0.64848197, -2.976
 [node name="grass1" parent="Props/eyecandies" unique_id=1743353139 instance=ExtResource("26_muepx")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
 
-[node name="Wind" type="Node" parent="Props/eyecandies/grass1"]
+[node name="Wind" type="Node" parent="Props/eyecandies/grass1" unique_id=1966091545]
 script = ExtResource("40_foliage_wind")
 
 [node name="log" parent="Props/eyecandies" unique_id=1518400935 instance=ExtResource("29_2m3w5")]
@@ -372,19 +381,64 @@ transform = Transform3D(-1, 1.57361e-07, 6.114193e-15, 0, -7.8680486e-08, 1.6, 8
 [node name="grass2" parent="Props/eyecandies" unique_id=1863238249 instance=ExtResource("27_yu71x")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -14)
 
-[node name="Wind" type="Node" parent="Props/eyecandies/grass2"]
+[node name="Wind" type="Node" parent="Props/eyecandies/grass2" unique_id=891379699]
 script = ExtResource("40_foliage_wind")
 
 [node name="grass3" parent="Props/eyecandies" unique_id=627943168 instance=ExtResource("27_yu71x")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -6)
 
-[node name="Wind" type="Node" parent="Props/eyecandies/grass3"]
+[node name="Wind" type="Node" parent="Props/eyecandies/grass3" unique_id=90082719]
 script = ExtResource("40_foliage_wind")
 
 [node name="bush" parent="Props/eyecandies" unique_id=616452771 instance=ExtResource("29_52qkm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -4)
 
-[node name="Wind" type="Node" parent="Props/eyecandies/bush"]
+[node name="Wind" type="Node" parent="Props/eyecandies/bush" unique_id=394118038]
+script = ExtResource("40_foliage_wind")
+
+[node name="fence" parent="Props/eyecandies" unique_id=1234966156 instance=ExtResource("35_0005w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 0, -3)
+
+[node name="fence2" parent="Props/eyecandies" unique_id=1128572959 instance=ExtResource("35_0005w")]
+transform = Transform3D(-6.9938224e-08, 0, -1, 0, 1.3, 0, 1.6, 0, -4.371139e-08, 6.1000004, 0, 1.9000002)
+
+[node name="fence3" parent="Props/eyecandies" unique_id=1056758214 instance=ExtResource("35_0005w")]
+transform = Transform3D(2.0981466e-07, 0, 1, 0, 1.3, 0, -1.6, 0, 1.3113416e-07, 3.1000004, 0, 1.9)
+
+[node name="blueberry_bush" parent="Props/eyecandies" unique_id=1748432056 instance=ExtResource("37_emeer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, -12)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blueberry_bush" unique_id=386296288]
+script = ExtResource("40_foliage_wind")
+
+[node name="berry_bush" parent="Props/eyecandies" unique_id=888765469 instance=ExtResource("28_52qkm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, -9.3)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/berry_bush" unique_id=1360914505]
+script = ExtResource("40_foliage_wind")
+
+[node name="berry_bush2" parent="Props/eyecandies" unique_id=1794700689 instance=ExtResource("28_52qkm")]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -9.7, 0, -6.9)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/berry_bush2" unique_id=55595392]
+script = ExtResource("40_foliage_wind")
+
+[node name="berry_bush3" parent="Props/eyecandies" unique_id=1860891756 instance=ExtResource("28_52qkm")]
+transform = Transform3D(1.6, 0, 0, 0, 2, 0, 0, 0, 1.8, 24.3, 0, 12)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/berry_bush3" unique_id=800554170]
+script = ExtResource("40_foliage_wind")
+
+[node name="berry_bush4" parent="Props/eyecandies" unique_id=1807819526 instance=ExtResource("28_52qkm")]
+transform = Transform3D(1.5454813, 0, 0.5124617, 0, 2.5000002, 0, -0.4141105, 0, 1.9125334, 20.3, 0, 7)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/berry_bush4" unique_id=978202501]
+script = ExtResource("40_foliage_wind")
+
+[node name="berry_bush5" parent="Props/eyecandies" unique_id=1981813892 instance=ExtResource("28_52qkm")]
+transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.0583986e-08, 20.3, 0, 13.1)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/berry_bush5" unique_id=1523019782]
 script = ExtResource("40_foliage_wind")
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
@@ -458,57 +512,3 @@ mesh = SubResource("BoxMesh_wgm46")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test2" unique_id=1376386726]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.509651, 0, -10.17687)
 shape = SubResource("BoxShape3D_256to")
-
-[node name="tree_chesburg_2" parent="." unique_id=823451885 instance=ExtResource("30_vgvlt")]
-transform = Transform3D(-2.9802322e-08, 0, -1.9000001, 0, 1.3, 0, 1.5999999, 0, -5.9604645e-08, 24, 0, -6)
-
-[node name="fence" parent="." unique_id=1234966156 instance=ExtResource("35_0005w")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 0, -3)
-
-[node name="fence2" parent="." unique_id=1128572959 instance=ExtResource("35_0005w")]
-transform = Transform3D(-6.9938224e-08, 0, -1, 0, 1.3, 0, 1.6, 0, -4.371139e-08, 6.1000004, 0, 1.9000002)
-
-[node name="fence3" parent="." unique_id=1056758214 instance=ExtResource("35_0005w")]
-transform = Transform3D(2.0981466e-07, 0, 1, 0, 1.3, 0, -1.6, 0, 1.3113416e-07, 3.1000004, 0, 1.9)
-
-[node name="tree_chesburg_3" parent="." unique_id=929990572 instance=ExtResource("30_vgvlt")]
-transform = Transform3D(-0.33646473, 0, 1.2557036, 0, 1.3, 0, -1.2557036, 0, -0.33646473, 28, 0, 12)
-
-[node name="blueberry_bush" parent="." unique_id=1748432056 instance=ExtResource("37_emeer")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, -12)
-
-[node name="Wind" type="Node" parent="blueberry_bush"]
-script = ExtResource("40_foliage_wind")
-
-[node name="berry_bush" parent="." unique_id=888765469 instance=ExtResource("28_52qkm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, -9.3)
-
-[node name="Wind" type="Node" parent="berry_bush"]
-script = ExtResource("40_foliage_wind")
-
-[node name="berry_bush2" parent="." unique_id=1794700689 instance=ExtResource("28_52qkm")]
-transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -9.7, 0, -6.9)
-
-[node name="Wind" type="Node" parent="berry_bush2"]
-script = ExtResource("40_foliage_wind")
-
-[node name="berry_bush3" parent="." unique_id=1860891756 instance=ExtResource("28_52qkm")]
-transform = Transform3D(1.6, 0, 0, 0, 2, 0, 0, 0, 1.8, 24.3, 0, 12)
-
-[node name="Wind" type="Node" parent="berry_bush3"]
-script = ExtResource("40_foliage_wind")
-
-[node name="berry_bush4" parent="." unique_id=1807819526 instance=ExtResource("28_52qkm")]
-transform = Transform3D(1.5454813, 0, 0.5124617, 0, 2.5000002, 0, -0.4141105, 0, 1.9125334, 20.3, 0, 7)
-
-[node name="Wind" type="Node" parent="berry_bush4"]
-script = ExtResource("40_foliage_wind")
-
-[node name="berry_bush5" parent="." unique_id=1981813892 instance=ExtResource("28_52qkm")]
-transform = Transform3D(-4.8956753e-08, 0, 1.386, 0, 1.7499999, 0, -1.12, 0, -6.0583986e-08, 20.3, 0, 13.1)
-
-[node name="Wind" type="Node" parent="berry_bush5"]
-script = ExtResource("40_foliage_wind")
-
-[node name="tree_chesburg_６" parent="." unique_id=490283275 instance=ExtResource("24_i8mdn")]
-transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 21, 0, 3)

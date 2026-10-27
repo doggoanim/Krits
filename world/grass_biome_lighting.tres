@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1_v032n")
 sun_energy = 1.2
+sun_shadow_blur = 0.0
 brightness = 0.83
 contrast = 1.15
 saturation = 1.0
