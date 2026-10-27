@@ -122,6 +122,17 @@ func _ready() -> void:
 	add_child(_slime_drip)
 	_swim_bubbles = _build_emitter(_bubble_material(), 8, 1.2, false, _bubble_quad)
 	_swim_bubbles.position.y = 1.3   # roughly head height, not the feet — bubbles rise off the face/chest
+	# GPUParticles3D culls the WHOLE emitter against visibility_aabb, computed
+	# in the emitter's own local space — local_coords = false lets individual
+	# bubbles drift in world space well away from that origin as they rise,
+	# but the default box (sized for short-range one-shot bursts, the common
+	# case for every OTHER emitter here) doesn't account for that drift at
+	# all. With a box too small to cover a bubble's actual rise, some camera
+	# angles put that small box outside the view frustum and the engine culls
+	# the entire system — every bubble vanishes at once — even though the
+	# risen bubbles themselves are plainly still in view. A generous box
+	# covering the full rise range fixes that.
+	_swim_bubbles.visibility_aabb = AABB(Vector3(-1.5, -0.5, -1.5), Vector3(3.0, 3.0, 3.0))
 	add_child(_swim_bubbles)
 
 # ---------------------------------------------------------------- continuous
@@ -449,8 +460,8 @@ func _bubble_material() -> ParticleProcessMaterial:
 	m.gravity = Vector3(0.0, BUBBLE_BASE_GRAVITY, 0.0)
 	m.damping_min = 0.0
 	m.damping_max = 0.3
-	m.scale_min = 0.04
-	m.scale_max = 0.34
+	m.scale_min = 0.005
+	m.scale_max = 0.24
 	m.color_ramp = _bubble_ramp_tex
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	m.emission_sphere_radius = 0.3
