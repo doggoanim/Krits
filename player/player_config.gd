@@ -30,6 +30,11 @@ extends Resource
 											## between the two scales linearly with steepness,
 											## see slope_speed_for_angle()
 @export var slope_slide_accel := 25.0      ## how quickly slope-sliding ramps up to its target speed
+@export var slope_exit_lock_time := 0.1    ## briefly locks out steering/accel right after leaving
+											## a forced slope slide (see GroundState's
+											## _slope_exit_t) — carries whatever momentum the
+											## slide had instead of snapping straight to full
+											## player control the instant the ground levels out
 @export var slope_jump_push := 6.0         ## extra horizontal kick along the downhill direction when
 											## jumping off a slope slide, added on top of whatever
 											## momentum the slide had already built up

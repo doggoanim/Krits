@@ -18,6 +18,8 @@ var _no_input_t := 0.0   ## seconds input has read as fully released, continuous
                            ## stop_detect_delay below, right where "stopping" is computed
 var _slope_sliding := false   ## true while forced into the steep-slope slide below — only used
                                ## to play the skid sound once per slide, not every single frame
+var _slope_exit_t := 0.0   ## >0 for a short window right after leaving the forced slope slide —
+                            ## see config.slope_exit_lock_time
 
 ## Footsteps are timed to the running clip's own loop (see PlayerVisual.run_phase())
 ## rather than a fixed timer: a footstep fires each time playback crosses one
@@ -39,6 +41,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.can_dive = true
 	_move_t = 0.0
 	_slope_sliding = false
+	_slope_exit_t = 0.0
 	if _msg.get("jump_queued", false):
 		# A jump pressed sometime during a long jump's flight (see
 		# LongJumpState) — re-arm the buffer so this state's own
@@ -113,6 +116,12 @@ func physics_update(delta: float) -> void:
 		if not p.is_on_floor():
 			machine.transition_to(&"Air")
 		return
+	if _slope_sliding:
+		# Just left the forced slide (the ground leveled back out under you) —
+		# lock out steering/accel for a beat rather than snapping straight to
+		# full control, so momentum carries through the transition instead of
+		# the player being able to instantly redirect it.
+		_slope_exit_t = c.slope_exit_lock_time
 	_slope_sliding = false
 
 	# Fast enough stop or sharp enough reversal triggers a brief slide. Only
@@ -192,11 +201,14 @@ func physics_update(delta: float) -> void:
 		# last stretch — 1 - frac^2 so the deceleration rate itself ramps up.
 		var frac := clampf(_slide_t / c.slide_time, 0.0, 1.0)
 		h = _slide_dir * (_slide_start_speed * (1.0 - frac * frac))
+	elif _slope_exit_t > 0.0:
+		_slope_exit_t -= delta
+		h = prev_h   # frozen — carries the slide's exit momentum untouched, see above
 	else:
 		var speed := c.walk_speed * (Player.SLIME_SPEED_MULT if p.is_slimed() else 1.0)
 		h = prev_h.move_toward(input * speed, (c.ground_accel if moving else c.ground_decel) * delta)
 	p.set_hvel(h)
-	if moving and not was_sliding:
+	if moving and not was_sliding and _slope_exit_t <= 0.0:
 		p.face(input, delta)
 	if moving:
 		p.visual.play(PlayerVisual.ANIM_RUN, 0.15, PlayerVisual.RUN_ANIM_SPEED)

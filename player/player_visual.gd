@@ -297,11 +297,15 @@ func set_slimed(active: bool) -> void:
 ## purely cosmetic pose that should still protect itself from being
 ## overwritten but never take control away (the top-of-wall jump's roll
 ## pose, say — full air control from the moment it leaves the wall).
-func play_hold(anim_name: StringName, duration: float, speed := 1.0, blocks_control := true) -> void:
+## `blend` is forwarded to play() as-is — defaults to a short crossfade like
+## before, but a lunge-interrupting reaction (a wall bounce cutting off
+## air_dive/long_jump's own instant-cut pose, say) should pass 0.0 so the old
+## pose doesn't linger on screen fading out underneath the new one.
+func play_hold(anim_name: StringName, duration: float, speed := 1.0, blocks_control := true, blend := 0.15) -> void:
 	_hold_t = duration
 	_held_anim = anim_name
 	_hold_blocks_control = blocks_control
-	play(anim_name, 0.15, speed, true)
+	play(anim_name, blend, speed, true)
 
 ## Normalized position (0..1) through anim_name's own loop, or -1.0 if it
 ## isn't the one currently playing. Used to time a footstep/climb sound to
