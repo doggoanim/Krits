@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 Events="*res://core/events.gd"
 InputSetup="*res://core/input_setup.gd"
 Game="*res://core/game.gd"
+Music="*res://core/music_player.gd"
 
 [display]
 
