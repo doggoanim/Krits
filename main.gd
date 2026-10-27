@@ -16,12 +16,20 @@ extends Node3D
 ## without touching code.
 @export var env_config: EnvironmentConfig
 
-## Levels in the "interior_level" group (see world/interior_room.tscn's own
-## root node) swap the outdoor sky out for solid black and switch the sun
-## off — see _apply_level_lighting(). An interior is still lit, just by its
-## own OmniLight3D lamp instead of the outdoor sun/ambient, which would
-## otherwise keep shining in through walls that have no outdoor geometry on
-## the other side of them to actually block it.
+## The same kind of resource, but for levels in the "interior_level" group
+## (see world/interior_room.tscn's own root node) — see world/interior.tres
+## for the current indoor look (warm sunset LUT, tighter contrast). Swapped
+## in wholesale by _apply_level_lighting() whenever you step through a door,
+## and swapped back out for env_config the moment you're outside again.
+## Leave unset to just reuse env_config indoors too.
+@export var interior_env_config: EnvironmentConfig = preload("res://world/interior.tres")
+
+## Levels in the INTERIOR_GROUP additionally force the sky out for solid
+## black and switch the sun off entirely — see _apply_level_lighting(). This
+## part isn't a style choice interior_env_config can override: an enclosed
+## room has no sky to show and no outdoor geometry on the far side of its
+## walls to block the sun from shining straight through, so both would look
+## broken regardless of which EnvironmentConfig is active.
 const INTERIOR_GROUP := &"interior_level"
 
 ## Retro pixelation overlay (see core/pixelate_effect.gd) — block size in
@@ -52,11 +60,9 @@ var cam: CameraRig
 var encounters: EncounterManager
 var level: Node3D   ## the currently active level root — see _swap_level()
 
-## See _build_environment()/_apply_level_lighting().
+## See _build_environment()/_apply_environment_config()/_apply_level_lighting().
 var _sun: DirectionalLight3D
 var _env: Environment
-var _outdoor_bg_mode: Environment.BGMode
-var _outdoor_ambient_energy: float
 
 func _ready() -> void:
 	Game.load_game()
@@ -191,88 +197,104 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE \
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 
+## Builds the one Sun/WorldEnvironment pair the whole game uses, as direct
+## children of Main rather than part of the swappable `level` (see `level`'s
+## own doc comment) so they persist untouched across every _swap_level() —
+## only their properties change, via _apply_environment_config(). Starts out
+## wearing env_config's outdoor look; _apply_level_lighting() takes it from
+## here the moment a level is actually in hand.
 func _build_environment() -> void:
-	var cfg := env_config if env_config else EnvironmentConfig.new()
-
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = cfg.sun_rotation_degrees
-	sun.light_color = cfg.sun_color
-	sun.light_energy = cfg.sun_energy
-	sun.shadow_enabled = cfg.sun_shadows
-	sun.shadow_blur = cfg.sun_shadow_blur
-	sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 	add_child(sun)
 
 	var env := Environment.new()
-	env.background_mode = Environment.BG_SKY
 	env.sky = Sky.new()
-	var sky_mat := ProceduralSkyMaterial.new()
+	env.sky.sky_material = ProceduralSkyMaterial.new()
+	# A flat, near-neutral ambient color (not sourced from the sky) so a vivid
+	# sky doesn't tint the character/props blue — only the sky itself is blue.
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+
+	var we := WorldEnvironment.new()
+	we.environment = env
+	add_child(we)
+
+	_sun = sun
+	_env = env
+	_apply_environment_config(env_config if env_config else EnvironmentConfig.new())
+
+## Applies every look/grading value an EnvironmentConfig carries — sun,
+## sky colors, ambient, tonemap, glow, SSAO, volumetric fog, color grading —
+## onto the shared Sun/Environment _build_environment() built once. Used for
+## env_config at startup, and again by _apply_level_lighting() with whichever
+## config fits every time a level loads, so swapping between outdoor and an
+## interior_level re-grades the whole scene, not just its background.
+##
+## Deliberately leaves background_mode/background_color and the sun's own
+## `visible` alone — those are the structural indoor/outdoor split
+## _apply_level_lighting() layers on top afterward, not a style choice this
+## config gets a say in (see INTERIOR_GROUP's doc comment).
+func _apply_environment_config(cfg: EnvironmentConfig) -> void:
+	_sun.rotation_degrees = cfg.sun_rotation_degrees
+	_sun.light_color = cfg.sun_color
+	_sun.light_energy = cfg.sun_energy
+	_sun.shadow_enabled = cfg.sun_shadows
+	_sun.shadow_blur = cfg.sun_shadow_blur
+	_sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
+
+	var sky_mat := _env.sky.sky_material as ProceduralSkyMaterial
 	sky_mat.sky_top_color = cfg.sky_top_color
 	sky_mat.sky_horizon_color = cfg.sky_horizon_color
 	sky_mat.ground_bottom_color = cfg.ground_bottom_color
 	sky_mat.ground_horizon_color = cfg.ground_horizon_color
-	env.sky.sky_material = sky_mat
-	# A flat, near-neutral ambient color (not sourced from the sky) so a vivid
-	# sky doesn't tint the character/props blue — only the sky itself is blue.
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = cfg.ambient_color
-	env.ambient_light_energy = cfg.ambient_energy
 
-	env.tonemap_mode = cfg.tonemap_mode
-	env.tonemap_exposure = cfg.exposure
-	env.tonemap_white = cfg.white_point
+	_env.background_mode = Environment.BG_SKY
+	_env.ambient_light_color = cfg.ambient_color
+	_env.ambient_light_energy = cfg.ambient_energy
 
-	env.glow_enabled = cfg.glow_enabled
-	env.glow_intensity = cfg.glow_intensity
-	env.glow_bloom = cfg.glow_bloom
-	env.glow_hdr_threshold = cfg.glow_hdr_threshold
+	_env.tonemap_mode = cfg.tonemap_mode
+	_env.tonemap_exposure = cfg.exposure
+	_env.tonemap_white = cfg.white_point
 
-	env.ssao_enabled = cfg.ssao_enabled
-	env.ssao_intensity = cfg.ssao_intensity
-	env.ssao_radius = cfg.ssao_radius
+	_env.glow_enabled = cfg.glow_enabled
+	_env.glow_intensity = cfg.glow_intensity
+	_env.glow_bloom = cfg.glow_bloom
+	_env.glow_hdr_threshold = cfg.glow_hdr_threshold
+
+	_env.ssao_enabled = cfg.ssao_enabled
+	_env.ssao_intensity = cfg.ssao_intensity
+	_env.ssao_radius = cfg.ssao_radius
 
 	# Volumetric fog is what actually produces visible sun shafts/god rays
 	# through trees and gaps (see EnvironmentConfig's header comment on the
 	# group) — it's the sun's light_volumetric_fog_energy above, set on the
 	# DirectionalLight itself, that makes this fog volume actually light up
 	# instead of just sitting there as flat haze.
-	env.volumetric_fog_enabled = cfg.volumetric_fog_enabled
-	env.volumetric_fog_density = cfg.volumetric_fog_density
-	env.volumetric_fog_albedo = cfg.volumetric_fog_albedo
-	env.volumetric_fog_anisotropy = cfg.volumetric_fog_anisotropy
-	env.volumetric_fog_length = cfg.volumetric_fog_length
-	env.volumetric_fog_gi_inject = cfg.volumetric_fog_gi_inject
+	_env.volumetric_fog_enabled = cfg.volumetric_fog_enabled
+	_env.volumetric_fog_density = cfg.volumetric_fog_density
+	_env.volumetric_fog_albedo = cfg.volumetric_fog_albedo
+	_env.volumetric_fog_anisotropy = cfg.volumetric_fog_anisotropy
+	_env.volumetric_fog_length = cfg.volumetric_fog_length
+	_env.volumetric_fog_gi_inject = cfg.volumetric_fog_gi_inject
 
-	env.adjustment_enabled = cfg.adjustment_enabled
-	env.adjustment_brightness = cfg.brightness
-	env.adjustment_contrast = cfg.contrast
-	env.adjustment_saturation = cfg.saturation
-	if cfg.color_correction_lut:
-		env.adjustment_color_correction = cfg.color_correction_lut
+	_env.adjustment_enabled = cfg.adjustment_enabled
+	_env.adjustment_brightness = cfg.brightness
+	_env.adjustment_contrast = cfg.contrast
+	_env.adjustment_saturation = cfg.saturation
+	# Set unconditionally (not just "if present") so going back to a config
+	# with no LUT of its own actually clears one a previous config set.
+	_env.adjustment_color_correction = cfg.color_correction_lut
 
-	var we := WorldEnvironment.new()
-	we.environment = env
-	add_child(we)
-
-	# Captured so _apply_level_lighting() can swap between this and a solid-
-	# black indoor look, and restore the outdoor one exactly rather than
-	# guessing back at the sky/ambient values env_config originally set.
-	_sun = sun
-	_env = env
-	_outdoor_bg_mode = env.background_mode
-	_outdoor_ambient_energy = env.ambient_light_energy
-
-## Switches the sky/sun out for a plain black void, and the ambient wash off
-## entirely, whenever the just-loaded level is in the INTERIOR_GROUP — called
-## right after instancing a level, both on first load and on every Door swap.
-## An interior still gets lit; it's just lit by its own OmniLight3D lamp
-## (see world/interior_room.tscn) rather than by anything outdoor, since
-## there's no outdoor geometry on the far side of its walls to block the sun/
-## sky from shining straight through otherwise. Restores the exact outdoor
-## values _build_environment() set up the moment you're back outside.
+## Re-grades the whole scene for whichever side of a door you're now on, and
+## additionally force the sky/sun off for a plain black void whenever the
+## just-loaded level is in the INTERIOR_GROUP — called right after
+## instancing a level, both on first load and on every Door swap. See
+## interior_env_config's doc comment for the look itself, and
+## INTERIOR_GROUP's for why the void/sun part isn't part of that config.
 func _apply_level_lighting(lvl: Node) -> void:
 	var indoor := lvl.is_in_group(INTERIOR_GROUP)
-	_env.background_mode = Environment.BG_COLOR if indoor else _outdoor_bg_mode
-	_env.background_color = Color.BLACK
-	_env.ambient_light_energy = 0.0 if indoor else _outdoor_ambient_energy
+	var cfg := interior_env_config if indoor and interior_env_config else env_config
+	_apply_environment_config(cfg if cfg else EnvironmentConfig.new())
+	if indoor:
+		_env.background_mode = Environment.BG_COLOR
+		_env.background_color = Color.BLACK
 	_sun.visible = not indoor
