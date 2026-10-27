@@ -14,26 +14,24 @@ extends GPUParticles3D
 ## heavier later if the game ever needs clouds the camera can fly through or
 ## that drive actual weather.
 ##
-## Shape variety comes from a small procedural sprite sheet (see
-## _make_cloud_atlas): each of its SHAPE_GRID*SHAPE_GRID frames is itself 2-4
-## overlapping soft circles baked together, so a single frame already reads
-## as a little stacked cluster rather than one perfectly round blob — no
-## real per-particle clustering needed. Every particle picks a random frame
-## (and a random rotation) at spawn, so the field doesn't read as the same
-## shape copy-pasted across the sky.
+## Each cloud is the same soft round sprite AmbientMotes/FallingLeaves
+## already use (proven to look fine, unlike an earlier hand-baked lumpy-
+## shape attempt here that didn't). "Varied, can-stack" shapes come from
+## cluster_lobes: several of these soft circles spawn stacked tightly
+## together per cloud, each with its own randomized size, so the overlap
+## itself is what reads as one bigger lumpy cluster instead of a single
+## perfectly round blob — real overlapping sprites, not a baked texture
+## trick.
 
 @export var area_size := Vector2(150.0, 150.0)   ## how wide a patch of sky this covers, centered on this node
 @export var height := 35.0                        ## how high above this node's own Y the layer sits
-@export var cloud_count := 14
-@export var cloud_size := Vector2(18.0, 10.0)
+@export var cloud_count := 10                      ## number of CLUSTERS — actual sprite count is this * cluster_lobes
+@export var cluster_lobes := 4                      ## soft circles stacked per cluster — higher = lumpier/fluffier
+@export var cluster_spread := 6.0                   ## how far a cluster's lobes scatter from its own center
+@export var cloud_size := Vector2(16.0, 16.0)
 @export var cloud_color := Color(1.0, 1.0, 1.0, 0.85)
 @export var drift_speed := 0.6          ## world units/sec along +X — same travel direction WindGusts uses
 @export var react_to_gusts := true      ## clouds visibly speed up while a gust is sweeping through
-
-const SHAPE_GRID := 2       ## 2x2 = 4 distinct cloud-shape frames baked into the atlas
-const ATLAS_SIZE := 256     ## total atlas pixels per side (ATLAS_SIZE / SHAPE_GRID per frame)
-
-static var _cloud_atlas: ImageTexture   ## shared across every SkyClouds instance — built once
 
 var _mat: ParticleProcessMaterial
 
@@ -54,25 +52,16 @@ func _build() -> void:
 	mat.initial_velocity_min = drift_speed * 0.8
 	mat.initial_velocity_max = drift_speed
 	mat.gravity = Vector3.ZERO
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	mat.emission_box_extents = Vector3(area_size.x, 4.0, area_size.y) * 0.5
-	mat.emission_shape_offset = Vector3(0.0, height, 0.0)   # lifts the whole box up without moving this node itself
-	mat.scale_min = 0.7
-	mat.scale_max = 1.4
+	# Explicit jittered points rather than one big box: every lobe's spawn
+	# point is baked close to its own cluster's siblings (see
+	# _make_cluster_points), which is what makes several overlapping soft
+	# circles actually overlap instead of scattering independently and
+	# rarely landing near each other.
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_POINTS
+	mat.emission_points = _make_cluster_points()
+	mat.scale_min = 0.6
+	mat.scale_max = 1.2
 	mat.color_ramp = _make_fade_ramp(cloud_color)
-	# Each particle freezes on one random frame of the shape atlas (anim_speed
-	# 0, anim_offset randomized) instead of animating through it — the
-	# standard Godot trick for giving particles a random static sprite
-	# variant from a frame atlas rather than every particle using frame 0.
-	mat.anim_speed_min = 0.0
-	mat.anim_speed_max = 0.0
-	mat.anim_offset_min = 0.0
-	mat.anim_offset_max = 1.0
-	mat.angle_min = -180.0   # random initial billboard-plane rotation, so repeated frames don't
-	mat.angle_max = 180.0    # all land facing the exact same way either
-
-	if _cloud_atlas == null:
-		_cloud_atlas = _make_cloud_atlas()
 
 	var quad := QuadMesh.new()
 	quad.size = cloud_size
@@ -81,13 +70,10 @@ func _build() -> void:
 	surf.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	surf.vertex_color_use_as_albedo = true
-	surf.albedo_texture = _cloud_atlas
-	surf.particles_anim_h_frames = SHAPE_GRID
-	surf.particles_anim_v_frames = SHAPE_GRID
-	surf.particles_anim_loop = false
+	surf.albedo_texture = SoftCircleTexture.make(48)
 	quad.material = surf
 
-	amount = cloud_count
+	amount = cloud_count * cluster_lobes
 	lifetime = area_size.x / maxf(drift_speed, 0.05)   # ~ time to drift across area_size once
 	preprocess = lifetime   # pre-roll so the sky is already full of clouds on load, not empty at first
 	randomness = 1.0
@@ -105,11 +91,31 @@ func _build() -> void:
 	# particles are still clearly on screen. Setting this explicitly, sized
 	# to the real drift area plus a margin for each cloud's own size, is
 	# what actually fixes the "clouds disappear at some angles" symptom.
-	var margin: float = maxf(cloud_size.x, cloud_size.y) * 1.5
+	var margin: float = maxf(cloud_size.x, cloud_size.y) * 1.5 + cluster_spread
 	visibility_aabb = AABB(
 		Vector3(-area_size.x * 0.5 - margin, height - margin, -area_size.y * 0.5 - margin),
 		Vector3(area_size.x + margin * 2.0, margin * 2.0, area_size.y + margin * 2.0)
 	)
+
+## cloud_count cluster centers scattered across area_size at `height`, each
+## with cluster_lobes points jittered within cluster_spread of it — see this
+## file's header comment for why clustered points (not one big random box)
+## is what makes clouds read as lumpy stacked clusters.
+func _make_cluster_points() -> PackedVector3Array:
+	var points := PackedVector3Array()
+	for i in cloud_count:
+		var center := Vector3(
+			randf_range(-area_size.x * 0.5, area_size.x * 0.5),
+			height,
+			randf_range(-area_size.y * 0.5, area_size.y * 0.5),
+		)
+		for j in cluster_lobes:
+			points.append(center + Vector3(
+				randf_range(-cluster_spread, cluster_spread),
+				randf_range(-cluster_spread * 0.3, cluster_spread * 0.3),
+				randf_range(-cluster_spread, cluster_spread),
+			))
+	return points
 
 static func _make_fade_ramp(c: Color) -> GradientTexture1D:
 	var g := Gradient.new()
@@ -122,34 +128,3 @@ static func _make_fade_ramp(c: Color) -> GradientTexture1D:
 	var t := GradientTexture1D.new()
 	t.gradient = g
 	return t
-
-## Bakes a SHAPE_GRID x SHAPE_GRID sprite sheet where each frame is 2-4
-## overlapping soft circles merged by taking the brightest one at each pixel
-## (not summed, so overlaps don't blow out past full white) — a cheap way to
-## get a lumpy, "stacked cluster" silhouette per frame without needing
-## several real mesh instances per cloud. Built once and cached in
-## _cloud_atlas; every SkyClouds instance shares it.
-static func _make_cloud_atlas() -> ImageTexture:
-	var img := Image.create(ATLAS_SIZE, ATLAS_SIZE, false, Image.FORMAT_RGBA8)
-	var cell := ATLAS_SIZE / SHAPE_GRID
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1   # fixed — a stable-looking atlas baked the same way every run, not reshuffled each launch
-
-	for frame_y in SHAPE_GRID:
-		for frame_x in SHAPE_GRID:
-			var lobes: Array[Vector3] = []   # x, y (cell-local pixels), radius
-			for i in rng.randi_range(2, 4):
-				lobes.append(Vector3(
-					cell * 0.5 + rng.randf_range(-cell * 0.22, cell * 0.22),
-					cell * 0.5 + rng.randf_range(-cell * 0.15, cell * 0.15),
-					cell * rng.randf_range(0.22, 0.32),
-				))
-			for py in cell:
-				for px in cell:
-					var alpha := 0.0
-					for lobe in lobes:
-						var dist := Vector2(px, py).distance_to(Vector2(lobe.x, lobe.y))
-						alpha = maxf(alpha, clampf(1.0 - dist / lobe.z, 0.0, 1.0))
-					img.set_pixel(frame_x * cell + px, frame_y * cell + py, Color(1.0, 1.0, 1.0, alpha))
-
-	return ImageTexture.create_from_image(img)
