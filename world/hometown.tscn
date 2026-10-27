@@ -334,6 +334,8 @@ drift_speed = 0.3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -10)
 script = ExtResource("42_wind_lines")
 area_size = Vector3(20, 3, 20)
+line_thickness = 0.08
+trail_fraction = 1.0
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
@@ -367,7 +369,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.90913105, 0.043483734, 4.86
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.739195, 0.64848197, -2.9766304)
 
 [node name="grass1" parent="Props/eyecandies" unique_id=1743353139 instance=ExtResource("26_muepx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
+transform = Transform3D(1, 0, 0, 0, 2.6, 0, 0, 0, 1, 13, 0, -4)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/grass1" unique_id=1966091545]
 script = ExtResource("40_foliage_wind")
@@ -379,7 +381,7 @@ transform = Transform3D(1, 0, 0, 0, -7.8680486e-08, 1.6, 0, -1.8000001, -6.99382
 transform = Transform3D(-1, 1.57361e-07, 6.114193e-15, 0, -7.8680486e-08, 1.6, 8.742278e-08, 1.8000001, 6.993822e-08, 10, 0.38494915, -14)
 
 [node name="grass2" parent="Props/eyecandies" unique_id=1863238249 instance=ExtResource("27_yu71x")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -14)
+transform = Transform3D(1, 0, 0, 0, 2.6, 0, 0, 0, 1, 13, 0, -14)
 
 [node name="Wind" type="Node" parent="Props/eyecandies/grass2" unique_id=891379699]
 script = ExtResource("40_foliage_wind")
