@@ -35,6 +35,14 @@ static func _get_white_texture() -> Texture2D:
 		_white_texture = ImageTexture.create_from_image(img)
 	return _white_texture
 
+## Public wrapper around the same cached 1x1 white texture, for any other
+## code that binds a shader's sampler2D albedo parameter from an existing
+## material that might not have one (see the comment above) — e.g.
+## world/foliage_wind.gd, which does the same "untextured material" swap
+## for world props that this file does for characters.
+static func white_texture() -> Texture2D:
+	return _get_white_texture()
+
 ## Scales `model` uniformly so its current rest-pose bounding-box height
 ## matches `target_height`. Returns the AABB measured *before* scaling, so
 ## callers can size other things (like outline thickness) proportionally to
