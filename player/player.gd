@@ -331,6 +331,19 @@ func _update_water() -> void:
 	if deep and machine.current_name != &"Swim" and swim_exit_cd <= 0.0:
 		machine.transition_to(&"Swim")
 	elif not deep and machine.current_name == &"Swim":
+		# Pressing jump to swim UP (SwimState's own gentle vertical control,
+		# not a real jump) still sets jump_buffer_t like any other press — see
+		# _update_timers(). Left alone, that stale buffer combined with coyote
+		# already reading >0 (from resting at/near the lake floor while still
+		# technically in Swim — coyote tracks is_on_floor() regardless of
+		# state) fires AirState's own buffered-jump the instant this
+		# transition lands next frame: a real, full-strength jump
+		# (config.jump_velocity, far more than swim_vertical_speed) launching
+		# the player straight up right as they finish swimming down and press
+		# jump to swim back up. Clearing it here, right at the one place
+		# every such transition passes through, stops that without touching
+		# jump_buffer/coyote's legitimate behavior anywhere else.
+		jump_buffer_t = 0.0
 		# Air's own on-floor check next frame settles whether this is a true
 		# fall or you've actually surfaced onto solid ground — same reasoning
 		# as _unstick() forcing Air rather than guessing Ground directly.

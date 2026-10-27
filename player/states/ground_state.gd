@@ -149,7 +149,17 @@ func physics_update(delta: float) -> void:
 	# first; reversing itself needs no such delay since it only fires once
 	# the opposing input actually shows up.
 	var stopping := not moving and _no_input_t >= c.stop_detect_delay and _move_t >= c.slide_min_move_time
-	var reversing := moving and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
+	# step_up_grace: same reasoning as on_steep_slope above — a step's own
+	# corner can deflect prev_h (last frame's actual velocity, post-collision)
+	# well off whatever direction the stick is actually held, for a single
+	# frame right as a step resolves. Read at face value, that misread as a
+	# sharp player-initiated reversal and fired the whole turn-skid reaction
+	# (slide pose, hvel frozen to the deflected direction, and — since face()
+	# is skipped for the rest of the skid's hold — facing visibly stuck on
+	# the deflected direction for a beat) right as the player climbed a step,
+	# with no actual reversal input behind it at all.
+	var reversing := moving and p.step_up_grace <= 0.0 \
+			and prev_h.normalized().dot(input.normalized()) <= c.slide_turn_dot
 	var starting_slide := not was_sliding and prev_h.length() >= c.slide_min_speed and (stopping or reversing)
 	if starting_slide:
 		_slide_is_turn = reversing
