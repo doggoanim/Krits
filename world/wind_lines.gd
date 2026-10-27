@@ -57,7 +57,7 @@ func _build() -> void:
 	mat.turbulence_enabled = true
 	mat.turbulence_noise_strength = curve_strength
 	mat.turbulence_noise_scale = 1.5
-	mat.particle_flag_align_y_to_velocity = true   # orients the streak along its own motion
+	mat.set_particle_flag(ParticleProcessMaterial.PARTICLE_FLAG_ALIGN_Y_TO_VELOCITY, true)   # orients the streak along its own motion
 	mat.color_ramp = _make_fade_ramp(line_color)
 
 	var quad := QuadMesh.new()
