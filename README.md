@@ -92,18 +92,32 @@ toward the new direction.
 			 (talk vs. open ShopMenu). Door also extends it: walking up and pressing interact swaps the
 			 active level for its `target_level`, landing the player on whichever Spawnpoint/DoorSpawn
 			 in it has `target_spawn_id` (see Main._on_level_travel_requested()/LoadingScreen (ui/) for
-			 the cartoon iris-pulse cover the swap happens behind). DoorSpawn is a lightweight interior-
-			 only arrival marker (no fast-travel unlock/heal, unlike Spawnpoint). InteriorRoom is a
-			 building-interior blockout in the same spirit as TestLevel: one box mesh with its material
-			 cull_mode flipped (CULL_FRONT) so it renders from the inside instead of the outside — see
-			 its own doc comment — plus a door back out built in automatically; duplicate
-			 interior_room.tscn per distinct building and swap in real assets later.
-			 house_1_interior.tscn is a worked example of that duplication: an InteriorRoom instance
-			 for house_chesburg_1, wired to a Door + DoorSpawn (both children of that house node in
-			 hometown.tscn, spawn_id `house_1_entrance`) placed just outside its front wall -- nudge
-			 their position in the editor if they don't line up with the model's actual doorway, the
-			 placement here is an estimate since the house's door isn't a separate node in its .glb.
-			 WorldEnemy (pops in
+			 the cartoon iris wipe it happens behind). DoorSpawn is a lightweight interior-only arrival
+			 marker (no fast-travel unlock/heal, unlike Spawnpoint). interior_room.tscn is a building-
+			 interior blockout in the same per-box spirit as TestLevel, but as real scene nodes instead
+			 of code: six separate thin StaticBody3D panels (Floor, Ceiling, WallNorth/South/East/West),
+			 each with its own CollisionShape3D — a true hollow shell, not one solid block covering the
+			 whole room (an earlier, code-generated version of this scene made exactly that mistake: one
+			 BoxShape3D sized to the whole room is solid collision filling the ENTIRE volume, not a
+			 hollow one, so anything spawned inside it got shoved out unpredictably — it read as falling
+			 through/off the floor). The ceiling and walls use a cull_mode-FRONT material so what
+			 renders is each panel's INNER face rather than its outer one; the floor uses the ordinary
+			 cull-back material since its top face already faces the right way. Carries a ReturnDoor +
+			 ReturnSpawn back out. Open it (or any interior duplicated from it) directly in the editor
+			 to see/resize the room — nothing about its layout is generated at runtime anymore.
+			 Duplicate the whole scene per distinct building, resize/reposition its panels to the new
+			 room's shape, and swap in real wall/furniture assets later. house_1_interior.tscn is a
+			 worked example of that duplication, for house_chesburg_1 — wired to a Door + DoorSpawn
+			 (both children of that house node in hometown.tscn, spawn_id `house_1_entrance`) placed
+			 just outside its front wall; nudge their position in the editor if they don't line up with
+			 the model's actual doorway, since the placement here is an estimate — the house's door
+			 isn't a separate node in its .glb. Door.target_level and ReturnDoor's own target_level are
+			 a .tscn PATH (@export_file), not a PackedScene export, and deliberately so: an interior's
+			 return door normally points right back at the very level that placed the entrance Door
+			 leading to it, so the two scenes reference each other, and a PackedScene export bakes that
+			 into a real circular ext_resource dependency Godot's loader can deadlock on ("Parse Error:
+			 Busy"). A path string carries no such edge — Door._interact() loads it lazily, only once
+			 actually used. WorldEnemy (pops in
 			 when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
 			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
@@ -119,8 +133,11 @@ toward the new direction.
 			 wave height itself as a stand-in)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
-			 later), LoadingScreen (full black cover + a pulsing hollow ring, built by UiRoot and
-			 driven entirely by Main's Door-swap handler — see world/door.gd). Static layout for all
+			 later), LoadingScreen (a real cartoon iris wipe — iris_mask.gdshader draws solid black
+			 outside a circular hole and fully transparent inside it, and the script just animates that
+			 hole's radius down to a point and back out, rather than a decorative shape floating on an
+			 already-opaque screen — built by UiRoot and driven entirely by Main's Door-swap handler, see
+			 world/door.gd). Static layout for all
 			 of these lives in their matching .tscn (hud.tscn,
 			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn inheriting it,
 			 screen_transition.tscn, loading_screen.tscn) — open any of them in the editor to move/resize things;

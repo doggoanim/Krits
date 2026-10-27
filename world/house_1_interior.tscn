@@ -1,11 +1,133 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=12 format=3]
 
-[ext_resource type="Script" path="res://world/interior_room.gd" id="1"]
+[ext_resource type="Script" path="res://world/door.gd" id="1"]
+[ext_resource type="Script" path="res://world/door_spawn.gd" id="2"]
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(8, 0.2, 8)
+
+[sub_resource type="BoxMesh" id="FloorMesh"]
+size = Vector3(8, 0.2, 8)
+
+[sub_resource type="StandardMaterial3D" id="OuterMat"]
+albedo_color = Color(0.82, 0.74, 0.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="InnerMat"]
+albedo_color = Color(0.82, 0.74, 0.6, 1)
+cull_mode = 1
+
+[sub_resource type="BoxShape3D" id="NSWallShape"]
+size = Vector3(8, 3.2, 0.2)
+
+[sub_resource type="BoxMesh" id="NSWallMesh"]
+size = Vector3(8, 3.2, 0.2)
+
+[sub_resource type="BoxShape3D" id="EWWallShape"]
+size = Vector3(0.2, 3.2, 8)
+
+[sub_resource type="BoxMesh" id="EWWallMesh"]
+size = Vector3(0.2, 3.2, 8)
+
+[sub_resource type="BoxShape3D" id="DoorShape"]
+size = Vector3(1.2, 2.2, 0.3)
+
+[sub_resource type="BoxMesh" id="DoorMesh"]
+size = Vector3(1.2, 2.2, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="DoorMat"]
+albedo_color = Color(0.35, 0.22, 0.12, 1)
 
 [node name="House1Interior" type="Node3D"]
-script = ExtResource("1")
-room_size = Vector3(8, 3.2, 8)
-wall_color = Color(0.82, 0.74, 0.6, 1)
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("FloorMesh")
+material_override = SubResource("OuterMat")
+
+[node name="Ceiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("FloorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("FloorMesh")
+material_override = SubResource("InnerMat")
+
+[node name="WallNorth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 4)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="WallNorth"]
+shape = SubResource("NSWallShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallNorth"]
+mesh = SubResource("NSWallMesh")
+material_override = SubResource("InnerMat")
+
+[node name="WallSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -4)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="WallSouth"]
+shape = SubResource("NSWallShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallSouth"]
+mesh = SubResource("NSWallMesh")
+material_override = SubResource("InnerMat")
+
+[node name="WallEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.6, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="WallEast"]
+shape = SubResource("EWWallShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallEast"]
+mesh = SubResource("EWWallMesh")
+material_override = SubResource("InnerMat")
+
+[node name="WallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.6, 0)
+collision_layer = 129
+
+[node name="Collision" type="CollisionShape3D" parent="WallWest"]
+shape = SubResource("EWWallShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallWest"]
+mesh = SubResource("EWWallMesh")
+material_override = SubResource("InnerMat")
+
+[node name="Lamp" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
 light_color = Color(1, 0.88, 0.7, 1)
-exit_level = "res://world/hometown.tscn"
-exit_spawn_id = &"house_1_entrance"
+light_energy = 1.4
+omni_range = 7.2
+
+[node name="ReturnDoor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.8)
+script = ExtResource("1")
+target_level = "res://world/hometown.tscn"
+target_spawn_id = &"house_1_entrance"
+prompt_text = "Press E to exit"
+
+[node name="Collision" type="CollisionShape3D" parent="ReturnDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("DoorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="ReturnDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("DoorMesh")
+material_override = SubResource("DoorMat")
+
+[node name="ReturnSpawn" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.6)
+script = ExtResource("2")
+spawn_id = &"house_1_entrance"
