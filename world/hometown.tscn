@@ -98,15 +98,6 @@ albedo_color = Color(0.8117647, 0.6627451, 0.19215687, 1)
 radius = 0.4
 height = 1.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_wgm46"]
-size = Vector3(0.63, 11.65, 7.895)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_aa14t"]
-size = Vector3(0.63, 11.65, 7.895)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_256to"]
-size = Vector3(0.63, 11.65, 7.895)
-
 [node name="Hometown" type="Node3D" unique_id=1195529557]
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
@@ -580,32 +571,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 5, 0)
 script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
-
-[node name="Debug" type="Node3D" parent="." unique_id=419982432]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.820147, 0, 0)
-
-[node name="test" type="StaticBody3D" parent="Debug" unique_id=911434677]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 33.856796, 5.193923, -14.587875)
-collision_layer = 257
-collision_mask = 257
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Debug/test" unique_id=963138141]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.176876, 0, 6.5096464)
-mesh = SubResource("BoxMesh_wgm46")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test" unique_id=1209494254]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.176876, 0, 6.5096464)
-shape = SubResource("BoxShape3D_aa14t")
-
-[node name="test2" type="StaticBody3D" parent="Debug" unique_id=154162387]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 29.93472, 5.193923, -18.553587)
-collision_layer = 257
-collision_mask = 257
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Debug/test2" unique_id=1426599119]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.509651, 0, -10.17687)
-mesh = SubResource("BoxMesh_wgm46")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Debug/test2" unique_id=1376386726]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.509651, 0, -10.17687)
-shape = SubResource("BoxShape3D_256to")
