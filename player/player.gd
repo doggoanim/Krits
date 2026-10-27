@@ -454,7 +454,12 @@ func _update_auto_unstick(delta: float, on_floor: bool) -> void:
 ## any of the above: if it's tagged NO_STEP_UP_GROUP, bail immediately and let
 ## it collide like an ordinary wall — see that constant's comment for why.
 func _try_step_up() -> void:
-	if not is_on_floor():
+	# Swimming can graze the lake floor (near the shore, or just diving deep
+	# enough) and briefly read as is_on_floor() too — this assist is only
+	# meant for walking up literal stairs/curbs, and treating the floor
+	# ahead as a climbable riser while buoyant launched the player straight
+	# up out of the water on nothing more than turning toward it.
+	if not is_on_floor() or machine.current_name == &"Swim":
 		return
 	var horizontal := velocity * Vector3(1.0, 0.0, 1.0)
 	if horizontal.length() < 0.01:
