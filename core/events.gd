@@ -19,6 +19,10 @@ signal stats_changed
 signal spawnpoint_activated(id: StringName)
 signal fast_travel_requested(id: StringName)
 signal story_flag_changed(flag: StringName, value: Variant)
+## A Door was used — Main swaps the active level for `level_scene` and places
+## the player at whichever Spawnpoint/DoorSpawn inside it has `spawn_id`,
+## behind LoadingScreen's cartoon iris-pulse. See world/door.gd.
+signal level_travel_requested(level_scene: PackedScene, spawn_id: StringName)
 
 # Dialogue
 signal dialogue_started

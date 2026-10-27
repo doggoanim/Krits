@@ -42,12 +42,13 @@ extends Node3D
 var player: Player
 var cam: CameraRig
 var encounters: EncounterManager
+var level: Node3D   ## the currently active level root — see _swap_level()
 
 func _ready() -> void:
 	Game.load_game()
 	_build_environment()
 
-	var level := level_scene.instantiate() if level_scene else TestLevel.new()
+	level = level_scene.instantiate() if level_scene else TestLevel.new()
 	add_child(level)
 
 	player = Player.new()
@@ -107,6 +108,7 @@ func _ready() -> void:
 
 	Events.encounter_returned.connect(_on_encounter_returned)
 	Events.fast_travel_requested.connect(_travel_to)
+	Events.level_travel_requested.connect(_on_level_travel_requested)
 	_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 
 func _travel_to(id: StringName) -> void:
@@ -116,6 +118,52 @@ func _travel_to(id: StringName) -> void:
 			player.teleport(sp.respawn_position())
 			cam.global_position = player.global_position
 			return
+
+## A Door was used (see world/door.gd/Events.level_travel_requested). Freezes
+## the player and locks input for the whole swap, then hands the actual work
+## to LoadingScreen so it happens hidden behind the cover rather than visibly
+## mid-frame — see _swap_level().
+func _on_level_travel_requested(next_level: PackedScene, spawn_id: StringName) -> void:
+	if next_level == null:
+		return
+	Game.input_locked = true
+	player.enter_cinematic()
+	await LoadingScreen.instance.run(func(): _swap_level(next_level, spawn_id))
+	Game.input_locked = false
+
+## Frees the current level, instantiates `next_level` in its place, and
+## re-points everything that was keyed to the old level (encounters' world
+## geometry, registered world enemies) at the new one before placing the
+## player. Only ever called from inside LoadingScreen.run()'s covered window
+## (see _on_level_travel_requested()) — nothing here is meant to be visible
+## while it happens.
+func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
+	if level:
+		level.queue_free()   # deferred — see _find_spawn_in()'s doc comment for why that matters here
+	level = next_level.instantiate()
+	add_child(level)
+	encounters.setup(player, level)
+	for n in level.find_children("*", "", true, false):
+		if n is WorldEnemy:
+			encounters.register_world_enemy(n)
+	var pos := _find_spawn_in(level, spawn_id)
+	player.teleport(pos if pos != null else level.global_position)
+	cam.global_position = player.global_position
+
+## Scoped to `root` (the level that was just instantiated) rather than a
+## global group lookup like _travel_to() above uses — right after a swap the
+## OLD level's nodes are technically still in the tree (queue_free() only
+## takes effect at end of frame) and could carry the exact same spawn id
+## (every interior's own DoorSpawn defaults to &"enter", for instance), so a
+## global search could still match the one about to disappear instead of the
+## new level's own. Scoping the search to `root` sidesteps that entirely.
+func _find_spawn_in(root: Node, id: StringName) -> Variant:
+	for n in root.find_children("*", "", true, false):
+		if n is Spawnpoint and (n as Spawnpoint).spawn_id == id:
+			return (n as Spawnpoint).respawn_position()
+		if n is DoorSpawn and (n as DoorSpawn).spawn_id == id:
+			return (n as DoorSpawn).respawn_position()
+	return null
 
 func _on_encounter_returned(player_defeated: bool) -> void:
 	if player_defeated:

@@ -89,8 +89,16 @@ toward the new direction.
 			 ShopKeeper (world/) is the in-world trigger that opens it.
 - world/     Interactable (shared range/prompt/trigger base — floats a prompt while the player's in
 			 range and able to use it, calls _interact() on press), NPC and ShopKeeper both extend it
-			 (talk vs. open ShopMenu). WorldEnemy (pops in when near, wanders, touch = fight), Spawnpoint,
-			 WorldChunk (distance-based
+			 (talk vs. open ShopMenu). Door also extends it: walking up and pressing interact swaps the
+			 active level for its `target_level`, landing the player on whichever Spawnpoint/DoorSpawn
+			 in it has `target_spawn_id` (see Main._on_level_travel_requested()/LoadingScreen (ui/) for
+			 the cartoon iris-pulse cover the swap happens behind). DoorSpawn is a lightweight interior-
+			 only arrival marker (no fast-travel unlock/heal, unlike Spawnpoint). InteriorRoom is a
+			 building-interior blockout in the same spirit as TestLevel: one box mesh with its material
+			 cull_mode flipped (CULL_FRONT) so it renders from the inside instead of the outside — see
+			 its own doc comment — plus a door back out built in automatically; duplicate
+			 interior_room.tscn per distinct building and swap in real assets later. WorldEnemy (pops in
+			 when near, wanders, touch = fight), Spawnpoint, WorldChunk (distance-based
 			 visibility culling for a region), WorldGate (blocks a path until a story flag is set),
 			 EnvironmentConfig (sun/sky/tonemap/glow/color-grading tunables), hometown.tscn (the default
 			 first area — a small plaza built from plain Godot nodes: boxes, cylinders, prisms, no
@@ -105,9 +113,11 @@ toward the new direction.
 			 wave height itself as a stand-in)
 - ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
-			 later). Static layout for all of these lives in their matching .tscn (hud.tscn,
+			 later), LoadingScreen (full black cover + a pulsing hollow ring, built by UiRoot and
+			 driven entirely by Main's Door-swap handler — see world/door.gd). Static layout for all
+			 of these lives in their matching .tscn (hud.tscn,
 			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn inheriting it,
-			 screen_transition.tscn) — open any of them in the editor to move/resize things;
+			 screen_transition.tscn, loading_screen.tscn) — open any of them in the editor to move/resize things;
 			 the .gd scripts just hold behavior now (refresh logic, tweens, signals). The two
 			 exceptions are deliberate: PortraitSlot is a single custom-drawn Control with
 			 nothing to lay out, and PortraitViewport builds its private mini 3D scene (lights,
