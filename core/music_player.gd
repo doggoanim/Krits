@@ -10,11 +10,19 @@ extends Node
 
 @export var bus := &"Master"
 
+## Linear scale on top of whatever the track's own file volume already is —
+## 1.0 = unchanged, 0.5 = half as loud. Converted to dB for AudioStreamPlayer
+## (which only takes volume_db) via linear_to_db() below. Tucked down for
+## now since the music was coming in too loud over everything else; raise
+## it back toward 1.0 once the rest of the mix is tuned.
+@export_range(0.0, 1.0) var volume_scale := 0.5
+
 var _player: AudioStreamPlayer
 
 func _ready() -> void:
 	_player = AudioStreamPlayer.new()
 	_player.bus = bus
+	_player.volume_db = linear_to_db(volume_scale)
 	_player.finished.connect(_on_finished)
 	add_child(_player)
 
