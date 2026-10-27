@@ -65,6 +65,18 @@ func _ready() -> void:
 		var box := BoxShape3D.new()
 		box.size = size
 		cs.shape = box
+	# A bare BoxShape3D/CylinderShape3D is centered on this node's own
+	# origin, extending size.y/2 both above AND below it — but surface_y
+	# (and contains_point()'s own box/cylinder test below) treats the WHOLE
+	# shape as sitting below the surface, from surface_y down to
+	# surface_y - size.y. Left uncorrected, the ACTUAL collider's top sits
+	# size.y/2 above the surface too, well past the visible waterline — so
+	# jumping or swimming "out" had to clear that much extra height before
+	# the Area3D ever actually registered as exited (and the next landing's
+	# body_entered, with it, the splash) at all, instead of leaving right
+	# at the surface like it looks like it should. Offsetting the shape's
+	# own position down into the water aligns the two.
+	cs.position.y = surface_y - size.y * 0.5
 	add_child(cs)
 
 	body_entered.connect(_on_body_entered)
