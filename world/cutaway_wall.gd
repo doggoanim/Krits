@@ -33,6 +33,16 @@ extends StaticBody3D
 
 @export var normal_axis := Vector3.BACK
 
+## Half this panel's own depth along normal_axis (every wall/ceiling/floor
+## box in interior_room.tscn is 0.2 thick, so 0.1 here) — see _process()'s
+## use of it: without this margin, "outward" was measured from the panel's
+## exact center plane, leaving a dead zone the size of the panel's own
+## thickness where the camera could end up physically embedded inside the
+## slab while the wall was still rendering normally, showing its inside-out
+## geometry from within. Cutting away a little before the camera actually
+## reaches the panel's own volume avoids that.
+@export var half_thickness := 0.1
+
 ## Every CutawayWall's own physics RID, for PlayerXray to exclude from its
 ## camera->player raycast (see that script's own doc comment) — a wall hiding
 ## its mesh to let the camera see into the room still keeps its collision
@@ -62,7 +72,9 @@ func _process(_delta: float) -> void:
 	# Camera on (or past) the outward side -> render nothing (but keep
 	# casting a shadow), so it can see through to the room without the
 	# room's own lighting changing. Camera still on the inward side -> show,
-	# same as a normal wall.
-	var outward := to_cam.dot(world_normal) > 0.0
+	# same as a normal wall. Threshold sits half_thickness BEFORE the panel's
+	# center plane (not at it) so the cutaway has already happened by the
+	# time the camera would otherwise be inside the panel's own geometry.
+	var outward := to_cam.dot(world_normal) > -half_thickness
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
 		if outward else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
