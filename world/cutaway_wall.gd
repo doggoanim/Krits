@@ -19,10 +19,23 @@ extends StaticBody3D
 
 @export var normal_axis := Vector3.BACK
 
+## Every CutawayWall's own physics RID, for PlayerXray to exclude from its
+## camera->player raycast (see that script's own doc comment) — a wall hiding
+## its mesh to let the camera see into the room still keeps its collision
+## (so the player can't walk through it), and without this exclusion that
+## collision alone was enough to trip PlayerXray's halftone silhouette right
+## on top of an already-correct cutaway view. Same static-registry idiom as
+## WaterVolume.active.
+static var active: Array[RID] = []
+
 var _mesh: MeshInstance3D
 
 func _ready() -> void:
 	_mesh = find_child("Mesh", false, false) as MeshInstance3D
+	active.append(get_rid())
+
+func _exit_tree() -> void:
+	active.erase(get_rid())
 
 func _process(_delta: float) -> void:
 	if _mesh == null:

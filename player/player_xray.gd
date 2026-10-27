@@ -11,6 +11,14 @@ extends Node3D
 ## view of the player is fully blocked — sampling several heights (feet,
 ## waist, head) rather than one point, so a sliver of the character still
 ## peeking over/around cover counts as visible, not occluded.
+##
+## CutawayWall panels (world/cutaway_wall.gd) are excluded from the
+## occlusion raycast: those walls already hide their own mesh once the
+## camera is on their outward side, specifically so you can see straight
+## into a room from outside — but they keep their collision (so the player
+## still can't walk through them), and without this exclusion that leftover
+## collision alone was enough to trip this halftone overlay right on top of
+## an already-correct, already-visible view into the room.
 
 const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
@@ -63,7 +71,7 @@ func _is_occluded() -> bool:
 		if from.distance_squared_to(to) < 0.01:
 			return false
 		var query := PhysicsRayQueryParameters3D.create(from, to, 1)   # world geometry only
-		query.exclude = [player.get_rid()]
+		query.exclude = [player.get_rid()] + CutawayWall.active
 		var hit := space.intersect_ray(query)
 		if hit.is_empty():
 			return false   # this point is visible — not fully obstructed
