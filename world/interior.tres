@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://c64wq2d3g2uua"]
+
+[ext_resource type="CompressedTexture3D" uid="uid://b7ywf065f6aoe" path="res://assets/luts/sunset_lut.png" id="1_8eeuw"]
+[ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="2_j81s5"]
+
+[resource]
+script = ExtResource("2_j81s5")
+sun_energy = 1.2
+sun_shadow_blur = 0.0
+volumetric_fog_enabled = true
+brightness = 0.83
+contrast = 1.15
+saturation = 1.0
+color_correction_lut = ExtResource("1_8eeuw")
