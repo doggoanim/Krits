@@ -13,9 +13,8 @@ shader_type canvas_item;
 /// idea of the real aspect ratio on its own.
 uniform float radius : hint_range(0.0, 1.5) = 1.3;
 uniform vec2 aspect = vec2(1.0, 1.0);
-uniform float edge_softness : hint_range(0.0, 0.1) = 0.015;   ## a hard edge reads as
-																## a jagged circle at
-																## screen resolution
+// A hard edge reads as a jagged circle at screen resolution.
+uniform float edge_softness : hint_range(0.0, 0.1) = 0.015;
 
 void fragment() {
 	vec2 centered = (UV - vec2(0.5)) * aspect;
