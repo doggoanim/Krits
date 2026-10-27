@@ -61,6 +61,13 @@ func _apply_recursive(n: Node) -> void:
 			_apply_recursive(c)
 
 func _wind_ify(mi: MeshInstance3D) -> void:
+	# Sway height is measured from wherever this mesh's geometry actually
+	# starts, not blindly from local Y=0 — most foliage here has its pivot at
+	# the base already (so this is just 0), but an asset authored with its
+	# pivot somewhere else (a flower card centered on its own bounding box,
+	# say) would otherwise see most/all of its vertices read as height 0 and
+	# barely sway — see the shader's own comment on base_y.
+	var base_y := mi.mesh.get_aabb().position.y if mi.mesh else 0.0
 	for i in mi.mesh.get_surface_count() if mi.mesh else 0:
 		var src := mi.get_active_material(i)
 		var wind_mat := ShaderMaterial.new()
@@ -96,5 +103,6 @@ func _wind_ify(mi: MeshInstance3D) -> void:
 		wind_mat.set_shader_parameter(&"wind_strength", wind_strength)
 		wind_mat.set_shader_parameter(&"wind_speed", wind_speed)
 		wind_mat.set_shader_parameter(&"wind_scale", wind_scale)
+		wind_mat.set_shader_parameter(&"base_y", base_y)
 		mi.set_surface_override_material(i, wind_mat)
 		_materials.append(wind_mat)

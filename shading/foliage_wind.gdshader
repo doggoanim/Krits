@@ -19,15 +19,21 @@ render_mode cull_disabled;
 // prop-scale meshes, so it's simplest to always disable culling here rather
 // than add a second variant shader just for that one flag.
 //
-// Vertex sway relies on the convention every foliage asset here already
-// follows: the mesh's own origin sits at its base (planted at Y=0), so
-// VERTEX.y is already "local height above the ground" with no extra offset
-// needed — taller parts (a blade's tip, a branch's end) sway further than
-// the root without any per-asset calibration. wind_strength is in world
-// units of sway per world unit of local height, so the same value naturally
-// reads as a small flutter on short grass and a visibly bigger sway on a
-// tall tree's crown; tune per-instance via FoliageWind's exports if a
-// particular prop needs to look calmer or wilder than that default scaling.
+// Vertex sway wants "local height above the ground", which most foliage
+// assets here give for free (mesh origin planted at the base, so VERTEX.y
+// already IS that height) — but not every imported asset follows that
+// convention (a flower card authored with its pivot at the center or top,
+// say), and for one of those almost the entire mesh could read as height 0
+// and barely sway at all. base_y corrects for that: FoliageWind.gd measures
+// each mesh's own local AABB once at setup and hands its lowest Y down here,
+// so height is always relative to wherever the mesh ACTUALLY starts,
+// whatever the pivot convention of the source asset happened to be.
+// wind_strength is in world units of sway per world unit of that height, so
+// the same value naturally reads as a small flutter on short grass and a
+// visibly bigger sway on a tall tree's crown; tune per-instance via
+// FoliageWind's exports if a particular prop needs to look calmer or wilder
+// than that default scaling.
+uniform float base_y = 0.0;   // this mesh's own local AABB min Y — see world/foliage_wind.gd
 
 uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
@@ -49,7 +55,7 @@ uniform float gust = 1.0;
 
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	float height = max(VERTEX.y, 0.0);
+	float height = max(VERTEX.y - base_y, 0.0);
 	// Phase depends on world position (not just TIME) so instances of the
 	// same mesh scattered around the level don't all sway in lockstep — each
 	// one samples a slightly different point of the same slow-moving "gust"

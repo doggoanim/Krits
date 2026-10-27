@@ -795,8 +795,14 @@ func bounce_off_orb(combo := 1) -> void:
 ## bounce too), a dive bounce does not, so the chain ends there until you land.
 ## `allow_grounded` lets Roll (which is still on the floor the instant this is
 ## called) trigger it too — everyone else is already airborne so it's moot.
+## `vertical_only` swaps the usual cannon-off-the-wall push for a plain
+## straight-up pop instead — the same read as stepping off the top of a
+## climbed wall (see WallClimbState._jump()'s _at_top case: a normal
+## start_jump(), no horizontal kick). Dive uses this: diving straight at a
+## wall shouldn't fling you back the way you came, it should just carry you
+## up it, so the lunge still makes forward progress instead of undoing itself.
 func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: StringName,
-		bounce_time: float, allow_grounded := false) -> bool:
+		bounce_time: float, allow_grounded := false, vertical_only := false) -> bool:
 	if (is_on_floor() and not allow_grounded) or not is_on_wall() or prev_hvel.length() < config.wall_min_speed:
 		return false
 	var n := get_wall_normal()
@@ -806,8 +812,12 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 	n = n.normalized()
 	if (-prev_hvel.normalized()).dot(n) < 0.35:
 		return false
-	velocity = n * config.wall_bounce_push
-	velocity.y = config.wall_bounce_up
+	if vertical_only:
+		velocity = Vector3.ZERO
+		velocity.y = config.jump_velocity
+	else:
+		velocity = n * config.wall_bounce_push
+		velocity.y = config.wall_bounce_up
 	face(n)
 	visual.play_hold(bounce_anim, bounce_time)
 	var impact_pos := global_position + n * RADIUS + Vector3.UP * (STAND_HEIGHT * 0.5)
