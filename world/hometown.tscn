@@ -40,6 +40,7 @@
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
 [ext_resource type="Script" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
 [ext_resource type="Script" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
+[ext_resource type="Script" path="res://world/wind_lines.gd" id="42_wind_lines"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -319,6 +320,11 @@ color = Color(0.75, 1, 0.45, 0.8)
 glow_energy = 3.5
 mote_size = 0.035
 drift_speed = 0.3
+
+[node name="WindLines" type="GPUParticles3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -10)
+script = ExtResource("42_wind_lines")
+area_size = Vector3(20, 3, 20)
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
