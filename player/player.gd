@@ -273,9 +273,51 @@ func safe_move_and_slide() -> void:
 		push_warning("Player velocity went non-finite (%s) — likely a degenerate collision shape nearby. Resetting to zero." % velocity)
 		velocity = Vector3.ZERO
 	_try_step_up()
+	var pos_before := global_position
 	move_and_slide()
 	if not velocity.is_finite():
 		velocity = Vector3.ZERO
+	_resolve_wedge(pos_before)
+
+## A second, different safety net from the one above: a convex outside corner
+## — e.g. a wall meeting a roof overhang's trim, especially if they're
+## separate collision meshes with a seam between them — can hand
+## move_and_slide() two (or more) contact normals that genuinely conflict,
+## not just a lot of them. No amount of max_slides iteration finds a way out
+## of that; the body can sit there indefinitely with real nonzero velocity
+## but zero actual displacement, perfectly pinned. Unlike the NaN case this
+## produces no bad numbers to detect directly, so instead: if we're airborne,
+## clearly trying to move, and genuinely not going anywhere for a sustained
+## moment, treat that itself as "wedged" and shove free along whatever
+## surfaces are pressing on us. This is also a safety net, not a fix for the
+## underlying seam/corner geometry — but unlike the step-up opt-out group,
+## there's no way to pre-tag "this corner might wedge someone," so a generic
+## recovery is the only approach that covers corners we don't know about yet.
+const WEDGE_STUCK_TIME := 0.2    ## how long "not actually moving" must persist before it counts as wedged
+const WEDGE_MIN_SPEED := 0.5     ## below this, standing still is normal, not a sign of being stuck
+const WEDGE_MOVE_EPSILON := 0.02 ## actual displacement below this (despite nonzero velocity) counts as "stuck"
+const WEDGE_NUDGE_SPEED := 4.0
+var _wedge_t := 0.0
+
+func _resolve_wedge(pos_before: Vector3) -> void:
+	if is_on_floor() or velocity.length() < WEDGE_MIN_SPEED:
+		_wedge_t = 0.0
+		return
+	if global_position.distance_to(pos_before) > WEDGE_MOVE_EPSILON:
+		_wedge_t = 0.0
+		return
+	_wedge_t += get_physics_process_delta_time()
+	if _wedge_t < WEDGE_STUCK_TIME:
+		return
+	_wedge_t = 0.0
+	var escape := Vector3.ZERO
+	for i in get_slide_collision_count():
+		escape += get_slide_collision(i).get_normal()
+	if escape.is_zero_approx():
+		escape = Vector3.UP
+	push_warning("Player wedged in a corner near %s — nudging free." % global_position)
+	velocity = escape.normalized() * WEDGE_NUDGE_SPEED
+	move_and_slide()
 
 ## Stepped stairs are a series of small vertical risers, and a riser is just
 ## a wall as far as move_and_slide() is concerned — without this, climbing a
