@@ -141,9 +141,9 @@ script = ExtResource("7")
 custom_minimum_size = Vector2(340, 0)
 layout_mode = 0
 offset_left = 24.0
-offset_top = 150.0
+offset_top = 190.0
 offset_right = 24.0
-offset_bottom = 150.0
+offset_bottom = 190.0
 
 [node name="LevelLabel" type="Label" parent="Readout" unique_id=1245520595]
 unique_name_in_owner = true
