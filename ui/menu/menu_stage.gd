@@ -42,9 +42,14 @@ func _hold_elapsed() -> float:
 func _input(event: InputEvent) -> void:
 	if not _holding or _hold_elapsed() < SKIP_GRACE:
 		return
-	var pressed := (event is InputEventKey and event.pressed and not event.echo) \
-			or (event is InputEventMouseButton and event.pressed) \
-			or (event is InputEventJoypadButton and event.pressed)
+	var pressed := false
+	if event is InputEventKey:
+		var key := event as InputEventKey
+		pressed = key.pressed and not key.echo
+	elif event is InputEventMouseButton:
+		pressed = (event as InputEventMouseButton).pressed
+	elif event is InputEventJoypadButton:
+		pressed = (event as InputEventJoypadButton).pressed
 	if pressed:
 		_holding = false
 		get_viewport().set_input_as_handled()
