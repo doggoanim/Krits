@@ -8,20 +8,46 @@ extends Node3D
 ## Seconds Krits floats alone in the middle of the screen before sliding aside.
 const INTRO_HOLD := 2.0
 const MOVE_TIME := 1.4
+const SKIP_GRACE := 0.25   ## seconds before a key press can skip the hold
 
 ## Where Krits ends up horizontally: 0 = centre of the screen, 1 = the right
 ## screen edge. 0.5 would be the middle of the right half; 0.38 sits a bit
 ## closer to centre, still clear of the title block on the left.
 @export_range(0.0, 1.0) var hero_screen_x := 0.38
 
+var _holding := false
+var _hold_start_msec := 0
+
 @onready var _hero: MenuHero = %Hero
 @onready var _camera: Camera3D = %Camera
 
 ## The splash has just faded to reveal the void: let Krits float centred for
 ## a beat, then slide him to the right. Awaitable.
+## Pressing any key / click / button during the hold skips the rest of it
+## (ignored for the first SKIP_GRACE seconds, so the press that dismissed the
+## splash can't skip it by accident).
 func play_intro() -> void:
-	await get_tree().create_timer(INTRO_HOLD).timeout
+	_holding = true
+	_hold_start_msec = Time.get_ticks_msec()
+	var elapsed := 0.0
+	while _holding and elapsed < INTRO_HOLD:
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+	_holding = false
 	await move_hero_aside()
+
+func _hold_elapsed() -> float:
+	return (Time.get_ticks_msec() - _hold_start_msec) / 1000.0
+
+func _input(event: InputEvent) -> void:
+	if not _holding or _hold_elapsed() < SKIP_GRACE:
+		return
+	var pressed := (event is InputEventKey and event.pressed and not event.echo) \
+			or (event is InputEventMouseButton and event.pressed) \
+			or (event is InputEventJoypadButton and event.pressed)
+	if pressed:
+		_holding = false
+		get_viewport().set_input_as_handled()
 
 func move_hero_aside() -> void:
 	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
