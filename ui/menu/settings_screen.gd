@@ -35,32 +35,34 @@ func _ready() -> void:
 		_tab_buttons[i].pressed.connect(_show_page.bind(i))
 	_reset.pressed.connect(_on_reset)
 	_return.pressed.connect(_go_back)
-	_mouse_focus_only(self)
+	_disable_tab_focus(self)
 
 func enter(_payload: Dictionary = {}) -> void:
 	_cancel_rebind()
 	_sync()
 	_tab_buttons[0].button_pressed = true
 	_show_page(0)
-	get_viewport().gui_release_focus()
+	_tab_buttons[0].grab_focus()
 
 func exit() -> void:
 	_cancel_rebind()
 	Settings.save()
 
-## This page is mouse-driven: clicking a control focuses it, but no key
-## (Tab, arrows) moves focus from one control to the next.
-func _mouse_focus_only(node: Node) -> void:
+## Tab / Shift+Tab are disabled on this page: each control's "next" and
+## "previous" focus target is itself, so those keys leave focus where it is.
+## Arrow keys (and Enter / Space) still move between and operate controls.
+func _disable_tab_focus(node: Node) -> void:
 	for child in node.get_children():
 		if child is Control:
-			child.focus_mode = Control.FOCUS_CLICK
-		_mouse_focus_only(child)
+			child.focus_next = child.get_path()
+			child.focus_previous = child.get_path()
+		_disable_tab_focus(child)
 
 # --- Input ----------------------------------------------------------------
 
 func _input(event: InputEvent) -> void:
-	# The Tab key doesn't move focus between settings controls (Tab is also a
-	# bindable key here). Swallowed unless we're capturing a new binding below.
+	# Belt and braces with _disable_tab_focus(): Tab never reaches the GUI here,
+	# unless we're capturing a new binding below.
 	if _rebinding == &"" and is_visible_in_tree() \
 			and (event.is_action_pressed(&"ui_focus_next") or event.is_action_pressed(&"ui_focus_prev")):
 		get_viewport().set_input_as_handled()
