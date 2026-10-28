@@ -8,7 +8,8 @@ render_mode unshaded, cull_disabled, depth_draw_never, blend_mix;
 global uniform float time_offset;   // pausable shader clock — see ShaderClock
 
 uniform vec4 chalk : source_color = vec4(1.0, 1.0, 1.0, 1.0);
-uniform float wall_height = 90.0;   // mesh height, to find "metres above the ground"
+uniform float wall_height = 90.0;   // total mesh height
+uniform float below_ground = 14.0;  // how much of it sits under the ground line
 uniform float band_height = 0.7;    // the solid chalk band at the base
 uniform float fade_height = 9.0;    // metres over which the wall fades to nothing
 uniform float hatch_scale = 1.1;    // stroke density
@@ -19,12 +20,12 @@ varying float h;
 
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	h = VERTEX.y + wall_height * 0.5;   // height above the segment's ground (mesh-local)
+	h = VERTEX.y + wall_height * 0.5 - below_ground;   // metres above the ground line (negative = underground)
 }
 
 void fragment() {
 	float t = TIME - time_offset;
-	float fade = 1.0 - smoothstep(0.0, fade_height, h);
+	float fade = (1.0 - smoothstep(0.0, fade_height, h)) * (1.0 - smoothstep(0.0, below_ground, -h));
 	// Diagonal hatch strokes that sway a little as they climb — jittery like
 	// someone redrawing the line every few frames.
 	float jitter = floor(t * 6.0);

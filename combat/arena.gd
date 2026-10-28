@@ -37,6 +37,8 @@ const WALL_DEPTH_BELOW_GROUND := 20.0   ## how far the wall's COLLIDER (only) ex
                                  ## though only its center point is raycast, which left a
                                  ## gap a player could slide/roll under at the segment's
                                  ## edges; purely underground so it's never visible
+const WALL_VISIBLE_BELOW := 14.0   ## the wall's visible mesh also reaches this far underground, so it
+                                   ## shows through slopes/dips (the intro grows it up AND down)
 const WALL_SEGMENTS := 28       ## faceted approximation of a circle
 const ORBS_BASE := 5
 const ORBS_PER_ENEMY := 2
@@ -226,9 +228,11 @@ func play_outro() -> void:
 ## the ground edge fixed in place instead of growing from the segment's
 ## vertical center in both directions at once.
 func _set_wall_growth(t: float) -> void:
+	# The mesh spans from WALL_VISIBLE_BELOW under the ground line up to
+	# WALL_HEIGHT above it; scaling about the ground line grows it both ways.
 	for mesh in _wall_meshes:
 		mesh.scale.y = t
-		mesh.position.y = -WALL_HEIGHT * 0.5 * (1.0 - t)
+		mesh.position.y = (WALL_HEIGHT - WALL_VISIBLE_BELOW) * 0.5 * t - WALL_HEIGHT * 0.5
 
 ## Call once the barrier is solid; enemies start shooting after a short intro.
 func start_fight() -> void:
@@ -671,7 +675,15 @@ func _build_barrier() -> void:
 
 		var wall_pos := local_pos
 		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
-		_wall_meshes.append(_slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y, WALL_DEPTH_BELOW_GROUND))
+		var wall_mesh := _slab(wall_pos, Vector3(seg_len, WALL_HEIGHT, 1.0), wall_col, WALL_LAYER, 0.0, true, rot_y, WALL_DEPTH_BELOW_GROUND)
+		# Stretch the visible mesh down below the ground line too (the
+		# collider already goes deep) and tell the shader where "ground" is.
+		(wall_mesh.mesh as BoxMesh).size.y = WALL_HEIGHT + WALL_VISIBLE_BELOW
+		wall_mesh.position.y = -WALL_VISIBLE_BELOW * 0.5
+		var wall_mat := wall_mesh.material_override as ShaderMaterial
+		wall_mat.set_shader_parameter(&"wall_height", WALL_HEIGHT + WALL_VISIBLE_BELOW)
+		wall_mat.set_shader_parameter(&"below_ground", WALL_VISIBLE_BELOW)
+		_wall_meshes.append(wall_mesh)
 
 		var ring_pos := local_pos
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
