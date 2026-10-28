@@ -17,14 +17,38 @@ extends Node
 ## it back toward 1.0 once the rest of the mix is tuned.
 @export_range(0.0, 1.0) var volume_scale := 0.5
 
+## While a menu is open the game is paused, but the music keeps playing —
+## muffled (lowpass on the Music bus) and a little quieter, easing in and out.
+@export var menu_cutoff_hz := 900.0
+@export_range(0.0, 1.0) var menu_volume_mult := 0.75
+@export var menu_blend_speed := 6.0
+
+const OPEN_CUTOFF_HZ := 20500.0   ## lowpass fully open = no audible effect
+
 var _player: AudioStreamPlayer
+var _lowpass: AudioEffectLowPassFilter
+var _blend := 0.0   ## 0 = normal, 1 = fully muffled (menu open)
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS   # keep playing while a menu pauses the tree
+	var bus_idx := AudioServer.get_bus_index(bus)
+	if bus_idx != -1:
+		_lowpass = AudioEffectLowPassFilter.new()
+		_lowpass.cutoff_hz = OPEN_CUTOFF_HZ
+		AudioServer.add_bus_effect(bus_idx, _lowpass)
 	_player = AudioStreamPlayer.new()
 	_player.bus = bus
 	_player.volume_db = linear_to_db(volume_scale)
 	_player.finished.connect(_on_finished)
 	add_child(_player)
+
+func _process(delta: float) -> void:
+	var target := 1.0 if MenuBase.open_menu != null else 0.0
+	_blend = move_toward(_blend, target, menu_blend_speed * delta)
+	if _lowpass:
+		# Interpolate in log space so the sweep sounds even.
+		_lowpass.cutoff_hz = exp(lerpf(log(OPEN_CUTOFF_HZ), log(menu_cutoff_hz), _blend))
+	_player.volume_db = linear_to_db(volume_scale * lerpf(1.0, menu_volume_mult, _blend))
 
 ## Starts `stream` looping from the top. A no-op if it's already the track
 ## playing, so callers can call this every frame/level-load without
