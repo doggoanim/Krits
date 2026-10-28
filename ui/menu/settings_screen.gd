@@ -5,7 +5,7 @@ extends MenuScreen
 ##
 ## Every option control in settings_screen.tscn carries `metadata/setting` =
 ## the Settings key it edits, and this script binds them automatically by
-## control type (HSlider, CheckButton, OptionButton; OptionButton item ids ARE
+## control type (HSlider, on/off toggle buttons, OptionButton; OptionButton item ids ARE
 ## the stored values). So adding an option = add a Settings key + a row in the
 ## scene; nothing here changes. The only generated rows are the key-binding
 ## buttons, because that list comes from InputSetup.BINDINGS.

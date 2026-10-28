@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" path="res://ui/menu/settings_screen.gd" id="1"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/enabled.png" id="2_on"]
+[ext_resource type="Texture2D" path="res://assets/ui/disabled.png" id="3_off"]
+
 [sub_resource type="ButtonGroup" id="TabGroup"]
 
 [node name="SettingsScreen" type="Control"]
@@ -131,8 +134,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "VSync"
 
-[node name="VSync" type="CheckButton" parent="Content/Pages/DisplayPage/VSyncRow"]
+[node name="VSync" type="TextureButton" parent="Content/Pages/DisplayPage/VSyncRow"]
+custom_minimum_size = Vector2(273, 84)
 layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
 metadata/setting = &"display/vsync"
 
 [node name="FpsCapRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
@@ -272,8 +282,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "Mute When Unfocused"
 
-[node name="MuteUnfocused" type="CheckButton" parent="Content/Pages/AudioPage/MuteUnfocusedRow"]
+[node name="MuteUnfocused" type="TextureButton" parent="Content/Pages/AudioPage/MuteUnfocusedRow"]
+custom_minimum_size = Vector2(273, 84)
 layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
 metadata/setting = &"audio/mute_unfocused"
 
 [node name="ControlsPage" type="VBoxContainer" parent="Content/Pages"]
@@ -317,8 +334,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "Invert Camera Y"
 
-[node name="InvertY" type="CheckButton" parent="Content/Pages/ControlsPage/InvertYRow"]
+[node name="InvertY" type="TextureButton" parent="Content/Pages/ControlsPage/InvertYRow"]
+custom_minimum_size = Vector2(273, 84)
 layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
 metadata/setting = &"controls/invert_y"
 
 [node name="Scroll" type="ScrollContainer" parent="Content/Pages/ControlsPage"]
@@ -352,8 +376,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "Screen Shake"
 
-[node name="ScreenShake" type="CheckButton" parent="Content/Pages/AccessibilityPage/ScreenShakeRow"]
+[node name="ScreenShake" type="TextureButton" parent="Content/Pages/AccessibilityPage/ScreenShakeRow"]
+custom_minimum_size = Vector2(273, 84)
 layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
 metadata/setting = &"accessibility/screen_shake"
 
 [node name="ResetButton" type="Button" parent="."]
