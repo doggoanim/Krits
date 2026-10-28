@@ -13,7 +13,7 @@ extends RefCounted
 ## currently worn/wielded — that's what max_hp()/max_shield()/damage() read.
 
 const BASE_HP := 100.0
-const BASE_SHIELD := 50.0
+const BASE_SHIELD := 0.0    ## no shield worn = no shield bar
 const BASE_DAMAGE := 1.0   ## orb hits are the only thing that uses this — combo scaling
                            ## (see Arena.COMBO_BONUS) still ramps up from here as normal
 const SHIELD_RECHARGE_DELAY := 3.0
@@ -95,6 +95,19 @@ func buy(item: EquipmentData) -> bool:
 func is_owned(item: EquipmentData) -> bool:
 	return _owns(item)
 
+## Takes the armor or shield off (back to the base stat). Weapons can't be
+## removed. `slot_item` is any item of the slot to clear, e.g. the equipped one.
+func unequip(slot_item: EquipmentData) -> void:
+	if slot_item is ArmorData:
+		equipped_armor = null
+		hp = minf(hp, max_hp())
+	elif slot_item is ShieldData:
+		equipped_shield = null
+		shield = minf(shield, max_shield())
+	else:
+		return
+	Events.stats_changed.emit()
+
 func equip(item: EquipmentData) -> void:
 	if item is ArmorData:
 		equipped_armor = item
@@ -130,10 +143,14 @@ func from_dict(d: Dictionary) -> void:
 	owned_armors = _load_id_array(d.get("owned_armors", []), EquipmentLibrary.starting_armor().id)
 	owned_shields = _load_id_array(d.get("owned_shields", []), EquipmentLibrary.starting_shield().id)
 	owned_weapons = _load_id_array(d.get("owned_weapons", []), EquipmentLibrary.starting_weapon().id)
+	# A missing key means an old save (wear the starter); an empty string means
+	# "deliberately took it off".
 	equipped_armor = EquipmentLibrary.by_id(StringName(d.get("equipped_armor", ""))) as ArmorData
-	if equipped_armor == null: equipped_armor = EquipmentLibrary.starting_armor()
+	if equipped_armor == null and d.has("equipped_armor") == false:
+		equipped_armor = EquipmentLibrary.starting_armor()
 	equipped_shield = EquipmentLibrary.by_id(StringName(d.get("equipped_shield", ""))) as ShieldData
-	if equipped_shield == null: equipped_shield = EquipmentLibrary.starting_shield()
+	if equipped_shield == null and d.has("equipped_shield") == false:
+		equipped_shield = EquipmentLibrary.starting_shield()
 	equipped_weapon = EquipmentLibrary.by_id(StringName(d.get("equipped_weapon", ""))) as WeaponData
 	if equipped_weapon == null: equipped_weapon = EquipmentLibrary.starting_weapon()
 	full_heal()

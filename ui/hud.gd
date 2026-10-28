@@ -80,7 +80,8 @@ func _refresh() -> void:
 	var s := Game.stats
 	_hp_fill.max_value = s.max_hp()
 	_hp_fill.value = s.hp
-	_shield_outline.max_value = s.max_shield()
+	_shield_outline.max_value = maxf(s.max_shield(), 1.0)
+	_shield_outline.visible = s.max_shield() > 0.0   # no shield worn, no bar
 	_shield_outline.value = s.shield
 	# Stamina has no gameplay source yet (reserved for future abilities) —
 	# shown full until something drains it.

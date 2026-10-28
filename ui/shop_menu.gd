@@ -50,8 +50,14 @@ func _row(item: EquipmentData, is_equipped: bool) -> void:
 
 	var b := Button.new()
 	if is_equipped:
-		b.text = "Equipped"
-		b.disabled = true
+		if item is WeaponData:
+			b.text = "Equipped"
+			b.disabled = true
+		else:
+			b.text = "Take off"
+			b.pressed.connect(func():
+				s.unequip(item)
+				refresh())
 	else:
 		b.text = "Equip" if is_owned else "Buy"
 		b.disabled = not is_owned and item.price > s.gold

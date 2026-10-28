@@ -50,7 +50,7 @@ static func buckler() -> ShieldData:
 	s.id = &"buckler"
 	s.display_name = "Wooden Shield"
 	s.price = 0
-	s.shield_bonus = 0.0
+	s.shield_bonus = 10.0
 	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
 	return s
 

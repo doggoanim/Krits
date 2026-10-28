@@ -294,7 +294,7 @@ func _fill_gear(list: VBoxContainer, owned: Array, equipped: EquipmentData) -> v
 		b.add_theme_font_size_override(&"font_size", 40)
 		b.set_meta(GEAR_ID_META, item.id)
 		b.focus_entered.connect(_on_gear_focused.bind(item))
-		b.pressed.connect(_equip.bind(item))
+		b.pressed.connect(_toggle_gear.bind(item, is_equipped))
 		list.add_child(b)
 
 func _focus_gear() -> void:
@@ -316,7 +316,9 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	_detail_name.text = item.display_name
 	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)
-	_detail_kind.text = "Equipped" if equipped != null and equipped.id == item.id else "Press to equip"
+	var worn := equipped != null and equipped.id == item.id
+	var removable := item is ArmorData or item is ShieldData
+	_detail_kind.text = ("Equipped — press to take off" if removable else "Equipped") if worn else "Press to equip"
 	_detail_text.text = _gear_text(item)
 
 func _gear_text(item: EquipmentData) -> String:
@@ -326,6 +328,14 @@ func _gear_text(item: EquipmentData) -> String:
 	elif item is WeaponData: stat = "Weapon: +%d damage" % item.damage_bonus
 	var flavor := item.flavor()
 	return stat if flavor == "" else flavor + "\n\n" + stat
+
+## Pressing worn armor/shield takes it off; anything else equips it.
+func _toggle_gear(item: EquipmentData, is_equipped: bool) -> void:
+	if is_equipped and (item is ArmorData or item is ShieldData):
+		Game.stats.unequip(item)   # emits stats_changed -> refresh()
+		_message.text = "Took off %s." % item.display_name
+	else:
+		_equip(item)
 
 func _equip(item: EquipmentData) -> void:
 	Game.stats.equip(item)   # emits stats_changed -> refresh()
