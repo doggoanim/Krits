@@ -2,7 +2,7 @@ class_name MenuBase
 extends PanelContainer
 ## Pauses the game and centers a panel. Subclasses fill `content` in refresh().
 ## The panel chrome (centered PanelContainer + its Content VBoxContainer)
-## lives in menu_base.tscn — StatsMenu/TravelMenu inherit that scene and just
+## lives in menu_base.tscn — TravelMenu/ShopMenu inherit that scene and just
 ## swap in their own script, so editing menu_base.tscn's layout/size/position
 ## updates every menu built on it at once.
 

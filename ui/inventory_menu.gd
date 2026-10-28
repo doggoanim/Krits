@@ -1,22 +1,27 @@
 class_name InventoryMenu
 extends MenuBase
-## The bag screen (hotkey: "menu_inventory", default I). Two tabs:
-##   Items — a grid of slots (Game.inventory; capacity grows with backpacks).
-##           Pick a slot to read about it; Use / Drop buttons on the right.
-##   Gear  — every armor/shield/weapon you own; pick one to equip it.
-## Layout and art live in inventory_menu.tscn; this script fills in the
-## dynamic parts (one slot per bag slot, one button per owned item).
+## The bag screen (hotkey: "menu_inventory", default Tab). Three tabs:
+##   Items     — a grid of slots (Game.inventory; capacity grows with
+##               backpacks). Pick one to read about it; Use / Drop, and put
+##               consumables on hotbar slots 4-6.
+##   Gear      — every armor/shield/weapon you own; pick one to equip it.
+##   Abilities — the abilities you know; put them on hotbar slots 1-3.
+## The hotbar itself is shown along the bottom (display only here — the
+## number keys use it in the game, see HotbarBar). Layout and art live in
+## inventory_menu.tscn; this script fills in the dynamic parts.
+
+enum Page { ITEMS, GEAR, ABILITIES }
 
 @export var slot_scene: PackedScene
 @export var slot_styles: Array[StyleBox] = []   ## nine-sliced plates: normal, hover, pressed
 
 @onready var _gold: Label = %GoldLabel
-@onready var _items_tab: Button = %ItemsTab
-@onready var _gear_tab: Button = %GearTab
-@onready var _items_page: Control = %ItemsPage
-@onready var _gear_page: Control = %GearPage
+@onready var _stats_label: Label = %StatsLabel
+@onready var _tabs: Array[Button] = [%ItemsTab, %GearTab, %AbilitiesTab]
+@onready var _pages: Array[Control] = [%ItemsPage, %GearPage, %AbilitiesPage]
 @onready var _capacity: Label = %CapacityLabel
 @onready var _grid: GridContainer = %Grid
+@onready var _ability_grid: GridContainer = %AbilityGrid
 @onready var _armor_list: VBoxContainer = %ArmorList
 @onready var _shield_list: VBoxContainer = %ShieldList
 @onready var _weapon_list: VBoxContainer = %WeaponList
@@ -26,10 +31,14 @@ extends MenuBase
 @onready var _message: Label = %Message
 @onready var _use_button: Button = %UseButton
 @onready var _drop_button: Button = %DropButton
+@onready var _assign_label: Label = %AssignLabel
+@onready var _assign_row: HBoxContainer = %AssignRow
 
 const GEAR_ID_META := &"gear_id"
 
+var _page := Page.ITEMS
 var _selected := 0                  ## index of the focused bag slot
+var _selected_ability := 0          ## index of the focused ability
 var _gear_focus: StringName = &""   ## id of the focused gear button (restored after a rebuild)
 
 func _init() -> void:
@@ -37,8 +46,8 @@ func _init() -> void:
 
 func _ready() -> void:
 	super()
-	_items_tab.pressed.connect(_show_page.bind(true))
-	_gear_tab.pressed.connect(_show_page.bind(false))
+	for i in _tabs.size():
+		_tabs[i].pressed.connect(_show_page.bind(i))
 	_use_button.pressed.connect(_use_selected)
 	_drop_button.pressed.connect(_drop_selected)
 
@@ -47,46 +56,58 @@ func _ready() -> void:
 func _clear() -> void:
 	pass
 
+## Tab is both the open key and a UI focus key, and a focused control would
+## swallow it before MenuBase's _unhandled_input ever saw it — so while open,
+## catch the toggle here, ahead of GUI focus handling.
+func _input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed(toggle_action):
+		close()
+		get_viewport().set_input_as_handled()
+
 func open() -> void:
 	super()
 	if open_menu != self:
 		return
 	_message.text = ""
-	_show_page(true)
+	_show_page(Page.ITEMS)
 
 func refresh() -> void:
-	_gold.text = "Gold: %d" % Game.stats.gold
+	var s := Game.stats
+	_gold.text = "Gold: %d" % s.gold
+	_stats_label.text = "HP %d/%d   Shield %d/%d   Damage %d" % [s.hp, s.max_hp(), s.shield, s.max_shield(), s.damage()]
 	_build_items()
 	_build_gear()
+	_build_abilities()
 
 # ---------------------------------------------------------------- pages
 
-func _show_page(items: bool) -> void:
-	_items_tab.set_pressed_no_signal(items)
-	_gear_tab.set_pressed_no_signal(not items)
-	_items_page.visible = items
-	_gear_page.visible = not items
+func _show_page(page: int) -> void:
+	_page = page as Page
+	for i in _pages.size():
+		_pages[i].visible = i == page
+		_tabs[i].set_pressed_no_signal(i == page)
 	_message.text = ""
-	if items:
-		_focus_selected_slot()
-	else:
-		_focus_gear.call_deferred()
+	match _page:
+		Page.ITEMS:
+			_focus_selected_slot(_grid, _selected)
+			_update_item_details()
+		Page.GEAR:
+			_focus_gear.call_deferred()
+		Page.ABILITIES:
+			_focus_selected_slot(_ability_grid, _selected_ability)
+			_update_ability_details()
 
 # ---------------------------------------------------------------- items
 
 func _build_items() -> void:
 	var inv := Game.inventory
-	for c in _grid.get_children():
-		_grid.remove_child(c)
-		c.queue_free()
+	_clear_children(_grid)
 	var bag := inv.backpack()
 	_capacity.text = "Bag %d / %d   (%s)" % [inv.stacks.size(), inv.capacity(),
 		bag.display_name if bag else "no backpack"]
 	_selected = clampi(_selected, 0, maxi(inv.capacity() - 1, 0))
 	for i in inv.capacity():
-		var slot := slot_scene.instantiate() as InventorySlot
-		_grid.add_child(slot)
-		_style_slot(slot)
+		var slot := _new_slot(_grid)
 		if i < inv.stacks.size():
 			slot.show_item(ItemLibrary.by_id(inv.stacks[i]["id"]), inv.stacks[i]["count"])
 		else:
@@ -94,21 +115,29 @@ func _build_items() -> void:
 		slot.focus_entered.connect(_on_slot_focused.bind(i))
 		slot.pressed.connect(_on_slot_pressed.bind(i))
 	FocusPop.attach_all(_grid)
-	if _items_page.visible and visible:
-		_focus_selected_slot()
-	_update_item_details()
+	if _page == Page.ITEMS and visible:
+		_focus_selected_slot(_grid, _selected)
+		_update_item_details()
 
-func _style_slot(slot: Button) -> void:
+func _new_slot(parent: Control) -> InventorySlot:
+	var slot := slot_scene.instantiate() as InventorySlot
+	parent.add_child(slot)
 	if slot_styles.size() >= 3:
 		slot.add_theme_stylebox_override(&"normal", slot_styles[0])
 		slot.add_theme_stylebox_override(&"hover", slot_styles[1])
 		slot.add_theme_stylebox_override(&"pressed", slot_styles[2])
 		slot.set_meta(FocusPop.LOOKS_META, slot_styles)
+	return slot
 
-func _focus_selected_slot() -> void:
-	if _grid.get_child_count() == 0:
+func _clear_children(node: Node) -> void:
+	for c in node.get_children():
+		node.remove_child(c)
+		c.queue_free()
+
+func _focus_selected_slot(grid: GridContainer, index: int) -> void:
+	if grid.get_child_count() == 0:
 		return
-	var slot := _grid.get_child(clampi(_selected, 0, _grid.get_child_count() - 1)) as Control
+	var slot := grid.get_child(clampi(index, 0, grid.get_child_count() - 1)) as Control
 	slot.grab_focus.call_deferred()
 
 func _on_slot_focused(index: int) -> void:
@@ -122,10 +151,10 @@ func _on_slot_pressed(index: int) -> void:
 
 func _update_item_details() -> void:
 	var stacks := Game.inventory.stacks
-	var has_item := _selected < stacks.size()
 	_use_button.visible = false
 	_drop_button.visible = false
-	if not has_item:
+	_clear_assign()
+	if _selected >= stacks.size():
 		_detail_name.text = "Empty slot"
 		_detail_kind.text = ""
 		_detail_text.text = ""
@@ -140,14 +169,15 @@ func _update_item_details() -> void:
 	_use_button.visible = item.is_usable()
 	_drop_button.visible = item.can_drop()
 	_drop_button.text = "Drop 1"
+	if item.is_usable():
+		_set_assign(item.id, [3, 4, 5])
 
 func _use_selected() -> void:
 	if _selected >= Game.inventory.stacks.size():
 		return
-	_message.text = Game.inventory.use(_selected)
-	var keep := _message.text
+	var msg := Game.inventory.use(_selected)
 	refresh()
-	_message.text = keep
+	_message.text = msg
 
 func _drop_selected() -> void:
 	if _selected >= Game.inventory.stacks.size():
@@ -156,10 +186,87 @@ func _drop_selected() -> void:
 	if item == null or not item.can_drop():
 		return
 	Game.inventory.remove_at(_selected, 1)
-	_message.text = "Dropped %s." % item.display_name
-	var keep := _message.text
 	refresh()
+	_message.text = "Dropped %s." % item.display_name
+
+# ---------------------------------------------------------------- hotbar assignment
+
+func _clear_assign() -> void:
+	_assign_label.visible = false
+	_clear_children(_assign_row)
+
+## Buttons to put `id` on one of the hotbar `slots` (indices), plus Unequip
+## if it's already on the bar.
+func _set_assign(id: StringName, slots: Array) -> void:
+	_clear_children(_assign_row)
+	_assign_label.visible = true
+	var current := Game.hotbar.slot_of(id)
+	for slot in slots:
+		var b := Button.new()
+		b.text = ("✓ " if slot == current else "") + str(slot + 1)
+		b.add_theme_font_size_override(&"font_size", 40)
+		b.pressed.connect(_assign.bind(id, slot))
+		_assign_row.add_child(b)
+	if current != -1:
+		var u := Button.new()
+		u.text = "Unequip"
+		u.add_theme_font_size_override(&"font_size", 36)
+		u.pressed.connect(_unassign.bind(current, id))
+		_assign_row.add_child(u)
+	FocusPop.attach_all(_assign_row)
+
+func _assign(id: StringName, slot: int) -> void:
+	if Game.hotbar.assign(slot, id):
+		_message.text = "Equipped to hotbar slot %d." % (slot + 1)
+		_redisplay_details()
+
+func _unassign(slot: int, _id: StringName) -> void:
+	Game.hotbar.clear(slot)
+	_message.text = "Removed from the hotbar."
+	_redisplay_details()
+
+func _redisplay_details() -> void:
+	var keep := _message.text
+	match _page:
+		Page.ITEMS: _update_item_details()
+		Page.ABILITIES: _update_ability_details()
 	_message.text = keep
+
+# ---------------------------------------------------------------- abilities
+
+func _build_abilities() -> void:
+	_clear_children(_ability_grid)
+	var known := Game.hotbar.known
+	_selected_ability = clampi(_selected_ability, 0, maxi(known.size() - 1, 0))
+	for i in known.size():
+		var slot := _new_slot(_ability_grid)
+		slot.show_ability(AbilityLibrary.by_id(known[i]))
+		slot.focus_entered.connect(_on_ability_focused.bind(i))
+	FocusPop.attach_all(_ability_grid)
+	if _page == Page.ABILITIES and visible:
+		_focus_selected_slot(_ability_grid, _selected_ability)
+		_update_ability_details()
+
+func _on_ability_focused(index: int) -> void:
+	_selected_ability = index
+	_message.text = ""
+	_update_ability_details()
+
+func _update_ability_details() -> void:
+	_use_button.visible = false
+	_drop_button.visible = false
+	_clear_assign()
+	var known := Game.hotbar.known
+	if _selected_ability >= known.size():
+		_detail_name.text = "No abilities yet"
+		_detail_kind.text = ""
+		_detail_text.text = "Learn abilities from shops."
+		return
+	var a := AbilityLibrary.by_id(known[_selected_ability])
+	_detail_name.text = a.display_name
+	_detail_kind.text = "Ability   Cooldown %ds" % int(a.cooldown)
+	_detail_text.text = a.description
+	_set_assign(a.id, [0, 1, 2])
 
 # ---------------------------------------------------------------- gear
 
@@ -168,14 +275,15 @@ func _build_gear() -> void:
 	_fill_gear(_armor_list, s.owned_armors, s.equipped_armor)
 	_fill_gear(_shield_list, s.owned_shields, s.equipped_shield)
 	_fill_gear(_weapon_list, s.owned_weapons, s.equipped_weapon)
-	FocusPop.attach_all(_gear_page)
-	if _gear_page.visible and visible:
+	FocusPop.attach_all(_gear_list_root())
+	if _page == Page.GEAR and visible:
 		_focus_gear.call_deferred()
 
+func _gear_list_root() -> Node:
+	return _pages[Page.GEAR]
+
 func _fill_gear(list: VBoxContainer, owned: Array, equipped: EquipmentData) -> void:
-	for c in list.get_children():
-		list.remove_child(c)
-		c.queue_free()
+	_clear_children(list)
 	for id in owned:
 		var item := EquipmentLibrary.by_id(id)
 		if item == null:
@@ -204,6 +312,7 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	_gear_focus = item.id
 	_use_button.visible = false
 	_drop_button.visible = false
+	_clear_assign()
 	_detail_name.text = item.display_name
 	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)

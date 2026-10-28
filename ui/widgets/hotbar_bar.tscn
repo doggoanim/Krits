@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/widgets/hotbar_bar.gd" id="1"]
+[ext_resource type="PackedScene" path="res://ui/widgets/inventory_slot.tscn" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="5"]
+
+[sub_resource type="StyleBoxTexture" id="Plate1"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+texture = ExtResource("3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate2"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+texture = ExtResource("4")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate3"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+texture = ExtResource("5")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[node name="HotbarBar" type="HBoxContainer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -330.0
+offset_top = -140.0
+offset_right = 330.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+script = ExtResource("1")
+slot_scene = ExtResource("2")
+slot_styles = Array[StyleBox]([SubResource("Plate1"), SubResource("Plate2"), SubResource("Plate3")])

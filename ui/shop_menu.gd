@@ -24,6 +24,7 @@ func refresh() -> void:
 	_section("Armor (HP)", EquipmentLibrary.all_armors(), s.equipped_armor)
 	_section("Shields (Shield)", EquipmentLibrary.all_shields(), s.equipped_shield)
 	_section("Weapons (Damage)", EquipmentLibrary.all_weapons(), s.equipped_weapon)
+	_ability_section()
 	_backpack_section()
 	_supplies_section()
 	_sell_section()
@@ -136,3 +137,23 @@ func _sell_section() -> void:
 			_button("Sell 1", false, func(): inv.sell_item(item.id, 1)),
 			_button("Sell all", n < 2, func(): inv.sell_item(item.id, n)),
 		])
+
+## Abilities: bought once, then equipped to hotbar slots 1-3 from the
+## inventory's Abilities tab. Free starter abilities (price 0) aren't listed.
+func _ability_section() -> void:
+	_heading("Abilities")
+	for a in AbilityLibrary.all_abilities():
+		if a.price <= 0:
+			continue
+		var known := Game.hotbar.knows(a.id)
+		var label := "%s  —  %s" % [a.display_name, "learned" if known else "%dg" % a.price]
+		var b := _button("Learned" if known else "Buy", known or a.price > Game.stats.gold,
+			func(): _buy_ability(a))
+		_add_row(label, [b])
+
+func _buy_ability(a: AbilityData) -> void:
+	if Game.stats.gold < a.price or Game.hotbar.knows(a.id):
+		return
+	Game.stats.gold -= a.price
+	Events.stats_changed.emit()
+	Game.hotbar.learn(a.id)

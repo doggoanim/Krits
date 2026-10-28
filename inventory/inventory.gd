@@ -133,6 +133,13 @@ func use(index: int) -> String:
 	remove_at(index, 1)
 	return "Used %s." % item.display_name
 
+## Uses the first stack of `id` (used by the hotbar). "" if you have none.
+func use_id(id: StringName) -> String:
+	for i in stacks.size():
+		if stacks[i]["id"] == id:
+			return use(i)
+	return "You're out of those."
+
 ## Buys `bag` if it's an upgrade you can afford. False = nothing changed.
 func buy_backpack(bag: BackpackData) -> bool:
 	if bag.slots <= (backpack().slots if backpack() else 0) or bag.price > Game.stats.gold:

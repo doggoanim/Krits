@@ -15,8 +15,7 @@ const BINDINGS := {
 	&"roll_dive": {"label": "Roll / Dive", "key": KEY_SHIFT},
 	&"crouch_pound": {"label": "Crouch / Pound", "key": KEY_CTRL},
 	&"interact": {"label": "Interact", "key": KEY_E},
-	&"menu_inventory": {"label": "Inventory", "key": KEY_I},
-	&"menu_stats": {"label": "Stats Menu", "key": KEY_TAB},
+	&"menu_inventory": {"label": "Inventory", "key": KEY_TAB},
 	&"menu_travel": {"label": "Travel Menu", "key": KEY_M},
 }
 
@@ -37,6 +36,8 @@ func _ready() -> void:
 	for action in BINDINGS:
 		bind_key(action, default_key(action))
 	bind_key(&"ui_cancel_menu", KEY_ESCAPE)   # fixed — not rebindable
+	for i in 6:   # hotbar slots 1-6 — fixed number keys, not on the rebind list
+		bind_key(StringName("hotbar_%d" % (i + 1)), (KEY_1 + i) as Key)
 
 ## Human-readable name of a physical key, in the player's own keyboard layout
 ## ("E", "Shift", "Space"...) — for on-screen prompts and the rebind list.

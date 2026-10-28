@@ -68,6 +68,7 @@ func _ready() -> void:
 	Events.combo_changed.connect(_on_combo)
 	Events.combo_landed.connect(_on_combo_landed)
 	Events.item_gained.connect(_on_item_gained)
+	Events.notice.connect(_toast)
 	Events.inventory_full.connect(_on_inventory_full)
 	_combo_plate.resized.connect(func() -> void: _combo_plate.pivot_offset = _combo_plate.size * 0.5)
 	_refresh()
@@ -91,7 +92,9 @@ func _refresh() -> void:
 	# label it sat next to now shows gold instead.
 	_xp.visible = false
 	_level.text = "Gold %d   HP %d/%d   Shield %d/%d" % [s.gold, s.hp, s.max_hp(), s.shield, s.max_shield()]
-	_hint.text = "[Tab] Stats   [M] Travel"
+	_hint.text = "[%s] Inventory   [%s] Travel" % [
+		InputSetup.key_label(Settings.get_binding(&"menu_inventory")),
+		InputSetup.key_label(Settings.get_binding(&"menu_travel"))]
 
 func _on_combo(c: int) -> void:
 	if c <= 0:

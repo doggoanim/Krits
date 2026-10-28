@@ -143,6 +143,7 @@ func _process(delta: float) -> void:
 ## encounter was triggered. The player is never moved — the barrier simply
 ## rises around wherever they already are.
 func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
+	add_to_group(&"arena")   # abilities (Shockwave) look the live fight up by group
 	player = p
 	global_position = origin
 	radius = radius_for(roster.size())

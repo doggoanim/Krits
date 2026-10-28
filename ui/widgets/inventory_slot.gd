@@ -7,6 +7,8 @@ extends Button
 @onready var _icon: TextureRect = %Icon
 @onready var _initial: Label = %Initial
 @onready var _count: Label = %Count
+@onready var _key: Label = %Key               ## hotbar number, top-left (hidden unless set)
+@onready var _cooldown: ColorRect = %Cooldown ## dark wipe that drains upward while an ability recharges
 
 func show_item(item: ItemData, count: int) -> void:
 	_icon.texture = item.icon
@@ -20,3 +22,24 @@ func show_empty() -> void:
 	_icon.visible = false
 	_initial.visible = false
 	_count.text = ""
+
+func show_ability(ability: AbilityData) -> void:
+	_icon.texture = ability.icon
+	_icon.visible = ability.icon != null
+	_initial.visible = ability.icon == null
+	_initial.text = ability.display_name.left(1)
+	_initial.add_theme_color_override(&"font_color", ability.color)
+	_count.text = ""
+
+## Hotbar number shown in the corner ("" hides it).
+func set_key_text(text: String) -> void:
+	_key.text = text
+
+## 0 = ready ... 1 = just used.
+func set_cooldown(fraction: float) -> void:
+	_cooldown.visible = fraction > 0.0
+	_cooldown.anchor_top = 1.0 - fraction
+
+## Greys the slot out (e.g. a hotbar consumable you've run out of).
+func set_dim(dim: bool) -> void:
+	modulate.a = 0.45 if dim else 1.0

@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="5"]
 [ext_resource type="PackedScene" path="res://ui/widgets/inventory_slot.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://ui/widgets/hotbar_bar.tscn" id="7"]
 
 [sub_resource type="StyleBoxFlat" id="Dim"]
 bg_color = Color(0, 0, 0, 0.62)
@@ -88,6 +89,17 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 84
 text = "Inventory"
 
+[node name="StatsLabel" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 38
+text = "HP"
+
+[node name="Spacer" type="Control" parent="Margin/Content/Header"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
 [node name="GoldLabel" type="Label" parent="Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -115,6 +127,14 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 48
 toggle_mode = true
 text = "Gear"
+
+[node name="AbilitiesTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Abilities"
 
 [node name="Body" type="HBoxContainer" parent="Margin/Content"]
 layout_mode = 2
@@ -205,6 +225,29 @@ text = "Weapon"
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="AbilitiesPage" type="VBoxContainer" parent="Margin/Content/Body/Pages"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Heading" type="Label" parent="Margin/Content/Body/Pages/AbilitiesPage"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Known abilities — equip them to hotbar slots 1-3"
+
+[node name="AbilityGrid" type="GridContainer" parent="Margin/Content/Body/Pages/AbilitiesPage"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 6
+
 [node name="Details" type="PanelContainer" parent="Margin/Content/Body"]
 custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
@@ -255,3 +298,22 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 44
 text = "Drop 1"
+
+[node name="AssignLabel" type="Label" parent="Margin/Content/Body/Details/Column"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0.7)
+theme_override_font_sizes/font_size = 32
+text = "Hotbar slot:"
+
+[node name="AssignRow" type="HBoxContainer" parent="Margin/Content/Body/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HotbarBar" parent="Margin/Content" instance=ExtResource("7")]
+layout_mode = 2
+size_flags_horizontal = 4
+interactive = false
+slot_size = 88.0

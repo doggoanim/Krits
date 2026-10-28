@@ -11,6 +11,7 @@ signal combo_landed(damage: float, hits: int, pound_bonus: bool)   ## the Sword'
 signal enemy_defeated(enemy: Node, gold: int)
 
 # Inventory
+signal notice(text: String)   ## a short message for the player (HUD toast)
 signal item_gained(id: StringName, count: int)
 signal inventory_full(id: StringName)   ## something didn't fit in the bag
 

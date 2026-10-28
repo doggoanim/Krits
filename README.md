@@ -52,7 +52,7 @@ slot 1 on first launch. `Game.player_name` is stored per save.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·
-Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · Esc pause menu
+Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab inventory · 1-6 hotbar · M fast travel · Esc pause menu
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
 dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
@@ -171,7 +171,7 @@ toward the new direction.
 			 a fresnel rim; resize/instance it like any other prop, no script or extra setup needed.
 			 No shoreline foam or real depth-based shading yet — the color banding is driven by the
 			 wave height itself as a stand-in)
-- ui/        Hud, menus (stats / travel), ScreenTransition + dissolve.gdshader (screen-space
+- ui/        Hud, menus (inventory / shop / travel), hotbar, ScreenTransition + dissolve.gdshader (screen-space
 			 fade utility, not currently wired up — kept in case a UI-level transition is wanted
 			 later), LoadingScreen (a real cartoon iris wipe — iris_mask.gdshader draws solid black
 			 outside a circular hole and fully transparent inside it, and the script just animates that
@@ -179,7 +179,7 @@ toward the new direction.
 			 already-opaque screen — built by UiRoot and driven entirely by Main's Door-swap handler, see
 			 world/door.gd). Static layout for all
 			 of these lives in their matching .tscn (hud.tscn,
-			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn/pause_menu.tscn inheriting it,
+			 main_menu.tscn, menu_base.tscn + travel_menu.tscn/pause_menu.tscn inheriting it,
 			 screen_transition.tscn, loading_screen.tscn) — open any of them in the editor to move/resize things;
 			 the .gd scripts just hold behavior now (refresh logic, tweens, signals). The two
 			 exceptions are deliberate: PortraitSlot is a single custom-drawn Control with
@@ -345,3 +345,8 @@ restores them after, so whatever look you set here carries into combat too.
 - To add an item: add a builder + list entry in `ItemLibrary`.
 
 **Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: a golden "POUND x1.25!" plate under the combo plate (`PoundPlate` in hud.tscn), golden damage numbers/confetti, its own hit sound (`attack_orb_sword_hit_pound.wav`, replaces the normal sword hit), a bigger kick and longer hitstop.
+
+### Hotbar & abilities
+- `abilities/`: `AbilityData` (effect, cooldown, price), `AbilityLibrary` (placeholder catalog: Second Wind, Super Jump, Guard Up, Shockwave), `AbilityRunner.activate()` does the effect.
+- `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; learn new abilities in shops.
+- `ui/widgets/hotbar_bar.tscn`: the HUD strip (cooldown wipe, item counts); a display-only copy sits at the bottom of the inventory screen.
