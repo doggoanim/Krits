@@ -92,7 +92,7 @@ func _refresh() -> void:
 	# the bar that used to track XP-to-next-level just stays hidden; the
 	# label it sat next to now shows gold instead.
 	_xp.visible = false
-	_level.text = "Gold %d   HP %d/%d   Shield %d/%d" % [s.gold, s.hp, s.max_hp(), s.shield, s.max_shield()]
+	_level.visible = false   # gold / HP / shield text removed — the bars say it (gold is in the inventory)
 	_hint.text = "[%s] Inventory   [%s] Travel" % [
 		InputSetup.key_label(Settings.get_binding(&"menu_inventory")),
 		InputSetup.key_label(Settings.get_binding(&"menu_travel"))]
