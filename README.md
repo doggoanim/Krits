@@ -321,3 +321,7 @@ restores them after, so whatever look you set here carries into combat too.
 - **Barrier:** chalk-and-hatch wall shader (`combat/arena_wall.gdshader`, world-space so segments join up, pausable clock) + a dashed ground ring + chunky outlined posts every 4th segment (`Arena._build_barrier/_build_post`; tune `POST_*`, `DASH_FRACTION`, `RING_WIDTH`).
 - **Intro/outro:** ring dashes and posts pop in (elastic), walls thump up with a camera kick; `Arena.play_outro()` sinks the walls and pops the ring/posts away with puffs (replaces the old dissolve for arenas).
 - **Orbs:** bolder outline, ground blob shadow, squash on landing and pop-in on respawn.
+
+## Enemy physics
+
+`Enemy` is a `CharacterBody3D` (layer 3 "enemy"; collides with world, arena walls and other enemies, not the player): gravity, slopes, bumping into rocks, and knockback from hits (`Enemy.knockback`, stronger for longer sword combos; they stagger until they land). They give up on a destination if stuck. Spawns use `Arena.is_spot_clear()` so nothing starts inside walls/props (falls back near the arena centre if no clear spot is found).

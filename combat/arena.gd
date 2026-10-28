@@ -75,6 +75,8 @@ const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this abov
                                     ## land on a disconnected nearby platform (or a gap with no
                                     ## floor) from reading as part of this fight
 const RANDOM_POINT_ATTEMPTS := 8
+const CLEAR_POINT_ATTEMPTS := 30   ## more tries when the spot must also be free of geometry
+const SPAWN_CLEARANCE_LIFT := 0.4  ## see is_spot_clear()
 
 ## ---- reveal sequence (see play_intro()) ----
 const WALL_SHADER := preload("res://combat/arena_wall.gdshader")
@@ -257,18 +259,37 @@ func cancel() -> void:
 ## above/below the arena's own base height is rejected and resampled — it's
 ## almost always a separate platform or a gap that just happens to fall
 ## inside the circle's footprint, not actually part of this fight's floor.
-func random_point(fraction := 1.0) -> Vector3:
-	for _i in RANDOM_POINT_ATTEMPTS:
+func random_point(fraction := 1.0, clear_radius := 0.0, clear_height := 0.0) -> Vector3:
+	var attempts := RANDOM_POINT_ATTEMPTS if clear_radius <= 0.0 else CLEAR_POINT_ATTEMPTS
+	for _i in attempts:
 		var pos := _sample_disk(fraction)
 		var h := ground_height(pos)
-		if absf(h - global_position.y) <= MAX_GROUND_DEVIATION:
-			pos.y = h
-			return pos
-	# Every attempt landed somewhere disconnected — flat at the arena's own
-	# base height beats spawning on unrelated terrain.
-	var pos := _sample_disk(fraction)
+		if absf(h - global_position.y) > MAX_GROUND_DEVIATION:
+			continue
+		pos.y = h
+		if clear_radius > 0.0 and not is_spot_clear(pos, clear_radius, clear_height):
+			continue
+		return pos
+	# Every attempt landed somewhere disconnected (or inside something) —
+	# fall back to near the arena's centre, which is where the player stands
+	# and so is known to be open, at the arena's own base height.
+	var pos := global_position + Vector3(randf_range(-2.0, 2.0), 0.0, randf_range(-2.0, 2.0))
 	pos.y = global_position.y
 	return pos
+
+## True if a capsule of `radius`/`height` standing on the ground at `pos`
+## overlaps no world geometry or arena wall — i.e. something could spawn
+## there without starting inside a rock, house or the barrier. Lifted a
+## little off the floor so the ground itself (slopes included) doesn't count.
+func is_spot_clear(pos: Vector3, radius: float, height: float) -> bool:
+	var shape := CapsuleShape3D.new()
+	shape.radius = radius * 0.9
+	shape.height = maxf(height - SPAWN_CLEARANCE_LIFT, radius * 2.0)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.collision_mask = 1 | WALL_LAYER | (1 << 2)   # world, barrier, other enemies
+	query.transform = Transform3D(Basis.IDENTITY, pos + Vector3.UP * (SPAWN_CLEARANCE_LIFT + shape.height * 0.5))
+	return get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 func _sample_disk(fraction: float) -> Vector3:
 	var r := radius * fraction * sqrt(randf())   # sqrt: uniform over the disk's area, not biased to the centre
@@ -282,9 +303,8 @@ func _spawn_enemy(d: EnemyData) -> void:
 	# The placeholder sphere's pivot is at its own center, so it needs lifting
 	# to sit on the ground; an animated model's origin is at its feet (same
 	# convention as the player), so it needs no extra lift at all.
-	var lift := 0.9 if d.model == null else 0.0
-	var pos := random_point(0.6)
-	pos.y += lift
+	var pos := random_point(0.6, Enemy.body_radius(d), Enemy.body_height(d))
+	pos.y += Enemy.feet_offset(d) + 0.05
 	e.global_position = pos
 	e.defeated.connect(_on_enemy_defeated)
 	enemies.append(e)
@@ -417,6 +437,7 @@ func _land_sword_combo() -> void:
 		if is_instance_valid(e):
 			HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), total, power)
 			e.punch()
+			e.knockback(player.global_position, minf(3.0 + 0.5 * hits, 9.0))
 			e.take_damage(total)   # same damage to every enemy
 	Events.combo_landed.emit(total, hits)
 	if player.camera_rig:
@@ -582,6 +603,7 @@ func _rune_name(k: Orb.Kind) -> String:
 func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int) -> void:
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
+			e.knockback(player.global_position, 3.0)
 			e.take_damage(dmg)   # same damage to every enemy
 	player.bounce_off_orb(combo_for_feedback)
 	if _over:

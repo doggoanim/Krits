@@ -1,9 +1,11 @@
 class_name Enemy
-extends Node3D
+extends CharacterBody3D
 ## Arena enemy: wanders inside the arena and fires its bullet patterns, plus
 ## (when EnemyData enables them) a telegraphed leap attack, a burst-shoot
-## volley, and/or a damaging slime trail. It has no collision; it only takes
-## damage through the arena's orb system.
+## volley, and/or a damaging slime trail. It has real physics now (gravity,
+## slopes, bumping into world geometry, arena walls and other enemies, knockback
+## from hits) but does not block the player; it only takes damage through the
+## arena's orb system.
 
 signal defeated(enemy: Enemy)
 
@@ -38,6 +40,33 @@ var _stun_t := 0.0
 var _burn_dps := 0.0
 var _burn_t := 0.0
 
+## ---- physics -------------------------------------------------------------
+const GRAVITY := 30.0
+const KNOCK_FRICTION := 9.0        ## horizontal knockback decay on the ground (m/s per second)
+const KNOCK_FRICTION_AIR := 1.5
+const STAGGER_TIME := 0.4          ## can't walk for this long after being knocked back
+const STUCK_CHECK_TIME := 0.6      ## how often "am I actually getting anywhere?" is checked
+const ENEMY_LAYER := 1 << 2        ## physics layer 3: enemy
+const COLLIDE_MASK := 1 | (1 << 6) | (1 << 2)   ## world, arena walls, other enemies (not the player)
+var _walk := Vector3.ZERO          ## horizontal velocity the AI wants this frame
+var _knock := Vector3.ZERO         ## horizontal knockback velocity, decays by itself
+var _stagger_t := 0.0
+var _stuck_t := 0.0
+var _stuck_from := Vector3.ZERO
+
+## Body size derived from EnemyData — used for the collider and (by Arena) to
+## check a spawn spot is clear and to stand the enemy on the ground.
+static func body_height(d: EnemyData) -> float:
+	return d.model_height if d.model else 1.4 * d.size
+
+static func body_radius(d: EnemyData) -> float:
+	return 0.7 * d.size if d.model == null else clampf(d.model_height * 0.28, 0.3, 1.5)
+
+## Distance from the node's origin down to its feet (the placeholder sphere is
+## pivoted at its centre, a model at its feet).
+static func feet_offset(d: EnemyData) -> float:
+	return 0.7 * d.size if d.model == null else 0.0
+
 const FACE_TURN_SPEED := 8.0   ## rad/s, how fast an enemy turns to face its movement
 const SPHERE_OUTLINE_RATIO := 0.08   ## placeholder-sphere outline thickness, as a fraction of its radius
 
@@ -53,6 +82,11 @@ func setup(d: EnemyData, a: Arena, t: Node3D) -> void:
 		_special_t = randf_range(1.0, 2.0)   # brief delay after the intro before the first one
 
 func _ready() -> void:
+	collision_layer = ENEMY_LAYER
+	collision_mask = COLLIDE_MASK
+	floor_snap_length = 0.5
+	floor_max_angle = deg_to_rad(55.0)
+	_build_collider()
 	if data.model:
 		_visual = EnemyVisual.new()
 		add_child(_visual)
@@ -73,23 +107,70 @@ func _ready() -> void:
 		CelOutline.apply(_mesh, sphere_radius * SPHERE_OUTLINE_RATIO)
 	_dest = global_position
 
+func _build_collider() -> void:
+	var cs := CollisionShape3D.new()
+	var r := body_radius(data)
+	if data.model:
+		var cap := CapsuleShape3D.new()
+		var h := body_height(data)
+		cap.radius = r
+		cap.height = maxf(h, r * 2.0)
+		cs.shape = cap
+		cs.position.y = h * 0.5
+	else:
+		var sph := SphereShape3D.new()
+		sph.radius = r
+		cs.shape = sph
+	add_child(cs)
+
 func _physics_process(delta: float) -> void:
-	if _dying:
+	_walk = Vector3.ZERO
+	if not _dying:
+		_update_status_effects(delta)
+	if not _dying:
+		if _stun_t <= 0.0 and not _busy_with_special:
+			_move(delta)
+			_shoot(delta)
+		_update_puddle_trail(delta)
+		_update_special_attacks(delta)
+		if _mesh:
+			if _flash > 0.0:
+				_flash -= delta
+				_mat.albedo_color = Color.WHITE
+			else:
+				_mat.albedo_color = data.color
+	_apply_physics(delta)
+
+## Gravity, walking, knockback and collision in one place. While a leap or
+## burst-shoot is playing out, that coroutine owns the position instead.
+func _apply_physics(delta: float) -> void:
+	if _busy_with_special:
+		velocity = Vector3.ZERO
 		return
-	_update_status_effects(delta)
-	if _dying:
-		return   # a burn tick above can finish it off mid-frame
-	if _stun_t <= 0.0 and not _busy_with_special:
-		_move(delta)
-		_shoot(delta)
-	_update_puddle_trail(delta)
-	_update_special_attacks(delta)
-	if _mesh:
-		if _flash > 0.0:
-			_flash -= delta
-			_mat.albedo_color = Color.WHITE
-		else:
-			_mat.albedo_color = data.color
+	var on_floor := is_on_floor()
+	var horizontal := _knock + (_walk if _stagger_t <= 0.0 else Vector3.ZERO)
+	_knock = _knock.move_toward(Vector3.ZERO, (KNOCK_FRICTION if on_floor else KNOCK_FRICTION_AIR) * delta)
+	_stagger_t = maxf(0.0, _stagger_t - delta)
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
+	if on_floor and velocity.y <= 0.0:
+		velocity.y = 0.0
+	else:
+		velocity.y -= GRAVITY * delta
+	move_and_slide()
+
+## Shoves the enemy away from `from_pos` and pops it into the air; it
+## staggers (can't walk) until it has landed and recovered.
+func knockback(from_pos: Vector3, strength: float) -> void:
+	if _busy_with_special:
+		return
+	var away := global_position - from_pos
+	away.y = 0.0
+	if away.length_squared() < 0.0001:
+		away = Vector3.FORWARD.rotated(Vector3.UP, randf() * TAU)
+	_knock = away.normalized() * strength
+	velocity.y = strength * 1.1
+	_stagger_t = STAGGER_TIME
 
 func _move(delta: float) -> void:
 	if not armed:
@@ -109,10 +190,24 @@ func _move(delta: float) -> void:
 			_visual.play_idle()
 		return
 	var dir := flat.normalized()
-	global_position += dir * data.move_speed * _speed_mult * delta
+	_walk = dir * data.move_speed * _speed_mult
+	_check_stuck(delta)
 	_face(dir, delta)
 	if _visual:
 		_visual.play_move()
+
+## If the enemy keeps walking but isn't getting anywhere (jammed against a
+## rock or another enemy), give up on that destination and pick a new one.
+func _check_stuck(delta: float) -> void:
+	_stuck_t += delta
+	if _stuck_t < STUCK_CHECK_TIME:
+		return
+	var expected := data.move_speed * _speed_mult * _stuck_t
+	var moved := Vector2(global_position.x - _stuck_from.x, global_position.z - _stuck_from.z).length()
+	if moved < expected * 0.25:
+		_dest = arena.random_point(0.8)
+	_stuck_t = 0.0
+	_stuck_from = global_position
 
 ## Smoothly yaws the enemy to face its movement direction (same atan2
 ## convention as Player.face()). Only ever called from _move(), which itself
@@ -306,7 +401,7 @@ func _clamped_landing_point(raw: Vector3) -> Vector3:
 	if flat.length() > limit:
 		flat = flat.normalized() * limit
 	var land := arena.global_position + flat
-	land.y = arena.ground_height(land)
+	land.y = arena.ground_height(land) + feet_offset(data)
 	return land
 
 func _land_leap(land: Vector3) -> void:
