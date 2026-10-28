@@ -59,6 +59,7 @@ const JUMP_FLOOR_SNAP := 0.0
 
 var camera_rig: CameraRig
 var visual: PlayerVisual
+var gear: GearDisplay   ## floating shield + weapon behind the player
 var effects: PlayerEffects
 var audio: PlayerAudio
 var xray: PlayerXray
@@ -174,6 +175,10 @@ func _ready() -> void:
 
 	visual = PlayerVisual.new()
 	add_child(visual)
+
+	gear = GearDisplay.new()
+	add_child(gear)
+	gear.setup(self)
 
 	effects = PlayerEffects.new()
 	add_child(effects)

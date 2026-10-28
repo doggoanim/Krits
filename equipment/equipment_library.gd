@@ -51,6 +51,7 @@ static func buckler() -> ShieldData:
 	s.display_name = "Buckler"
 	s.price = 0
 	s.shield_bonus = 0.0
+	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
 	return s
 
 static func round_shield() -> ShieldData:
@@ -80,6 +81,8 @@ static func rusty_sword() -> WeaponData:
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 0.0
+	# Hangs behind the shield with the blade angled up over its upper edge.
+	_look(w, "sword_wooden", 0.3, Vector3(0.1, -0.3, -0.12), Vector3(0.0, 0.0, -35.0))
 	return w
 
 static func steel_sword() -> WeaponData:
@@ -128,3 +131,16 @@ static func by_id(item_id: StringName) -> EquipmentData:
 	for w in all_weapons():
 		if w.id == item_id: return w
 	return null
+
+# ---------------------------------------------------------------- worn look
+## Attaches assets/equipments/<file>.glb (if it exists) as the item's worn
+## model. A missing file just means "nothing shown" — never an error.
+static func _look(item: EquipmentData, file: String, model_scale: float,
+		offset: Vector3, rotation_deg: Vector3) -> void:
+	var path := "res://assets/equipments/%s.glb" % file
+	if not ResourceLoader.exists(path):
+		return
+	item.model = load(path)
+	item.model_scale = model_scale
+	item.model_offset = offset
+	item.model_rotation_deg = rotation_deg
