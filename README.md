@@ -325,3 +325,12 @@ restores them after, so whatever look you set here carries into combat too.
 ## Enemy physics
 
 `Enemy` is a `CharacterBody3D` (layer 3 "enemy"; collides with world, arena walls and other enemies, not the player): gravity, slopes, bumping into rocks, and knockback from hits (`Enemy.knockback`, stronger for longer sword combos; they stagger until they land). They give up on a destination if stuck. Spawns use `Arena.is_spot_clear()` so nothing starts inside walls/props (falls back near the arena centre if no clear spot is found).
+
+## Combat feedback & audio
+
+- **Telegraphs** (`combat/telegraph.gd`): a "!" over the attacker, a filling landing circle for the slime's leap, an aim line for its burst shot.
+- **Burst shots** come out of the body's centre (`Enemy.center_point()`), aim at the player's chest, fly at `shoot_speed`, and are spaced just past `Player.HIT_INVULN` so a landing ball always finds the i-frames over. Hits splash (`combat/splash_fx.gd`).
+- **Player hit reaction** (`Player.hit(amount, pierces, from)` -> `_react_to_hit`): hurt sound, flicker for the whole i-frame window, squash, camera kick, shove + hop away from `from`. Each hit also takes one step off the combo (`Events.player_hurt` -> `Arena._on_player_hurt`).
+- **Hit-Stop** slider in Settings > Accessibility scales `HitStop.freeze` (0 = off).
+- **SFX:** weapon damage sounds (`PlayerAudio.play_damage_hit`), `player_hurt_*`, slime footsteps/shoot/leap (data-driven on `EnemyData`: `sfx_*`), UI focus/click (`core/ui_sfx.gd`, hooked into `FocusPop`).
+- Boss finisher (slow-mo kill-cam) is intentionally not built yet — reserved for when bosses exist.

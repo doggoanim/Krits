@@ -9,6 +9,9 @@ const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.0
 const RADIUS := 0.4
 const HIT_INVULN := 0.8
+const HIT_KNOCK_SPEED := 6.0    ## horizontal shove away from whatever hit you
+const HIT_KNOCK_UP := 5.0       ## little hop that comes with it
+const HIT_SHAKE := 0.35
 const SLIME_SPEED_MULT := 0.5   ## ground speed kept while standing in a slime puddle
 
 ## A wall is climbable purely by having this collision layer bit set (in
@@ -1129,11 +1132,33 @@ func water_submersion() -> float:
 
 # ---------------------------------------------------------------- damage
 
-func hit(amount: float, pierces_shield := false) -> void:
+## Squash, camera kick and a small shove + hop away from the source of a hit.
+## Only the ordinary movement states get shoved (not mid-roll, swimming or
+## climbing, where a sudden velocity change would fight the state).
+func _react_to_hit(from: Vector3) -> void:
+	visual.squash_stretch(0.7, 1.3, 0.35)
+	if camera_rig:
+		camera_rig.shake(HIT_SHAKE)
+	if from == Vector3.INF:
+		return   # damage with no direction (a puddle tick): no shove, so it can't undo the puddle's no-jump rule
+	var state := machine.current_name
+	if state != &"Ground" and state != &"Air" and state != &"Crouch":
+		return
+	var away := global_position - from
+	away.y = 0.0
+	if away.length_squared() > 0.001:
+		set_hvel(away.normalized() * HIT_KNOCK_SPEED)
+	velocity.y = HIT_KNOCK_UP
+	if state != &"Air":
+		machine.transition_to(&"Air")
+
+## `from` is where the hit came from (a bullet's position, a leaping enemy...)
+## so the player can be shoved away from it; Vector3.INF = unknown, no shove.
+func hit(amount: float, pierces_shield := false, from := Vector3.INF) -> void:
 	if dead or invuln > 0.0 or Game.god_mode:
 		return
 	invuln = HIT_INVULN
-	visual.flash()
+	visual.flash(HIT_INVULN)   # flickers for the whole invincibility window
 	var hp_before := Game.stats.hp
 	var died := Game.stats.take_damage(amount, pierces_shield)
 	# Only the "hurt" face, not flash() above — that stays on every hit
@@ -1144,6 +1169,10 @@ func hit(amount: float, pierces_shield := false) -> void:
 	# shield runs out, and that should show hurt too.
 	if Game.stats.hp < hp_before:
 		visual.show_hurt()
+	audio.play_hurt()
+	if not died:
+		_react_to_hit(from)
+		Events.player_hurt.emit(from)
 	if died:
 		dead = true
 		velocity = Vector3.ZERO

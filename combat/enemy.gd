@@ -45,6 +45,9 @@ const GRAVITY := 30.0
 const KNOCK_FRICTION := 9.0        ## horizontal knockback decay on the ground (m/s per second)
 const KNOCK_FRICTION_AIR := 1.5
 const STAGGER_TIME := 0.4          ## can't walk for this long after being knocked back
+const STEP_DISTANCE := 1.1          ## metres between footstep sounds
+const SFX_BUS := &"SFX"
+const SFX_PITCH_VARIANCE := 0.1
 const STUCK_CHECK_TIME := 0.6      ## how often "am I actually getting anywhere?" is checked
 const ENEMY_LAYER := 1 << 2        ## physics layer 3: enemy
 const COLLIDE_MASK := 1 | (1 << 6) | (1 << 2)   ## world, arena walls, other enemies (not the player)
@@ -53,6 +56,7 @@ var _knock := Vector3.ZERO         ## horizontal knockback velocity, decays by i
 var _stagger_t := 0.0
 var _stuck_t := 0.0
 var _stuck_from := Vector3.ZERO
+var _step_dist := 0.0              ## distance walked since the last footstep sound
 
 ## Body size derived from EnemyData — used for the collider and (by Arena) to
 ## check a spawn spot is clear and to stand the enemy on the ground.
@@ -157,7 +161,34 @@ func _apply_physics(delta: float) -> void:
 		velocity.y = 0.0
 	else:
 		velocity.y -= GRAVITY * delta
+	var before := global_position
 	move_and_slide()
+	if on_floor and not _walk.is_zero_approx():
+		_step_dist += Vector2(global_position.x - before.x, global_position.z - before.z).length()
+		if _step_dist >= STEP_DISTANCE:
+			_step_dist = 0.0
+			_play_random_sfx(data.sfx_footsteps)
+
+## World-space middle of the body (a model's origin is at its feet, the
+## placeholder sphere's at its centre) — where shots come out and what hits aim at.
+func center_point() -> Vector3:
+	return global_position + Vector3.UP * (body_height(data) * 0.5 - feet_offset(data))
+
+func _play_sfx(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var p := AudioStreamPlayer3D.new()
+	p.stream = stream
+	p.pitch_scale = 1.0 + randf_range(-SFX_PITCH_VARIANCE, SFX_PITCH_VARIANCE)
+	p.bus = SFX_BUS
+	arena.add_child(p)
+	p.global_position = global_position
+	p.play()
+	p.finished.connect(p.queue_free)
+
+func _play_random_sfx(pool: Array[AudioStream]) -> void:
+	if not pool.is_empty():
+		_play_sfx(pool.pick_random())
 
 ## Shoves the enemy away from `from_pos` and pops it into the air; it
 ## staggers (can't walk) until it has landed and recovered.
@@ -357,12 +388,28 @@ func _run_special_attack() -> void:
 func _do_leap_attack() -> void:
 	if _visual:
 		_visual.play_leap_ready()
-	await get_tree().create_timer(data.leap_ready_time).timeout
+	# Telegraph: a "!" and a landing circle that follows the player and fills
+	# up over leap_ready_time, then locks where the leap will actually land.
+	Telegraph.exclaim(self, body_height(data) + 0.5)
+	var zone := Telegraph.circle(arena, data.leap_radius)
+	var waited := 0.0
+	while waited < data.leap_ready_time:
+		if _dying or not is_instance_valid(target):
+			zone.queue_free()
+			return
+		_place_leap_zone(zone)
+		zone.set_fill(waited / data.leap_ready_time)
+		await get_tree().physics_frame
+		waited += get_physics_process_delta_time()
 	if _dying:
+		zone.queue_free()
 		return
+	_place_leap_zone(zone)
+	zone.lock()
 
 	var start := global_position
 	var land := _clamped_landing_point(target.global_position)
+	_play_sfx(data.sfx_leap)
 	if _visual:
 		_visual.play_leap()
 
@@ -386,11 +433,17 @@ func _do_leap_attack() -> void:
 				_spawn_puddle(global_position, data.puddle_radius)
 		await get_tree().physics_frame
 		if _dying:
+			zone.queue_free()
 			return
 
 	global_position = land
 	rotation = Vector3.ZERO   # land upright, whatever the tumble left it at
 	_land_leap(land)
+	zone.fade_out()
+
+func _place_leap_zone(zone: Telegraph) -> void:
+	var land := _clamped_landing_point(target.global_position)
+	zone.global_position = Vector3(land.x, land.y - feet_offset(data) + Telegraph.FLOOR_LIFT, land.z)
 
 ## Keeps a leap from landing outside the arena (e.g. the player hugging the
 ## wall) and settles it onto real ground.
@@ -409,23 +462,57 @@ func _land_leap(land: Vector3) -> void:
 		_spawn_puddle(land, data.puddle_radius * data.puddle_landing_radius_mult)
 	if is_instance_valid(target) and target is Player and not (target as Player).dead:
 		if target.global_position.distance_to(land) <= data.leap_radius:
-			(target as Player).hit(data.leap_damage)
+			(target as Player).hit(data.leap_damage, false, global_position)
 
 ## A machine-gun-style volley: a randomized number of aimed shots, each
 ## re-triggering anim_shoot and colored with this enemy's accent color.
 func _do_burst_shoot() -> void:
 	var count := randi_range(data.shoot_count_min, data.shoot_count_max)
-	for _i in count:
+	# Telegraph: "!" + an aim line that tracks the player through the wind-up
+	# and the whole volley.
+	Telegraph.exclaim(self, body_height(data) + 0.5)
+	var aim := Telegraph.line(arena, 0.3)
+	if _visual:
+		_visual.play_idle()
+	if not await _wait_aiming(data.shoot_ready_time, aim):
+		return
+	# Shots are spaced just past the player's invincibility window, so a ball
+	# that lands always finds the i-frames from the previous hit already over.
+	var spacing := maxf(data.shoot_interval, Player.HIT_INVULN + 0.02)
+	for i in count:
 		if _dying or not is_instance_valid(target):
+			aim.queue_free()
 			return
 		_face_point_instant(target.global_position)
 		if _visual:
 			_visual.play_shoot()
 		_fire_slime_ball()
-		await get_tree().create_timer(data.shoot_interval).timeout
+		if i < count - 1 and not await _wait_aiming(spacing, aim):
+			return
+	aim.fade_out()
+
+## Waits `seconds` (physics time) while keeping the aim line and facing on
+## the player. False if the enemy died / the target vanished meanwhile (the
+## line is cleaned up then).
+func _wait_aiming(seconds: float, aim: Telegraph) -> bool:
+	var waited := 0.0
+	while waited < seconds:
+		if _dying or not is_instance_valid(target):
+			aim.queue_free()
+			return false
+		aim.set_line(center_point(), _aim_point())
+		_face_point_instant(target.global_position)
+		await get_tree().physics_frame
+		waited += get_physics_process_delta_time()
+	return true
+
+## Where shots aim: the player's chest, not their feet.
+func _aim_point() -> Vector3:
+	return target.global_position + Vector3.UP * (Player.STAND_HEIGHT * 0.55)
 
 func _fire_slime_ball() -> void:
-	var dir := target.global_position - global_position
+	var origin := center_point()   # from the middle of the body, not the pivot at its feet
+	var dir := _aim_point() - origin
 	if dir.length() < 0.01:
 		return
 	var b := Bullet.new()
@@ -433,4 +520,5 @@ func _fire_slime_ball() -> void:
 	b.velocity = dir.normalized() * data.shoot_speed
 	b.color_override = data.color
 	arena.add_child(b)
-	b.global_position = global_position
+	b.global_position = origin
+	_play_random_sfx(data.sfx_shoot)

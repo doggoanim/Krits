@@ -3,6 +3,15 @@ extends RefCounted
 ## Code-defined enemy templates. Move to .tres resources when content grows.
 
 const GREEN_SLIME_MODEL := preload("res://assets/enemies/green_slime.glb")
+const SLIME_SFX_DIR := "res://sounds/SFX/enemies/"
+const SLIME_FOOTSTEPS: Array[AudioStream] = [
+	preload(SLIME_SFX_DIR + "slime_footsteps_1.wav"), preload(SLIME_SFX_DIR + "slime_footsteps_2.wav"),
+	preload(SLIME_SFX_DIR + "slime_footsteps_3.wav"), preload(SLIME_SFX_DIR + "slime_footsteps_4.wav"),
+	preload(SLIME_SFX_DIR + "slime_footsteps_5.wav")]
+const SLIME_SHOOT: Array[AudioStream] = [
+	preload(SLIME_SFX_DIR + "slime_shoot_1.wav"), preload(SLIME_SFX_DIR + "slime_shoot_2.wav"),
+	preload(SLIME_SFX_DIR + "slime_shoot_3.wav"), preload(SLIME_SFX_DIR + "slime_shoot_4.wav")]
+const SLIME_LEAP: AudioStream = preload(SLIME_SFX_DIR + "slime_leap.wav")
 
 static func green_slime() -> EnemyData:
 	var d := EnemyData.new()
@@ -30,12 +39,16 @@ static func green_slime() -> EnemyData:
 
 	d.shoot_min_cooldown = 2.5
 	d.shoot_max_cooldown = 4.5
-	d.shoot_count_min = 1
-	d.shoot_count_max = 10
+	d.shoot_count_min = 2
+	d.shoot_count_max = 4   # shots are spaced just past the player's i-frames (~0.8 s), so keep volleys short
+	d.shoot_ready_time = 0.6
 	d.shoot_interval = 0.12
-	d.shoot_speed = 10.0
+	d.shoot_speed = 18.0
 	d.shoot_damage = 5.0
 	d.anim_shoot = &"shoot"
+	d.sfx_footsteps = SLIME_FOOTSTEPS
+	d.sfx_shoot = SLIME_SHOOT
+	d.sfx_leap = SLIME_LEAP
 
 	d.leaves_puddle_trail = true
 	d.puddle_interval = 0.5

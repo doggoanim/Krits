@@ -227,8 +227,8 @@ func play(anim_name: StringName, blend := 0.15, speed := 1.0, force := false) ->
 	_last_played_anim = anim_name
 	_anim.play(anim_name, blend, speed, speed < 0.0)
 
-func flash() -> void:
-	_flash_t = 0.25
+func flash(duration := 0.25) -> void:
+	_flash_t = duration
 
 ## Swaps the face to `name` (a key of FACE_EXPRESSIONS, e.g. &"idle"). Safe to
 ## call every frame like play() — a no-op once that expression is already

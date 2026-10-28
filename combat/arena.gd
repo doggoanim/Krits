@@ -106,6 +106,7 @@ var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released 
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
                                  ## released/cleared by the next CAST orb — see _lookup_spell()
 var _rune_buffer_t := 0.0      ## counts down to 0 while _rune_buffer isn't empty; see _process()
+var _sword_hits: Array[float] = []   ## Sword only — each banked hit's damage, newest last (getting hit takes the last one back)
 var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, dealt when the player lands
 var _buffer_label: Label3D     ## floats over the player showing the queued runes — Staff only,
                                  ## built in begin() and freed in _end()
@@ -158,6 +159,7 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 		p.add_child(_buffer_label)   # tracks the player automatically; freed in _end()
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
+	Events.player_hurt.connect(_on_player_hurt)
 	Events.encounter_started.emit(self)
 
 ## The arena's reveal: the ground ring sweeps around first (each segment pops
@@ -421,6 +423,7 @@ func _handle_sword_hit(orb: Orb) -> void:
 	combo += 1
 	var dmg := Game.stats.damage() * (1.0 + COMBO_BONUS * (combo - 1))
 	_sword_banked += dmg
+	_sword_hits.append(dmg)
 	player.bounce_off_orb(combo)
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
@@ -432,6 +435,8 @@ func _land_sword_combo() -> void:
 	var total := _sword_banked
 	var hits := combo
 	_sword_banked = 0.0
+	_sword_hits.clear()
+	player.audio.play_damage_hit(WeaponData.Kind.SWORD, hits)
 	var power := float(hits)
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
@@ -601,6 +606,7 @@ func _rune_name(k: Orb.Kind) -> String:
 ## got it there: hit every enemy, bounce the player, fire the usual combo/
 ## orb_hit events, and schedule the orb's respawn.
 func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int) -> void:
+	player.audio.play_damage_hit(_equipped_weapon_kind())
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
 			e.knockback(player.global_position, 3.0)
@@ -636,6 +642,16 @@ func _on_player_landed() -> void:
 		if not _over:
 			Events.combo_changed.emit(0)
 
+## Getting hit costs one step of the combo (and, for the sword, that step's
+## banked damage).
+func _on_player_hurt(_from: Vector3) -> void:
+	if combo <= 0 or _over:
+		return
+	if not _sword_hits.is_empty():
+		_sword_banked = maxf(0.0, _sword_banked - _sword_hits.pop_back())
+	combo -= 1
+	Events.combo_changed.emit(combo)
+
 func _on_enemy_defeated(e: Enemy) -> void:
 	enemies.erase(e)
 	gold_reward += e.data.gold
@@ -651,6 +667,7 @@ func _end(victory: bool) -> void:
 	_over = true
 	Events.player_landed.disconnect(_on_player_landed)
 	Events.player_died.disconnect(_on_player_died)
+	Events.player_hurt.disconnect(_on_player_hurt)
 	for c in get_children():
 		if c is Bullet:
 			c.queue_free()
@@ -660,6 +677,7 @@ func _end(victory: bool) -> void:
 	if player.camera_rig:
 		player.camera_rig.extra_distance = 0.0
 	_sword_banked = 0.0
+	_sword_hits.clear()
 	if _buffer_label:
 		_buffer_label.queue_free()   # a child of player, not of this arena — won't go with it otherwise
 	if victory:

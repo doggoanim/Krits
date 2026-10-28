@@ -40,6 +40,7 @@ const DEFAULTS := {
 	&"controls/invert_y": false,
 	&"controls/bindings": {},
 	&"accessibility/screen_shake": true,
+	&"accessibility/hitstop": 1.0,            ## multiplier on hit-stop freeze time (0 = off)
 	&"accessibility/text_speed": 1.0,         ## multiplier on dialogue typewriter speed
 }
 

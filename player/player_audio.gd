@@ -21,6 +21,16 @@ const LONG_JUMP_SFX: AudioStream = preload(SFX_DIR + "long_jump.wav")
 const WALL_BOUNCE_SFX: AudioStream = preload(SFX_DIR + "wall_bounce.wav")
 const ROLL_BOUNCE_SFX: AudioStream = preload(SFX_DIR + "roll_bounce.wav")
 const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
+## Played when a weapon actually deals its damage (sword: on landing the
+## combo; bow: when the stack is released; staff: when a spell is cast).
+const SWORD_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_sword_hit.wav")
+const BOW_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_bow_hit.wav")
+const MAGIC_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_magic_hit.wav")
+const HURT_SFX: Array[AudioStream] = [
+	preload(SFX_DIR + "player_hurt_1.wav"),
+	preload(SFX_DIR + "player_hurt_2.wav"),
+	preload(SFX_DIR + "player_hurt_3.wav"),
+]
 const SIDE_FLIP_SFX: AudioStream = preload(SFX_DIR + "side_flip.wav")
 const SKID_SFX: AudioStream = preload(SFX_DIR + "skid.wav")
 const CLIMB_SFX: AudioStream = preload(SFX_DIR + "climb.wav")
@@ -197,6 +207,20 @@ func play_roll_bounce() -> void:
 func play_orb_attack(combo := 1) -> void:
 	var base_pitch := minf(1.0 + float(maxi(combo, 1) - 1) * ORB_COMBO_PITCH_STEP, ORB_COMBO_PITCH_MAX)
 	_play(ORB_ATTACK_SFX, PITCH_VARIANCE, base_pitch)
+
+## The sound of a weapon's damage landing; `kind` is the equipped
+## WeaponData.Kind. Sword hits pitch up slightly with the combo (`power`).
+func play_damage_hit(kind: int, power := 1) -> void:
+	match kind:
+		WeaponData.Kind.BOW:
+			_play(BOW_HIT_SFX, PITCH_VARIANCE)
+		WeaponData.Kind.STAFF:
+			_play(MAGIC_HIT_SFX, PITCH_VARIANCE)
+		_:
+			_play(SWORD_HIT_SFX, PITCH_VARIANCE, minf(1.0 + 0.03 * float(maxi(power, 1) - 1), 1.3))
+
+func play_hurt() -> void:
+	_play(HURT_SFX.pick_random(), PITCH_VARIANCE)
 
 ## `surface` comes from FootstepSurfaces.detect() — see GroundState, which
 ## raycasts straight down each step and passes whatever it finds through.

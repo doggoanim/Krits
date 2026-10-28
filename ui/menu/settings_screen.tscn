@@ -395,6 +395,28 @@ ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"accessibility/screen_shake"
 
+[node name="HitstopRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AccessibilityPage/HitstopRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Hit-Stop"
+
+[node name="Hitstop" type="HSlider" parent="Content/Pages/AccessibilityPage/HitstopRow"]
+custom_minimum_size = Vector2(600, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.5
+step = 0.25
+value = 1.0
+tick_count = 7
+ticks_on_borders = true
+metadata/setting = &"accessibility/hitstop"
+
 [node name="TextSpeedRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
 layout_mode = 2
 theme_override_constants/separation = 40

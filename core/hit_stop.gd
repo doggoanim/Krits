@@ -11,6 +11,7 @@ static var _active := false
 
 static func freeze(duration: float, scale := FROZEN_SCALE) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
+	duration *= float(Settings.get_value(&"accessibility/hitstop"))   # Settings > Accessibility
 	if tree == null or duration <= 0.0:
 		return
 	_until_msec = maxi(_until_msec, Time.get_ticks_msec() + int(duration * 1000.0))

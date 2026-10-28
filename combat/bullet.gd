@@ -13,6 +13,7 @@ var accel := 0.0          ## speed change per second (0 = constant)
 ## to keep the usual pierces_shield-based magenta/orange — most patterns
 ## don't need to think about color at all.
 var color_override := Color(0.0, 0.0, 0.0, 0.0)
+var _color := Color(1.0, 0.55, 0.1)
 
 func _ready() -> void:
 	collision_layer = 1 << 3   # layer 4: bullet
@@ -30,9 +31,10 @@ func _ready() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	if color_override.a > 0.0:
-		mat.albedo_color = color_override
+		_color = color_override
 	else:
-		mat.albedo_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
+		_color = Color(1.0, 0.1, 0.9) if pierces_shield else Color(1.0, 0.55, 0.1)
+	mat.albedo_color = _color
 	m.material_override = mat
 	add_child(m)
 	CelOutline.apply(m, OUTLINE_THICKNESS)
@@ -49,5 +51,6 @@ func _physics_process(delta: float) -> void:
 
 func _on_body(body: Node3D) -> void:
 	if body is Player:
-		(body as Player).hit(damage, pierces_shield)
+		(body as Player).hit(damage, pierces_shield, global_position)
+		SplashFx.spawn(get_parent(), global_position, _color, velocity)
 		queue_free()

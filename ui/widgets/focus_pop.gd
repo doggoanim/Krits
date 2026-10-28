@@ -50,6 +50,8 @@ func _ready() -> void:
 	target.focus_entered.connect(_on_focus_entered)
 	target.focus_exited.connect(_on_focus_exited)
 	target.mouse_entered.connect(_on_mouse_entered)
+	if target is BaseButton:
+		(target as BaseButton).pressed.connect(UiSfx.click)
 
 func _on_mouse_entered() -> void:
 	var base := target as BaseButton
@@ -58,6 +60,7 @@ func _on_mouse_entered() -> void:
 	target.grab_focus()   # hovering selects, same as the keyboard
 
 func _on_focus_entered() -> void:
+	UiSfx.focus()
 	if not _captured:
 		_captured = true
 		_base_min = target.custom_minimum_size

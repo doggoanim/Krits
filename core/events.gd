@@ -12,6 +12,7 @@ signal enemy_defeated(enemy: Node, gold: int)
 
 # Player
 signal player_damaged(hp: float, shield: float)
+signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frames); from = where it came from, or Vector3.INF
 signal player_died
 signal player_landed
 signal stats_changed

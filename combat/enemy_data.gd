@@ -57,10 +57,17 @@ func has_leap() -> bool:
 @export var shoot_max_cooldown := 0.0
 @export var shoot_count_min := 1
 @export var shoot_count_max := 10
-@export var shoot_interval := 0.12     ## time between shots within one burst
+@export var shoot_ready_time := 0.6    ## telegraph ("!" + aim line) before the first shot
+@export var shoot_interval := 0.12     ## minimum time between shots — Enemy stretches it to just outlast the player's i-frames
 @export var shoot_speed := 10.0
 @export var shoot_damage := 6.0
 @export var anim_shoot: StringName = &""
+
+## Sounds (all optional). One of a list is picked at random each time.
+@export_group("Sounds")
+@export var sfx_footsteps: Array[AudioStream] = []
+@export var sfx_leap: AudioStream
+@export var sfx_shoot: Array[AudioStream] = []
 
 func has_burst_shoot() -> bool:
 	return shoot_max_cooldown > 0.0
