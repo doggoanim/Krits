@@ -520,6 +520,7 @@ func _fire_slime_ball() -> void:
 	b.damage = data.shoot_damage
 	b.velocity = dir.normalized() * data.shoot_speed
 	b.color_override = data.color
+	b.radius = data.shoot_ball_radius
 	arena.add_child(b)
 	b.global_position = origin
 	_play_random_sfx(data.sfx_shoot)
