@@ -12,10 +12,10 @@
 [ext_resource type="Texture2D" uid="uid://dxnfu8qr88oqk" path="res://assets/ui/button_3.png" id="plate_3"]
 
 [sub_resource type="StyleBoxTexture" id="ComboPlate1"]
-content_margin_left = 34.0
-content_margin_top = 8.0
-content_margin_right = 34.0
-content_margin_bottom = 8.0
+content_margin_left = 54.0
+content_margin_top = 26.0
+content_margin_right = 54.0
+content_margin_bottom = 26.0
 texture = ExtResource("plate_1")
 texture_margin_left = 40.0
 texture_margin_top = 40.0
@@ -23,10 +23,10 @@ texture_margin_right = 40.0
 texture_margin_bottom = 40.0
 
 [sub_resource type="StyleBoxTexture" id="ComboPlate2"]
-content_margin_left = 34.0
-content_margin_top = 8.0
-content_margin_right = 34.0
-content_margin_bottom = 8.0
+content_margin_left = 54.0
+content_margin_top = 26.0
+content_margin_right = 54.0
+content_margin_bottom = 26.0
 texture = ExtResource("plate_2")
 texture_margin_left = 40.0
 texture_margin_top = 40.0
@@ -34,10 +34,10 @@ texture_margin_right = 40.0
 texture_margin_bottom = 40.0
 
 [sub_resource type="StyleBoxTexture" id="ComboPlate3"]
-content_margin_left = 34.0
-content_margin_top = 8.0
-content_margin_right = 34.0
-content_margin_bottom = 8.0
+content_margin_left = 54.0
+content_margin_top = 26.0
+content_margin_right = 54.0
+content_margin_bottom = 26.0
 texture = ExtResource("plate_3")
 texture_margin_left = 40.0
 texture_margin_top = 40.0
@@ -163,7 +163,7 @@ layout_mode = 2
 [node name="ComboPlate" type="PanelContainer" parent="." unique_id=2127239897]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(150, 76)
+custom_minimum_size = Vector2(190, 0)
 layout_mode = 0
 offset_left = 450.0
 offset_top = 38.0
@@ -202,9 +202,9 @@ visible = false
 modulate = Color(1, 0.82, 0.25, 1)
 layout_mode = 0
 offset_left = 450.0
-offset_top = 122.0
-offset_right = 640.0
-offset_bottom = 176.0
+offset_top = 168.0
+offset_right = 690.0
+offset_bottom = 262.0
 rotation = 0.04
 mouse_filter = 2
 theme_override_styles/panel = SubResource("ComboPlate2")
