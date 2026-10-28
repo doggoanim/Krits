@@ -19,6 +19,19 @@ const BINDINGS := {
 	&"menu_travel": {"label": "Travel Menu", "key": KEY_M},
 }
 
+## The movement actions also steer UI focus: whatever key an action is bound
+## to is added to the matching built-in ui_* action (alongside its arrow key /
+## gamepad), so W/A/S/D (or the player's rebinds) move between menu controls
+## and adjust sliders just like the arrow keys. Kept in step by bind_key().
+const UI_MIRRORS := {
+	&"move_forward": &"ui_up",
+	&"move_back": &"ui_down",
+	&"move_left": &"ui_left",
+	&"move_right": &"ui_right",
+}
+
+var _mirrored: Dictionary = {}   ## ui action -> the InputEventKey we added to it
+
 func _ready() -> void:
 	for action in BINDINGS:
 		bind_key(action, default_key(action))
@@ -36,3 +49,17 @@ func bind_key(action: StringName, keycode: Key) -> void:
 	var ev := InputEventKey.new()
 	ev.physical_keycode = keycode
 	InputMap.action_add_event(action, ev)
+	_mirror_to_ui(action, keycode)
+
+func _mirror_to_ui(action: StringName, keycode: Key) -> void:
+	if not UI_MIRRORS.has(action):
+		return
+	var ui_action: StringName = UI_MIRRORS[action]
+	if not InputMap.has_action(ui_action):
+		return
+	if _mirrored.has(ui_action):
+		InputMap.action_erase_event(ui_action, _mirrored[ui_action])
+	var ev := InputEventKey.new()
+	ev.physical_keycode = keycode
+	InputMap.action_add_event(ui_action, ev)
+	_mirrored[ui_action] = ev
