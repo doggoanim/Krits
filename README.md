@@ -313,5 +313,5 @@ restores them after, so whatever look you set here carries into combat too.
 ## Sword combat feel
 
 - Airborne orb hits only **bank** damage (combo scaling still applies) and bounce you up; the whole combo is dealt when you **touch the ground** (`Arena._land_sword_combo`), with a hitstop (`core/hit_stop.gd`), enemy squash (`Enemy.punch`), cartoony damage number + confetti (`combat/hit_burst.gd`) and a screen kick.
-- The combo counter is a hand-drawn plate billboard over the player (`combat/combo_billboard.tscn`): pops on each hit, heats up in colour every few combo steps, slams to the damage total on landing. Tunables are exports on `ComboBillboard`; hitstop/shake constants are at the top of `arena.gd`.
+- The combo counter is a small hand-drawn plate in the HUD next to the bars (`ComboPlate` in `ui/hud.tscn`, driven by `Events.combo_changed` / `combo_landed`): pops on each hit, heats up in colour every few steps, slams to the damage total on landing. Hitstop/shake constants are at the top of `arena.gd`.
 - Bow and Staff are unchanged.

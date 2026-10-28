@@ -35,7 +35,17 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _level: Label = %LevelLabel
 @onready var _xp: ProgressBar = %XpBar
 @onready var _hint: Label = %HintLabel
+@onready var _combo_plate: PanelContainer = %ComboPlate   ## small hand-drawn plate beside the bars
 @onready var _combo: Label = %ComboLabel
+
+## -- Combo plate ----------------------------------------------------------
+## Pops on every combo step, warms up in colour every COMBO_PER_TIER steps,
+## and (Sword) slams to the damage total when the combo lands, then fades.
+@export var combo_plate_styles: Array[StyleBox] = []   ## one picked at random per pop
+const COMBO_TIER_COLORS := [Color(1, 1, 1), Color(1, 0.93, 0.5), Color(1, 0.72, 0.4), Color(1, 0.5, 0.45), Color(1, 0.55, 0.85)]
+const COMBO_PER_TIER := 3
+var _combo_tween: Tween
+var _combo_slamming := false
 
 var _hp_rest_pos: Vector2   ## _hp_group's resting position, read from the scene so the shake
 							## always springs back to wherever it's actually placed
@@ -53,6 +63,8 @@ func _ready() -> void:
 	Events.player_damaged.connect(_on_player_damaged)
 	Events.stats_changed.connect(_refresh)
 	Events.combo_changed.connect(_on_combo)
+	Events.combo_landed.connect(_on_combo_landed)
+	_combo_plate.resized.connect(func() -> void: _combo_plate.pivot_offset = _combo_plate.size * 0.5)
 	_refresh()
 
 func _process(_delta: float) -> void:
@@ -77,7 +89,43 @@ func _refresh() -> void:
 	_hint.text = "[Tab] Stats   [M] Travel"
 
 func _on_combo(c: int) -> void:
-	_combo.text = "x%d" % c if c > 1 else ""
+	if c <= 0:
+		if not _combo_slamming:   # a landing slam hides itself when it's done
+			_hide_combo_plate()
+		return
+	_combo_slamming = false
+	_combo.text = "x%d" % c
+	var tier := mini((c - 1) / COMBO_PER_TIER, COMBO_TIER_COLORS.size() - 1)
+	_combo_plate.modulate = COMBO_TIER_COLORS[tier]
+	_pop_combo_plate(1.5, 0.4)
+
+func _on_combo_landed(damage: float, _hits: int) -> void:
+	_combo_slamming = true
+	_combo.text = ("%d" if is_equal_approx(damage, roundf(damage)) else "%.1f") % damage
+	_combo_plate.modulate = Color.WHITE
+	_pop_combo_plate(1.8, 0.25)
+	_combo_tween.tween_interval(0.5)
+	_combo_tween.tween_property(_combo_plate, "scale", Vector2.ZERO, 0.2) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_combo_tween.tween_callback(func() -> void:
+		_combo_slamming = false
+		_combo_plate.visible = false)
+
+func _pop_combo_plate(from_scale: float, time: float) -> void:
+	if not combo_plate_styles.is_empty():
+		_combo_plate.add_theme_stylebox_override(&"panel", combo_plate_styles.pick_random())
+	if _combo_tween:
+		_combo_tween.kill()
+	_combo_plate.visible = true
+	_combo_plate.scale = Vector2.ONE * from_scale
+	_combo_tween = create_tween()
+	_combo_tween.tween_property(_combo_plate, "scale", Vector2.ONE, time) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+func _hide_combo_plate() -> void:
+	if _combo_tween:
+		_combo_tween.kill()
+	_combo_plate.visible = false
 
 ## Events.player_damaged also fires from PlayerStats.full_heal() (same signal,
 ## new hp/shield either way) — only punch the portrait/shake the bar when hp

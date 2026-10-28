@@ -7,6 +7,7 @@ signal encounter_ended(arena: Node, victory: bool)
 signal encounter_returned(player_defeated: bool)   ## back in the overworld
 signal orb_hit(combo: int, damage: float)
 signal combo_changed(combo: int)
+signal combo_landed(damage: float, hits: int)   ## the Sword's banked combo was just dealt on landing
 signal enemy_defeated(enemy: Node, gold: int)
 
 # Player

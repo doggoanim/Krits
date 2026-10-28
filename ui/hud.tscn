@@ -7,6 +7,42 @@
 [ext_resource type="Texture2D" uid="uid://bfj231jx7567i" path="res://assets/ui/portrait_frame_crop.png" id="5"]
 [ext_resource type="Script" uid="uid://sjd0lyqkiai" path="res://ui/widgets/textured_slanted_bar.gd" id="6"]
 [ext_resource type="Script" uid="uid://cji8cv4nhnvxx" path="res://ui/widgets/portrait_viewport.gd" id="7"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="plate_1"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="plate_2"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="plate_3"]
+
+[sub_resource type="StyleBoxTexture" id="ComboPlate1"]
+content_margin_left = 34.0
+content_margin_top = 8.0
+content_margin_right = 34.0
+content_margin_bottom = 8.0
+texture = ExtResource("plate_1")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="ComboPlate2"]
+content_margin_left = 34.0
+content_margin_top = 8.0
+content_margin_right = 34.0
+content_margin_bottom = 8.0
+texture = ExtResource("plate_2")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="ComboPlate3"]
+content_margin_left = 34.0
+content_margin_top = 8.0
+content_margin_right = 34.0
+content_margin_bottom = 8.0
+texture = ExtResource("plate_3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
 [sub_resource type="StyleBoxFlat" id="XpFillStyle"]
 bg_color = Color(0.9, 0.8, 0.2, 1)
@@ -20,6 +56,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1")
+combo_plate_styles = Array[StyleBox]([SubResource("ComboPlate1"), SubResource("ComboPlate2"), SubResource("ComboPlate3")])
 
 [node name="HpGroup" type="Control" parent="." unique_id=527543768]
 unique_name_in_owner = true
@@ -123,13 +160,24 @@ show_percentage = false
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ComboLabel" type="Label" parent="." unique_id=1260707991]
+[node name="ComboPlate" type="PanelContainer" parent="."]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(150, 76)
 layout_mode = 0
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -60.0
-offset_top = 40.0
-offset_right = -60.0
-offset_bottom = 40.0
-theme_override_font_sizes/font_size = 44
+offset_left = 450.0
+offset_top = 38.0
+offset_right = 600.0
+offset_bottom = 114.0
+rotation = -0.05
+mouse_filter = 2
+theme_override_styles/panel = SubResource("ComboPlate1")
+
+[node name="ComboLabel" type="Label" parent="ComboPlate"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "x2"
+horizontal_alignment = 1
+vertical_alignment = 1
