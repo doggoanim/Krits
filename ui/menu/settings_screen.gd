@@ -155,11 +155,7 @@ func _build_binding_rows() -> void:
 
 func _refresh_binding_labels() -> void:
 	for action in _binding_buttons:
-		_binding_buttons[action].text = _key_name(Settings.get_binding(action))
-
-func _key_name(physical: Key) -> String:
-	var layout_key := DisplayServer.keyboard_get_keycode_from_physical(physical)
-	return OS.get_keycode_string(layout_key if layout_key != KEY_NONE else physical)
+		_binding_buttons[action].text = InputSetup.key_label(Settings.get_binding(action))
 
 func _start_rebind(action: StringName) -> void:
 	_cancel_rebind()

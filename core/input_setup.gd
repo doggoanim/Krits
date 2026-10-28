@@ -37,6 +37,12 @@ func _ready() -> void:
 		bind_key(action, default_key(action))
 	bind_key(&"ui_cancel_menu", KEY_ESCAPE)   # fixed — not rebindable
 
+## Human-readable name of a physical key, in the player's own keyboard layout
+## ("E", "Shift", "Space"...) — for on-screen prompts and the rebind list.
+func key_label(physical: Key) -> String:
+	var layout_key := DisplayServer.keyboard_get_keycode_from_physical(physical)
+	return OS.get_keycode_string(layout_key if layout_key != KEY_NONE else physical)
+
 func default_key(action: StringName) -> Key:
 	return BINDINGS[action]["key"]
 

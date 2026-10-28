@@ -13,13 +13,17 @@ extends StaticBody3D
 ## _interact() (what actually happens).
 
 @export var interact_radius := 2.5
+## What the prompt says. Only the action word is shown, beside the interact
+## key's button ("Press E to enter" -> "Enter"; plain "Press E" -> just the
+## key) — see InteractPrompt. Any leading "Press <key> (to)" is dropped.
 @export var prompt_text := "Press E"
-@export var prompt_height := 2.0   ## how far above this node's origin the floating prompt sits
+@export var prompt_height := 2.0   ## how far above this node's origin the prompt sits
 
 var player: Player
 var _in_range := false
 var _area: Area3D
-var _prompt: Label3D
+var _verb := ""
+var _prompting := false
 
 func _ready() -> void:
 	_area = Area3D.new()
@@ -34,13 +38,16 @@ func _ready() -> void:
 	_area.body_entered.connect(_on_body_entered)
 	_area.body_exited.connect(_on_body_exited)
 
-	_prompt = Label3D.new()
-	_prompt.text = prompt_text
-	_prompt.position.y = prompt_height
-	_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_prompt.no_depth_test = true
-	_prompt.visible = false
-	add_child(_prompt)
+	_verb = _verb_from(prompt_text)
+
+func _exit_tree() -> void:
+	InteractPrompt.release(self)
+
+## "Press E to enter" -> "Enter"; "Press E" -> "".
+static func _verb_from(text: String) -> String:
+	var re := RegEx.create_from_string("(?i)^\\s*press\\s+\\S+\\s*(to\\s+)?")
+	var verb := re.sub(text, "").strip_edges()
+	return verb.substr(0, 1).to_upper() + verb.substr(1)
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
@@ -54,7 +61,11 @@ func _on_body_exited(body: Node3D) -> void:
 
 func _process(_delta: float) -> void:
 	var usable := _in_range and _can_interact()
-	_prompt.visible = usable
+	if usable:
+		InteractPrompt.request(self, global_position + Vector3.UP * prompt_height, _verb)
+	elif _prompting:
+		InteractPrompt.release(self)
+	_prompting = usable
 	if usable and Input.is_action_just_pressed(&"interact"):
 		_interact()
 

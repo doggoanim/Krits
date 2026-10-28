@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="3"]
+[ext_resource type="Script" path="res://ui/interact_prompt.gd" id="4"]
+
+[sub_resource type="StyleBoxTexture" id="Plate1"]
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 16.0
+texture = ExtResource("1")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate2"]
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 16.0
+texture = ExtResource("2")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate3"]
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 16.0
+texture = ExtResource("3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[node name="InteractPrompt" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4")
+plate_styles = Array[StyleBox]([SubResource("Plate1"), SubResource("Plate2"), SubResource("Plate3")])
+
+[node name="Box" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_constants/separation = 18
+
+[node name="Plate" type="PanelContainer" parent="Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 104)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Plate1")
+
+[node name="Key" type="Label" parent="Box/Plate"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 60
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Verb" type="Label" parent="Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 54
+text = "Enter"
