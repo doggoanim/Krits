@@ -8,12 +8,18 @@ extends HBoxContainer
 @export var slot_styles: Array[StyleBox] = []   ## nine-sliced plates, one per slot (cycled)
 @export var interactive := true
 @export var slot_size := 96.0
+@export var group_gap := 90.0   ## extra space between the ability slots (1-3) and consumable slots (4-6)
 
 var _slots: Array[InventorySlot] = []
 
 func _ready() -> void:
 	for i in Hotbar.SLOT_COUNT:
 		var slot := slot_scene.instantiate() as InventorySlot
+		if i == Hotbar.ABILITY_SLOTS:
+			var gap := Control.new()
+			gap.custom_minimum_size = Vector2(group_gap, 0)
+			gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			add_child(gap)
 		slot.custom_minimum_size = Vector2(slot_size, slot_size)
 		slot.focus_mode = Control.FOCUS_NONE
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
