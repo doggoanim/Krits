@@ -35,17 +35,26 @@ func _ready() -> void:
 		_tab_buttons[i].pressed.connect(_show_page.bind(i))
 	_reset.pressed.connect(_on_reset)
 	_return.pressed.connect(_go_back)
+	_mouse_focus_only(self)
 
 func enter(_payload: Dictionary = {}) -> void:
 	_cancel_rebind()
 	_sync()
 	_tab_buttons[0].button_pressed = true
 	_show_page(0)
-	_tab_buttons[0].grab_focus()
+	get_viewport().gui_release_focus()
 
 func exit() -> void:
 	_cancel_rebind()
 	Settings.save()
+
+## This page is mouse-driven: clicking a control focuses it, but no key
+## (Tab, arrows) moves focus from one control to the next.
+func _mouse_focus_only(node: Node) -> void:
+	for child in node.get_children():
+		if child is Control:
+			child.focus_mode = Control.FOCUS_CLICK
+		_mouse_focus_only(child)
 
 # --- Input ----------------------------------------------------------------
 
