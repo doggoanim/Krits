@@ -35,6 +35,7 @@
 [ext_resource type="PackedScene" uid="uid://pj45bqvbl54i" path="res://assets/world/house_chesburg_4.glb" id="28_lybmh"]
 [ext_resource type="PackedScene" uid="uid://232wke3ls06t" path="res://assets/world/nature/log.glb" id="29_2m3w5"]
 [ext_resource type="PackedScene" uid="uid://l352u12jftju" path="res://assets/world/nature/bush.glb" id="29_52qkm"]
+[ext_resource type="Texture2D" uid="uid://dkrydxsdd4k7r" path="res://assets/textures/water.jpg" id="30_lcfa2"]
 [ext_resource type="PackedScene" uid="uid://bgi0nckpg0qug" path="res://assets/world/nature/tree_chesburg_2.glb" id="30_vgvlt"]
 [ext_resource type="PackedScene" uid="uid://cdviygxdsjeil" path="res://assets/world/fence.glb" id="35_0005w"]
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
@@ -74,9 +75,10 @@ size = Vector3(4, 18.6, 0.1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
 shader = ExtResource("18_water2_shader")
+shader_parameter/albedo_texture = ExtResource("30_lcfa2")
 shader_parameter/uv_scroll_speed = Vector2(0.05, 0.03)
-shader_parameter/shallow_color = Color(0.4, 0.8, 0.85, 0.65)
-shader_parameter/deep_color = Color(0.05, 0.25, 0.45, 0.9)
+shader_parameter/shallow_color = Color(1, 1, 1, 1)
+shader_parameter/deep_color = Color(1, 1, 1, 0.9019608)
 shader_parameter/wave_height = 0.08
 shader_parameter/wave_scale = 1.3
 shader_parameter/wave_speed = 0.6
