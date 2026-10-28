@@ -22,10 +22,6 @@ extends Resource
 ## needing a separate script.
 @export var sets_flag: StringName = &""
 
-## Seconds to wait before auto-advancing this line when auto-advance is on.
-## Negative = work it out from the text length.
-@export var auto_delay: float = -1.0
-
 @export var next: DialogueNode            ## used only when choices is empty
 @export var choices: Array[DialogueChoice] = []
 
@@ -55,8 +51,3 @@ func visible_choices() -> Array[DialogueChoice]:
 			out.append(c)
 	return out
 
-## Seconds auto-advance should wait once this line has finished typing.
-func resolved_auto_delay() -> float:
-	if auto_delay >= 0.0:
-		return auto_delay
-	return clampf(0.9 + text.length() * 0.035, 1.2, 6.0)

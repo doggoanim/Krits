@@ -6,8 +6,7 @@ extends CanvasLayer
 ##
 ##   - walks a DialogueNode graph (see dialogue/dialogue_node.gd),
 ##   - types each line out with Typewriter (BBCode + [pause=s] tags),
-##   - lets the player finish a line (interact), skip (hold interact) or
-##     auto-advance (toggle with the dialogue_auto key / Settings),
+##   - lets the player finish a line (interact), skip (hold interact),
 ##   - hands the in-world side (freeze player, camera focus, speaker turn)
 ##     to DialogueStage.
 ##
@@ -45,7 +44,6 @@ var _current: DialogueNode
 var _stage: DialogueStage
 var _line_done := false
 var _opened_frame := -1
-var _auto_timer := -1.0
 var _holding := false
 var _hold_time := 0.0
 var _skip_tick := 0.0
@@ -93,8 +91,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"ui_cancel_menu"):
 		_end()
-	elif event.is_action_pressed(&"dialogue_auto"):
-		Settings.set_value(&"accessibility/dialogue_auto", not _auto_enabled())
 	elif event.is_action_pressed(&"interact"):
 		_holding = true
 		_hold_time = 0.0
@@ -130,24 +126,13 @@ func _process(delta: float) -> void:
 					_typewriter.finish()
 				elif _line_done and _choices.get_child_count() == 0:
 					_advance()
-	if _auto_timer > 0.0:
-		_auto_timer -= delta
-		if _auto_timer <= 0.0:
-			_advance()
 
 func _skipping() -> bool:
 	return _holding and _hold_time >= SKIP_HOLD_TIME
 
-func _auto_enabled() -> bool:
-	return Settings.get_value(&"accessibility/dialogue_auto")
-
 func _on_setting_changed(key: StringName) -> void:
-	if key == &"accessibility/dialogue_auto" or key == &"controls/bindings":
+	if key == &"controls/bindings":
 		_refresh_hint()
-		if _open and _line_done and _auto_enabled() and _current and _current.visible_choices().is_empty():
-			_auto_timer = _current.resolved_auto_delay()
-		elif not _auto_enabled():
-			_auto_timer = -1.0
 
 # --- Conversation flow ------------------------------------------------------
 
@@ -162,7 +147,6 @@ func _show_node(node: DialogueNode) -> void:
 	if node.sets_flag != &"":
 		Game.set_flag(node.sets_flag)
 	_line_done = false
-	_auto_timer = -1.0
 	_clear_choices()
 	_hint.visible = false
 	_speaker_label.text = node.speaker
@@ -189,8 +173,6 @@ func _on_line_finished() -> void:
 		return
 	_refresh_hint()
 	_hint.visible = true
-	if _auto_enabled():
-		_auto_timer = _current.resolved_auto_delay()
 
 func _show_choices(options: Array[DialogueChoice]) -> void:
 	for choice in options:
@@ -222,7 +204,6 @@ func _end() -> void:
 	_open = false
 	_current = null
 	_holding = false
-	_auto_timer = -1.0
 	_typewriter.finish()
 	_clear_choices()
 	if _stage:
@@ -235,9 +216,7 @@ func _end() -> void:
 
 func _refresh_hint() -> void:
 	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
-	var auto_key := InputSetup.key_label(Settings.get_binding(&"dialogue_auto"))
-	_hint.text = "%s  Next   ·   hold  Skip   ·   %s  Auto: %s" % [
-		key, auto_key, "On" if _auto_enabled() else "Off"]
+	_hint.text = "%s  Next   ·   hold  Skip" % key
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5
