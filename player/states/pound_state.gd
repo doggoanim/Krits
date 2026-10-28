@@ -34,4 +34,5 @@ func physics_update(delta: float) -> void:
 		return
 	p.safe_move_and_slide()
 	if p.is_on_floor():
+		p.pound_landed_frame = Engine.get_physics_frames()
 		machine.transition_to(&"PoundLand", {"jump_queued": _jump_queued})

@@ -45,6 +45,7 @@ const ORBS_PER_ENEMY := 2
 const ORB_HEIGHT := Vector2(1.8, 4.4)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
+const POUND_BONUS := 1.25         ## Sword: landing the combo with a ground pound multiplies the damage
 const LAND_HITSTOP_BASE := 0.07   ## seconds of freeze on a landing hit...
 const LAND_HITSTOP_PER_HIT := 0.015   ## ...plus this per orb in the combo...
 const LAND_HITSTOP_MAX := 0.22        ## ...up to this cap
@@ -433,22 +434,25 @@ func _handle_sword_hit(orb: Orb) -> void:
 ## The landing: hit every enemy for the whole banked combo, with a freeze
 ## frame, a squash on each enemy, damage numbers and a screen kick.
 func _land_sword_combo() -> void:
-	var total := _sword_banked
+	var pounded := player.pound_landed_frame == Engine.get_physics_frames()
+	var total := _sword_banked * (POUND_BONUS if pounded else 1.0)
 	var hits := combo
 	_sword_banked = 0.0
 	_sword_hits.clear()
 	player.audio.play_damage_hit(WeaponData.Kind.SWORD, hits)
+	if pounded:
+		player.audio.play_pound_bonus()
 	var power := float(hits)
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
-			HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), total, power)
+			HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), total, power, pounded)
 			e.punch()
 			e.knockback(player.global_position, minf(3.0 + 0.5 * hits, 9.0))
 			e.take_damage(total)   # same damage to every enemy
-	Events.combo_landed.emit(total, hits)
+	Events.combo_landed.emit(total, hits, pounded)
 	if player.camera_rig:
-		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8))
-	HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX))
+		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8) + (0.2 if pounded else 0.0))
+	HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.3 if pounded else 1.0))
 
 ## ARROW orbs bank damage without hitting anything; the next SHOOT orb
 ## releases the whole bank at once (and does nothing if nothing's banked —

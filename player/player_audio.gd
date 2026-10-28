@@ -219,6 +219,12 @@ func play_damage_hit(kind: int, power := 1) -> void:
 		_:
 			_play(SWORD_HIT_SFX, PITCH_VARIANCE, minf(1.0 + 0.03 * float(maxi(power, 1) - 1), 1.3))
 
+## Success cue for the sword's ground-pound bonus: the sword hit again, high
+## and bright, over the normal one. Swap in a dedicated sample here if wanted.
+func play_pound_bonus() -> void:
+	_play(SWORD_HIT_SFX, 0.0, 1.6)
+	_play(ORB_ATTACK_SFX, 0.0, 2.0)
+
 func play_hurt() -> void:
 	_play(HURT_SFX.pick_random(), PITCH_VARIANCE)
 

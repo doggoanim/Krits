@@ -343,3 +343,5 @@ restores them after, so whatever look you set here carries into combat too.
 - **Getting items:** enemy `drops` (rolled per defeat, added on victory; slime drops goo/potions), shop "Supplies", and dialogue (`DialogueNode.gives_item`/`gives_count`). `DialogueChoice.required_item` gates a choice on holding an item. Overflow is left behind with a "Bag full" toast; pickups show as HUD toasts.
 - **Shop:** now also sells backpacks and supplies, and buys materials/consumables (`sell_price`).
 - To add an item: add a builder + list entry in `ItemLibrary`.
+
+**Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: golden "N!" plate + "Pound bonus x1.25!" toast in the HUD, golden damage numbers/confetti, brighter double hit sound (`PlayerAudio.play_pound_bonus`), a bigger kick and longer hitstop.

@@ -102,11 +102,16 @@ func _on_combo(c: int) -> void:
 	_combo_plate.modulate = COMBO_TIER_COLORS[tier]
 	_pop_combo_plate(1.5, 0.4)
 
-func _on_combo_landed(damage: float, _hits: int) -> void:
+func _on_combo_landed(damage: float, _hits: int, pound_bonus: bool) -> void:
 	_combo_slamming = true
 	_combo.text = ("%d" if is_equal_approx(damage, roundf(damage)) else "%.1f") % damage
 	_combo_plate.modulate = Color.WHITE
-	_pop_combo_plate(1.8, 0.25)
+	if pound_bonus:
+		# Ground-pound bonus: golden plate, bigger pop, and a toast naming it.
+		_combo.text += "!"
+		_combo_plate.modulate = Color(1.0, 0.82, 0.25)
+		_toast("Pound bonus x1.25!")
+	_pop_combo_plate(2.4 if pound_bonus else 1.8, 0.3 if pound_bonus else 0.25)
 	_combo_tween.tween_interval(0.5)
 	_combo_tween.tween_property(_combo_plate, "scale", Vector2.ZERO, 0.2) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)

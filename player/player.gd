@@ -72,6 +72,7 @@ var dead := false
 var coyote := 0.0
 var jump_buffer_t := 0.0
 var invuln := 0.0
+var pound_landed_frame := -1   ## physics frame a ground pound last touched down (the sword's pound bonus checks it)
 var roll_cd := 0.0
 var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per-frame
 						   ## find_climbable_wall() check can't instantly re-grab it
