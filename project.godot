@@ -61,7 +61,7 @@ common/physics_ticks_per_second=120
 
 [shader_globals]
 
-game_time={
+time_offset={
 "type": "float",
 "value": 0.0
 }

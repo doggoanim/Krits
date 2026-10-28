@@ -29,11 +29,13 @@ const FONT_SCALES: Array[float] = [1.0, 0.78, 0.52, 0.44]
 const OPEN_TIME := 0.28
 const CLOSE_TIME := 0.18
 const SLIDE_DISTANCE := 50.0
+const PORTRAIT_SLIDE := 160.0   ## px the portrait slides in from the right
 const PANEL_TIME := 0.3
 const PAGE_FADE := 0.15
 
 @onready var _backdrop: ColorRect = %Backdrop
 @onready var _side_panel: ColorRect = %SidePanel
+@onready var _portrait: PortraitViewport = %Portrait
 @onready var _heading_margin: MarginContainer = %HeadingMargin
 @onready var _menu_margin: MarginContainer = %MenuMargin
 @onready var _items: Array[Node] = %Items.get_children()
@@ -55,6 +57,8 @@ var _backdrop_lod := 0.0             ## resting blur/tint of each layer, read fr
 var _backdrop_tint := Color.TRANSPARENT
 var _side_lod := 0.0
 var _side_tint := Color.TRANSPARENT
+var _portrait_left := 0.0            ## the portrait's resting offsets, read from the scene
+var _portrait_right := 0.0
 var _side_width := 0.0               ## the side panel's resting anchor_right (fraction of the screen)
 var _heading_left := 0
 var _menu_left := 0
@@ -68,6 +72,8 @@ func _ready() -> void:
 	_side_lod = side_mat.get_shader_parameter("blur_lod")
 	_side_tint = side_mat.get_shader_parameter("tint")
 	_side_width = _side_panel.anchor_right
+	_portrait_left = _portrait.offset_left
+	_portrait_right = _portrait.offset_right
 	_heading_left = _heading_margin.get_theme_constant("margin_left")
 	_menu_left = _menu_margin.get_theme_constant("margin_left")
 	for node in _items:
@@ -145,6 +151,10 @@ func _set_progress(k: float) -> void:
 	_side_panel.anchor_left = -_side_width * (1.0 - k)
 	_side_panel.anchor_right = _side_width * k
 	content.modulate.a = k
+	_portrait.get_parent().modulate.a = k
+	var shift := PORTRAIT_SLIDE * (1.0 - k)
+	_portrait.offset_left = _portrait_left + shift
+	_portrait.offset_right = _portrait_right + shift
 	var slide := int(SLIDE_DISTANCE * (1.0 - k))
 	_heading_margin.add_theme_constant_override("margin_left", _heading_left - slide)
 	_menu_margin.add_theme_constant_override("margin_left", _menu_left - slide)
@@ -175,6 +185,7 @@ func _open_settings() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
+	_fade(_portrait.get_parent(), 0.0)
 	await _fade(content, 0.0)
 	content.visible = false
 	await _widen_panel(1.0)
@@ -193,6 +204,7 @@ func _close_settings() -> void:
 	_settings.exit()
 	await _widen_panel(_side_width)
 	content.visible = true
+	_fade(_portrait.get_parent(), 1.0)
 	await _fade(content, 1.0)
 	_settings_button.grab_focus()
 	_transitioning = false

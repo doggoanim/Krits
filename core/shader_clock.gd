@@ -1,18 +1,27 @@
 extends Node
-## Autoload `ShaderClock`: feeds the global shader parameter `game_time`,
-## which the wind, water and low-HP-vignette shaders use instead of TIME.
-## TIME is a wall clock that keeps ticking while the tree is paused; this node
-## is pausable (default process mode), so it stops accumulating when the pause
-## menu (or any other menu) pauses the game, and everything animated by
-## `game_time` freezes with it.
+## Autoload `ShaderClock`: keeps shader animation from running while the game
+## is paused. Shaders read the built-in TIME, which never stops; this node adds
+## up every second spent paused and publishes it as the global shader
+## parameter `time_offset`, and the wind, water and low-HP-vignette shaders use
+## `TIME - time_offset` — so while paused that value stays put and everything
+## animated by it freezes, then carries on from where it left off.
 ##
-## To make a new shader pause-aware: add `global uniform float game_time;` and
-## use it where you'd use TIME.
+## Left unset (the editor's own 3D viewport never runs this) the offset is 0 and
+## the shaders just behave like plain TIME.
+##
+## To make a new shader pause-aware: add `global uniform float time_offset;`
+## and use `(TIME - time_offset)` wherever you'd use TIME.
 
-const PARAM := &"game_time"
+const PARAM := &"time_offset"
 
-var _time := 0.0
+var _paused_total := 0.0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS   # must keep counting while paused
+	RenderingServer.global_shader_parameter_set(PARAM, 0.0)
 
 func _process(delta: float) -> void:
-	_time += delta
-	RenderingServer.global_shader_parameter_set(PARAM, _time)
+	if not get_tree().paused:
+		return
+	_paused_total += delta
+	RenderingServer.global_shader_parameter_set(PARAM, _paused_total)

@@ -1,8 +1,10 @@
 shader_type spatial;
 render_mode cull_disabled, diffuse_toon, specular_toon, blend_mix;
 // Pausable clock (see core/shader_clock.gd): TIME keeps running while the
-// game is paused, this doesn't — so animation freezes with the pause menu.
-global uniform float game_time;
+// game is paused, so ShaderClock publishes how much of it was spent paused
+// and we subtract that — animation freezes with the pause menu. (Unset, e.g.
+// in the editor's own viewport, it's 0 and this is plain TIME.)
+global uniform float time_offset;
 // Simple stylized water: a toon-stepped shallow/deep color blend plus a
 // couple of layered sine waves for gentle animated motion, and a fresnel
 // rim so it brightens at grazing angles like a real reflective surface.
@@ -41,8 +43,8 @@ float sparkle_hash(vec2 p) {
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_xz = world_pos.xz;
-	float w1 = sin(world_pos.x * wave_scale + game_time * wave_speed);
-	float w2 = sin((world_pos.x + world_pos.z) * wave_scale * 0.6 - game_time * wave_speed * 1.3);
+	float w1 = sin(world_pos.x * wave_scale + (TIME - time_offset) * wave_speed);
+	float w2 = sin((world_pos.x + world_pos.z) * wave_scale * 0.6 - (TIME - time_offset) * wave_speed * 1.3);
 	wave_offset = (w1 + w2) * 0.5;
 	VERTEX.y += wave_offset * wave_height;
 }
@@ -58,7 +60,7 @@ void fragment() {
 	// Texture is optional: an unset sampler2D defaults to solid white, so
 	// this multiply is a no-op (leaves the flat toon-color look untouched)
 	// until you actually assign one.
-	vec2 scrolled_uv = UV + game_time * uv_scroll_speed;
+	vec2 scrolled_uv = UV + (TIME - time_offset) * uv_scroll_speed;
 	vec4 tex = texture(albedo_texture, scrolled_uv);
 	color *= tex.rgb;
 	alpha *= tex.a;
@@ -76,7 +78,7 @@ void fragment() {
 		// glints riding the surface motion instead of a fixed glitter
 		// pattern painted on top of it.
 		vec2 cell = floor((world_xz + wave_offset * 0.1) * sparkle_density);
-		float roll = floor(game_time * sparkle_speed);
+		float roll = floor((TIME - time_offset) * sparkle_speed);
 		float n = sparkle_hash(cell + roll);
 		// Narrow threshold: only a sparse handful of cells are "lit" on any
 		// given roll, which is what reads as scattered glints rather than a

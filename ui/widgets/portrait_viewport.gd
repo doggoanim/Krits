@@ -17,14 +17,26 @@ extends Control
 ## clipped to a circle (see CIRCLE_MASK_SHADER_CODE) so the frame's border
 ## shows through cleanly all the way around instead of a square poking out.
 
-const RENDER_SIZE := 256                ## SubViewport resolution, independent of the Control's size
 const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
-const OUTLINE_WIDTH_PX := 2.0   ## same screen-space-dilation idea as OutlineSystem, just sized for this render's 256x256, not the main viewport's
 const OUTLINE_COLOR := Color.BLACK
-const PORTRAIT_TURN := 0.32   ## extra yaw (rad) so the portrait isn't a flat mirror-facing
-                               ## shot — turns the character slightly left; flip the sign
-                               ## if it reads as turning right instead
+
+## The HUD uses the defaults (a 256px circular headshot turned slightly left);
+## the pause menu overrides them in pause_menu.tscn for a big, rectangular,
+## right-turned, clickable portrait.
+@export_group("Render")
+@export var render_size := 256         ## SubViewport resolution, independent of the Control's size
+@export var circular := true           ## clip the render to a circle (HUD frame) — off for a free-standing portrait
+@export var outline_width_px := 2.0    ## same screen-space-dilation idea as OutlineSystem, sized for this render, not the main viewport's
+@export var turn := 0.32               ## extra yaw (rad) so it isn't a flat mirror-facing shot: positive turns the character left, negative right
+@export var only_when_visible := false ## don't render while hidden (for a portrait that's only sometimes on screen)
+
+@export_group("Click squish")
+@export var clickable := false
+@export var squish_sound: AudioStream
+@export var squish_pitch_range := Vector2(0.8, 1.3)   ## random pitch_scale per click
+@export_range(0.0, 1.0) var squish_pivot_y := 0.85    ## where on the control the squash anchors (fraction down) — near the character's base
+@export var sfx_bus := &"SFX"
 
 ## Clips the render to a circle inscribed in the TextureRect's own rect (a
 ## true circle only when that rect is square, which is how Hud sizes
@@ -42,7 +54,8 @@ const CIRCLE_MASK_SHADER_CODE := """
 shader_type canvas_item;
 
 uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float outline_width_px : hint_range(0.0, 16.0) = 2.0;
+uniform float outline_width_px : hint_range(0.0, 32.0) = 2.0;
+uniform bool circular = true;
 
 void fragment() {
 	vec2 texel_size = 1.0 / vec2(textureSize(TEXTURE, 0));
@@ -65,7 +78,7 @@ void fragment() {
 	float alpha = max(tex.a, ring * outline_color.a);
 
 	float dist = length(UV - vec2(0.5));
-	float circle_edge = 1.0 - smoothstep(0.48, 0.5, dist);
+	float circle_edge = circular ? 1.0 - smoothstep(0.48, 0.5, dist) : 1.0;
 	COLOR = vec4(rgb, alpha * circle_edge);
 }
 """
@@ -78,10 +91,11 @@ var _synced_expression: StringName = &""   ## last expression copied from the li
 
 func _ready() -> void:
 	_viewport = SubViewport.new()
-	_viewport.size = Vector2i(RENDER_SIZE, RENDER_SIZE)
+	_viewport.size = Vector2i(render_size, render_size)
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if only_when_visible \
+			else SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
 	_build_scene()
 
@@ -96,9 +110,11 @@ func _ready() -> void:
 	var circle_mat := ShaderMaterial.new()
 	circle_mat.shader = circle_shader
 	circle_mat.set_shader_parameter(&"outline_color", OUTLINE_COLOR)
-	circle_mat.set_shader_parameter(&"outline_width_px", OUTLINE_WIDTH_PX)
+	circle_mat.set_shader_parameter(&"outline_width_px", outline_width_px)
+	circle_mat.set_shader_parameter(&"circular", circular)
 	tex_rect.material = circle_mat
 	add_child(tex_rect)
+	mouse_filter = Control.MOUSE_FILTER_STOP if clickable else Control.MOUSE_FILTER_IGNORE
 
 func _build_scene() -> void:
 	var world := Node3D.new()
@@ -125,7 +141,7 @@ func _build_scene() -> void:
 
 	_model = PlayerVisual.MODEL_SCENE.instantiate()
 	world.add_child(_model)
-	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET + PORTRAIT_TURN
+	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET + turn
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 
 	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
@@ -152,6 +168,60 @@ func _build_scene() -> void:
 
 func _process(_delta: float) -> void:
 	_sync_face()
+
+# --- Click squish ---------------------------------------------------------------
+
+var _squish_tween: Tween
+
+func _gui_input(event: InputEvent) -> void:
+	if not clickable:
+		return
+	var click := event as InputEventMouseButton
+	if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT \
+			and _is_on_character(click.position):
+		accept_event()
+		squish()
+
+## Squashes and stretches the portrait like a toy being squeezed, with a
+## pitch-varied squeak. Snappy: four quick steps, the last one springing back.
+func squish() -> void:
+	if _squish_tween and _squish_tween.is_valid():
+		_squish_tween.kill()
+	pivot_offset = Vector2(size.x * 0.5, size.y * squish_pivot_y)
+	scale = Vector2.ONE
+	_squish_tween = create_tween()
+	_squish_tween.tween_property(self, "scale", Vector2(1.3, 0.62), 0.06) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squish_tween.tween_property(self, "scale", Vector2(0.86, 1.2), 0.09) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squish_tween.tween_property(self, "scale", Vector2(1.07, 0.94), 0.08) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_squish_tween.tween_property(self, "scale", Vector2.ONE, 0.12) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_play_squeak()
+
+func _play_squeak() -> void:
+	if squish_sound == null:
+		return
+	var player := AudioStreamPlayer.new()
+	player.stream = squish_sound
+	player.bus = sfx_bus
+	player.pitch_scale = randf_range(squish_pitch_range.x, squish_pitch_range.y)
+	add_child(player)
+	player.finished.connect(player.queue_free)
+	player.play()
+
+## Only clicks that land on the character (not the empty transparent area
+## around him) count — checked against the render's own alpha.
+func _is_on_character(local_pos: Vector2) -> bool:
+	if size.x <= 0.0 or size.y <= 0.0:
+		return false
+	var image := _viewport.get_texture().get_image()
+	if image == null:
+		return false
+	var px := Vector2i((local_pos / size * Vector2(image.get_size())).floor())
+	px = px.clamp(Vector2i.ZERO, image.get_size() - Vector2i.ONE)
+	return image.get_pixelv(px).a > 0.1
 
 ## Mirrors the live player's current face expression (blink, hurt, ...) onto
 ## this copy's own face material — read-only, see this file's header comment.

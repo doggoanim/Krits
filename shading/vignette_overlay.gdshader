@@ -1,7 +1,9 @@
 shader_type canvas_item;
 // Pausable clock (see core/shader_clock.gd): TIME keeps running while the
-// game is paused, this doesn't — so animation freezes with the pause menu.
-global uniform float game_time;
+// game is paused, so ShaderClock publishes how much of it was spent paused
+// and we subtract that — animation freezes with the pause menu. (Unset, e.g.
+// in the editor's own viewport, it's 0 and this is plain TIME.)
+global uniform float time_offset;
 // Low-HP warning vignette: darkens and gently pulses the screen edges.
 // Purely a function of `intensity` (0 = invisible, 1 = fully showing) —
 // this shader has no idea what HP even is, LowHpVignette (core/low_hp_vignette.gd)
@@ -25,7 +27,7 @@ void fragment() {
 	float dist = length(centered);
 
 	float ring = smoothstep(radius, radius + softness, dist);
-	float pulse = 1.0 + sin(game_time * pulse_speed) * pulse_amount;
+	float pulse = 1.0 + sin((TIME - time_offset) * pulse_speed) * pulse_amount;
 	float alpha = ring * clamp(intensity * pulse, 0.0, 1.0);
 
 	COLOR = vec4(vignette_color.rgb, alpha * vignette_color.a);

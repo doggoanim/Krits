@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://ui/menu/settings_screen.tscn" id="4"]
 [ext_resource type="Shader" path="res://ui/pause_backdrop.gdshader" id="5"]
 [ext_resource type="Theme" path="res://ui/pause_menu_theme.tres" id="6"]
+[ext_resource type="Script" path="res://ui/widgets/portrait_viewport.gd" id="7"]
+[ext_resource type="AudioStream" path="res://sounds/SFX/toy_squeak.wav" id="8"]
 
 [sub_resource type="ShaderMaterial" id="Backdrop"]
 shader = ExtResource("5")
@@ -130,7 +132,34 @@ theme_override_font_sizes/font_size = 88
 text = "Quit"
 alignment = 0
 
-[node name="Settings" parent="." index="3" instance=ExtResource("4")]
+[node name="PortraitWrap" type="Control" parent="." index="3"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Portrait" type="Control" parent="PortraitWrap"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1060.0
+offset_top = -800.0
+offset_right = 40.0
+offset_bottom = 300.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("7")
+render_size = 1024
+circular = false
+outline_width_px = 7.0
+turn = -0.32
+only_when_visible = true
+clickable = true
+squish_sound = ExtResource("8")
+
+[node name="Settings" parent="." index="4" instance=ExtResource("4")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -138,7 +167,7 @@ layout_mode = 2
 [node name="Dim" parent="Settings" index="0"]
 visible = false
 
-[node name="Confirm" type="ColorRect" parent="." index="4"]
+[node name="Confirm" type="ColorRect" parent="." index="5"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
