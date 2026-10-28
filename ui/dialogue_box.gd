@@ -86,12 +86,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel_menu"):
 		_end()
 	elif event.is_action_pressed(&"interact"):
-		_holding = true
-		_hold_time = 0.0
-		_skip_tick = 0.0
 		_press_interact()
-	elif event.is_action_released(&"interact"):
-		else:
+	else:
 		return
 	get_viewport().set_input_as_handled()
 
