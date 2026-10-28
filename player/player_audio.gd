@@ -24,7 +24,7 @@ const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
 ## Played when a weapon actually deals its damage (sword: on landing the
 ## combo; bow: when the stack is released; staff: when a spell is cast).
 const SWORD_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_sword_hit.wav")
-const POUND_HIT_SFX: AudioStream = preload(SFX_DIR + "enemies/attack_orb_sword_hit_pound.wav")   ## sword combo landed with a ground pound
+const POUND_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_sword_hit_pound.wav")   ## sword combo landed with a ground pound
 const BOW_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_bow_hit.wav")
 const MAGIC_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_magic_hit.wav")
 const HURT_SFX: Array[AudioStream] = [
