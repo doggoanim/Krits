@@ -36,6 +36,10 @@ enabled=PackedStringArray("res://addons/proton_scatter/plugin.cfg")
 
 import/blender/enabled=false
 
+[gui]
+
+theme/custom_font="res://assets/fonts/zyzol/Zyzol.otf"
+
 [layer_names]
 
 3d_render/layer_2="character_outline"
@@ -46,10 +50,6 @@ import/blender/enabled=false
 3d_physics/layer_5="orb"
 3d_physics/layer_6="trigger"
 3d_physics/layer_8="camera_push"
-
-[gui]
-
-theme/custom_font="res://assets/fonts/zyzol/Zyzol.otf"
 
 [physics]
 
