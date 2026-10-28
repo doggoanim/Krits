@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://bfj231jx7567i" path="res://assets/ui/portrait_frame_crop.png" id="5"]
 [ext_resource type="Script" uid="uid://sjd0lyqkiai" path="res://ui/widgets/textured_slanted_bar.gd" id="6"]
 [ext_resource type="Script" uid="uid://cji8cv4nhnvxx" path="res://ui/widgets/portrait_viewport.gd" id="7"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="plate_1"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="plate_2"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="plate_3"]
+[ext_resource type="Texture2D" uid="uid://c120af7sqe3ml" path="res://assets/ui/button_1.png" id="plate_1"]
+[ext_resource type="Texture2D" uid="uid://ctbnugoakkam8" path="res://assets/ui/button_2.png" id="plate_2"]
+[ext_resource type="Texture2D" uid="uid://dxnfu8qr88oqk" path="res://assets/ui/button_3.png" id="plate_3"]
 
 [sub_resource type="StyleBoxTexture" id="ComboPlate1"]
 content_margin_left = 34.0
@@ -160,7 +160,7 @@ show_percentage = false
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ComboPlate" type="PanelContainer" parent="."]
+[node name="ComboPlate" type="PanelContainer" parent="." unique_id=2127239897]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(150, 76)
@@ -173,7 +173,7 @@ rotation = -0.05
 mouse_filter = 2
 theme_override_styles/panel = SubResource("ComboPlate1")
 
-[node name="ComboLabel" type="Label" parent="ComboPlate"]
+[node name="ComboLabel" type="Label" parent="ComboPlate" unique_id=276630832]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
@@ -182,7 +182,7 @@ text = "x2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Toasts" type="VBoxContainer" parent="."]
+[node name="Toasts" type="VBoxContainer" parent="." unique_id=1634289903]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 1
@@ -196,7 +196,7 @@ grow_horizontal = 0
 mouse_filter = 2
 theme_override_constants/separation = 10
 
-[node name="PoundPlate" type="PanelContainer" parent="."]
+[node name="PoundPlate" type="PanelContainer" parent="." unique_id=13798954]
 unique_name_in_owner = true
 visible = false
 modulate = Color(1, 0.82, 0.25, 1)
@@ -209,7 +209,7 @@ rotation = 0.04
 mouse_filter = 2
 theme_override_styles/panel = SubResource("ComboPlate2")
 
-[node name="PoundLabel" type="Label" parent="PoundPlate"]
+[node name="PoundLabel" type="Label" parent="PoundPlate" unique_id=638091594]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 32
