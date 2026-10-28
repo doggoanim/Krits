@@ -13,5 +13,8 @@ extends Resource
 @export var required_flag: StringName = &""   ## hidden unless Game.flag(required_flag) is true; "" = always shown
 @export var sets_flag: StringName = &""       ## set true via Game.set_flag() when this choice is picked; "" = no-op
 
+@export var required_item: StringName = &""   ## hidden unless the bag holds this item
+
 func is_visible() -> bool:
-	return required_flag == &"" or Game.flag(required_flag)
+	return (required_flag == &"" or Game.flag(required_flag)) \
+		and (required_item == &"" or Game.inventory.has(required_item))

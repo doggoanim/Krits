@@ -53,6 +53,16 @@ static func green_slime() -> EnemyData:
 	d.sfx_leap = SLIME_LEAP
 	d.sfx_land = SLIME_LAND
 
+	var goo := ItemDrop.new()
+	goo.item_id = &"slime_goo"
+	goo.chance = 0.8
+	goo.min_count = 1
+	goo.max_count = 2
+	var potion := ItemDrop.new()
+	potion.item_id = &"health_potion"
+	potion.chance = 0.15
+	d.drops = [goo, potion]
+
 	d.leaves_puddle_trail = true
 	d.puddle_interval = 0.5
 	d.puddle_radius = 1.3

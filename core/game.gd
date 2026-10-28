@@ -13,6 +13,7 @@ const LEGACY_SAVE_PATH := "user://save.json"
 var current_slot := 1
 var player_name := "Krits"
 var stats := PlayerStats.new()
+var inventory := Inventory.new()
 var story_flags := {}
 var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
@@ -65,6 +66,7 @@ func delete_save(slot := -1) -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 	stats = PlayerStats.new()
+	inventory = Inventory.new()
 	story_flags.clear()
 	unlocked_spawns.clear()
 	last_spawn = &""
@@ -105,7 +107,7 @@ func start_new_game(slot: int, new_name: String) -> void:
 func save() -> void:
 	var data := {
 		"player_name": player_name,
-		"stats": stats.to_dict(), "flags": story_flags,
+		"stats": stats.to_dict(), "inventory": inventory.to_dict(), "flags": story_flags,
 		"spawns": unlocked_spawns.map(func(s): return String(s)),
 		"last_spawn": String(last_spawn),
 	}
@@ -120,6 +122,7 @@ func load_game() -> bool:
 		return false
 	player_name = String(parsed.get("player_name", "Krits"))
 	stats.from_dict(parsed.get("stats", {}))
+	inventory.from_dict(parsed.get("inventory", {}))
 	story_flags = parsed.get("flags", {})
 	unlocked_spawns.clear()
 	for s in parsed.get("spawns", []): unlocked_spawns.append(StringName(s))

@@ -68,6 +68,13 @@ func full_heal() -> void:
 	shield = max_shield()
 	Events.player_damaged.emit(hp, shield)
 
+## Restores hp and shield (clamped to their maximums).
+func heal(hp_amount: float, shield_amount := 0.0) -> void:
+	hp = minf(max_hp(), hp + hp_amount)
+	shield = minf(max_shield(), shield + shield_amount)
+	Events.player_damaged.emit(hp, shield)
+	Events.stats_changed.emit()
+
 func add_gold(amount: int) -> void:
 	gold += amount
 	Events.stats_changed.emit()

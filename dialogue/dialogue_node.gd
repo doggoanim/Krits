@@ -22,6 +22,10 @@ extends Resource
 ## needing a separate script.
 @export var sets_flag: StringName = &""
 
+## Item handed to the player (via Game.inventory) when this line is shown.
+@export var gives_item: StringName = &""
+@export var gives_count := 1
+
 @export var next: DialogueNode            ## used only when choices is empty
 @export var choices: Array[DialogueChoice] = []
 

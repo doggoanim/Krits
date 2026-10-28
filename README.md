@@ -334,3 +334,12 @@ restores them after, so whatever look you set here carries into combat too.
 - **Hit-Stop** slider in Settings > Accessibility scales `HitStop.freeze` (0 = off).
 - **SFX:** weapon damage sounds (`PlayerAudio.play_damage_hit`), `player_hurt_*`, slime footsteps/shoot/leap (data-driven on `EnemyData`: `sfx_*`), UI focus/click (`core/ui_sfx.gd`, hooked into `FocusPop`).
 - Boss finisher (slow-mo kill-cam) is intentionally not built yet — reserved for when bosses exist.
+
+## Inventory
+
+- **Data** (`inventory/`): `ItemData` (consumable / material / key, stack size, buy+sell price, heal effect), `ItemLibrary` (code catalog + backpacks; icons auto-load from `assets/items/<id>.png`), `Inventory` (limited stack slots, `Game.inventory`, saved per slot), `BackpackData`, `ItemDrop`. Equipment is *not* in the bag (see `PlayerStats` owned/equipped).
+- **Slots:** 10 with no backpack; buy a Small (+6) / Medium (+12) / Large (+20) backpack at a shop — they replace each other, not stack.
+- **Menu:** `ui/inventory_menu.tscn` (hotkey **I**, rebindable): Items tab = grid of hand-drawn slots + details/Use/Drop; Gear tab = equip any owned armor/shield/weapon anywhere.
+- **Getting items:** enemy `drops` (rolled per defeat, added on victory; slime drops goo/potions), shop "Supplies", and dialogue (`DialogueNode.gives_item`/`gives_count`). `DialogueChoice.required_item` gates a choice on holding an item. Overflow is left behind with a "Bag full" toast; pickups show as HUD toasts.
+- **Shop:** now also sells backpacks and supplies, and buys materials/consumables (`sell_price`).
+- To add an item: add a builder + list entry in `ItemLibrary`.

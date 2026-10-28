@@ -10,6 +10,10 @@ signal combo_changed(combo: int)
 signal combo_landed(damage: float, hits: int)   ## the Sword's banked combo was just dealt on landing
 signal enemy_defeated(enemy: Node, gold: int)
 
+# Inventory
+signal item_gained(id: StringName, count: int)
+signal inventory_full(id: StringName)   ## something didn't fit in the bag
+
 # Player
 signal player_damaged(hp: float, shield: float)
 signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frames); from = where it came from, or Vector3.INF

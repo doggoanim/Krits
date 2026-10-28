@@ -24,6 +24,9 @@ func refresh() -> void:
 	_section("Armor (HP)", EquipmentLibrary.all_armors(), s.equipped_armor)
 	_section("Shields (Shield)", EquipmentLibrary.all_shields(), s.equipped_shield)
 	_section("Weapons (Damage)", EquipmentLibrary.all_weapons(), s.equipped_weapon)
+	_backpack_section()
+	_supplies_section()
+	_sell_section()
 
 func _section(heading: String, items: Array, equipped: EquipmentData) -> void:
 	var h := Label.new()
@@ -65,3 +68,71 @@ func _bonus_text(item: EquipmentData) -> String:
 	if item is ShieldData: return "  (+%d Shield)" % item.shield_bonus
 	if item is WeaponData: return "  (+%d Dmg)" % item.damage_bonus
 	return ""
+
+# ---------------------------------------------------------------- bag, supplies, selling
+
+func _heading(text: String) -> void:
+	var h := Label.new()
+	h.text = text
+	h.add_theme_font_size_override("font_size", 18)
+	content.add_child(h)
+
+func _add_row(text: String, buttons: Array) -> void:
+	var h := HBoxContainer.new()
+	var l := Label.new()
+	l.text = text
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(l)
+	for b in buttons:
+		h.add_child(b)
+	content.add_child(h)
+
+func _button(text: String, disabled: bool, action: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.disabled = disabled
+	b.pressed.connect(func():
+		action.call()
+		refresh())
+	return b
+
+## Backpacks: each one replaces the last (they don't stack), so only
+## upgrades can be bought.
+func _backpack_section() -> void:
+	var inv := Game.inventory
+	_heading("Backpacks (Bag slots: %d)" % inv.capacity())
+	var current := inv.backpack()
+	for bag in ItemLibrary.all_backpacks():
+		var owned := current != null and current.id == bag.id
+		var upgrade := bag.slots > (current.slots if current else 0)
+		var label := "%s  (+%d slots)  —  %s" % [bag.display_name, bag.slots, "owned" if owned else "%dg" % bag.price]
+		var b := _button("Owned" if owned else ("Buy" if upgrade else "—"),
+			owned or not upgrade or bag.price > Game.stats.gold, func(): inv.buy_backpack(bag))
+		_add_row(label, [b])
+
+func _supplies_section() -> void:
+	var inv := Game.inventory
+	_heading("Supplies")
+	for item in ItemLibrary.all_items():
+		if item.buy_price <= 0:
+			continue
+		var label := "%s  —  %dg   (have %d)" % [item.display_name, item.buy_price, inv.count_of(item.id)]
+		var b := _button("Bag full" if not inv.can_fit(item.id, 1) else "Buy",
+			item.buy_price > Game.stats.gold or not inv.can_fit(item.id, 1), func(): inv.buy_item(item))
+		_add_row(label, [b])
+
+func _sell_section() -> void:
+	var inv := Game.inventory
+	var sellable: Array[ItemData] = []
+	for item in ItemLibrary.all_items():
+		if item.sell_price > 0 and inv.has(item.id):
+			sellable.append(item)
+	if sellable.is_empty():
+		return
+	_heading("Sell")
+	for item in sellable:
+		var n := inv.count_of(item.id)
+		_add_row("%s x%d  —  %dg each" % [item.display_name, n, item.sell_price], [
+			_button("Sell 1", false, func(): inv.sell_item(item.id, 1)),
+			_button("Sell all", n < 2, func(): inv.sell_item(item.id, n)),
+		])

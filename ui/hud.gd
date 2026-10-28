@@ -45,6 +45,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 const COMBO_TIER_COLORS := [Color(1, 1, 1), Color(1, 0.93, 0.5), Color(1, 0.72, 0.4), Color(1, 0.5, 0.45), Color(1, 0.55, 0.85)]
 const COMBO_PER_TIER := 3
 var _combo_tween: Tween
+@onready var _toasts: VBoxContainer = %Toasts   ## pickup notices, top right
 var _combo_slamming := false
 
 var _hp_rest_pos: Vector2   ## _hp_group's resting position, read from the scene so the shake
@@ -64,6 +65,8 @@ func _ready() -> void:
 	Events.stats_changed.connect(_refresh)
 	Events.combo_changed.connect(_on_combo)
 	Events.combo_landed.connect(_on_combo_landed)
+	Events.item_gained.connect(_on_item_gained)
+	Events.inventory_full.connect(_on_inventory_full)
 	_combo_plate.resized.connect(func() -> void: _combo_plate.pivot_offset = _combo_plate.size * 0.5)
 	_refresh()
 
@@ -110,6 +113,39 @@ func _on_combo_landed(damage: float, _hits: int) -> void:
 	_combo_tween.tween_callback(func() -> void:
 		_combo_slamming = false
 		_combo_plate.visible = false)
+
+## -- Pickup toasts ---------------------------------------------------------
+func _on_item_gained(id: StringName, count: int) -> void:
+	var item := ItemLibrary.by_id(id)
+	if item:
+		_toast("+%d %s" % [count, item.display_name])
+
+func _on_inventory_full(id: StringName) -> void:
+	var item := ItemLibrary.by_id(id)
+	_toast("Bag full! Left behind: %s" % (item.display_name if item else String(id)))
+
+## A small hand-drawn plate that pops in, waits and fades.
+func _toast(text: String) -> void:
+	var plate := PanelContainer.new()
+	if not combo_plate_styles.is_empty():
+		plate.add_theme_stylebox_override(&"panel", combo_plate_styles.pick_random())
+	plate.size_flags_horizontal = Control.SIZE_SHRINK_END
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label := Label.new()
+	label.text = text
+	label.add_theme_color_override(&"font_color", Color.BLACK)
+	label.add_theme_font_size_override(&"font_size", 34)
+	plate.add_child(label)
+	_toasts.add_child(plate)
+	plate.modulate.a = 0.0
+	plate.resized.connect(func() -> void: plate.pivot_offset = plate.size * 0.5)
+	var tw := plate.create_tween()
+	tw.tween_property(plate, "modulate:a", 1.0, 0.15)
+	tw.parallel().tween_property(plate, "scale", Vector2.ONE, 0.3).from(Vector2(1.3, 1.3)) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(2.2)
+	tw.tween_property(plate, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(plate.queue_free)
 
 func _pop_combo_plate(from_scale: float, time: float) -> void:
 	if not combo_plate_styles.is_empty():

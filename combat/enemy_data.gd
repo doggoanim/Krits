@@ -13,6 +13,7 @@ extends Resource
 @export var color := Color(0.8, 0.2, 0.2)
 @export var size := 1.0
 @export var patterns: Array[BulletPattern] = []
+@export var drops: Array[ItemDrop] = []   ## rolled when this enemy is defeated; collected when the fight is won
 
 ## Optional animated model (see EnemyVisual). Leave unset to keep the plain
 ## procedural sphere — existing enemies (Spinner, Piercer, ...) don't need

@@ -118,6 +118,8 @@ func _show_node(node: DialogueNode) -> void:
 		return
 	if node.sets_flag != &"":
 		Game.set_flag(node.sets_flag)
+	if node.gives_item != &"":
+		Game.inventory.add(node.gives_item, node.gives_count)
 	_line_done = false
 	_clear_choices()
 	_hint.visible = false
