@@ -4,44 +4,56 @@ extends Node3D
 ## same rigged krits.glb the game uses (instanced as the "Model" child in
 ## menu_stage.tscn, so it's visible/movable in the editor), but with none of
 ## PlayerVisual's gameplay layers — no lean, expressions, outline pass, or
-## state machine — just a pose, a flat white override, and a slow spin/bob.
+## state machine — just a pose, a flat white override, and a slow zero-g
+## tumble/bob.
 ##
-## MenuStage moves THIS node (to slide Krits aside for the title); the spin
-## and bob live on the child Model, so the two never fight over a transform.
+## MenuStage moves THIS node (to slide Krits aside for the title); the
+## tumble and bob live on the child Pivot, so the two never fight over a
+## transform.
 
-## Clip names tried in order; the first one the model actually has is played
-## on loop. krits.glb has no dedicated menu pose yet — add a clip called
-## "main_menu" in Blender and re-export, and it's picked up automatically
-## with no code change; until then it falls back to the treading-water pose,
-## which reads as floating.
-@export var pose_candidates: Array[StringName] = [&"main_menu", &"swimming_idle", &"idle"]
+## The menu pose: the first clip below the model actually has is played on
+## loop. Matching is forgiving — case, spaces, underscores and hyphens are
+## ignored ("Main Menu", "main-menu" and "main_menu" all match), and failing
+## an exact match any clip with "menu" in its name is used. If nothing menu-
+## like exists it falls back to plain idle (and warns, listing every clip in
+## the model so a misnamed one is easy to spot).
+@export var pose_candidates: Array[StringName] = [&"main_menu", &"idle"]
 ## Standing height in world units, same fit-to-height the game applies.
 @export var height := 2.2
-@export var spin_speed := 0.6      ## radians/second around Y
+## Free-floating tumble, radians/second around each axis (X, Y, Z). The three
+## differ on purpose so the combined motion never repeats in an obvious loop
+## and he slowly passes through every orientation, like drifting in zero-g.
+## Set to (0, 0.6, 0) for a plain turntable spin instead.
+@export var tumble_speed := Vector3(0.25, 0.6, 0.15)
 @export var bob_height := 0.12     ## world units, up and down
 @export var bob_speed := 1.2       ## radians/second of the bob's sine
-@export var tilt := 0.07           ## radians, slow forward/back sway
 
+## The Pivot is what tumbles and bobs; the Model is offset inside it so his
+## centre of mass — not his feet — sits on the pivot's origin. That's what
+## makes him rotate in place around his middle instead of swinging around
+## his feet like a pendulum.
+@onready var _pivot: Node3D = %Pivot
 @onready var _model: Node3D = %Model
 
-var _base_y := 0.0
+var _angles := Vector3.ZERO
 var _t := 0.0
 
 func _ready() -> void:
 	var box := ModelUtil.fit_height(_model, height)
-	# fit_height reports the pre-scale AABB; recentre so the model's middle —
-	# not its feet — sits on this node's origin, which is what makes it appear
-	# centred on screen and what the bob/spin pivot around.
-	_base_y = -box.get_center().y * _model.scale.y
-	_model.position.y = _base_y
+	# fit_height reports the pre-scale AABB. Shift the model by minus its
+	# (scaled) centre so the middle of his body is the pivot's origin.
+	_model.position = -box.get_center() * _model.scale.x
 	_make_white(_model)
 	_play_pose()
 
 func _process(delta: float) -> void:
 	_t += delta
-	_model.rotation.y += spin_speed * delta
-	_model.rotation.x = sin(_t * bob_speed * 0.6) * tilt
-	_model.position.y = _base_y + sin(_t * bob_speed) * bob_height
+	# Euler angles accumulated by hand (rather than rotate_x/y/z on the
+	# basis) so there's no drift to correct, and `rotation` leaves the
+	# model's fit-to-height scale untouched.
+	_angles += tumble_speed * delta
+	_pivot.rotation = _angles
+	_pivot.position.y = sin(_t * bob_speed) * bob_height
 
 ## Replaces every surface's material with flat, unshaded white — "pure
 ## white" regardless of lighting (there is none in the menu's void), and
@@ -63,9 +75,27 @@ func _play_pose() -> void:
 	if anim == null:
 		push_warning("MenuHero: no AnimationPlayer under the model — it will hold its bind pose.")
 		return
-	for clip in pose_candidates:
-		if anim.has_animation(clip):
-			anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
-			anim.play(clip)
-			return
-	push_warning("MenuHero: none of pose_candidates exist in the model — it will hold its bind pose.")
+	var clip := _find_clip(anim)
+	if clip == &"":
+		push_warning("MenuHero: no menu pose found. Clips in the model: %s" % [anim.get_animation_list()])
+		return
+	anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+	anim.play(clip)
+
+## Exact candidates first, then anything with "menu" in its name once
+## case/separators are stripped, then the remaining candidates — so a
+## "Main Menu" clip beats the idle fallback even though idle is listed.
+func _find_clip(anim: AnimationPlayer) -> StringName:
+	var first := pose_candidates[0] if not pose_candidates.is_empty() else &""
+	if first != &"" and anim.has_animation(first):
+		return first
+	for clip in anim.get_animation_list():
+		if _normalize(clip).contains("menu"):
+			return StringName(clip)
+	for candidate in pose_candidates:
+		if anim.has_animation(candidate):
+			return candidate
+	return &""
+
+func _normalize(clip_name: String) -> String:
+	return clip_name.to_lower().replace("_", "").replace("-", "").replace(" ", "")

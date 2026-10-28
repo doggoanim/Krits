@@ -35,5 +35,8 @@ script = ExtResource("3")
 unique_name_in_owner = true
 script = ExtResource("2")
 
-[node name="Model" parent="Hero" instance=ExtResource("4")]
+[node name="Pivot" type="Node3D" parent="Hero"]
+unique_name_in_owner = true
+
+[node name="Model" parent="Hero/Pivot" instance=ExtResource("4")]
 unique_name_in_owner = true

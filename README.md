@@ -19,11 +19,11 @@ backdrop plus a stack of full-screen pages, shown one at a time with fades:
    studio image to the `Image` node's texture in that scene (a dim placeholder label shows
    until you do).
 2. **Stage** (`ui/menu/menu_stage.tscn`) — pitch-black world, a `StarField` of random white
-   dots, and `MenuHero`: the real `krits.glb`, forced to flat white, floating/spinning in a
-   looping pose. After the splash it floats centred for a beat, then slides to the right.
-   Its pose is the first clip it finds from `pose_candidates` (`main_menu`, then
-   `swimming_idle`, then `idle`) — export a `main_menu` clip from Blender and it's used
-   automatically.
+   dots, and `MenuHero`: the real `krits.glb`, forced to flat white, tumbling freely on all
+   three axes (`tumble_speed`) in a looping pose. After the splash it floats centred for a beat, then slides to the right.
+   Its pose is a clip named like "main menu" (case/spaces/underscores ignored), else `idle` —
+   export that clip from Blender and it's used automatically; if none is found a warning
+   lists every clip the model has.
 3. **Title** — big "Krits" on the left, blinking "Press any key to continue", then Play /
    Settings / Quit (the hand-drawn `assets/ui/button_1/2/3.png` as normal/hover/pressed,
    styled in `ui/menu/menu_theme.tres`).
