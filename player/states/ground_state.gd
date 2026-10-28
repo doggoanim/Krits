@@ -16,6 +16,11 @@ var _turn_flip_t := 0.0   ## >0 for a short grace window after a turn-skid start
 var _move_t := 0.0   ## how long you've been continuously moving — gates the slide below
 var _no_input_t := 0.0   ## seconds input has read as fully released, continuously — see
                            ## stop_detect_delay below, right where "stopping" is computed
+const SLIDE_STUCK_TIME := 0.3        ## sliding but not actually moving for this long = pinned on a seam/lip
+const SLIDE_STUCK_EPSILON := 0.015   ## per-frame displacement below this counts as "not moving"
+const SLIDE_UNSTICK_SPEED := 5.0     ## shove along the surface normal to pop free
+
+var _slide_stuck_t := 0.0
 var _slope_sliding := false   ## true while forced into the steep-slope slide below — only used
                                ## to play the skid sound once per slide, not every single frame
 var _slope_exit_t := 0.0   ## >0 for a short window right after leaving the forced slope slide —
@@ -41,6 +46,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.can_dive = true
 	_move_t = 0.0
 	_slope_sliding = false
+	_slide_stuck_t = 0.0
 	_slope_exit_t = 0.0
 	if _msg.get("jump_queued", false):
 		# A jump pressed sometime during a long jump's flight (see
@@ -118,9 +124,23 @@ func physics_update(delta: float) -> void:
 		p.set_hvel(p.get_hvel().move_toward(down_slope * target_speed, c.slope_slide_accel * delta))
 		p.visual.play(PlayerVisual.ANIM_SLIDE)
 		p.velocity.y = -1.0
+		var pos_before := p.global_position
 		p.safe_move_and_slide()
 		if not p.is_on_floor():
+			_slide_stuck_t = 0.0
 			machine.transition_to(&"Air")
+			return
+		# Pinned on a seam or roof lip: a steep slope is driving us downhill but
+		# the contact normals cancel out and we go nowhere, forever. Pop off.
+		if p.global_position.distance_to(pos_before) < SLIDE_STUCK_EPSILON:
+			_slide_stuck_t += delta
+			if _slide_stuck_t >= SLIDE_STUCK_TIME:
+				_slide_stuck_t = 0.0
+				p.velocity = normal * SLIDE_UNSTICK_SPEED + down_slope * 2.0 + Vector3.UP * 2.0
+				p.move_and_slide()
+				machine.transition_to(&"Air")
+		else:
+			_slide_stuck_t = 0.0
 		return
 	if _slope_sliding:
 		# Just left the forced slide (the ground leveled back out under you) —
