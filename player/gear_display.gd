@@ -17,7 +17,7 @@ extends Node3D
 
 @export var shield_rest := Vector3(0.0, 1.15, 0.55)   ## relative to the player's facing; +Z is behind
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
-@export var weapon_hang_back := 0.05     ## how far behind the shield face the weapon hangs
+@export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
 @export var swing_follow := 12.0       ## spring stiffness (higher = snappier)
@@ -105,14 +105,22 @@ func _swap(old: Node3D, parent: Node3D, item: EquipmentData) -> Node3D:
 	node.position = item.model_offset
 	node.rotation_degrees = item.model_rotation_deg
 	parent.add_child(node)
+	# Same treatment as the character: cel shading + the shared outline pass,
+	# and a halftone x-ray copy so it shows through walls with the player.
+	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark"))
+	_register_xray.call_deferred(node)   # the player's PlayerXray may not exist yet
 	return node
+
+func _register_xray(model: Node3D) -> void:
+	if is_instance_valid(model) and _player and _player.xray:
+		_player.xray.attach(model)
 
 ## The weapon hangs from the top edge of the shield, just behind its face.
 func _place_weapon_pivot() -> void:
 	var top := shield_default_top
 	if _shield_model and is_instance_valid(_shield_model):
 		top = _top_edge(_shield_model)
-	_weapon_pivot.position = Vector3(0.0, top, -weapon_hang_back)
+	_weapon_pivot.position = Vector3(0.0, top, weapon_hang_back)
 
 ## Highest point of a model's meshes, in the anchor's space.
 func _top_edge(model: Node3D) -> float:

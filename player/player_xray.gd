@@ -27,10 +27,22 @@ const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of ST
 var player: Player
 var _copies: Array[MeshInstance3D] = []
 var _t := 0.0
+var _occluded := false
 
 func setup(p: Player) -> void:
 	player = p
 	_build_copies(p.visual.get_model())
+
+## Gives an extra model (worn gear) its own halftone copy, so it's part of
+## the silhouette too. The copies live under the model and are freed with it.
+func attach(model: Node3D) -> void:
+	var mat := ShaderMaterial.new()
+	mat.shader = SHADER
+	mat.render_priority = 10
+	var before := _copies.size()
+	_collect(model, mat)
+	for i in range(before, _copies.size()):
+		_copies[i].visible = _occluded
 
 func _build_copies(model: Node3D) -> void:
 	var mat := ShaderMaterial.new()
@@ -54,9 +66,12 @@ func _process(delta: float) -> void:
 	if _t > 0.0:
 		return
 	_t = CHECK_INTERVAL
-	var occluded := _is_occluded()
-	for c in _copies:
-		c.visible = occluded
+	_occluded = _is_occluded()
+	for i in range(_copies.size() - 1, -1, -1):   # gear swaps free their copies
+		if is_instance_valid(_copies[i]):
+			_copies[i].visible = _occluded
+		else:
+			_copies.remove_at(i)
 
 func _is_occluded() -> bool:
 	if player == null or player.camera_rig == null:
