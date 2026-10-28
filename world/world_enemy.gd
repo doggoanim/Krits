@@ -6,7 +6,8 @@ extends CharacterBody3D
 signal touched(enemy: WorldEnemy)
 
 @export var enemy_id: StringName = &""        ## unique id; defeated ids are saved as cleared
-@export var data: EnemyData
+@export var data: EnemyData                     ## leave empty to use `type` below
+@export_enum("Green Slime", "Spinner", "Piercer") var type := 0   ## pick the enemy right in the Inspector
 @export var spawn_radius := 22.0
 @export var despawn_radius := 32.0
 @export var wander_radius := 8.0
@@ -34,6 +35,8 @@ var _player: Player
 var _tween: Tween
 
 func _ready() -> void:
+	if data == null:
+		data = [EnemyLibrary.green_slime, EnemyLibrary.spinner, EnemyLibrary.piercer][type].call()
 	if enemy_id != &"" and Game.flag(_cleared_key(), false):
 		queue_free()
 		return
