@@ -38,6 +38,11 @@ func open() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func close() -> void:
+	close_immediately()
+
+## The actual close. A menu that animates out overrides close(), plays its
+## animation, then calls this once it's done.
+func close_immediately() -> void:
 	if open_menu != self:
 		return
 	open_menu = null

@@ -4,8 +4,8 @@ shader_type canvas_item;
 // Reads the screen, so it must sit on top of the scene it's blurring.
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
-uniform float blur_lod : hint_range(0.0, 7.0) = 3.0;     // mip level sampled — higher = blurrier
-uniform vec4 tint : source_color = vec4(0.18, 0.02, 0.02, 0.35);   // colour + how strongly it washes over
+uniform float blur_lod : hint_range(0.0, 7.0) = 1.6;     // mip level sampled — higher = blurrier
+uniform vec4 tint : source_color = vec4(0.0, 0.0, 0.0, 0.15);   // colour + how strongly it washes over
 
 void fragment() {
 	// 9 taps spread over the mip's pixel footprint, so the blur is smooth
