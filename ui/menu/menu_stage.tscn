@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://ui/menu/menu_stage.gd" id="1"]
 [ext_resource type="Script" path="res://ui/menu/menu_hero.gd" id="2"]
 [ext_resource type="Script" path="res://ui/menu/star_field.gd" id="3"]
-[ext_resource type="PackedScene" path="res://assets/player/krits.glb" id="4"]
+[ext_resource type="PackedScene" path="res://assets/player/Krits.glb" id="4"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1

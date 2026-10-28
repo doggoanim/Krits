@@ -5,7 +5,7 @@ extends Node3D
 ## this node only owns facing (set by Player.face) and the movement lean (set by
 ## Player._update_lean), so the two layers never fight each other.
 
-const MODEL_SCENE := preload("res://assets/player/krits.glb")
+const MODEL_SCENE := preload("res://assets/player/Krits.glb")
 
 ## Clip names baked into the model. Kept as constants so a renamed clip in a
 ## future export only needs updating here, not at every call site.

@@ -77,14 +77,14 @@ toward the new direction.
 			 technique),
 			 VFX (one-shot particle effects usable from any Node3D, e.g. WorldEnemy's pop-in puff)
 - player/    Player + PlayerConfig (all tunables), StateMachine, states/ (one file per move), camera,
-			 PlayerVisual (loads assets/player/krits.glb, plays its baked animations by name),
+			 PlayerVisual (loads assets/player/Krits.glb, plays its baked animations by name),
 			 PlayerEffects (particles), PlayerAudio (movement SFX, sounds/SFX/ — jump, long jump,
 			 air dive, wall/roll bounce, skid, side flip, orb attack, footsteps, and the ground
 			 pound's three phases (ready/jump/land); every one-shot gets a slight random
 			 pitch_scale nudge except air dive and long jump, which stay fixed). Footsteps
 			 are timed to the running clip's own loop (PlayerVisual.run_phase()), not a
 			 fixed timer — see GroundState._update_footsteps().
-- assets/    player/krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
+- assets/    player/Krits.glb — rigged character + animations (idle, run, jump_start1/2/3, falling,
 			 air_dive, roll_loop, long_jump, ground_pound, ground_pound_land, crouch_idle,
 			 crouch_walk, roll_collision, slide, side_jump, attack1/2/3). jump_start and attack
 			 each have 3 interchangeable variants, picked at random per jump / per orb hit
@@ -180,7 +180,7 @@ toward the new direction.
 
 ## Extending
 - New move: add a `states/xxx_state.gd` extending PlayerState, register it in Player._ready.
-- New/changed character animation: re-export assets/player/krits.glb from Blender (one glTF with every
+- New/changed character animation: re-export assets/player/Krits.glb from Blender (one glTF with every
   action as a separate Action/NLA strip — see PlayerVisual's ANIM_* constants for the clip names each
   state expects), then call `player.visual.play(&"clip_name")` from whichever state should use it.
 - New bullet pattern: extend BulletPattern, implement fire().
