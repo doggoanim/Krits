@@ -20,7 +20,7 @@ static func starting_weapon() -> WeaponData: return rusty_sword()
 static func cloth_tunic() -> ArmorData:
 	var a := ArmorData.new()
 	a.id = &"cloth_tunic"
-	a.display_name = "Cloth Tunic"
+	a.display_name = "Tunic"
 	a.price = 0
 	a.hp_bonus = 0.0
 	return a
@@ -48,7 +48,7 @@ static func all_armors() -> Array[ArmorData]:
 static func buckler() -> ShieldData:
 	var s := ShieldData.new()
 	s.id = &"buckler"
-	s.display_name = "Buckler"
+	s.display_name = "Wooden Shield"
 	s.price = 0
 	s.shield_bonus = 0.0
 	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
@@ -77,7 +77,7 @@ static func all_shields() -> Array[ShieldData]:
 static func rusty_sword() -> WeaponData:
 	var w := WeaponData.new()
 	w.id = &"rusty_sword"
-	w.display_name = "Rusty Sword"
+	w.display_name = "Wooden Sword"
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 0.0
