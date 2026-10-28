@@ -697,10 +697,14 @@ script = ExtResource("40_foliage_wind")
 [node name="CloudShadows" type="Node3D" parent="." unique_id=2069795992]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
 script = ExtResource("44_cloud_shadows")
+height = 43.0
 
 [node name="SkyClouds" type="GPUParticles3D" parent="." unique_id=454784756]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
 script = ExtResource("45_sky_clouds")
+area_size = Vector2(250, 250)
+height = 60.0
+cloud_size = Vector2(27, 27)
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
