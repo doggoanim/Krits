@@ -439,9 +439,10 @@ func _land_sword_combo() -> void:
 	var hits := combo
 	_sword_banked = 0.0
 	_sword_hits.clear()
-	player.audio.play_damage_hit(WeaponData.Kind.SWORD, hits)
 	if pounded:
 		player.audio.play_pound_bonus()
+	else:
+		player.audio.play_damage_hit(WeaponData.Kind.SWORD, hits)
 	var power := float(hits)
 	for e in enemies.duplicate():
 		if is_instance_valid(e):

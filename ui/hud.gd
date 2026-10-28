@@ -36,6 +36,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _xp: ProgressBar = %XpBar
 @onready var _hint: Label = %HintLabel
 @onready var _combo_plate: PanelContainer = %ComboPlate   ## small hand-drawn plate beside the bars
+@onready var _pound_plate: PanelContainer = %PoundPlate   ## shown under the combo plate on a ground-pound bonus
 @onready var _combo: Label = %ComboLabel
 
 ## -- Combo plate ----------------------------------------------------------
@@ -45,6 +46,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 const COMBO_TIER_COLORS := [Color(1, 1, 1), Color(1, 0.93, 0.5), Color(1, 0.72, 0.4), Color(1, 0.5, 0.45), Color(1, 0.55, 0.85)]
 const COMBO_PER_TIER := 3
 var _combo_tween: Tween
+var _pound_tween: Tween
 @onready var _toasts: VBoxContainer = %Toasts   ## pickup notices, top right
 var _combo_slamming := false
 
@@ -97,6 +99,7 @@ func _on_combo(c: int) -> void:
 			_hide_combo_plate()
 		return
 	_combo_slamming = false
+	_pound_plate.visible = false
 	_combo.text = "x%d" % c
 	var tier := mini((c - 1) / COMBO_PER_TIER, COMBO_TIER_COLORS.size() - 1)
 	_combo_plate.modulate = COMBO_TIER_COLORS[tier]
@@ -106,12 +109,9 @@ func _on_combo_landed(damage: float, _hits: int, pound_bonus: bool) -> void:
 	_combo_slamming = true
 	_combo.text = ("%d" if is_equal_approx(damage, roundf(damage)) else "%.1f") % damage
 	_combo_plate.modulate = Color.WHITE
+	_pop_combo_plate(1.8, 0.25)
 	if pound_bonus:
-		# Ground-pound bonus: golden plate, bigger pop, and a toast naming it.
-		_combo.text += "!"
-		_combo_plate.modulate = Color(1.0, 0.82, 0.25)
-		_toast("Pound bonus x1.25!")
-	_pop_combo_plate(2.4 if pound_bonus else 1.8, 0.3 if pound_bonus else 0.25)
+		_show_pound_plate()
 	_combo_tween.tween_interval(0.5)
 	_combo_tween.tween_property(_combo_plate, "scale", Vector2.ZERO, 0.2) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
@@ -151,6 +151,21 @@ func _toast(text: String) -> void:
 	tw.tween_interval(2.2)
 	tw.tween_property(plate, "modulate:a", 0.0, 0.35)
 	tw.tween_callback(plate.queue_free)
+
+## The golden "POUND x1.25!" plate under the combo plate: pops, holds, shrinks.
+func _show_pound_plate() -> void:
+	if _pound_tween:
+		_pound_tween.kill()
+	_pound_plate.pivot_offset = _pound_plate.size * 0.5
+	_pound_plate.visible = true
+	_pound_plate.scale = Vector2.ONE * 2.0
+	_pound_tween = create_tween()
+	_pound_tween.tween_property(_pound_plate, "scale", Vector2.ONE, 0.3) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_pound_tween.tween_interval(0.7)
+	_pound_tween.tween_property(_pound_plate, "scale", Vector2.ZERO, 0.2) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_pound_tween.tween_callback(func() -> void: _pound_plate.visible = false)
 
 func _pop_combo_plate(from_scale: float, time: float) -> void:
 	if not combo_plate_styles.is_empty():

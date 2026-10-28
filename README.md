@@ -344,4 +344,4 @@ restores them after, so whatever look you set here carries into combat too.
 - **Shop:** now also sells backpacks and supplies, and buys materials/consumables (`sell_price`).
 - To add an item: add a builder + list entry in `ItemLibrary`.
 
-**Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: golden "N!" plate + "Pound bonus x1.25!" toast in the HUD, golden damage numbers/confetti, brighter double hit sound (`PlayerAudio.play_pound_bonus`), a bigger kick and longer hitstop.
+**Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: a golden "POUND x1.25!" plate under the combo plate (`PoundPlate` in hud.tscn), golden damage numbers/confetti, its own hit sound (`attack_orb_sword_hit_pound.wav`, replaces the normal sword hit), a bigger kick and longer hitstop.

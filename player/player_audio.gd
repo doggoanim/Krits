@@ -24,6 +24,7 @@ const ORB_ATTACK_SFX: AudioStream = preload(SFX_DIR + "attack_orb.wav")
 ## Played when a weapon actually deals its damage (sword: on landing the
 ## combo; bow: when the stack is released; staff: when a spell is cast).
 const SWORD_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_sword_hit.wav")
+const POUND_HIT_SFX: AudioStream = preload(SFX_DIR + "enemies/attack_orb_sword_hit_pound.wav")   ## sword combo landed with a ground pound
 const BOW_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_bow_hit.wav")
 const MAGIC_HIT_SFX: AudioStream = preload(SFX_DIR + "attack_orb_magic_hit.wav")
 const HURT_SFX: Array[AudioStream] = [
@@ -219,11 +220,9 @@ func play_damage_hit(kind: int, power := 1) -> void:
 		_:
 			_play(SWORD_HIT_SFX, PITCH_VARIANCE, minf(1.0 + 0.03 * float(maxi(power, 1) - 1), 1.3))
 
-## Success cue for the sword's ground-pound bonus: the sword hit again, high
-## and bright, over the normal one. Swap in a dedicated sample here if wanted.
+## The sword's ground-pound-bonus landing sound — replaces the normal sword hit.
 func play_pound_bonus() -> void:
-	_play(SWORD_HIT_SFX, 0.0, 1.6)
-	_play(ORB_ATTACK_SFX, 0.0, 2.0)
+	_play(POUND_HIT_SFX, PITCH_VARIANCE)
 
 func play_hurt() -> void:
 	_play(HURT_SFX.pick_random(), PITCH_VARIANCE)

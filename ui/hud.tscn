@@ -195,3 +195,24 @@ offset_bottom = 40.0
 grow_horizontal = 0
 mouse_filter = 2
 theme_override_constants/separation = 10
+
+[node name="PoundPlate" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 0.82, 0.25, 1)
+layout_mode = 0
+offset_left = 450.0
+offset_top = 122.0
+offset_right = 640.0
+offset_bottom = 176.0
+rotation = 0.04
+mouse_filter = 2
+theme_override_styles/panel = SubResource("ComboPlate2")
+
+[node name="PoundLabel" type="Label" parent="PoundPlate"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "POUND x1.25!"
+horizontal_alignment = 1
+vertical_alignment = 1
