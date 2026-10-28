@@ -309,3 +309,9 @@ restores them after, so whatever look you set here carries into combat too.
 - **UI:** `ui/dialogue_box.tscn` (hand-drawn plates, editable in the editor) driven by `ui/dialogue_box.gd`. Create with `DialogueBox.create()`; start with `DialogueBox.instance.start(node, speaker_node3d)`.
 - **Typewriter:** `ui/dialogue/typewriter.gd`. Text uses RichTextLabel BBCode (`[shake]`, `[wave]`, `[rainbow]`, `[color=...]`, `[b]`...) plus `[pause=0.5]`. Interact finishes a line, then advances; Settings > Accessibility has text speed.
 - **Speaker focus:** `dialogue/dialogue_stage.gd` freezes the player, eases `CameraRig` toward the speaker (`begin_focus/end_focus`) and calls `get_focus_point()`, `face_toward()`, `restore_facing()` on the speaker if it has them (`NPC` does). No player/speaker (main menu name prompt) = just the box.
+
+## Sword combat feel
+
+- Airborne orb hits only **bank** damage (combo scaling still applies) and bounce you up; the whole combo is dealt when you **touch the ground** (`Arena._land_sword_combo`), with a hitstop (`core/hit_stop.gd`), enemy squash (`Enemy.punch`), cartoony damage number + confetti (`combat/hit_burst.gd`) and a screen kick.
+- The combo counter is a hand-drawn plate billboard over the player (`combat/combo_billboard.tscn`): pops on each hit, heats up in colour every few combo steps, slams to the damage total on landing. Tunables are exports on `ComboBillboard`; hitstop/shake constants are at the top of `arena.gd`.
+- Bow and Staff are unchanged.

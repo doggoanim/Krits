@@ -43,6 +43,11 @@ const ORBS_PER_ENEMY := 2
 const ORB_HEIGHT := Vector2(1.8, 4.4)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
+const COMBO_BILLBOARD := preload("res://combat/combo_billboard.tscn")
+const BILLBOARD_HEIGHT := 2.5   ## above the player's origin
+const LAND_HITSTOP_BASE := 0.07   ## seconds of freeze on a landing hit...
+const LAND_HITSTOP_PER_HIT := 0.015   ## ...plus this per orb in the combo...
+const LAND_HITSTOP_MAX := 0.22        ## ...up to this cap
 const INTRO_DELAY := 1.0       ## enemies hold fire for this long after the reveal
 
 ## ---- weapon-specific orb behavior (see _on_orb_hit()/_spawn_orbs()) ----
@@ -90,6 +95,8 @@ var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released 
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
                                  ## released/cleared by the next CAST orb — see _lookup_spell()
 var _rune_buffer_t := 0.0      ## counts down to 0 while _rune_buffer isn't empty; see _process()
+var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, dealt when the player lands
+var _combo_billboard: ComboBillboard   ## Sword only — floats over the player, see begin()/_end()
 var _buffer_label: Label3D     ## floats over the player showing the queued runes — Staff only,
                                  ## built in begin() and freed in _end()
 var _spell_table: Dictionary = {}   ## built once in _ready() — see _build_spell_table()
@@ -137,6 +144,10 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 		_buffer_label.position = Vector3(0, 2.3, 0)
 		_buffer_label.visible = false
 		p.add_child(_buffer_label)   # tracks the player automatically; freed in _end()
+	if _equipped_weapon_kind() == WeaponData.Kind.SWORD:
+		_combo_billboard = COMBO_BILLBOARD.instantiate() as ComboBillboard
+		_combo_billboard.position = Vector3(0, BILLBOARD_HEIGHT, 0)
+		p.add_child(_combo_billboard)   # tracks the player; freed in _end()
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
 	Events.encounter_started.emit(self)
@@ -346,12 +357,36 @@ func _on_orb_hit(orb: Orb) -> void:
 		WeaponData.Kind.STAFF: _handle_staff_hit(orb)
 		_: _handle_sword_hit(orb)
 
-## Today's original behavior, unchanged: every hit deals damage, combo keeps
-## climbing (and scaling damage up with it) for as long as you keep landing them.
+## Sword: an orb hit in the air only BANKS its damage (combo scaling still
+## applies) and bounces you back up — no damage, no hitstop yet. Everything
+## is dealt at once when the player touches the ground, see _land_sword_combo().
 func _handle_sword_hit(orb: Orb) -> void:
 	combo += 1
 	var dmg := Game.stats.damage() * (1.0 + COMBO_BONUS * (combo - 1))
-	_resolve_hit(orb, dmg, combo)
+	_sword_banked += dmg
+	player.bounce_off_orb(combo)
+	Events.orb_hit.emit(combo, dmg)
+	if _combo_billboard:
+		_combo_billboard.set_combo(combo)
+	_respawn_orb_later(orb)
+
+## The landing: hit every enemy for the whole banked combo, with a freeze
+## frame, a squash on each enemy, damage numbers and a screen kick.
+func _land_sword_combo() -> void:
+	var total := _sword_banked
+	var hits := combo
+	_sword_banked = 0.0
+	var power := float(hits)
+	for e in enemies.duplicate():
+		if is_instance_valid(e):
+			HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), total, power)
+			e.punch()
+			e.take_damage(total)   # same damage to every enemy
+	if _combo_billboard:
+		_combo_billboard.slam(total)
+	if player.camera_rig:
+		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8))
+	HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX))
 
 ## ARROW orbs bank damage without hitting anything; the next SHOOT orb
 ## releases the whole bank at once (and does nothing if nothing's banked —
@@ -538,8 +573,11 @@ func _respawn_orb_later(orb: Orb) -> void:
 
 func _on_player_landed() -> void:
 	if combo > 0:
+		if _sword_banked > 0.0:
+			_land_sword_combo()
 		combo = 0
-		Events.combo_changed.emit(0)
+		if not _over:
+			Events.combo_changed.emit(0)
 
 func _on_enemy_defeated(e: Enemy) -> void:
 	enemies.erase(e)
@@ -564,6 +602,10 @@ func _end(victory: bool) -> void:
 			o.break_apart()   # any orbs still unclaimed break instead of just vanishing
 	if player.camera_rig:
 		player.camera_rig.extra_distance = 0.0
+	_sword_banked = 0.0
+	if _combo_billboard:
+		_combo_billboard.dismiss()
+		get_tree().create_timer(1.0).timeout.connect(_combo_billboard.queue_free)
 	if _buffer_label:
 		_buffer_label.queue_free()   # a child of player, not of this arena — won't go with it otherwise
 	if victory:

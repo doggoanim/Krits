@@ -174,6 +174,16 @@ func _update_status_effects(delta: float) -> void:
 		_burn_t -= delta
 		take_damage(_burn_dps * delta)
 
+## Squash-and-stretch reaction for a heavy hit (Arena calls it once per landed
+## combo — not from take_damage(), which burn damage calls every frame).
+func punch() -> void:
+	var node: Node3D = _visual if _visual else _mesh
+	if node == null:
+		return
+	node.scale = Vector3(1.35, 0.6, 1.35)
+	create_tween().tween_property(node, "scale", Vector3.ONE, 0.45) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
 func take_damage(amount: float) -> void:
 	hp -= amount
 	_flash = 0.12
