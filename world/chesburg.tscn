@@ -173,6 +173,9 @@ transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 10.72, 47, 1, -25.720001)
 [node name="rock_terrain2" parent="Terrain" unique_id=1092030027 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 6.4320006, 23.199999, 8.28, 21.6624)
 
+[node name="rock_terrain17" parent="Terrain" unique_id=306982721 instance=ExtResource("26_lybmh")]
+transform = Transform3D(20.400002, 0, 0, 0, 13.759198, 0, 0, 0, 6.4320006, 23.199999, 13.379999, 34.3624)
+
 [node name="rock_terrain9" parent="Terrain" unique_id=2091630497 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.7429996, 0, 0, 0, 7.2799997, 0, 0, 0, 3.34464, 34.657997, 6.0386243, 20.238266)
 
@@ -466,7 +469,7 @@ line_thickness = 0.08
 trail_fraction = 1.0
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2104874, 4.1793137, 34.901344)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.789513, 4.1793137, 34.901344)
 
 [node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
