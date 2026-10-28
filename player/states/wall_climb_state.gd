@@ -15,6 +15,9 @@ extends PlayerState
 ## one — eased in over wall_wrap_time (see the "_ease_*" fields below) rather
 ## than snapped to instantly. The very first grab is eased in the same way.
 
+## How far above the feet the floor-clamp ray starts (see _attempt_move).
+const GROUND_PROBE_RISE := 0.5
+
 var _normal := Vector3.FORWARD      ## the wall currently attached to
 var _attach_point := Vector3.ZERO   ## a point on that wall, at the player's own origin height
 									 ## (not the probe's chest-height — see find_climbable_wall())
@@ -119,8 +122,14 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	# climbable *in addition to* its normal solid collision, not instead of
 	# it) — starting the ray there could self-intersect the wall and return
 	# a bogus "floor" height instead of the real one far below.
-	var ray_origin := _attach_point + _normal * c.wall_hug_distance
-	var ground = p.ground_height_below(ray_origin, c.wall_climb_speed * delta + 0.2)
+	#
+	# Probed from where the player is GOING (`tentative`), starting a little
+	# above the feet, not from where they are now: strafing along the base of
+	# a wall onto ground that rises (a slope or mound against it) otherwise
+	# moved the feet into terrain the old-position ray never saw, and a ray
+	# starting exactly at the feet can't see ground that's already above them.
+	var ray_origin := tentative + _normal * c.wall_hug_distance + Vector3.UP * GROUND_PROBE_RISE
+	var ground = p.ground_height_below(ray_origin, GROUND_PROBE_RISE + c.wall_climb_speed * delta + 0.2)
 	if ground != null and tentative.y < ground:
 		tentative.y = ground
 

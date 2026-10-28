@@ -40,6 +40,9 @@ const SWIM_EXIT_GRACE := 0.5
 const NO_STEP_UP_GROUP := &"no_step_up"
 
 ## See the registration comment in _ready() and _unstick() below.
+## A surface this close to flat counts as a stair tread (vs. a ramp) when deciding
+## whether _try_step_up() should mask its hop with PlayerVisual.absorb_vertical_pop().
+const STEP_TREAD_MAX_ANGLE_DEG := 10.0
 const UNSTICK_ACTION := &"debug_unstick"   ## bound to F9
 
 ## See _update_auto_unstick().
@@ -591,7 +594,13 @@ func _try_step_up() -> void:
 	# teleport, applied straight to global_position, reads on screen as the
 	# character visibly hopping — see PlayerVisual.absorb_vertical_pop()'s
 	# own doc comment for how the rendered model masks it instead.
-	visual.absorb_vertical_pop(new_y - global_position.y)
+	# Only for a real step (a near-flat tread). On a ramp this same function
+	# fires nearly every frame with a small rise (see above), and absorbing each
+	# one stacked up a downward visual offset faster than it could ease back —
+	# the model visibly sank into the slope while running up it. The body still
+	# snaps up either way; a slope just needs no visual masking.
+	if settle.get_normal().angle_to(Vector3.UP) < deg_to_rad(STEP_TREAD_MAX_ANGLE_DEG):
+		visual.absorb_vertical_pop(new_y - global_position.y)
 	global_position.y = new_y
 	# Only arm the grace window (see its own doc comment) when what was just
 	# stepped onto is a genuinely near-flat tread — NOT whenever this function

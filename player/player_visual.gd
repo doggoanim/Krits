@@ -96,6 +96,7 @@ var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node'
 ## touched anywhere else (only _model.position.y, for the swim flip), so
 ## using it as an additive offset layer here is safe.
 var _step_pop_offset := 0.0
+const STEP_POP_MAX := 0.6   ## largest offset either way (matches PlayerConfig.max_step_height)
 const STEP_POP_DECAY := 10.0   ## how fast _step_pop_offset eases back to 0 —
 								## higher is snappier; tuned so a typical
 								## step-height pop settles out well within
@@ -447,7 +448,9 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 ## to 0 over STEP_POP_DECAY, so what's actually visible is a quick smoothed
 ## rise instead of an instant hop.
 func absorb_vertical_pop(dy: float) -> void:
-	_step_pop_offset -= dy
+	# Never let the model be offset further below the body than one step —
+	# repeated pops can't stack the character into the floor.
+	_step_pop_offset = clampf(_step_pop_offset - dy, -STEP_POP_MAX, STEP_POP_MAX)
 
 func _process(delta: float) -> void:
 	_update_face(delta)
