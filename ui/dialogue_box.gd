@@ -6,7 +6,7 @@ extends CanvasLayer
 ##
 ##   - walks a DialogueNode graph (see dialogue/dialogue_node.gd),
 ##   - types each line out with Typewriter (BBCode + [pause=s] tags),
-##   - lets the player finish a line (interact), skip (hold interact),
+##   - lets the player finish a line (interact), advance (interact again),
 ##   - hands the in-world side (freeze player, camera focus, speaker turn)
 ##     to DialogueStage.
 ##
@@ -20,8 +20,6 @@ extends CanvasLayer
 ##   is_active()                     true while a conversation is open
 
 const SCENE_PATH := "res://ui/dialogue_box.tscn"
-const SKIP_HOLD_TIME := 0.45     ## seconds interact must be held before it skips
-const SKIP_TICK := 0.12          ## seconds between lines while skipping
 const OPEN_TIME := 0.28
 const CLOSE_TIME := 0.18
 
@@ -44,9 +42,6 @@ var _current: DialogueNode
 var _stage: DialogueStage
 var _line_done := false
 var _opened_frame := -1
-var _holding := false
-var _hold_time := 0.0
-var _skip_tick := 0.0
 var _tween: Tween
 
 static func create() -> DialogueBox:
@@ -75,7 +70,6 @@ func start(node: DialogueNode, speaker: Node3D = null) -> void:
 		return
 	_open = true
 	_opened_frame = Engine.get_process_frames()
-	_holding = false
 	_stage = DialogueStage.new()
 	_stage.begin(speaker, get_tree())
 	visible = true
@@ -97,8 +91,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_skip_tick = 0.0
 		_press_interact()
 	elif event.is_action_released(&"interact"):
-		_holding = false
-	else:
+		else:
 		return
 	get_viewport().set_input_as_handled()
 
@@ -112,23 +105,6 @@ func _press_interact() -> void:
 				focused.pressed.emit()
 		else:
 			_advance()
-
-func _process(delta: float) -> void:
-	if not _open:
-		return
-	if _holding:
-		_hold_time += delta
-		if _hold_time >= SKIP_HOLD_TIME:
-			_skip_tick -= delta
-			if _skip_tick <= 0.0:
-				_skip_tick = SKIP_TICK
-				if _typewriter.is_typing():
-					_typewriter.finish()
-				elif _line_done and _choices.get_child_count() == 0:
-					_advance()
-
-func _skipping() -> bool:
-	return _holding and _hold_time >= SKIP_HOLD_TIME
 
 func _on_setting_changed(key: StringName) -> void:
 	if key == &"controls/bindings":
@@ -160,8 +136,6 @@ func _show_node(node: DialogueNode) -> void:
 		_pop(_name_tag)
 	_typewriter.speed = Settings.get_value(&"accessibility/text_speed")
 	_typewriter.play(_text, node.text)
-	if _skipping():
-		_typewriter.finish()
 
 func _on_line_finished() -> void:
 	if not _open or _current == null:
@@ -203,7 +177,6 @@ func _end() -> void:
 		return
 	_open = false
 	_current = null
-	_holding = false
 	_typewriter.finish()
 	_clear_choices()
 	if _stage:
@@ -216,7 +189,7 @@ func _end() -> void:
 
 func _refresh_hint() -> void:
 	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
-	_hint.text = "%s  Next   ·   hold  Skip" % key
+	_hint.text = "%s  Next" % key
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5

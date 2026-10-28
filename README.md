@@ -307,5 +307,5 @@ restores them after, so whatever look you set here carries into combat too.
 
 - **Data:** `DialogueNode` / `DialogueChoice` resources (`dialogue/`), unchanged. Code helpers: `DialogueNode.say(speaker, text)` and `DialogueNode.chain([[speaker, text], ...])`.
 - **UI:** `ui/dialogue_box.tscn` (hand-drawn plates, editable in the editor) driven by `ui/dialogue_box.gd`. Create with `DialogueBox.create()`; start with `DialogueBox.instance.start(node, speaker_node3d)`.
-- **Typewriter:** `ui/dialogue/typewriter.gd`. Text uses RichTextLabel BBCode (`[shake]`, `[wave]`, `[rainbow]`, `[color=...]`, `[b]`...) plus `[pause=0.5]`. Interact finishes a line, **hold interact** skips; Settings > Accessibility has text speed.
+- **Typewriter:** `ui/dialogue/typewriter.gd`. Text uses RichTextLabel BBCode (`[shake]`, `[wave]`, `[rainbow]`, `[color=...]`, `[b]`...) plus `[pause=0.5]`. Interact finishes a line, then advances; Settings > Accessibility has text speed.
 - **Speaker focus:** `dialogue/dialogue_stage.gd` freezes the player, eases `CameraRig` toward the speaker (`begin_focus/end_focus`) and calls `get_focus_point()`, `face_toward()`, `restore_facing()` on the speaker if it has them (`NPC` does). No player/speaker (main menu name prompt) = just the box.
