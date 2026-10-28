@@ -13,6 +13,8 @@ extends HBoxContainer
 var _slots: Array[InventorySlot] = []
 
 func _ready() -> void:
+	if interactive:
+		process_mode = Node.PROCESS_MODE_ALWAYS   # menus pause the tree; keep updating visibility (key use is guarded against pause in _try_use)
 	for i in Hotbar.SLOT_COUNT:
 		var slot := slot_scene.instantiate() as InventorySlot
 		if i == Hotbar.ABILITY_SLOTS:
@@ -33,7 +35,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if interactive:
-		visible = MenuBase.open_menu == null   # the HUD copy steps aside for any menu (the inventory has its own)
+		visible = not (MenuBase.open_menu is InventoryMenu)   # the inventory shows its own copy
 	var hotbar := Game.hotbar
 	for i in _slots.size():
 		var slot := _slots[i]
