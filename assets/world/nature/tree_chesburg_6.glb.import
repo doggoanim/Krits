@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://clkm5ngwo17ku"
-path="res://.godot/imported/tree_chesburg_６.glb-55946b3b62d9c969b094ed6317981a8c.scn"
+path="res://.godot/imported/tree_chesburg_6.glb-94726beea747a3a1b8d51bb797eea577.scn"
 
 [deps]
 
-source_file="res://assets/world/nature/tree_chesburg_６.glb"
-dest_files=["res://.godot/imported/tree_chesburg_６.glb-55946b3b62d9c969b094ed6317981a8c.scn"]
+source_file="res://assets/world/nature/tree_chesburg_6.glb"
+dest_files=["res://.godot/imported/tree_chesburg_6.glb-94726beea747a3a1b8d51bb797eea577.scn"]
 
 [params]
 

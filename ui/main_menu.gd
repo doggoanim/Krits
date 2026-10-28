@@ -105,4 +105,12 @@ func _start_game(payload: Dictionary) -> void:
 	var tw := create_tween()
 	tw.tween_property(_fade, "color:a", 1.0, FADE_TO_GAME)
 	await tw.finished
-	get_tree().change_scene_to_file(GAME_SCENE)
+	var err := get_tree().change_scene_to_file(GAME_SCENE)
+	if err != OK:
+		# The game scene (or one of its dependencies) failed to load —
+		# surface it instead of leaving the player on a black screen.
+		push_error("MainMenu: could not load %s (error %d)" % [GAME_SCENE, err])
+		var back := create_tween()
+		back.tween_property(_fade, "color:a", 0.0, FADE_TO_GAME)
+		await back.finished
+		_busy = false
