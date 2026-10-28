@@ -75,6 +75,15 @@ const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this abov
 const RANDOM_POINT_ATTEMPTS := 8
 
 ## ---- reveal sequence (see play_intro()) ----
+const WALL_SHADER := preload("res://combat/arena_wall.gdshader")
+const POST_EVERY := 4           ## a post at every Nth wall segment
+const POST_HEIGHT := 2.2
+const POST_RADIUS := 0.3
+const POST_OUTLINE := 0.05
+const DASH_FRACTION := 0.6      ## how much of each ring segment is drawn (the rest is a gap)
+const RING_WIDTH := 0.55
+const OUTRO_WALL_TIME := 0.4
+const OUTRO_RING_TIME := 0.35
 const RING_DRAW_TIME := 0.5     ## total time for the ground ring to sweep fully around
 const RING_POP_TIME := 0.12     ## how long each individual ring segment's own pop-in takes
 const WALL_GROW_TIME := 0.45    ## how long the walls take to rise once the ring's done
@@ -102,6 +111,8 @@ var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
 var _over := false
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
+var _posts: Array[Node3D] = []                 ## chunky corner posts, one every POST_EVERY segments
+var _post_segment: Array[int] = []             ## which ring segment each post stands at (same order as _posts)
                                                 ## as _wall_meshes
 
 static func radius_for(enemy_count: int) -> float:
@@ -165,6 +176,8 @@ func play_intro() -> void:
 		mesh.scale.y = 0.0
 	for piece in _ring_pieces:
 		piece.scale = Vector3.ZERO
+	for post in _posts:
+		post.scale = Vector3.ZERO
 
 	var ring_tween := create_tween()
 	ring_tween.set_parallel(true)
@@ -172,12 +185,39 @@ func play_intro() -> void:
 		var start_t := RING_DRAW_TIME * float(i) / float(_ring_pieces.size())
 		ring_tween.tween_property(_ring_pieces[i], "scale", Vector3.ONE, RING_POP_TIME) \
 				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for k in _posts.size():
+		var start_t := RING_DRAW_TIME * float(_post_segment[k]) / float(_ring_pieces.size())
+		ring_tween.tween_property(_posts[k], "scale", Vector3.ONE, 0.45) \
+				.set_delay(start_t).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	await ring_tween.finished
 
+	if player and player.camera_rig:
+		player.camera_rig.shake(0.3)   # the walls thump up out of the ground
 	var wall_tween := create_tween()
 	wall_tween.tween_method(_set_wall_growth, 0.0, 1.0, WALL_GROW_TIME) \
-			.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await wall_tween.finished
+
+## The teardown, mirror of play_intro(): walls sink back into the ground, the
+## ring dashes and posts pop out one after another with a puff each.
+## Awaited by EncounterManager before it frees the arena.
+func play_outro() -> void:
+	var tw := create_tween().set_parallel(true)
+	tw.tween_method(_set_wall_growth, 1.0, 0.0, OUTRO_WALL_TIME) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	for i in _ring_pieces.size():
+		var start_t := OUTRO_RING_TIME * float(i) / float(_ring_pieces.size())
+		tw.tween_property(_ring_pieces[i], "scale", Vector3.ZERO, 0.15) \
+				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	for k in _posts.size():
+		var post := _posts[k]
+		var start_t := OUTRO_RING_TIME * float(_post_segment[k]) / float(_ring_pieces.size())
+		tw.tween_property(post, "scale", Vector3.ZERO, 0.2) \
+				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tw.tween_callback(VFX.shatter.bind(self, post.global_position + Vector3.UP * POST_HEIGHT * 0.5, Color.WHITE, 0.7)) \
+				.set_delay(start_t + 0.15)
+	await tw.finished
+	await get_tree().create_timer(0.35).timeout   # let the last puffs play out
 
 ## Grows every wall segment's mesh up from the ground together, `t` 0..1.
 ## Scaling just the mesh (not its StaticBody3D/collider, which stays full
@@ -613,7 +653,9 @@ func _build_barrier() -> void:
 	add_child(stage_root)
 	_wall_meshes.clear()
 	_ring_pieces.clear()
-	var wall_col := Color(1.0, 1.0, 1.0, 0.16)   ## one solid translucent white, same on every segment
+	_posts.clear()
+	_post_segment.clear()
+	var wall_col := Color(1.0, 1.0, 1.0, 1.0)   ## chalk colour for arena_wall.gdshader (it does its own fading)
 	var glow_col := Color(1.0, 1.0, 1.0)
 	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
 	for i in WALL_SEGMENTS:
@@ -633,7 +675,39 @@ func _build_barrier() -> void:
 
 		var ring_pos := local_pos
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
-		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len, 0.06, 0.4), glow_col, 1.0, rot_y))
+		# A dash (not a continuous strip) with a little hand-drawn wobble.
+		var dash_rot := rot_y + randf_range(-0.05, 0.05)
+		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len * DASH_FRACTION, 0.08, RING_WIDTH), glow_col, 0.6, dash_rot))
+		if i % POST_EVERY == 0:
+			var post_pos := local_pos
+			post_pos.y = local_ground_y
+			_posts.append(_build_post(post_pos, i % (POST_EVERY * 2) == 0))
+			_post_segment.append(i)
+
+## A chunky rounded post with a bold black outline, standing on the ground at
+## `pos` (stage_root-local). A root node at the base so it can pop up from
+## the ground when scaled.
+func _build_post(pos: Vector3, warm: bool) -> Node3D:
+	var root := Node3D.new()
+	root.position = pos
+	stage_root.add_child(root)
+	var mesh := MeshInstance3D.new()
+	var cap := CapsuleMesh.new()
+	cap.radius = POST_RADIUS
+	cap.height = POST_HEIGHT
+	mesh.mesh = cap
+	mesh.position.y = POST_HEIGHT * 0.5
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.95, 0.75) if warm else Color(1.0, 1.0, 1.0)
+	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	mat.emission_enabled = true
+	mat.emission = mat.albedo_color
+	mat.emission_energy_multiplier = 0.35
+	mesh.material_override = mat
+	root.add_child(mesh)
+	CelOutline.apply(mesh, POST_OUTLINE)
+	return root
 
 ## `pos` is local to stage_root (i.e. relative to the arena's own origin),
 ## not a world-space coordinate — callers must not fold in global_position.
@@ -678,8 +752,11 @@ func _mesh(size: Vector3, col: Color, emit: float, translucent: bool) -> MeshIns
 		mat.emission = col
 		mat.emission_energy_multiplier = emit
 	if translucent:
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var wall_mat := ShaderMaterial.new()
+		wall_mat.shader = WALL_SHADER
+		wall_mat.set_shader_parameter(&"wall_height", size.y)
+		wall_mat.set_shader_parameter(&"chalk", col)
+		mi.material_override = wall_mat
+		return mi
 	mi.material_override = mat
 	return mi

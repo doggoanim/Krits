@@ -65,7 +65,9 @@ const CORE_RADIUS := 0.4
 const RING_INNER_RADIUS := 0.5
 const RING_OUTER_RADIUS := 0.62
 const RING_TILT := 55.0   ## degrees off horizontal
-const OUTLINE_THICKNESS := 0.03
+const OUTLINE_THICKNESS := 0.055   ## bold, cartoony black outline
+const SHADOW_RADIUS := 0.55         ## ground blob shadow under the orb
+const SHADOW_ALPHA := 0.3
 const BOB_SPEED := 2.0
 const BOB_HEIGHT := 0.15
 const PULSE_SPEED := 3.1       ## faster than the bob so the two don't lock in sync
@@ -84,6 +86,8 @@ var _outline_mat: StandardMaterial3D   ## the duplicate CelOutline.apply() makes
 var _base_scale := 1.0   ## target scale from _refresh() (1.0 active, 0.5 inactive); the
                           ## per-frame breathing pulse multiplies on top of this
 var _t := randf() * TAU
+var _pop := 1.0            ## squash-and-stretch multiplier on the visuals, tweened by _punch()
+var _shadow: MeshInstance3D   ## flat blob on the ground below, so you can judge where the orb is
 
 func _ready() -> void:
 	collision_layer = 1 << 4   # layer 5: orb
@@ -132,7 +136,42 @@ func _ready() -> void:
 		# about, this is the expected state until then.
 		add_child(_icon)
 
+	_build_shadow()
 	_refresh()
+
+func _build_shadow() -> void:
+	var disc := CylinderMesh.new()
+	disc.top_radius = SHADOW_RADIUS
+	disc.bottom_radius = SHADOW_RADIUS
+	disc.height = 0.01
+	disc.radial_segments = 20
+	disc.rings = 1
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0, 0, 0, SHADOW_ALPHA)
+	_shadow = MeshInstance3D.new()
+	_shadow.mesh = disc
+	_shadow.material_override = mat
+	_shadow.top_level = true   # stays on the ground while the orb floats/bobs above
+	_shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_shadow)
+
+func _update_shadow() -> void:
+	var arena := get_parent() as Arena
+	if arena == null or _shadow == null:
+		return
+	var ground := arena.ground_height(global_position)
+	_shadow.global_position = Vector3(global_position.x, ground + 0.05, global_position.z)
+	var height := maxf(global_position.y - ground, 0.0)
+	_shadow.scale = Vector3.ONE * clampf(1.0 - height * 0.1, 0.4, 1.0) * _base_scale
+	_shadow.visible = active
+
+## Squash-and-stretch pop (drop landing, respawn).
+func _punch(from: float) -> void:
+	_pop = from
+	create_tween().tween_property(self, "_pop", 1.0, 0.5) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 func _physics_process(delta: float) -> void:
 	_t += delta * BOB_SPEED
@@ -147,12 +186,14 @@ func _physics_process(delta: float) -> void:
 		_icon.position.y = bob
 
 	var pulse := 1.0 + sin(_t * PULSE_SPEED) * PULSE_AMOUNT
-	_mesh.scale = Vector3.ONE * (_base_scale * pulse)
+	_mesh.scale = Vector3.ONE * (_base_scale * pulse * _pop)
 	if _mesh_outline:
 		_mesh_outline.scale = _mesh.scale
-	_ring.scale = Vector3.ONE * _base_scale
+	_ring.scale = Vector3.ONE * (_base_scale * _pop)
 	_ring.rotate_y(delta * (RING_SPIN_SPEED if active else RING_SPIN_SPEED_IDLE))
 
+	if Engine.get_physics_frames() % 3 == 0:
+		_update_shadow()
 	if active:
 		for b in get_overlapping_bodies():
 			_try(b)
@@ -190,11 +231,13 @@ func drop_in(target: Vector3, from_height: float, duration: float, delay := 0.0)
 	tw.tween_interval(delay)
 	tw.tween_property(self, "global_position", target, duration) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(_punch.bind(0.6))   # lands with a squash
 
 func relocate(pos: Vector3) -> void:
 	global_position = pos
 	active = true
 	_refresh()
+	_punch(0.01)   # pops back in
 
 func _refresh() -> void:
 	var colors: Array = KIND_COLORS[kind]

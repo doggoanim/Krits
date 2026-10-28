@@ -8,12 +8,11 @@ extends Node
 ## Nobody goes anywhere: the player is never teleported, the camera never
 ## cuts away, and the world around the arena stays visible and unchanged —
 ## the barrier's reveal and its teardown are both just the barrier's own
-## geometry animating (growing up, then crumbling into noise — see
-## WorldDissolver for the teardown), never a screen overlay or a change of
+## geometry animating (growing up, then sinking and popping away — see
+## Arena.play_intro()/play_outro()), never a screen overlay or a change of
 ## location.
 
 const MERGE_DISTANCE := 14.0
-const BARRIER_TIME := 0.7       ## how long the barrier takes to solidify/dissolve
 const POST_FIGHT_PAUSE := 0.8
 const GRACE_TIME := 2.0         ## no new encounters right after one ends
 
@@ -23,7 +22,6 @@ var world_root: Node3D
 var active_arena: Arena
 var busy := false
 var _grace := 0.0
-var _dissolver := WorldDissolver.new()
 
 func setup(p: Player, world: Node3D) -> void:
 	player = p
@@ -79,12 +77,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	if not cancelled:
 		await get_tree().create_timer(POST_FIGHT_PAUSE).timeout
 
-	_dissolver.begin(arena.stage_root)
-	await _tween_progress(_dissolver, 1.0, BARRIER_TIME)
-	# No .finish() here on purpose: that would restore the walls' original
-	# (visible) material for a frame right before queue_free() takes effect.
-	# Fully dissolved (progress 1.0) already discards every fragment, so the
-	# barrier is already invisible — queue_free() can just take it from there.
+	await arena.play_outro()   # walls sink, ring dashes and posts pop out (see Arena)
 	arena.queue_free()
 	active_arena = null
 	for w in world_enemies:
@@ -104,9 +97,3 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	_grace = GRACE_TIME
 	Game.input_locked = false
 	busy = false
-
-## Tweens a WorldDissolver's progress (0 = whole, 1 = fully dissolved) to `target`.
-func _tween_progress(dissolver: WorldDissolver, target: float, duration: float) -> void:
-	var tw := create_tween()
-	tw.tween_method(dissolver.set_progress, dissolver.progress, target, duration)
-	await tw.finished

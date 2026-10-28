@@ -315,3 +315,9 @@ restores them after, so whatever look you set here carries into combat too.
 - Airborne orb hits only **bank** damage (combo scaling still applies) and bounce you up; the whole combo is dealt when you **touch the ground** (`Arena._land_sword_combo`), with a hitstop (`core/hit_stop.gd`), enemy squash (`Enemy.punch`), cartoony damage number + confetti (`combat/hit_burst.gd`) and a screen kick.
 - The combo counter is a small hand-drawn plate in the HUD next to the bars (`ComboPlate` in `ui/hud.tscn`, driven by `Events.combo_changed` / `combo_landed`): pops on each hit, heats up in colour every few steps, slams to the damage total on landing. Hitstop/shake constants are at the top of `arena.gd`.
 - Bow and Staff are unchanged.
+
+## Arena look
+
+- **Barrier:** chalk-and-hatch wall shader (`combat/arena_wall.gdshader`, world-space so segments join up, pausable clock) + a dashed ground ring + chunky outlined posts every 4th segment (`Arena._build_barrier/_build_post`; tune `POST_*`, `DASH_FRACTION`, `RING_WIDTH`).
+- **Intro/outro:** ring dashes and posts pop in (elastic), walls thump up with a camera kick; `Arena.play_outro()` sinks the walls and pops the ring/posts away with puffs (replaces the old dissolve for arenas).
+- **Orbs:** bolder outline, ground blob shadow, squash on landing and pop-in on respawn.
