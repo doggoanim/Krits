@@ -96,14 +96,6 @@ var _lean_bank := 0.0    ## current smoothed side-to-side lean (rad), this node'
 ## touched anywhere else (only _model.position.y, for the swim flip), so
 ## using it as an additive offset layer here is safe.
 var _step_pop_offset := 0.0
-## Visual-only sink into the surface being moved on (see Player._update_surface_sink):
-## `down` drops the model while running up a slope, `into` pushes it into the wall
-## while climbing. Targets are set each physics frame and eased in _process().
-var _sink_down := 0.0
-var _sink_into := 0.0
-var _sink_down_target := 0.0
-var _sink_into_target := 0.0
-const SINK_SMOOTHING := 12.0
 const STEP_POP_DECAY := 10.0   ## how fast _step_pop_offset eases back to 0 —
 								## higher is snappier; tuned so a typical
 								## step-height pop settles out well within
@@ -457,21 +449,11 @@ func set_lean(pitch: float, bank: float, smoothing: float, delta: float) -> void
 func absorb_vertical_pop(dy: float) -> void:
 	_step_pop_offset -= dy
 
-## Where the model should be sunk to — `down` metres below its normal height,
-## `into` metres forward (into a climbed wall). Eased toward each frame.
-func set_surface_sink(down: float, into: float) -> void:
-	_sink_down_target = down
-	_sink_into_target = into
-
 func _process(delta: float) -> void:
 	_update_face(delta)
 	if _step_pop_offset != 0.0:
 		_step_pop_offset = move_toward(_step_pop_offset, 0.0, STEP_POP_DECAY * absf(_step_pop_offset) * delta + 0.01)
-	var sink_t := 1.0 - exp(-SINK_SMOOTHING * delta)
-	_sink_down = lerpf(_sink_down, _sink_down_target, sink_t)
-	_sink_into = lerpf(_sink_into, _sink_into_target, sink_t)
-	# The model faces local -Z, so "into the wall" is -Z.
-	position = Vector3(0.0, _step_pop_offset - _sink_down, -_sink_into)
+		position.y = _step_pop_offset
 	if _hold_t > 0.0:
 		_hold_t = maxf(0.0, _hold_t - delta)
 	if _flash_t > 0.0:
