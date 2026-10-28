@@ -38,6 +38,22 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
+[sub_resource type="StyleBoxFlat" id="ConfirmPanel"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+content_margin_left = 60.0
+content_margin_top = 50.0
+content_margin_right = 60.0
+content_margin_bottom = 50.0
+
 [node name="SaveSlotsScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -119,3 +135,97 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 34
 text = "Return"
+
+[node name="DeleteRow" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -750.0
+offset_top = 395.0
+offset_right = 750.0
+offset_bottom = 465.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 120
+alignment = 1
+
+[node name="Delete1" type="Button" parent="DeleteRow"]
+custom_minimum_size = Vector2(420, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Delete"
+
+[node name="Delete2" type="Button" parent="DeleteRow"]
+custom_minimum_size = Vector2(420, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Delete"
+
+[node name="Delete3" type="Button" parent="DeleteRow"]
+custom_minimum_size = Vector2(420, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Delete"
+
+[node name="Confirm" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Panel" type="PanelContainer" parent="Confirm"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -200.0
+offset_right = 420.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("ConfirmPanel")
+
+[node name="VBox" type="VBoxContainer" parent="Confirm/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="Message" type="Label" parent="Confirm/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "Delete Slot 1?
+This can't be undone."
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Confirm/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="YesButton" type="Button" parent="Confirm/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Delete"
+
+[node name="NoButton" type="Button" parent="Confirm/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Cancel"
