@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="DialogueChoice" format=3]
+[gd_resource type="Resource" script_class="DialogueChoice" format=3 uid="uid://t081idjwues2"]
 
-[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="1_script"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mira/info.tres" id="2_info"]
+[ext_resource type="Script" uid="uid://v8ikwsq6vu2b" path="res://dialogue/dialogue_choice.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://c0goxya5bsrt7" path="res://dialogue/npcs/mira/info.tres" id="2_info"]
 
 [resource]
 script = ExtResource("1_script")
-text = "Tell me about this town"
+text = "yo"
 next = ExtResource("2_info")

@@ -1,12 +1,13 @@
-[gd_resource type="Resource" script_class="DialogueNode" format=3]
+[gd_resource type="Resource" script_class="DialogueNode" format=3 uid="uid://cntltot0qih2o"]
 
-[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="1_script"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mira/choice_info.tres" id="2_info"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mira/choice_bye.tres" id="3_bye"]
+[ext_resource type="Script" uid="uid://br2ijnooxyrd7" path="res://dialogue/dialogue_node.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://v8ikwsq6vu2b" path="res://dialogue/dialogue_choice.gd" id="1_yom8q"]
+[ext_resource type="Resource" uid="uid://t081idjwues2" path="res://dialogue/npcs/mira/choice_info.tres" id="2_info"]
+[ext_resource type="Resource" uid="uid://qlxwjw3xi1yu" path="res://dialogue/npcs/mira/choice_bye.tres" id="3_bye"]
 
 [resource]
 script = ExtResource("1_script")
 speaker = "Elder Mira"
-text = "Oh, hello there! Passing through, or just taking in the sights?"
+text = "yo"
 sets_flag = &"met_mira"
-choices = [ExtResource("2_info"), ExtResource("3_bye")]
+choices = Array[ExtResource("1_yom8q")]([ExtResource("2_info"), ExtResource("3_bye")])

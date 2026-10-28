@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
-[ext_resource type="Resource" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
+[ext_resource type="Resource" uid="uid://cntltot0qih2o" path="res://dialogue/npcs/mira/greet.tres" id="1_mira_dialogue"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
@@ -52,6 +52,7 @@
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
+[ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -483,7 +484,7 @@ line_thickness = 0.08
 trail_fraction = 1.0
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.789513, 4.1793137, 34.901344)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.789513, 4.1793137, 60.50196)
 
 [node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
@@ -748,3 +749,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 5, 0)
 script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
+
+[node name="Enemies" type="Node3D" parent="." unique_id=1768440793]
+
+[node name="WorldEnemy" type="CharacterBody3D" parent="Enemies" unique_id=1650436302]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.540747, 0.6118926, 31.145279)
+script = ExtResource("53_4t2cb")
+metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
