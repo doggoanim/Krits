@@ -11,3 +11,7 @@ extends Resource
 @export var id: StringName = &""
 @export var display_name := ""
 @export var price := 0
+
+## Flavor text, read from data/descriptions.cfg ([gear] section).
+func flavor() -> String:
+	return Descriptions.text("gear", id)

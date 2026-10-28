@@ -67,7 +67,7 @@ static func _make(id: StringName, name: String, cat: ItemData.Category, desc: St
 	i.id = id
 	i.display_name = name
 	i.category = cat
-	i.description = desc
+	i.description = Descriptions.text("items", id, desc)
 	i.color = color
 	i.buy_price = buy
 	i.sell_price = sell

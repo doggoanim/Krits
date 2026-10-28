@@ -320,10 +320,12 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	_detail_text.text = _gear_text(item)
 
 func _gear_text(item: EquipmentData) -> String:
-	if item is ArmorData: return "Armor\n+%d max HP" % item.hp_bonus
-	if item is ShieldData: return "Shield\n+%d max shield" % item.shield_bonus
-	if item is WeaponData: return "Weapon\n+%d damage" % item.damage_bonus
-	return ""
+	var stat := ""
+	if item is ArmorData: stat = "Armor: +%d max HP" % item.hp_bonus
+	elif item is ShieldData: stat = "Shield: +%d max shield" % item.shield_bonus
+	elif item is WeaponData: stat = "Weapon: +%d damage" % item.damage_bonus
+	var flavor := item.flavor()
+	return stat if flavor == "" else flavor + "\n\n" + stat
 
 func _equip(item: EquipmentData) -> void:
 	Game.stats.equip(item)   # emits stats_changed -> refresh()
