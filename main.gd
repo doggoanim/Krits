@@ -137,7 +137,7 @@ func _ready() -> void:
 	ui.travel_menu.is_in_combat = func() -> bool: return encounters.busy
 
 	Events.encounter_returned.connect(_on_encounter_returned)
-	Events.fast_travel_requested.connect(_travel_to)
+	Events.fast_travel_requested.connect(_on_fast_travel_requested)
 	Events.level_travel_requested.connect(_on_level_travel_requested)
 	_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 
@@ -148,6 +148,14 @@ func _travel_to(id: StringName) -> void:
 			player.teleport(sp.respawn_position())
 			cam.global_position = player.global_position
 			return
+
+## Fast travel from the map menu: the same iris wipe as a door, with the
+## teleport happening while it's fully closed.
+func _on_fast_travel_requested(id: StringName) -> void:
+	Game.input_locked = true
+	player.enter_cinematic()
+	await LoadingScreen.instance.run(func(): _travel_to(id))
+	Game.input_locked = false
 
 ## A Door was used (see world/door.gd/Events.level_travel_requested). Freezes
 ## the player and locks input for the whole swap, then hands the actual work
