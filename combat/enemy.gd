@@ -27,6 +27,8 @@ var _dying := false   ## true once defeated, so a lingering death animation isn'
 var _special_t := 0.0          ## countdown to the next leap/burst-shoot attack
 var _busy_with_special := false ## true while a leap or burst-shoot is actually playing out
 var _puddle_t := 0.0
+var _last_was_leap := false    ## which special attack ran last (see _run_special_attack)
+var _repeat_count := 0         ## how many times in a row that same kind has run
 
 ## ---- status effects (Staff's elemental orbs — see Orb.Kind/Arena) -------
 ## Each is independent and just ticks down on its own; nothing here stops
@@ -369,6 +371,12 @@ func _run_special_attack() -> void:
 	_busy_with_special = true
 	# Pick whichever attacks are actually configured; if both are, coin-flip.
 	var use_leap := data.has_leap() and (not data.has_burst_shoot() or randf() < 0.5)
+	# Never the same attack three times running: after two in a row of one
+	# kind, the other one is forced (when the enemy has both).
+	if data.has_leap() and data.has_burst_shoot() and _repeat_count >= 2:
+		use_leap = not _last_was_leap
+	_repeat_count = _repeat_count + 1 if use_leap == _last_was_leap else 1
+	_last_was_leap = use_leap
 	if use_leap:
 		await _do_leap_attack()
 		if _dying:

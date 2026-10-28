@@ -42,10 +42,10 @@ static func green_slime() -> EnemyData:
 	d.shoot_max_cooldown = 4.5
 	d.shoot_count_min = 1
 	d.shoot_count_max = 6   # shots are spaced just past the player's i-frames (~0.8 s)
-	d.shoot_ball_radius = 0.56   # double the default size
+	d.shoot_ball_radius = 0.448   # 1.6x the default size
 	d.shoot_ready_time = 0.6
 	d.shoot_interval = 0.12
-	d.shoot_speed = 18.0
+	d.shoot_speed = 21.6
 	d.shoot_damage = 5.0
 	d.anim_shoot = &"shoot"
 	d.sfx_footsteps = SLIME_FOOTSTEPS
