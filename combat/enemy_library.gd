@@ -18,7 +18,7 @@ static func green_slime() -> EnemyData:
 	var d := EnemyData.new()
 	d.id = &"green_slime"
 	d.display_name = "Green Slime"
-	d.max_hp = 6.0
+	d.max_hp = 10.0
 	d.gold = 20
 	d.color = Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)   # also the puddle/slime-ball tint
 	d.model = GREEN_SLIME_MODEL
