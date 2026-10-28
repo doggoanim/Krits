@@ -4,7 +4,7 @@ extends Node3D
 ##
 ##   Player ──(lagged follow)──> shield anchor (FloatingAnchor)
 ##                                  ├─ shield model
-##                                  └─ weapon pivot ── weapon model (swings)
+##                                  └─ weapon pivot (the shield's top edge) ── weapon model (swings)
 ##
 ## The shield floats at the player's back; the weapon hangs off the back of
 ## the shield, so it inherits the shield's lag and adds its own pendulum
@@ -16,6 +16,8 @@ extends Node3D
 ## (Events.stats_changed). Created by Player (add it after `visual`).
 
 @export var shield_rest := Vector3(0.0, 1.15, 0.55)   ## relative to the player's facing; +Z is behind
+@export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
+@export var weapon_hang_back := 0.05     ## how far behind the shield face the weapon hangs
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
 @export var swing_follow := 12.0       ## spring stiffness (higher = snappier)
@@ -40,6 +42,7 @@ func _ready() -> void:
 	_weapon_pivot.name = "WeaponPivot"
 	_anchor.add_child(_weapon_pivot)
 	Events.stats_changed.connect(_refresh)
+	_place_weapon_pivot()
 	_refresh()
 	_anchor.snap_to(_target_position(), _target_yaw())
 
@@ -56,7 +59,7 @@ func _target_yaw() -> float:
 
 func _target_position() -> Vector3:
 	var facing_basis := Basis(Vector3.UP, _target_yaw())
-	return _player.global_position + facing_basis * shield_rest
+	return _player.visual.global_position + facing_basis * shield_rest   # the model, not the collision body
 
 ## The weapon is a damped spring: anchor motion (in the anchor's own frame)
 ## pulls it off-centre, so it trails when you run, kicks when you stop, and
@@ -83,6 +86,7 @@ func _refresh() -> void:
 	if shield_id != _shield_id:
 		_shield_id = shield_id
 		_shield_model = _swap(_shield_model, _anchor, shield)
+		_place_weapon_pivot()
 	if weapon_id != _weapon_id:
 		_weapon_id = weapon_id
 		_weapon_model = _swap(_weapon_model, _weapon_pivot, weapon)
@@ -102,3 +106,20 @@ func _swap(old: Node3D, parent: Node3D, item: EquipmentData) -> Node3D:
 	node.rotation_degrees = item.model_rotation_deg
 	parent.add_child(node)
 	return node
+
+## The weapon hangs from the top edge of the shield, just behind its face.
+func _place_weapon_pivot() -> void:
+	var top := shield_default_top
+	if _shield_model and is_instance_valid(_shield_model):
+		top = _top_edge(_shield_model)
+	_weapon_pivot.position = Vector3(0.0, top, -weapon_hang_back)
+
+## Highest point of a model's meshes, in the anchor's space.
+func _top_edge(model: Node3D) -> float:
+	var top := -INF
+	var to_anchor := _anchor.global_transform.affine_inverse()
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var box := (to_anchor * mi.global_transform) * mi.get_aabb()
+		top = maxf(top, box.end.y)
+	return top if top > -INF else shield_default_top

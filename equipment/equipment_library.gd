@@ -81,8 +81,10 @@ static func rusty_sword() -> WeaponData:
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 0.0
-	# Hangs behind the shield with the blade angled up over its upper edge.
-	_look(w, "sword_wooden", 0.3, Vector3(0.1, -0.3, -0.12), Vector3(0.0, 0.0, -35.0))
+	# Hangs from the shield's top edge by its handle, blade pointing down. The
+	# glb's origin is the pommel with the blade along +Y, so flip it 180° and
+	# shift it up so the handle (not the pommel) sits on the hang point.
+	_look(w, "sword_wooden", 0.3, Vector3(0.0, 0.1, 0.0), Vector3(0.0, 0.0, 180.0))
 	return w
 
 static func steel_sword() -> WeaponData:
