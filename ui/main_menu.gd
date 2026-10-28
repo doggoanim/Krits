@@ -1,28 +1,103 @@
 class_name MainMenu
 extends Control
-## Title screen: the game boots into this (see project.godot's run/main_scene)
-## instead of straight into main.tscn. New Game wipes any existing save and
-## starts fresh; Continue resumes whatever's on disk (disabled when there's
-## nothing to resume); Quit exits the app. Layout lives in main_menu.tscn —
-## plain default-styled Godot controls for now; swap the scene's art/theme
-## once there's real menu art to build from.
+## Title flow: the game boots into this (see project.godot's run/main_scene)
+## instead of straight into main.tscn. It owns a persistent 3D backdrop
+## (MenuStage: black void, stars, a white floating Krits) and a set of
+## full-screen MenuScreen pages layered over it, showing one at a time:
+##
+##   Splash -> Title (press any key -> Play / Settings / Quit)
+##          -> Save slots -> [empty slot] Name prompt -> dialogue -> game
+##                        -> [used slot]  game
+##
+## Screens never move themselves — each emits MenuScreen.navigate and this
+## script fades the old one out, runs any choreography (the one-time intro
+## slide of Krits to the right), and fades the next one in. Adding a page is:
+## new MenuScreen scene, instance it below, register it in _screens.
 
 const GAME_SCENE := "res://main.tscn"
+const SCREEN_FADE := 0.3
+const FADE_TO_GAME := 0.8
 
-@onready var _continue_btn: Button = %ContinueButton
+@onready var _stage: MenuStage = %Stage
+@onready var _fade: ColorRect = %FadeToBlack
+
+## target name -> MenuScreen. &"game" and &"quit" are handled directly in
+## _on_navigate() rather than being screens.
+var _screens: Dictionary = {}
+var _current: MenuScreen
+var _busy := false          ## true while a transition runs, so a double-press can't stack two
+var _intro_played := false  ## the splash -> title slide of Krits only ever happens once
 
 func _ready() -> void:
-	_continue_btn.disabled = not Game.has_save()
-	%NewGameButton.pressed.connect(_on_new_game)
-	_continue_btn.pressed.connect(_on_continue)
-	%QuitButton.pressed.connect(_on_quit)
+	# The game's one shared dialogue box (see ui/dialogue_box.gd) — normally
+	# built by UiRoot inside main.tscn, so the menu needs its own for the
+	# name prompt's line. Same class, same look.
+	add_child(DialogueBox.new())
 
-func _on_new_game() -> void:
-	Game.delete_save()
+	_screens = {
+		&"splash": %Splash,
+		&"title": %Title,
+		&"slots": %Slots,
+		&"name": %NamePrompt,
+		&"settings": %Settings,
+	}
+	for key in _screens:
+		var screen: MenuScreen = _screens[key]
+		screen.visible = false
+		screen.modulate.a = 0.0
+		screen.navigate.connect(_on_navigate)
+	_fade.color.a = 0.0
+	# Splash appears instantly (no fade-in): it's an opaque black card, and
+	# fading it in from transparent would flash the starfield behind it first.
+	await _show(&"splash", {}, false)
+
+func _on_navigate(target: StringName, payload: Dictionary) -> void:
+	if _busy:
+		return
+	_busy = true
+	if _current:
+		await _hide(_current)
+	if target == &"quit":
+		get_tree().quit()
+		return
+	if target == &"game":
+		await _start_game(payload)
+		return
+	if target == &"title" and not _intro_played:
+		_intro_played = true
+		await _stage.play_intro()
+	await _show(target, payload)
+	_busy = false
+
+func _show(target: StringName, payload: Dictionary, fade_in := true) -> void:
+	var screen: MenuScreen = _screens[target]
+	screen.modulate.a = 0.0 if fade_in else 1.0
+	screen.visible = true
+	_current = screen
+	screen.enter(payload)
+	if not fade_in:
+		return
+	var tw := create_tween()
+	tw.tween_property(screen, "modulate:a", 1.0, SCREEN_FADE)
+	await tw.finished
+
+func _hide(screen: MenuScreen) -> void:
+	var tw := create_tween()
+	tw.tween_property(screen, "modulate:a", 0.0, SCREEN_FADE)
+	await tw.finished
+	screen.visible = false
+	screen.exit()
+
+## Points Game at the chosen slot (creating a brand-new save first when the
+## name prompt asked for one), fades to black, and hands off to the game —
+## Main's own Game.load_game() then reads whichever slot is current.
+func _start_game(payload: Dictionary) -> void:
+	var slot: int = payload.get("slot", Game.current_slot)
+	if payload.get("new_game", false):
+		Game.start_new_game(slot, String(payload.get("name", "Krits")))
+	else:
+		Game.select_slot(slot)
+	var tw := create_tween()
+	tw.tween_property(_fade, "color:a", 1.0, FADE_TO_GAME)
+	await tw.finished
 	get_tree().change_scene_to_file(GAME_SCENE)
-
-func _on_continue() -> void:
-	get_tree().change_scene_to_file(GAME_SCENE)
-
-func _on_quit() -> void:
-	get_tree().quit()

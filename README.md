@@ -1,7 +1,8 @@
 # Orb Odyssey RPG (Godot 4.7+)
 
 Open `project.godot` in Godot 4.7+ and press F5 — this boots `ui/main_menu.tscn`
-(New Game / Continue / Quit), which hands off to `main.tscn` for actual gameplay.
+(splash -> title -> save slots -> name prompt, see "Main menu" below), which hands
+off to `main.tscn` for actual gameplay.
 To iterate on gameplay without going through the menu every time, open
 `main.tscn` directly and press F6 (run current scene) instead. Everything is
 built in code from small modules, so there are no hand-edited .tscn files
@@ -9,6 +10,36 @@ besides `main.tscn` and `ui/main_menu.tscn` (both are just a bare root node with
 a script attached — all their content is built in `_ready()`) — but that's just
 how this project started, not a rule: see "Building your own map" below for
 hand-building levels visually in the editor, which works fine.
+
+## Main menu
+`ui/main_menu.tscn` (script `ui/main_menu.gd`) is a controller over a persistent 3D
+backdrop plus a stack of full-screen pages, shown one at a time with fades:
+
+1. **Splash** (`ui/menu/splash_screen.tscn`) — opaque black card; any key skips. Assign the
+   studio image to the `Image` node's texture in that scene (a dim placeholder label shows
+   until you do).
+2. **Stage** (`ui/menu/menu_stage.tscn`) — pitch-black world, a `StarField` of random white
+   dots, and `MenuHero`: the real `krits.glb`, forced to flat white, floating/spinning in a
+   looping pose. After the splash it floats centred for a beat, then slides to the right.
+   Its pose is the first clip it finds from `pose_candidates` (`main_menu`, then
+   `swimming_idle`, then `idle`) — export a `main_menu` clip from Blender and it's used
+   automatically.
+3. **Title** — big "Krits" on the left, blinking "Press any key to continue", then Play /
+   Settings / Quit (the hand-drawn `assets/ui/button_1/2/3.png` as normal/hover/pressed,
+   styled in `ui/menu/menu_theme.tres`).
+4. **Save slots** — three tall rectangles (left/middle/right) + a small Return button. A
+   used slot loads straight into the game; an empty one goes to the name prompt.
+5. **Name prompt** — "What's my name?"; the first character typed snaps the box to "Krits"
+   and the shared `DialogueBox` says "oh yeah I remember it now". Dismissing that line
+   creates the save and starts the game.
+
+Every page extends `MenuScreen` and only ever emits `navigate(target, payload)`; `MainMenu`
+does the fading and choreography. To add a page: new `MenuScreen` scene, instance it in
+`main_menu.tscn`, register it in `MainMenu._screens`.
+
+Saves are three files (`user://save_slot_1..3.json`) managed by `Game` (`current_slot`,
+`slot_summary()`, `start_new_game()`); an old single-file `user://save.json` is adopted as
+slot 1 on first launch. `Game.player_name` is stored per save.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·

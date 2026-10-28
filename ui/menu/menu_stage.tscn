@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/menu/menu_stage.gd" id="1"]
+[ext_resource type="Script" path="res://ui/menu/menu_hero.gd" id="2"]
+[ext_resource type="Script" path="res://ui/menu/star_field.gd" id="3"]
+[ext_resource type="PackedScene" path="res://assets/player/krits.glb" id="4"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StarMat"]
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 1)
+
+[node name="MenuStage" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Camera" type="Camera3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+current = true
+fov = 40.0
+
+[node name="Stars" type="MultiMeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+material_override = SubResource("StarMat")
+cast_shadow = 0
+script = ExtResource("3")
+
+[node name="Hero" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2")
+
+[node name="Model" parent="Hero" instance=ExtResource("4")]
+unique_name_in_owner = true
