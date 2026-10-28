@@ -7,7 +7,10 @@ func _init() -> void:
 	toggle_action = &"menu_travel"
 
 func can_open() -> bool:
-	return not is_in_combat.call()
+	if is_in_combat.call():
+		Events.notice.emit("Can't fast travel during a fight.")
+		return false
+	return true
 
 func refresh() -> void:
 	for c in content.get_children():
