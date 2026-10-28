@@ -8,7 +8,7 @@ extends Node
 ## to call into, and the music keeps playing across level swaps that don't
 ## ask for a change rather than restarting with every scene load.
 
-@export var bus := &"Master"
+@export var bus := &"Music"
 
 ## Linear scale on top of whatever the track's own file volume already is —
 ## 1.0 = unchanged, 0.5 = half as loud. Converted to dB for AudioStreamPlayer

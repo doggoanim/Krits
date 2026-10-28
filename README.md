@@ -28,7 +28,11 @@ backdrop plus a stack of full-screen pages, shown one at a time with fades:
    Settings / Quit (the hand-drawn `assets/ui/button_1/2/3.png` as normal/hover/pressed,
    styled in `ui/menu/menu_theme.tres`).
 4. **Save slots** — three tall rectangles (left/middle/right) + a small Return button. A
-   used slot loads straight into the game; an empty one goes to the name prompt.
+   used slot loads straight into the game (a Delete button under it, with confirmation,
+   wipes it); an empty one goes to the name prompt.
+   **Settings** (`ui/menu/settings_screen.*`) — Master / Music / Effects volume + fullscreen.
+   Values live in the `Settings` autoload (`core/settings.gd`), saved to `user://settings.cfg`
+   and applied at startup; buses are in `default_bus_layout.tres` (Master, Music, SFX).
 5. **Name prompt** — "What's my name?"; the first character typed snaps the box to "Krits"
    and the shared `DialogueBox` says "oh yeah I remember it now". Dismissing that line
    creates the save and starts the game.

@@ -151,10 +151,13 @@ const ORB_COMBO_PITCH_MAX := 2.2
 ## whole duration of a roll, same "built once, _ready()" idiom PlayerEffects
 ## uses for its continuous particle emitters (running dust, trails), rather
 ## than the fire-and-forget _play() pattern every other sound here uses.
+const SFX_BUS := &"SFX"   ## see default_bus_layout.tres
+
 var _roll_player: AudioStreamPlayer3D
 
 func _ready() -> void:
 	_roll_player = AudioStreamPlayer3D.new()
+	_roll_player.bus = SFX_BUS
 	add_child(_roll_player)
 	# Loop each take itself rather than relying on its .wav import settings
 	# already having loop enabled — guarantees it regardless of how the file
@@ -293,6 +296,7 @@ func _play(stream: AudioStream, pitch_variance: float, base_pitch := 1.0, volume
 	p.stream = stream
 	p.pitch_scale = base_pitch + randf_range(-pitch_variance, pitch_variance)
 	p.volume_db = volume_db
+	p.bus = SFX_BUS
 	add_child(p)
 	p.play()
 	p.finished.connect(p.queue_free)

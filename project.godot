@@ -22,6 +22,7 @@ Events="*res://core/events.gd"
 InputSetup="*res://core/input_setup.gd"
 Game="*res://core/game.gd"
 Music="*res://core/music_player.gd"
+Settings="*res://core/settings.gd"
 
 [display]
 
