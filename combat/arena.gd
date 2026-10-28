@@ -454,7 +454,8 @@ func _land_sword_combo() -> void:
 	Events.combo_landed.emit(total, hits, pounded)
 	if player.camera_rig:
 		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8) + (0.2 if pounded else 0.0))
-	HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.6 if pounded else 1.0))
+	if hits > 1 or pounded:   # a lone x1 hit gets no freeze (a pound bonus still does)
+		HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.6 if pounded else 1.0))
 
 ## ARROW orbs bank damage without hitting anything; the next SHOOT orb
 ## releases the whole bank at once (and does nothing if nothing's banked —
