@@ -193,3 +193,11 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## of a fixed time that can cut off early (still rising,
 											## jarring jump to a falling pose) or run long (stalls
 											## an orb-combo chain waiting on a pose that's done)
+
+@export_group("Visual sink")
+## The model sinks a little into the surface it's moving on, so feet look
+## planted instead of hovering (visual only — collision never moves).
+@export var slope_sink_depth := 0.18          ## metres the model drops while running UP a full-steepness slope
+@export var slope_sink_full_angle_deg := 40.0 ## slope angle at which the drop reaches slope_sink_depth (shallower slopes sink proportionally less)
+@export var slope_sink_min_speed := 1.0       ## must be moving uphill at least this fast to sink
+@export var climb_sink_depth := 0.15          ## metres the model pushes into the wall while wall-climbing

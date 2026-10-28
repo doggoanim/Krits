@@ -242,6 +242,23 @@ func _physics_process(delta: float) -> void:
 	_air_t = 0.0 if on_floor else _air_t + delta
 	_was_on_floor = on_floor
 	_update_lean(delta)
+	_update_surface_sink()
+
+## Visual-only: sinks the model a little into a slope while running up it, and
+## into the wall while climbing (config "Visual sink"). Collision is untouched.
+func _update_surface_sink() -> void:
+	var down := 0.0
+	var into := 0.0
+	var state := machine.current_name
+	if state == &"WallClimb":
+		into = config.climb_sink_depth
+	elif is_on_floor() and (state == &"Ground" or state == &"Crouch"):
+		var n := get_floor_normal()
+		var downhill := Vector3(n.x, 0.0, n.z)
+		if downhill.length() > 0.001 and velocity.dot(-downhill.normalized()) > config.slope_sink_min_speed:
+			var angle := acos(clampf(n.y, -1.0, 1.0))
+			down = config.slope_sink_depth * clampf(angle / deg_to_rad(config.slope_sink_full_angle_deg), 0.0, 1.0)
+	visual.set_surface_sink(down, into)
 
 ## Arcade-style motion lean: pitch forward with ground speed, bank into turns.
 ## Only during plain ground locomotion (Ground/Crouch) — every other state
