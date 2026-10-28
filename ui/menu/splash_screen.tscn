@@ -1,6 +1,9 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://ui/menu/splash_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/splash_screen_1.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/splash_screen_2.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/splash_screen_3.jpg" id="4"]
 
 [node name="SplashScreen" type="Control"]
 layout_mode = 3
@@ -10,6 +13,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+frames = Array[Texture2D]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
 
 [node name="Backdrop" type="ColorRect" parent="."]
 layout_mode = 1

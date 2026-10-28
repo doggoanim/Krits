@@ -10,9 +10,9 @@ const INTRO_HOLD := 2.0
 const MOVE_TIME := 1.4
 
 ## Where Krits ends up horizontally: 0 = centre of the screen, 1 = the right
-## screen edge. 0.5 puts him in the middle of the right half, clear of the
-## title block on the left.
-@export_range(0.0, 1.0) var hero_screen_x := 0.5
+## screen edge. 0.5 would be the middle of the right half; 0.38 sits a bit
+## closer to centre, still clear of the title block on the left.
+@export_range(0.0, 1.0) var hero_screen_x := 0.38
 
 @onready var _hero: MenuHero = %Hero
 @onready var _camera: Camera3D = %Camera

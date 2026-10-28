@@ -14,6 +14,10 @@ extends Control
 ## slide of Krits to the right), and fades the next one in. Adding a page is:
 ## new MenuScreen scene, instance it below, register it in _screens.
 
+## Looping music for the whole menu, started as soon as it opens (see Music,
+## core/music_player.gd). Main swaps it for the level's own track on load.
+@export var title_music: AudioStream = preload("res://sounds/Music/title_track.ogg")
+
 const GAME_SCENE := "res://main.tscn"
 const SCREEN_FADE := 0.3
 const FADE_TO_GAME := 0.8
@@ -33,6 +37,7 @@ func _ready() -> void:
 	# built by UiRoot inside main.tscn, so the menu needs its own for the
 	# name prompt's line. Same class, same look.
 	add_child(DialogueBox.new())
+	Music.play(title_music)
 
 	_screens = {
 		&"splash": %Splash,

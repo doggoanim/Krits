@@ -15,9 +15,9 @@ hand-building levels visually in the editor, which works fine.
 `ui/main_menu.tscn` (script `ui/main_menu.gd`) is a controller over a persistent 3D
 backdrop plus a stack of full-screen pages, shown one at a time with fades:
 
-1. **Splash** (`ui/menu/splash_screen.tscn`) — opaque black card; any key skips. Assign the
-   studio image to the `Image` node's texture in that scene (a dim placeholder label shows
-   until you do).
+1. **Splash** (`ui/menu/splash_screen.tscn`) — opaque black card; any key skips. It flickers
+   between the redrawn `assets/ui/splash_screen_1/2/3.jpg` frames (the `frames` export) every
+   ~0.12s so the lines boil like an animation. The menu plays `title_track.ogg` throughout.
 2. **Stage** (`ui/menu/menu_stage.tscn`) — pitch-black world, a `StarField` of random white
    dots, and `MenuHero`: the real `krits.glb`, forced to flat white, tumbling freely on all
    three axes (`tumble_speed`) in a looping pose. After the splash it floats centred for a beat, then slides to the right.
