@@ -41,6 +41,7 @@ const DEFAULTS := {
 	&"controls/bindings": {},
 	&"accessibility/screen_shake": true,
 	&"accessibility/hitstop": 1.0,            ## multiplier on hit-stop freeze time (0 = off)
+	&"accessibility/hitstop_flash": true,     ## white impact frame at the start of a hit-stop
 	&"accessibility/text_speed": 1.0,         ## multiplier on dialogue typewriter speed
 }
 
