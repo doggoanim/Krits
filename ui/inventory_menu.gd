@@ -114,7 +114,7 @@ func _build_items() -> void:
 			slot.show_empty()
 		slot.focus_entered.connect(_on_slot_focused.bind(i))
 		slot.pressed.connect(_on_slot_pressed.bind(i))
-	FocusPop.attach_all(_grid)
+	FocusPop.attach_all(_grid, true)
 	if _page == Page.ITEMS and visible:
 		_focus_selected_slot(_grid, _selected)
 		_update_item_details()
@@ -213,7 +213,7 @@ func _set_assign(id: StringName, slots: Array) -> void:
 		u.add_theme_font_size_override(&"font_size", 36)
 		u.pressed.connect(_unassign.bind(current, id))
 		_assign_row.add_child(u)
-	FocusPop.attach_all(_assign_row)
+	FocusPop.attach_all(_assign_row, true)
 
 func _assign(id: StringName, slot: int) -> void:
 	if Game.hotbar.assign(slot, id):
@@ -242,7 +242,7 @@ func _build_abilities() -> void:
 		var slot := _new_slot(_ability_grid)
 		slot.show_ability(AbilityLibrary.by_id(known[i]))
 		slot.focus_entered.connect(_on_ability_focused.bind(i))
-	FocusPop.attach_all(_ability_grid)
+	FocusPop.attach_all(_ability_grid, true)
 	if _page == Page.ABILITIES and visible:
 		_focus_selected_slot(_ability_grid, _selected_ability)
 		_update_ability_details()
@@ -275,7 +275,7 @@ func _build_gear() -> void:
 	_fill_gear(_armor_list, s.owned_armors, s.equipped_armor)
 	_fill_gear(_shield_list, s.owned_shields, s.equipped_shield)
 	_fill_gear(_weapon_list, s.owned_weapons, s.equipped_weapon)
-	FocusPop.attach_all(_gear_list_root())
+	FocusPop.attach_all(_gear_list_root(), true)
 	if _page == Page.GEAR and visible:
 		_focus_gear.call_deferred()
 

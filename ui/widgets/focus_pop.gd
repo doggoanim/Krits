@@ -11,6 +11,9 @@ extends Node
 ## these as a child of every Button / TextureButton / HSlider underneath `root`.
 ## Per-control opt-outs/tweaks via node metadata (set in the scene):
 ##   no_focus_pop = true      leave this control alone (it has its own focus look)
+##   focus_pop_scale = true   grow by SCALING (visual only) instead of resizing, so
+##                            nothing around it moves — for grids/scroll lists
+##                            (attach_all(root, true) sets this on everything)
 ##   focus_pop_grow = 1.0     don't resize it when focused (default GROW); for
 ##                            controls whose neighbours' alignment matters
 ##
@@ -20,6 +23,7 @@ extends Node
 
 const SKIP_META := &"no_focus_pop"
 const GROW_META := &"focus_pop_grow"
+const SCALE_META := &"focus_pop_scale"
 const LOOKS_META := &"focus_pop_looks"   ## Array of StyleBox to pick from on focus, instead of the theme's
 const ATTACHED_META := &"_focus_pop_attached"
 const GROW := 1.12           ## how much bigger a focused control gets
@@ -36,11 +40,13 @@ var _base_min := Vector2.ZERO
 var _base_font := 0
 var _saved_styles := {}   ## style name -> the control's own StyleBox override, or null if it had none
 
-static func attach_all(root: Node) -> void:
+static func attach_all(root: Node, scale_only := false) -> void:
 	for node in root.find_children("*", "Control", true, false):
 		if node.has_meta(SKIP_META) or node.has_meta(ATTACHED_META):
 			continue
 		if node is Button or node is TextureButton or node is HSlider:
+			if scale_only:
+				node.set_meta(SCALE_META, true)
 			var pop := FocusPop.new()
 			pop.target = node
 			node.set_meta(ATTACHED_META, true)
@@ -85,6 +91,13 @@ func _animate(factor: float) -> void:
 		return
 	if _tween and _tween.is_valid():
 		_tween.kill()
+	if target.has_meta(SCALE_META):
+		# Visual-only: scale around the centre, drawn above its neighbours.
+		target.pivot_offset = target.size * 0.5
+		target.z_index = 1 if factor > 1.0 else 0
+		_tween = target.create_tween().set_trans(Tween.TRANS_BACK if factor > 1.0 else Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_tween.tween_property(target, "scale", Vector2.ONE * factor, GROW_TIME)
+		return
 	_tween = target.create_tween().set_parallel(true)
 	_tween.set_trans(Tween.TRANS_BACK if factor > 1.0 else Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(target, "custom_minimum_size", _base_min * factor, GROW_TIME)
