@@ -20,6 +20,7 @@ extends Node
 
 const SKIP_META := &"no_focus_pop"
 const GROW_META := &"focus_pop_grow"
+const LOOKS_META := &"focus_pop_looks"   ## Array of StyleBox to pick from on focus, instead of the theme's
 const ATTACHED_META := &"_focus_pop_attached"
 const GROW := 1.12           ## how much bigger a focused control gets
 const GROW_TIME := 0.12
@@ -113,6 +114,12 @@ func _restore_look(button: Button) -> void:
 	_saved_styles.clear()
 
 func _pick_look(button: Button) -> StyleBox:
+	# A control can carry its own set of looks (e.g. nine-sliced plates for a
+	# tall slot, which the theme's stretch-to-fit textures would distort).
+	if button.has_meta(LOOKS_META):
+		var looks: Array = button.get_meta(LOOKS_META)
+		if not looks.is_empty():
+			return looks.pick_random()
 	if button.has_theme_stylebox_override(&"hover"):
 		return button.get_theme_stylebox(&"hover")   # the control's own selected look (e.g. a slot's grey)
 	var textured: Array[StyleBox] = []

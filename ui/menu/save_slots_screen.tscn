@@ -1,58 +1,53 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://ui/menu/save_slots_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="4"]
 
-[sub_resource type="StyleBoxFlat" id="SlotNormal"]
-bg_color = Color(1, 1, 1, 1)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+[sub_resource type="StyleBoxTexture" id="SlotNormal"]
+content_margin_left = 40.0
+content_margin_top = 40.0
+content_margin_right = 40.0
+content_margin_bottom = 40.0
+texture = ExtResource("2")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
-[sub_resource type="StyleBoxFlat" id="SlotHover"]
-bg_color = Color(0.86, 0.86, 0.86, 1)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+[sub_resource type="StyleBoxTexture" id="SlotHover"]
+content_margin_left = 40.0
+content_margin_top = 40.0
+content_margin_right = 40.0
+content_margin_bottom = 40.0
+texture = ExtResource("3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
-[sub_resource type="StyleBoxFlat" id="SlotPressed"]
-bg_color = Color(0.72, 0.72, 0.72, 1)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+[sub_resource type="StyleBoxTexture" id="SlotPressed"]
+content_margin_left = 40.0
+content_margin_top = 40.0
+content_margin_right = 40.0
+content_margin_bottom = 40.0
+texture = ExtResource("4")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
-[sub_resource type="StyleBoxFlat" id="ConfirmPanel"]
-bg_color = Color(1, 1, 1, 1)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-content_margin_left = 60.0
-content_margin_top = 50.0
-content_margin_right = 60.0
-content_margin_bottom = 50.0
+[sub_resource type="StyleBoxTexture" id="ConfirmPanel"]
+content_margin_left = 70.0
+content_margin_top = 60.0
+content_margin_right = 70.0
+content_margin_bottom = 60.0
+texture = ExtResource("2")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
 
 [node name="SaveSlotsScreen" type="Control"]
 layout_mode = 3
@@ -100,6 +95,7 @@ theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 1"
 metadata/focus_pop_grow = 1.0
+metadata/focus_pop_looks = [SubResource("SlotNormal"), SubResource("SlotHover"), SubResource("SlotPressed")]
 
 [node name="Slot2" type="Button" parent="Slots"]
 custom_minimum_size = Vector2(420, 760)
@@ -110,6 +106,7 @@ theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 2"
 metadata/focus_pop_grow = 1.0
+metadata/focus_pop_looks = [SubResource("SlotNormal"), SubResource("SlotHover"), SubResource("SlotPressed")]
 
 [node name="Slot3" type="Button" parent="Slots"]
 custom_minimum_size = Vector2(420, 760)
@@ -120,6 +117,7 @@ theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 3"
 metadata/focus_pop_grow = 1.0
+metadata/focus_pop_looks = [SubResource("SlotNormal"), SubResource("SlotHover"), SubResource("SlotPressed")]
 
 [node name="ReturnButton" type="Button" parent="."]
 unique_name_in_owner = true
