@@ -11,6 +11,9 @@ extends PanelContainer
 var toggle_action: StringName = &""
 
 static var open_menu: MenuBase
+## Frame a menu last closed on — lets PauseMenu tell "this same Esc press just
+## closed another menu" apart from a fresh Esc press (see PauseMenu).
+static var last_close_frame := -1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -38,6 +41,7 @@ func close() -> void:
 	if open_menu != self:
 		return
 	open_menu = null
+	last_close_frame = Engine.get_process_frames()
 	visible = false
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

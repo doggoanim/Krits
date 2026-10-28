@@ -18,6 +18,10 @@ extends Control
 ## core/music_player.gd). Main swaps it for the level's own track on load.
 @export var title_music: AudioStream = preload("res://sounds/Music/title_track.ogg")
 
+## Set by the pause menu's "Main Menu" button before it reloads this scene: skips
+## the splash and lands straight on Play / Settings / Quit.
+static var return_to_title := false
+
 const GAME_SCENE := "res://main.tscn"
 const SCREEN_FADE := 0.3
 const FADE_TO_GAME := 0.8
@@ -52,6 +56,12 @@ func _ready() -> void:
 		screen.modulate.a = 0.0
 		screen.navigate.connect(_on_navigate)
 	_fade.color.a = 0.0
+	if return_to_title:
+		return_to_title = false
+		_intro_played = true
+		await _stage.play_intro()
+		await _show(&"title", {"show_menu": true})
+		return
 	# Splash appears instantly (no fade-in): it's an opaque black card, and
 	# fading it in from transparent would flash the starfield behind it first.
 	await _show(&"splash", {}, false)

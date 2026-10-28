@@ -202,11 +202,6 @@ func _on_encounter_returned(player_defeated: bool) -> void:
 		Game.stats.full_heal()
 		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"ui_cancel_menu") and MenuBase.open_menu == null:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE \
-			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-
 ## Builds the one Sun/WorldEnvironment pair the whole game uses, as direct
 ## children of Main rather than part of the swappable `level` (see `level`'s
 ## own doc comment) so they persist untouched across every _swap_level() —

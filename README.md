@@ -52,7 +52,7 @@ slot 1 on first launch. `Game.player_name` is stored per save.
 
 ## Controls
 WASD move · Mouse camera · Space jump · Shift roll (ground) / air dive (air) ·
-Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · Esc free mouse
+Ctrl crouch (ground) / ground pound (air) · F1-F11 debug tools (see DebugTools) · Tab stats · M fast travel · Esc pause menu
 
 Tricks: roll+jump = long jump · jump right after a pound = high jump ·
 dive, long-jump, or roll into a wall = wall bounce (pops you into the air;
@@ -179,7 +179,7 @@ toward the new direction.
 			 already-opaque screen — built by UiRoot and driven entirely by Main's Door-swap handler, see
 			 world/door.gd). Static layout for all
 			 of these lives in their matching .tscn (hud.tscn,
-			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn inheriting it,
+			 main_menu.tscn, menu_base.tscn + stats_menu.tscn/travel_menu.tscn/pause_menu.tscn inheriting it,
 			 screen_transition.tscn, loading_screen.tscn) — open any of them in the editor to move/resize things;
 			 the .gd scripts just hold behavior now (refresh logic, tweens, signals). The two
 			 exceptions are deliberate: PortraitSlot is a single custom-drawn Control with

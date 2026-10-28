@@ -8,6 +8,7 @@ const HUD_SCENE := preload("res://ui/hud.tscn")
 const STATS_MENU_SCENE := preload("res://ui/stats_menu.tscn")
 const TRAVEL_MENU_SCENE := preload("res://ui/travel_menu.tscn")
 const SHOP_MENU_SCENE := preload("res://ui/shop_menu.tscn")
+const PAUSE_MENU_SCENE := preload("res://ui/pause_menu.tscn")
 const LOADING_SCREEN_SCENE := preload("res://ui/loading_screen.tscn")
 
 var travel_menu: TravelMenu
@@ -18,5 +19,6 @@ func _ready() -> void:
 	travel_menu = TRAVEL_MENU_SCENE.instantiate() as TravelMenu
 	add_child(travel_menu)
 	add_child(SHOP_MENU_SCENE.instantiate())   # no toggle_action — opened by a ShopKeeper, see ShopMenu
+	add_child(PAUSE_MENU_SCENE.instantiate())   # Esc — see PauseMenu
 	add_child(DialogueBox.new())   # code-built, no scene file — see DialogueBox's own doc comment
 	add_child(LOADING_SCREEN_SCENE.instantiate())   # Door's level-swap cover — see LoadingScreen
