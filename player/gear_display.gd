@@ -13,7 +13,7 @@ extends Node3D
 ## an item in EquipmentLibrary and it appears here. Armor is not handled yet.
 ##
 ## Rebuilds itself whenever the equipped shield/weapon changes
-## (Events.stats_changed). Created by Player.
+## (Events.stats_changed). Created by Player (add it after `visual`).
 
 @export var shield_rest := Vector3(0.0, 1.15, 0.55)   ## relative to the player's facing; +Z is behind
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
@@ -31,10 +31,8 @@ var _weapon_id: StringName = &"?"
 var _swing := Vector2.ZERO        ## (pitch, roll) offset of the weapon
 var _swing_vel := Vector2.ZERO
 
-func setup(player: Player) -> void:
-	_player = player
-
 func _ready() -> void:
+	_player = get_parent() as Player   # created by Player, which must already have its visual
 	_anchor = FloatingAnchor.new()
 	_anchor.name = "ShieldAnchor"
 	add_child(_anchor)

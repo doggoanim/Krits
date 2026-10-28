@@ -178,7 +178,6 @@ func _ready() -> void:
 
 	gear = GearDisplay.new()
 	add_child(gear)
-	gear.setup(self)
 
 	effects = PlayerEffects.new()
 	add_child(effects)
