@@ -728,7 +728,7 @@ script = ExtResource("1_shopkeeper")
 prompt_text = "Press E to shop"
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9839306, 0.9, 0)
 shape = SubResource("Shape_ShopBody")
 
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
