@@ -1,0 +1,34 @@
+[gd_resource type="Theme" format=3]
+
+[sub_resource type="StyleBoxEmpty" id="ItemIdle"]
+content_margin_left = 56.0
+content_margin_top = 8.0
+content_margin_right = 56.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="ItemSelected"]
+content_margin_left = 56.0
+content_margin_top = 8.0
+content_margin_right = 56.0
+content_margin_bottom = 8.0
+bg_color = Color(1, 1, 1, 1)
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(5, 6)
+
+[resource]
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_disabled_color = Color(1, 1, 1, 0.4)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/colors/font_shadow_color = Color(0, 0, 0, 0.45)
+Button/constants/shadow_offset_x = 3
+Button/constants/shadow_offset_y = 4
+Button/styles/disabled = SubResource("ItemIdle")
+Button/styles/focus = SubResource("ItemSelected")
+Button/styles/hover = SubResource("ItemIdle")
+Button/styles/hover_pressed = SubResource("ItemSelected")
+Button/styles/normal = SubResource("ItemIdle")
+Button/styles/pressed = SubResource("ItemSelected")

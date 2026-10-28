@@ -1,5 +1,8 @@
 shader_type spatial;
 render_mode cull_disabled;
+// Pausable clock (see core/shader_clock.gd): TIME keeps running while the
+// game is paused, this doesn't — so animation freezes with the pause menu.
+global uniform float game_time;
 // Wind-swaying foliage material. Not the project's toon shader
 // (shading/toon.gdshader) — world foliage props (grass, trees; see
 // world/chesburg.tscn's Props/Trees and Props/eyecandies) are unmodified
@@ -60,7 +63,7 @@ void vertex() {
 	// same mesh scattered around the level don't all sway in lockstep — each
 	// one samples a slightly different point of the same slow-moving "gust"
 	// field instead.
-	float phase = TIME * wind_speed + dot(world_pos.xz, vec2(wind_scale));
+	float phase = game_time * wind_speed + dot(world_pos.xz, vec2(wind_scale));
 	float sway = height * wind_strength * gust;
 	VERTEX.x += sin(phase) * sway;
 	VERTEX.z += cos(phase * 0.7) * sway * 0.6;

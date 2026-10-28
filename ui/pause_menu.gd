@@ -15,6 +15,13 @@ extends MenuBase
 
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
 
+## Font size of the highlighted entry, and how much smaller each step away from
+## it gets (down to MIN_FONT) — the list fans out from the selection.
+const SELECTED_FONT := 84
+const FONT_STEP := 10
+const MIN_FONT := 44
+
+@onready var _items: Array[Node] = %Items.get_children()
 @onready var _resume: Button = %ResumeButton
 @onready var _settings_button: Button = %SettingsButton
 @onready var _main_menu: Button = %MainMenuButton
@@ -29,6 +36,10 @@ var _on_confirmed := Callable()
 
 func _ready() -> void:
 	super()
+	for node in _items:
+		var item := node as Button
+		item.focus_entered.connect(_update_item_sizes)
+		item.mouse_entered.connect(item.grab_focus)   # hovering selects, like the keyboard does
 	_resume.pressed.connect(close)
 	_settings_button.pressed.connect(_open_settings)
 	_main_menu.pressed.connect(_ask.bind("Return to the main menu?\nProgress since your last\ncheckpoint is lost.", _go_main_menu))
@@ -68,6 +79,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		close()
 	get_viewport().set_input_as_handled()
+
+## Sizes every entry by its distance from the focused one.
+func _update_item_sizes() -> void:
+	var selected := -1
+	for i in _items.size():
+		if (_items[i] as Button).has_focus():
+			selected = i
+	if selected < 0:
+		return
+	for i in _items.size():
+		var font_size := SELECTED_FONT if i == selected else maxi(MIN_FONT, SELECTED_FONT - FONT_STEP * (abs(i - selected) + 1))
+		(_items[i] as Button).add_theme_font_size_override("font_size", font_size)
 
 # --- Settings page ------------------------------------------------------------
 
