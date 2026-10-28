@@ -1,4 +1,4 @@
-[gd_resource type="Theme" format=3]
+[gd_resource type="Theme" format=3 uid="uid://ck45uwwk2li76"]
 
 [sub_resource type="StyleBoxEmpty" id="ItemIdle"]
 content_margin_left = 90.0

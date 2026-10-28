@@ -13,6 +13,20 @@ texture = ExtResource("1_normal")
 
 [sub_resource type="StyleBoxEmpty" id="FocusNone"]
 
+[sub_resource type="StyleBoxTexture" id="BtnHover"]
+content_margin_left = 36.0
+content_margin_top = 12.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+texture = ExtResource("2_hover")
+
+[sub_resource type="StyleBoxTexture" id="BtnPressed"]
+content_margin_left = 36.0
+content_margin_top = 12.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+texture = ExtResource("3_pressed")
+
 [sub_resource type="StyleBoxFlat" id="FocusRing"]
 draw_center = false
 border_width_left = 5
@@ -28,20 +42,6 @@ expand_margin_left = 8.0
 expand_margin_top = 8.0
 expand_margin_right = 8.0
 expand_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxTexture" id="BtnHover"]
-content_margin_left = 36.0
-content_margin_top = 12.0
-content_margin_right = 36.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_hover")
-
-[sub_resource type="StyleBoxTexture" id="BtnPressed"]
-content_margin_left = 36.0
-content_margin_top = 12.0
-content_margin_right = 36.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_pressed")
 
 [sub_resource type="StyleBoxFlat" id="PopupPanel"]
 content_margin_left = 16.0
@@ -73,6 +73,7 @@ Button/styles/hover = SubResource("BtnHover")
 Button/styles/hover_pressed = SubResource("BtnPressed")
 Button/styles/normal = SubResource("BtnNormal")
 Button/styles/pressed = SubResource("BtnPressed")
+HSlider/styles/focus = SubResource("FocusNone")
 LineEdit/colors/caret_color = Color(0, 0, 0, 1)
 LineEdit/colors/font_color = Color(0, 0, 0, 1)
 LineEdit/colors/font_selected_color = Color(1, 1, 1, 1)
@@ -108,4 +109,3 @@ PopupMenu/constants/v_separation = 12
 PopupMenu/font_sizes/font_size = 44
 PopupMenu/styles/hover = SubResource("BtnHover")
 PopupMenu/styles/panel = SubResource("PopupPanel")
-HSlider/styles/focus = SubResource("FocusNone")
