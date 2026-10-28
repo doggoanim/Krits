@@ -15,7 +15,7 @@ extends Node3D
 ## Rebuilds itself whenever the equipped shield/weapon changes
 ## (Events.stats_changed). Created by Player (add it after `visual`).
 
-@export var shield_rest := Vector3(0.0, 1.15, 0.55)   ## relative to the player's facing; +Z is behind
+@export var shield_rest := Vector3(0.0, 1.0, 0.3)   ## relative to the player's facing; +Z is behind
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
 @export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
