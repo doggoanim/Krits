@@ -61,6 +61,7 @@ func has_leap() -> bool:
 @export var shoot_interval := 0.12     ## minimum time between shots — Enemy stretches it to just outlast the player's i-frames
 @export var shoot_speed := 10.0
 @export var shoot_damage := 6.0
+@export var shoot_rate_ramp := 1.5     ## each following shot comes this many times faster than the last (1 = steady)
 @export var shoot_ball_radius := 0.28   ## size of each ball
 @export var anim_shoot: StringName = &""
 

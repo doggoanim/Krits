@@ -485,8 +485,10 @@ func _do_burst_shoot() -> void:
 		_visual.play_idle()
 	if not await _wait_aiming(data.shoot_ready_time, aim):
 		return
-	# Shots are spaced just past the player's invincibility window, so a ball
-	# that lands always finds the i-frames from the previous hit already over.
+	# The first gap is just past the player's invincibility window, so a ball
+	# that lands finds the i-frames from the previous hit already over; every
+	# following gap is shoot_rate_ramp times shorter than the one before, so
+	# the volley speeds up (later balls can arrive inside i-frames — dodge!).
 	var spacing := maxf(data.shoot_interval, Player.HIT_INVULN + 0.02)
 	for i in count:
 		if _dying or not is_instance_valid(target):
@@ -496,8 +498,10 @@ func _do_burst_shoot() -> void:
 		if _visual:
 			_visual.play_shoot()
 		_fire_slime_ball()
-		if i < count - 1 and not await _wait_aiming(spacing, aim):
-			return
+		if i < count - 1:
+			if not await _wait_aiming(spacing, aim):
+				return
+			spacing /= maxf(data.shoot_rate_ramp, 1.0)
 	aim.fade_out()
 
 ## Waits `seconds` (physics time) while keeping the aim line and facing on
