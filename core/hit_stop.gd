@@ -6,23 +6,17 @@ extends RefCounted
 ## restores it. Overlapping calls extend rather than stack.
 ##
 ## Extras:
-##   - impact frame: a quick white flash at the start of a freeze
-##     (Settings > Accessibility > "Hit-Stop Flash").
 ##   - finisher(): a longer hold that then eases back up to normal speed
 ##     (picture and sound together) — used for the hit that ends a fight.
 
 const FROZEN_SCALE := 0.03
 const AUDIO_FROZEN_SCALE := 0.01   ## ~paused; AudioServer dislikes exactly 0
-const FLASH_ALPHA := 0.55
-const FLASH_TIME := 0.12
 const FINISHER_HOLD := 0.4
 const FINISHER_FADE := 0.8
 
 static var _until_msec := 0
 static var _fade_sec := 0.0        ## ease-out length after the hold (0 = snap back)
 static var _active := false
-static var _flash: ColorRect
-static var _flash_tween: Tween
 
 static func freeze(duration: float, scale := FROZEN_SCALE) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
@@ -48,7 +42,6 @@ static func _extend(_tree: SceneTree, duration: float) -> void:
 
 static func _start(tree: SceneTree, scale: float) -> void:
 	_set_speed(scale, AUDIO_FROZEN_SCALE)
-	_show_flash(tree)
 	if _active:
 		return
 	_active = true
@@ -74,24 +67,3 @@ static func _run(tree: SceneTree, scale: float) -> void:
 	_set_speed(1.0, 1.0)
 	_fade_sec = 0.0
 	_active = false
-
-# ---------------------------------------------------------------- impact frame
-
-static func _show_flash(tree: SceneTree) -> void:
-	if not bool(Settings.get_value(&"accessibility/hitstop_flash")):
-		return
-	if _flash == null or not is_instance_valid(_flash):
-		var layer := CanvasLayer.new()
-		layer.layer = 100
-		layer.process_mode = Node.PROCESS_MODE_ALWAYS
-		_flash = ColorRect.new()
-		_flash.color = Color.WHITE
-		_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-		layer.add_child(_flash)
-		tree.root.add_child(layer)
-	if _flash_tween:
-		_flash_tween.kill()
-	_flash.modulate.a = FLASH_ALPHA
-	_flash_tween = _flash.create_tween().set_ignore_time_scale(true)
-	_flash_tween.tween_property(_flash, "modulate:a", 0.0, FLASH_TIME)

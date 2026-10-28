@@ -395,27 +395,6 @@ ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"accessibility/screen_shake"
 
-[node name="HitstopFlashRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
-layout_mode = 2
-theme_override_constants/separation = 40
-
-[node name="Label" type="Label" parent="Content/Pages/AccessibilityPage/HitstopFlashRow"]
-custom_minimum_size = Vector2(450, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 52
-text = "Hit-Stop Flash"
-
-[node name="HitstopFlash" type="TextureButton" parent="Content/Pages/AccessibilityPage/HitstopFlashRow"]
-custom_minimum_size = Vector2(273, 84)
-layout_mode = 2
-size_flags_vertical = 4
-toggle_mode = true
-texture_normal = ExtResource("3_off")
-texture_pressed = ExtResource("2_on")
-ignore_texture_size = true
-stretch_mode = 5
-metadata/setting = &"accessibility/hitstop_flash"
-
 [node name="HitstopRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
