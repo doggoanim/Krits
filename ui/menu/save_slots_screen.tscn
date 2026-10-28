@@ -147,28 +147,28 @@ anchor_bottom = 0.5
 offset_left = -750.0
 offset_top = 395.0
 offset_right = 750.0
-offset_bottom = 465.0
+offset_bottom = 445.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 120
+theme_override_constants/separation = 360
 alignment = 1
 
 [node name="Delete1" type="Button" parent="DeleteRow"]
-custom_minimum_size = Vector2(420, 70)
+custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 26
 text = "Delete"
 
 [node name="Delete2" type="Button" parent="DeleteRow"]
-custom_minimum_size = Vector2(420, 70)
+custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 26
 text = "Delete"
 
 [node name="Delete3" type="Button" parent="DeleteRow"]
-custom_minimum_size = Vector2(420, 70)
+custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 26
 text = "Delete"
 
 [node name="Confirm" type="ColorRect" parent="."]
