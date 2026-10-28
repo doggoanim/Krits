@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://d2fy1vs3igdl3"
-path="res://.godot/imported/krits.glb-2830d53861a4f31bf8a96c0aadcda2c3.scn"
+path="res://.godot/imported/Krits.glb-20f373a9e83cd608ad8b6a03cd0dce5d.scn"
 
 [deps]
 
-source_file="res://assets/player/krits.glb"
-dest_files=["res://.godot/imported/krits.glb-2830d53861a4f31bf8a96c0aadcda2c3.scn"]
+source_file="res://assets/player/Krits.glb"
+dest_files=["res://.godot/imported/Krits.glb-20f373a9e83cd608ad8b6a03cd0dce5d.scn"]
 
 [params]
 

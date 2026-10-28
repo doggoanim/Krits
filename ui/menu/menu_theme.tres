@@ -1,8 +1,8 @@
-[gd_resource type="Theme" format=3]
+[gd_resource type="Theme" format=3 uid="uid://cg60h0v1l1nwd"]
 
-[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="1_normal"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="2_hover"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="3_pressed"]
+[ext_resource type="Texture2D" uid="uid://c120af7sqe3ml" path="res://assets/ui/button_1.png" id="1_normal"]
+[ext_resource type="Texture2D" uid="uid://ctbnugoakkam8" path="res://assets/ui/button_2.png" id="2_hover"]
+[ext_resource type="Texture2D" uid="uid://dxnfu8qr88oqk" path="res://assets/ui/button_3.png" id="3_pressed"]
 
 [sub_resource type="StyleBoxTexture" id="BtnNormal"]
 content_margin_left = 36.0
@@ -10,20 +10,6 @@ content_margin_top = 12.0
 content_margin_right = 36.0
 content_margin_bottom = 12.0
 texture = ExtResource("1_normal")
-
-[sub_resource type="StyleBoxTexture" id="BtnHover"]
-content_margin_left = 36.0
-content_margin_top = 12.0
-content_margin_right = 36.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_hover")
-
-[sub_resource type="StyleBoxTexture" id="BtnPressed"]
-content_margin_left = 36.0
-content_margin_top = 12.0
-content_margin_right = 36.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_pressed")
 
 [sub_resource type="StyleBoxFlat" id="FocusRing"]
 draw_center = false
@@ -40,6 +26,20 @@ expand_margin_left = 8.0
 expand_margin_top = 8.0
 expand_margin_right = 8.0
 expand_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="BtnHover"]
+content_margin_left = 36.0
+content_margin_top = 12.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+texture = ExtResource("2_hover")
+
+[sub_resource type="StyleBoxTexture" id="BtnPressed"]
+content_margin_left = 36.0
+content_margin_top = 12.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+texture = ExtResource("3_pressed")
 
 [resource]
 Button/colors/font_color = Color(0, 0, 0, 1)

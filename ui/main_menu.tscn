@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://e5h304llafks"]
 
-[ext_resource type="Script" path="res://ui/main_menu.gd" id="1"]
-[ext_resource type="Theme" path="res://ui/menu/menu_theme.tres" id="2"]
+[ext_resource type="Script" uid="uid://bhj4ebgilgns8" path="res://ui/main_menu.gd" id="1"]
+[ext_resource type="Theme" uid="uid://cg60h0v1l1nwd" path="res://ui/menu/menu_theme.tres" id="2"]
 [ext_resource type="PackedScene" path="res://ui/menu/menu_stage.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://ui/menu/splash_screen.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://ui/menu/title_screen.tscn" id="5"]
@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" path="res://ui/menu/name_prompt_screen.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://ui/menu/settings_screen.tscn" id="8"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=458867612]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,25 +19,30 @@ grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
 
-[node name="Stage" parent="." instance=ExtResource("3")]
+[node name="Stage" parent="." unique_id=1791167124 instance=ExtResource("3")]
 unique_name_in_owner = true
 
-[node name="Title" parent="." instance=ExtResource("5")]
+[node name="Title" parent="." unique_id=222067993 instance=ExtResource("5")]
 unique_name_in_owner = true
+layout_mode = 1
 
-[node name="Slots" parent="." instance=ExtResource("6")]
+[node name="Slots" parent="." unique_id=166766298 instance=ExtResource("6")]
 unique_name_in_owner = true
+layout_mode = 1
 
-[node name="NamePrompt" parent="." instance=ExtResource("7")]
+[node name="NamePrompt" parent="." unique_id=827889364 instance=ExtResource("7")]
 unique_name_in_owner = true
+layout_mode = 1
 
-[node name="Settings" parent="." instance=ExtResource("8")]
+[node name="Settings" parent="." unique_id=95502386 instance=ExtResource("8")]
 unique_name_in_owner = true
+layout_mode = 1
 
-[node name="Splash" parent="." instance=ExtResource("4")]
+[node name="Splash" parent="." unique_id=377184637 instance=ExtResource("4")]
 unique_name_in_owner = true
+layout_mode = 1
 
-[node name="FadeToBlack" type="ColorRect" parent="."]
+[node name="FadeToBlack" type="ColorRect" parent="." unique_id=1914625249]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
