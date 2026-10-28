@@ -50,6 +50,12 @@ func exit() -> void:
 # --- Input ----------------------------------------------------------------
 
 func _input(event: InputEvent) -> void:
+	# The Tab key doesn't move focus between settings controls (Tab is also a
+	# bindable key here). Swallowed unless we're capturing a new binding below.
+	if _rebinding == &"" and is_visible_in_tree() \
+			and (event.is_action_pressed(&"ui_focus_next") or event.is_action_pressed(&"ui_focus_prev")):
+		get_viewport().set_input_as_handled()
+		return
 	if _rebinding == &"" or not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	get_viewport().set_input_as_handled()
