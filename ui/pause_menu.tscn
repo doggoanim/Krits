@@ -157,6 +157,7 @@ circular = false
 outline_width_px = 7.0
 turn = -0.32
 only_when_visible = true
+mirror_player_face = false
 clickable = true
 squish_sound = ExtResource("8")
 

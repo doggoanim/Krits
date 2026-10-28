@@ -77,6 +77,9 @@ func _ready() -> void:
 	_heading_left = _heading_margin.get_theme_constant("margin_left")
 	_menu_left = _menu_margin.get_theme_constant("margin_left")
 	for node in _items:
+		node.set_meta(FocusPop.SKIP_META, true)   # the list has its own selected look (white bar)
+	FocusPop.attach_all(self)   # everything else: Settings page, confirmation buttons
+	for node in _items:
 		var item := node as Button
 		item.focus_entered.connect(_update_item_sizes)
 		item.mouse_entered.connect(item.grab_focus)   # hovering selects, like the keyboard does

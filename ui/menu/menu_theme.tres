@@ -11,6 +11,8 @@ content_margin_right = 36.0
 content_margin_bottom = 12.0
 texture = ExtResource("1_normal")
 
+[sub_resource type="StyleBoxEmpty" id="FocusNone"]
+
 [sub_resource type="StyleBoxFlat" id="FocusRing"]
 draw_center = false
 border_width_left = 5
@@ -66,7 +68,7 @@ Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
 Button/colors/font_pressed_color = Color(0, 0, 0, 1)
 Button/font_sizes/font_size = 56
 Button/styles/disabled = SubResource("BtnNormal")
-Button/styles/focus = SubResource("FocusRing")
+Button/styles/focus = SubResource("FocusNone")
 Button/styles/hover = SubResource("BtnHover")
 Button/styles/hover_pressed = SubResource("BtnPressed")
 Button/styles/normal = SubResource("BtnNormal")
@@ -94,7 +96,7 @@ OptionButton/colors/icon_normal_color = Color(0, 0, 0, 1)
 OptionButton/colors/icon_pressed_color = Color(0, 0, 0, 1)
 OptionButton/font_sizes/font_size = 56
 OptionButton/styles/disabled = SubResource("BtnNormal")
-OptionButton/styles/focus = SubResource("FocusRing")
+OptionButton/styles/focus = SubResource("FocusNone")
 OptionButton/styles/hover = SubResource("BtnHover")
 OptionButton/styles/hover_pressed = SubResource("BtnPressed")
 OptionButton/styles/normal = SubResource("BtnNormal")
@@ -106,3 +108,4 @@ PopupMenu/constants/v_separation = 12
 PopupMenu/font_sizes/font_size = 44
 PopupMenu/styles/hover = SubResource("BtnHover")
 PopupMenu/styles/panel = SubResource("PopupPanel")
+HSlider/styles/focus = SubResource("FocusNone")

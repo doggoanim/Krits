@@ -55,6 +55,7 @@ func _ready() -> void:
 		screen.visible = false
 		screen.modulate.a = 0.0
 		screen.navigate.connect(_on_navigate)
+	FocusPop.attach_all(self)   # the menu's focus look (see FocusPop) instead of Godot's default ring
 	_fade.color.a = 0.0
 	if return_to_title:
 		return_to_title = false

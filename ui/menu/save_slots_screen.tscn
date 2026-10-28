@@ -99,6 +99,7 @@ theme_override_styles/normal = SubResource("SlotNormal")
 theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 1"
+metadata/focus_pop_grow = 1.0
 
 [node name="Slot2" type="Button" parent="Slots"]
 custom_minimum_size = Vector2(420, 760)
@@ -108,6 +109,7 @@ theme_override_styles/normal = SubResource("SlotNormal")
 theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 2"
+metadata/focus_pop_grow = 1.0
 
 [node name="Slot3" type="Button" parent="Slots"]
 custom_minimum_size = Vector2(420, 760)
@@ -117,6 +119,7 @@ theme_override_styles/normal = SubResource("SlotNormal")
 theme_override_styles/hover = SubResource("SlotHover")
 theme_override_styles/pressed = SubResource("SlotPressed")
 text = "Slot 3"
+metadata/focus_pop_grow = 1.0
 
 [node name="ReturnButton" type="Button" parent="."]
 unique_name_in_owner = true
@@ -158,18 +161,21 @@ custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Delete"
+metadata/focus_pop_grow = 1.0
 
 [node name="Delete2" type="Button" parent="DeleteRow"]
 custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Delete"
+metadata/focus_pop_grow = 1.0
 
 [node name="Delete3" type="Button" parent="DeleteRow"]
 custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "Delete"
+metadata/focus_pop_grow = 1.0
 
 [node name="Confirm" type="ColorRect" parent="."]
 unique_name_in_owner = true

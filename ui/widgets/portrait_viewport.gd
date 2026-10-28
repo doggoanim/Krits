@@ -30,6 +30,7 @@ const OUTLINE_COLOR := Color.BLACK
 @export var outline_width_px := 2.0    ## same screen-space-dilation idea as OutlineSystem, sized for this render, not the main viewport's
 @export var turn := 0.32               ## extra yaw (rad) so it isn't a flat mirror-facing shot: positive turns the character left, negative right
 @export var only_when_visible := false ## don't render while hidden (for a portrait that's only sometimes on screen)
+@export var mirror_player_face := true ## copy the live player's expression each frame (HUD). Off = run its own blink timer, for a portrait shown while the game is paused (the player's own face is frozen then)
 
 @export_group("Click squish")
 @export var clickable := false
@@ -166,8 +167,45 @@ func _build_scene() -> void:
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
 
-func _process(_delta: float) -> void:
-	_sync_face()
+func _process(delta: float) -> void:
+	if mirror_player_face:
+		_sync_face()
+	else:
+		_update_own_face(delta)
+
+# --- Own face (when not mirroring the player) -------------------------------------
+# Same behaviour as PlayerVisual's: random idle blinks, and a hurt face that
+# wins over blinking while it lasts (squish() triggers it).
+
+var _blink_cd := randf_range(PlayerVisual.BLINK_INTERVAL_MIN, PlayerVisual.BLINK_INTERVAL_MAX)
+var _blink_hold := 0.0
+var _hurt_hold := 0.0
+
+func _update_own_face(delta: float) -> void:
+	if _hurt_hold > 0.0:
+		_hurt_hold -= delta
+		_apply_expression(&"hurt")
+		if _hurt_hold <= 0.0:
+			_blink_cd = randf_range(PlayerVisual.BLINK_INTERVAL_MIN, PlayerVisual.BLINK_INTERVAL_MAX)
+		return
+	if _blink_hold > 0.0:
+		_blink_hold -= delta
+		if _blink_hold <= 0.0:
+			_blink_cd = randf_range(PlayerVisual.BLINK_INTERVAL_MIN, PlayerVisual.BLINK_INTERVAL_MAX)
+	else:
+		_blink_cd -= delta
+		if _blink_cd <= 0.0:
+			_blink_hold = PlayerVisual.BLINK_DURATION
+	_apply_expression(&"blink" if _blink_hold > 0.0 else PlayerVisual.DEFAULT_EXPRESSION)
+
+func _apply_expression(expr: StringName) -> void:
+	if _face_material == null or expr == _synced_expression:
+		return
+	var tex: Texture2D = PlayerVisual.FACE_EXPRESSIONS.get(expr)
+	if tex == null:
+		return
+	_synced_expression = expr
+	ModelUtil.set_albedo_texture(_face_material, tex)
 
 # --- Click squish ---------------------------------------------------------------
 
@@ -198,6 +236,8 @@ func squish() -> void:
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_squish_tween.tween_property(self, "scale", Vector2.ONE, 0.12) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_hurt_hold = PlayerVisual.HURT_EXPRESSION_DURATION   # hurt face for the squeeze (own-face mode)
+	_blink_hold = 0.0
 	_play_squeak()
 
 func _play_squeak() -> void:
@@ -237,11 +277,4 @@ func _sync_face() -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	if player == null or player.visual == null:
 		return
-	var expr := player.visual.expression()
-	if expr == _synced_expression:
-		return
-	var tex: Texture2D = PlayerVisual.FACE_EXPRESSIONS.get(expr)
-	if tex == null:
-		return
-	_synced_expression = expr
-	ModelUtil.set_albedo_texture(_face_material, tex)
+	_apply_expression(player.visual.expression())
