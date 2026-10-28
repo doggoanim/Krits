@@ -61,10 +61,18 @@ func _refresh() -> void:
 
 	_refresh_delete_buttons()
 
-## A Delete button only makes sense under a slot that has a save.
+## A Delete button only makes sense under a slot that has a save. Empty
+## slots' buttons are made invisible and inert rather than hidden: hiding one
+## would remove it from the row's layout and slide the others out from under
+## their slots.
 func _refresh_delete_buttons() -> void:
 	for i in _delete_buttons.size():
-		_delete_buttons[i].visible = Game.has_save(i + 1)
+		var used := Game.has_save(i + 1)
+		var button := _delete_buttons[i]
+		button.modulate.a = 1.0 if used else 0.0
+		button.disabled = not used
+		button.focus_mode = Control.FOCUS_ALL if used else Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP if used else Control.MOUSE_FILTER_IGNORE
 
 func _ask_delete(slot: int) -> void:
 	_pending_delete = slot
