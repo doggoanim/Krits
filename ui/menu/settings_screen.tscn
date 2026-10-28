@@ -395,6 +395,50 @@ ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"accessibility/screen_shake"
 
+[node name="TextSpeedRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AccessibilityPage/TextSpeedRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Text Speed"
+
+[node name="TextSpeed" type="HSlider" parent="Content/Pages/AccessibilityPage/TextSpeedRow"]
+custom_minimum_size = Vector2(600, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.5
+max_value = 3.0
+step = 0.5
+value = 1.0
+tick_count = 6
+ticks_on_borders = true
+metadata/setting = &"accessibility/text_speed"
+
+[node name="AutoAdvanceRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AccessibilityPage/AutoAdvanceRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Auto-Advance Dialogue"
+
+[node name="AutoAdvance" type="TextureButton" parent="Content/Pages/AccessibilityPage/AutoAdvanceRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"accessibility/dialogue_auto"
+
 [node name="ResetButton" type="Button" parent="."]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(240, 70)

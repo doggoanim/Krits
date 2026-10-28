@@ -15,6 +15,7 @@ const BINDINGS := {
 	&"roll_dive": {"label": "Roll / Dive", "key": KEY_SHIFT},
 	&"crouch_pound": {"label": "Crouch / Pound", "key": KEY_CTRL},
 	&"interact": {"label": "Interact", "key": KEY_E},
+	&"dialogue_auto": {"label": "Auto-Advance Dialogue", "key": KEY_R},
 	&"menu_stats": {"label": "Stats Menu", "key": KEY_TAB},
 	&"menu_travel": {"label": "Travel Menu", "key": KEY_M},
 }

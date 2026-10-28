@@ -1,0 +1,171 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/dialogue_box.gd" id="1"]
+[ext_resource type="Script" path="res://ui/dialogue/typewriter.gd" id="2"]
+[ext_resource type="Theme" path="res://ui/menu/menu_theme.tres" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="6"]
+
+[sub_resource type="StyleBoxTexture" id="Plate1"]
+content_margin_left = 70.0
+content_margin_top = 46.0
+content_margin_right = 70.0
+content_margin_bottom = 46.0
+texture = ExtResource("4")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate2"]
+content_margin_left = 70.0
+content_margin_top = 46.0
+content_margin_right = 70.0
+content_margin_bottom = 46.0
+texture = ExtResource("5")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate3"]
+content_margin_left = 70.0
+content_margin_top = 46.0
+content_margin_right = 70.0
+content_margin_bottom = 46.0
+texture = ExtResource("6")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="TagPlate"]
+content_margin_left = 44.0
+content_margin_top = 14.0
+content_margin_right = 44.0
+content_margin_bottom = 14.0
+texture = ExtResource("6")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[node name="DialogueBox" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+visible = false
+script = ExtResource("1")
+plate_styles = Array[StyleBox]([SubResource("Plate1"), SubResource("Plate2"), SubResource("Plate3")])
+
+[node name="Typewriter" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("3")
+
+[node name="Plate" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 200.0
+offset_top = -400.0
+offset_right = -200.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+rotation = -0.014
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Plate1")
+
+[node name="Row" type="HBoxContainer" parent="Root/Plate"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 30
+
+[node name="Portrait" type="TextureRect" parent="Root/Plate/Row"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(220, 220)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Column" type="VBoxContainer" parent="Root/Plate/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Text" type="RichTextLabel" parent="Root/Plate/Row/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 46
+theme_override_font_sizes/bold_font_size = 46
+theme_override_font_sizes/italics_font_size = 46
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="Root/Plate/Row/Column"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.55)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 2
+
+[node name="NameTag" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 260.0
+offset_top = -480.0
+offset_right = 260.0
+offset_bottom = -390.0
+grow_vertical = 0
+rotation = 0.026
+mouse_filter = 2
+theme_override_styles/panel = SubResource("TagPlate")
+
+[node name="Speaker" type="Label" parent="Root/NameTag"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 46
+text = "Name"
+
+[node name="Choices" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -860.0
+offset_top = -440.0
+offset_right = -200.0
+offset_bottom = -420.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2
+theme_override_constants/separation = 14

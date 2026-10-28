@@ -32,6 +32,20 @@ var _shake := 0.0
 var _sens_scale := 1.0     ## cached from Settings (controls/camera_sens)
 var _pitch_dir := 1.0      ## -1 when Settings has invert-Y on
 
+# Conversation focus (see DialogueStage): the camera eases toward framing the
+# speaker and eases back to the exact view it left.
+const FOCUS_TIME := 0.6
+const FOCUS_YAW_OFFSET := 0.32      ## swings the view off-axis so the speaker sits to one side
+const FOCUS_PITCH := -0.12
+const FOCUS_PULL_IN := 1.0          ## metres the camera moves closer while focused
+var _focus_on := false
+var _focus_weight := 0.0            ## 0 = normal view, 1 = fully framing the speaker
+var _focus_node: Node3D
+var _focus_point := Vector3.ZERO
+var _saved_yaw := 0.0
+var _saved_pitch := 0.0
+var _focus_yaw := 0.0
+
 func _ready() -> void:
 	top_level = true
 	_arm = SpringArm3D.new()
@@ -71,7 +85,35 @@ func _read_settings() -> void:
 func _on_setting_changed(_key: StringName) -> void:
 	_read_settings()
 
+## Starts framing `node` (looking at `point`, in world space, for the aim).
+func begin_focus(node: Node3D, point: Vector3) -> void:
+	if target == null:
+		return
+	_focus_node = node
+	_focus_point = point
+	_saved_yaw = yaw
+	_saved_pitch = pitch
+	var d := point - target.global_position
+	_focus_yaw = atan2(-d.x, -d.z) + FOCUS_YAW_OFFSET
+	# Take the shortest way round from the current yaw.
+	_focus_yaw = _saved_yaw + angle_difference(_saved_yaw, _focus_yaw)
+	_focus_on = true
+
+func end_focus() -> void:
+	_focus_on = false
+
+func _update_focus(delta: float) -> float:
+	var goal := 1.0 if _focus_on else 0.0
+	_focus_weight = move_toward(_focus_weight, goal, delta / FOCUS_TIME)
+	var k := smoothstep(0.0, 1.0, _focus_weight)
+	if _focus_weight > 0.0 or _focus_on:
+		yaw = lerpf(_saved_yaw, _focus_yaw, k)
+		pitch = lerpf(_saved_pitch, FOCUS_PITCH, k)
+	return k
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _focus_on or _focus_weight > 0.0:
+		return   # the conversation owns the camera until it has eased back
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var sens := mouse_sensitivity * _sens_scale
 		yaw -= event.relative.x * sens
@@ -90,10 +132,14 @@ func shake(amount: float) -> void:
 	_shake = maxf(_shake, amount)
 
 func _process(delta: float) -> void:
+	var focus := _update_focus(delta)
 	if target:
-		global_position = global_position.lerp(target.global_position + Vector3.UP * 1.4, 1.0 - exp(-follow_speed * delta))
+		var anchor := target.global_position + Vector3.UP * 1.4
+		if focus > 0.0 and is_instance_valid(_focus_node):
+			anchor = anchor.lerp((target.global_position + _focus_point) * 0.5, focus * 0.6)
+		global_position = global_position.lerp(anchor, 1.0 - exp(-follow_speed * delta))
 	rotation = Vector3(pitch, yaw, 0.0)
-	_arm.spring_length = lerpf(_arm.spring_length, base_distance + extra_distance, 1.0 - exp(-4.0 * delta))
+	_arm.spring_length = lerpf(_arm.spring_length, base_distance + extra_distance - FOCUS_PULL_IN * focus, 1.0 - exp(-4.0 * delta))
 	if _shake > 0.0:
 		_shake = maxf(0.0, _shake - delta)
 		_cam.h_offset = randf_range(-1.0, 1.0) * _shake * 0.4

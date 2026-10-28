@@ -40,6 +40,8 @@ const DEFAULTS := {
 	&"controls/invert_y": false,
 	&"controls/bindings": {},
 	&"accessibility/screen_shake": true,
+	&"accessibility/text_speed": 1.0,         ## multiplier on dialogue typewriter speed
+	&"accessibility/dialogue_auto": false,     ## auto-advance finished dialogue lines
 }
 
 const _VOLUME_BUSES := {

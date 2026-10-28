@@ -9,6 +9,12 @@ extends Interactable
 ## just supplies what "usable" and "interact" mean for a conversation.
 
 @export var dialogue: DialogueNode
+@export var head_height := 1.6          ## where the camera looks while talking
+@export var face_player := true         ## turn toward the player during a conversation
+@export var facing_offset := 0.0        ## radians; PI if the model's front is +Z instead of -Z
+
+var _rest_yaw := 0.0
+var _turn_tween: Tween
 
 ## Grounded (not mid-air/rolling/diving/etc.), alive, and nothing else
 ## already has a conversation open — same spirit as the checks other
@@ -20,5 +26,26 @@ func _can_interact() -> bool:
 		and DialogueBox.instance != null and not DialogueBox.instance.is_active())
 
 func _interact() -> void:
-	player.face(global_position - player.global_position)
-	DialogueBox.instance.start(dialogue)
+	DialogueBox.instance.start(dialogue, self)
+
+# --- DialogueStage speaker interface ------------------------------------
+
+func get_focus_point() -> Vector3:
+	return global_position + Vector3.UP * head_height
+
+func face_toward(world_pos: Vector3) -> void:
+	if not face_player:
+		return
+	var d := world_pos - global_position
+	_rest_yaw = rotation.y
+	_turn_to(atan2(-d.x, -d.z) + facing_offset)
+
+func restore_facing() -> void:
+	if face_player:
+		_turn_to(_rest_yaw)
+
+func _turn_to(yaw: float) -> void:
+	if _turn_tween:
+		_turn_tween.kill()
+	_turn_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_turn_tween.tween_property(self, "rotation:y", rotation.y + angle_difference(rotation.y, yaw), 0.4)

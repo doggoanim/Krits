@@ -40,7 +40,7 @@ func _ready() -> void:
 	# The game's one shared dialogue box (see ui/dialogue_box.gd) — normally
 	# built by UiRoot inside main.tscn, so the menu needs its own for the
 	# name prompt's line. Same class, same look.
-	add_child(DialogueBox.new())
+	add_child(DialogueBox.create())
 	Music.play(title_music)
 
 	_screens = {

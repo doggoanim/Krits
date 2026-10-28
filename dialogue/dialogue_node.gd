@@ -22,5 +22,41 @@ extends Resource
 ## needing a separate script.
 @export var sets_flag: StringName = &""
 
+## Seconds to wait before auto-advancing this line when auto-advance is on.
+## Negative = work it out from the text length.
+@export var auto_delay: float = -1.0
+
 @export var next: DialogueNode            ## used only when choices is empty
 @export var choices: Array[DialogueChoice] = []
+
+## ---- Authoring helpers (for code-made lines; .tres files work as before) ----
+
+## A one-off line, e.g. DialogueBox.instance.start(DialogueNode.say("Mira", "Hi!")).
+static func say(speaker_name: String, line: String, then: DialogueNode = null) -> DialogueNode:
+	var n := DialogueNode.new()
+	n.speaker = speaker_name
+	n.text = line
+	n.next = then
+	return n
+
+## Builds a straight chain of lines from [[speaker, text], ...] and returns
+## the first one. Quick way to script a short exchange in code.
+static func chain(lines: Array) -> DialogueNode:
+	var head: DialogueNode = null
+	for i in range(lines.size() - 1, -1, -1):
+		head = say(lines[i][0], lines[i][1], head)
+	return head
+
+## True if this line offers at least one currently-visible choice.
+func visible_choices() -> Array[DialogueChoice]:
+	var out: Array[DialogueChoice] = []
+	for c in choices:
+		if c != null and c.is_visible():
+			out.append(c)
+	return out
+
+## Seconds auto-advance should wait once this line has finished typing.
+func resolved_auto_delay() -> float:
+	if auto_delay >= 0.0:
+		return auto_delay
+	return clampf(0.9 + text.length() * 0.035, 1.2, 6.0)

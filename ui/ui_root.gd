@@ -22,5 +22,5 @@ func _ready() -> void:
 	add_child(travel_menu)
 	add_child(SHOP_MENU_SCENE.instantiate())   # no toggle_action — opened by a ShopKeeper, see ShopMenu
 	add_child(PAUSE_MENU_SCENE.instantiate())   # Esc — see PauseMenu
-	add_child(DialogueBox.new())   # code-built, no scene file — see DialogueBox's own doc comment
+	add_child(DialogueBox.create())   # the one shared conversation UI — see DialogueBox
 	add_child(LOADING_SCREEN_SCENE.instantiate())   # Door's level-swap cover — see LoadingScreen

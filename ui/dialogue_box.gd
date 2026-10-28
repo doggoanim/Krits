@@ -1,79 +1,158 @@
 class_name DialogueBox
 extends CanvasLayer
-## Drives one conversation at a time: shows a DialogueNode's speaker/text/
-## portrait bottom-docked on screen, freezes the player for its duration
-## (Player.enter_cinematic() — the same mechanism encounter transitions use),
-## and walks the node graph as the player advances or picks a choice.
+## The game's one conversation UI. Layout lives in ui/dialogue_box.tscn
+## (hand-drawn plates, editable in the editor); this script only runs the
+## conversation:
 ##
-## Built here in code rather than as a .tscn — same "no separate scene file"
-## convention as DebugTools' own debug HUD and WorldEnemy's placeholder
-## visuals — so there's no hand-laid-out layout to keep in sync with this
-## script. Instantiated once by UiRoot, same as Hud/StatsMenu/TravelMenu.
+##   - walks a DialogueNode graph (see dialogue/dialogue_node.gd),
+##   - types each line out with Typewriter (BBCode + [pause=s] tags),
+##   - lets the player finish a line (interact), skip (hold interact) or
+##     auto-advance (toggle with the dialogue_auto key / Settings),
+##   - hands the in-world side (freeze player, camera focus, speaker turn)
+##     to DialogueStage.
+##
+## Create it with DialogueBox.create() — never DialogueBox.new(), which
+## would give an empty layer with no UI.
+##
+## Public API (unchanged for existing callers):
+##   DialogueBox.instance            the live box (null before one exists)
+##   start(node, speaker = null)     begin a conversation; `speaker` is the
+##                                   Node3D to frame (optional)
+##   is_active()                     true while a conversation is open
+
+const SCENE_PATH := "res://ui/dialogue_box.tscn"
+const SKIP_HOLD_TIME := 0.45     ## seconds interact must be held before it skips
+const SKIP_TICK := 0.12          ## seconds between lines while skipping
+const OPEN_TIME := 0.28
+const CLOSE_TIME := 0.18
 
 static var instance: DialogueBox
 
-var _player: Player
-var _current: DialogueNode
+@export var plate_styles: Array[StyleBox] = []   ## one is picked at random per line
 
-var _panel: PanelContainer
-var _speaker_label: Label
-var _text_label: RichTextLabel
-var _portrait_rect: TextureRect
-var _choice_list: VBoxContainer
-var _continue_hint: Label
+@onready var _root: Control = %Root
+@onready var _plate: PanelContainer = %Plate
+@onready var _name_tag: PanelContainer = %NameTag
+@onready var _speaker_label: Label = %Speaker
+@onready var _portrait: TextureRect = %Portrait
+@onready var _text: RichTextLabel = %Text
+@onready var _hint: Label = %Hint
+@onready var _choices: VBoxContainer = %Choices
+@onready var _typewriter: Typewriter = %Typewriter
+
+var _open := false
+var _current: DialogueNode
+var _stage: DialogueStage
+var _line_done := false
+var _opened_frame := -1
+var _auto_timer := -1.0
+var _holding := false
+var _hold_time := 0.0
+var _skip_tick := 0.0
+var _tween: Tween
+
+static func create() -> DialogueBox:
+	return (load(SCENE_PATH) as PackedScene).instantiate() as DialogueBox
 
 func _ready() -> void:
 	instance = self
-	layer = 20   # above Hud/menus — see UiRoot if this ever needs reordering
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	_build_ui()
 	visible = false
+	_typewriter.finished.connect(_on_line_finished)
+	for c in [_plate, _name_tag]:
+		c.resized.connect(_center_pivot.bind(c))
+		_center_pivot(c)
+	Settings.changed.connect(_on_setting_changed)
+
+func _exit_tree() -> void:
+	if instance == self:
+		instance = null
 
 func is_active() -> bool:
-	return visible
+	return _open
 
-## `node` is the conversation's first line. No-op if a conversation is
-## already running — NPC._can_talk() already guards against this, but
-## double-starting here would orphan whatever conversation was in progress.
-func start(node: DialogueNode) -> void:
-	if visible or node == null:
+## `node` is the conversation's first line; `speaker` (optional) is the 3D
+## actor to frame and turn toward the player. No-op if one is already open.
+func start(node: DialogueNode, speaker: Node3D = null) -> void:
+	if _open or node == null:
 		return
-	_player = get_tree().get_first_node_in_group(&"player") as Player
-	if _player:
-		_player.enter_cinematic()
+	_open = true
+	_opened_frame = Engine.get_process_frames()
+	_holding = false
+	_stage = DialogueStage.new()
+	_stage.begin(speaker, get_tree())
 	visible = true
+	_animate_open()
 	Events.dialogue_started.emit()
 	_show_node(node)
 
+# --- Input ------------------------------------------------------------------
+
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
+	# The press that opened the conversation must not also advance it.
+	if not _open or Engine.get_process_frames() == _opened_frame:
 		return
 	if event.is_action_pressed(&"ui_cancel_menu"):
-		# Bail out early, same "Esc always gets you out" convention MenuBase
-		# uses — regardless of whether a choice is currently showing.
 		_end()
+	elif event.is_action_pressed(&"dialogue_auto"):
+		Settings.set_value(&"accessibility/dialogue_auto", not _auto_enabled())
+	elif event.is_action_pressed(&"interact"):
+		_holding = true
+		_hold_time = 0.0
+		_skip_tick = 0.0
+		_press_interact()
+	elif event.is_action_released(&"interact"):
+		_holding = false
+	else:
 		return
-	var choices := _choice_list.get_children()
-	if choices.is_empty():
-		if event.is_action_pressed(&"interact"):
-			_show_node(_current.next if _current else null)
-		return
-	# W/S step through choices same as the arrow keys already do via Button's
-	# own built-in ui_up/ui_down focus handling — these aren't ui_up/ui_down
-	# themselves, so they need to be wired by hand here instead.
-	if event.is_action_pressed(&"move_forward"):
-		_move_choice_focus(choices, -1)
-	elif event.is_action_pressed(&"move_back"):
-		_move_choice_focus(choices, 1)
+	get_viewport().set_input_as_handled()
 
-## Steps the focused choice button by `step` (wrapping), same direction
-## sense as the arrow keys: move_forward (W) goes up the list, move_back (S)
-## goes down it.
-func _move_choice_focus(choices: Array, step: int) -> void:
-	var focused := get_viewport().gui_get_focus_owner()
-	var idx: int = choices.find(focused) if focused else -1
-	idx = 0 if idx < 0 else (idx + step + choices.size()) % choices.size()
-	choices[idx].grab_focus()
+func _press_interact() -> void:
+	if _typewriter.is_typing():
+		_typewriter.finish()
+	elif _line_done:
+		var focused := get_viewport().gui_get_focus_owner()
+		if _choices.get_child_count() > 0:
+			if focused is Button and _choices.is_ancestor_of(focused):
+				focused.pressed.emit()
+		else:
+			_advance()
+
+func _process(delta: float) -> void:
+	if not _open:
+		return
+	if _holding:
+		_hold_time += delta
+		if _hold_time >= SKIP_HOLD_TIME:
+			_skip_tick -= delta
+			if _skip_tick <= 0.0:
+				_skip_tick = SKIP_TICK
+				if _typewriter.is_typing():
+					_typewriter.finish()
+				elif _line_done and _choices.get_child_count() == 0:
+					_advance()
+	if _auto_timer > 0.0:
+		_auto_timer -= delta
+		if _auto_timer <= 0.0:
+			_advance()
+
+func _skipping() -> bool:
+	return _holding and _hold_time >= SKIP_HOLD_TIME
+
+func _auto_enabled() -> bool:
+	return Settings.get_value(&"accessibility/dialogue_auto")
+
+func _on_setting_changed(key: StringName) -> void:
+	if key == &"accessibility/dialogue_auto" or key == &"controls/bindings":
+		_refresh_hint()
+		if _open and _line_done and _auto_enabled() and _current and _current.visible_choices().is_empty():
+			_auto_timer = _current.resolved_auto_delay()
+		elif not _auto_enabled():
+			_auto_timer = -1.0
+
+# --- Conversation flow ------------------------------------------------------
+
+func _advance() -> void:
+	_show_node(_current.next if _current else null)
 
 func _show_node(node: DialogueNode) -> void:
 	_current = node
@@ -82,37 +161,55 @@ func _show_node(node: DialogueNode) -> void:
 		return
 	if node.sets_flag != &"":
 		Game.set_flag(node.sets_flag)
+	_line_done = false
+	_auto_timer = -1.0
+	_clear_choices()
+	_hint.visible = false
 	_speaker_label.text = node.speaker
-	_speaker_label.visible = node.speaker != ""
-	_text_label.text = node.text
-	_portrait_rect.texture = node.portrait
-	_portrait_rect.visible = node.portrait != null
+	_name_tag.visible = node.speaker != ""
+	_portrait.texture = node.portrait
+	_portrait.visible = node.portrait != null
+	if not plate_styles.is_empty():
+		_plate.add_theme_stylebox_override(&"panel", plate_styles.pick_random())
+	_pop(_plate)
+	if _name_tag.visible:
+		_pop(_name_tag)
+	_typewriter.speed = Settings.get_value(&"accessibility/text_speed")
+	_typewriter.play(_text, node.text)
+	if _skipping():
+		_typewriter.finish()
 
-	for c in _choice_list.get_children():
-		c.queue_free()
-	var shown: Array[DialogueChoice] = []
-	for choice in node.choices:
-		if choice.is_visible():
-			shown.append(choice)
-	_choice_list.visible = not shown.is_empty()
-	_continue_hint.visible = shown.is_empty()
-	var first_button: Button
-	for choice in shown:
+func _on_line_finished() -> void:
+	if not _open or _current == null:
+		return
+	_line_done = true
+	var options := _current.visible_choices()
+	if not options.is_empty():
+		_show_choices(options)
+		return
+	_refresh_hint()
+	_hint.visible = true
+	if _auto_enabled():
+		_auto_timer = _current.resolved_auto_delay()
+
+func _show_choices(options: Array[DialogueChoice]) -> void:
+	for choice in options:
 		var b := Button.new()
 		b.text = choice.text
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.focus_mode = Control.FOCUS_ALL
 		b.pressed.connect(_pick.bind(choice))
-		_choice_list.add_child(b)
-		if first_button == null:
-			first_button = b
-	if first_button:
-		# Lets ui_up/ui_down (arrow keys, Godot's own default — not WASD, so
-		# this doesn't fight the game's own movement bindings) step through
-		# the choices, and ui_accept (Enter/Space) pick whichever is
-		# focused — Control's built-in focus/activation behavior, no extra
-		# input handling needed here beyond actually grabbing focus somewhere
-		# to start from.
-		first_button.grab_focus()
+		_choices.add_child(b)
+	FocusPop.attach_all(_choices)
+	# Arrow keys and the (mirrored) movement keys move between choices through
+	# Godot's own focus handling — see InputSetup.UI_MIRRORS.
+	(_choices.get_child(0) as Button).grab_focus()
+	_pop(_choices)
+
+func _clear_choices() -> void:
+	for c in _choices.get_children():
+		_choices.remove_child(c)
+		c.queue_free()
 
 func _pick(choice: DialogueChoice) -> void:
 	if choice.sets_flag != &"":
@@ -120,58 +217,50 @@ func _pick(choice: DialogueChoice) -> void:
 	_show_node(choice.next)
 
 func _end() -> void:
-	visible = false
+	if not _open:
+		return
+	_open = false
 	_current = null
-	if _player:
-		_player.machine.transition_to(&"Ground")
-		_player = null
+	_holding = false
+	_auto_timer = -1.0
+	_typewriter.finish()
+	_clear_choices()
+	if _stage:
+		_stage.end()
+		_stage = null
+	_animate_close()
 	Events.dialogue_ended.emit()
 
-func _build_ui() -> void:
-	_panel = PanelContainer.new()
-	_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	_panel.offset_left = 80
-	_panel.offset_right = -80
-	_panel.offset_top = -220
-	_panel.offset_bottom = -40
-	add_child(_panel)
+# --- Presentation -----------------------------------------------------------
 
-	var margin := MarginContainer.new()
-	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 18)
-	_panel.add_child(margin)
+func _refresh_hint() -> void:
+	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
+	var auto_key := InputSetup.key_label(Settings.get_binding(&"dialogue_auto"))
+	_hint.text = "%s  Next   ·   hold  Skip   ·   %s  Auto: %s" % [
+		key, auto_key, "On" if _auto_enabled() else "Off"]
 
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 16)
-	margin.add_child(hbox)
+func _center_pivot(c: Control) -> void:
+	c.pivot_offset = c.size * 0.5
 
-	_portrait_rect = TextureRect.new()
-	_portrait_rect.custom_minimum_size = Vector2(96, 96)
-	_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	_portrait_rect.visible = false
-	hbox.add_child(_portrait_rect)
+## Small squash-in so each new plate feels placed rather than swapped.
+func _pop(c: Control) -> void:
+	c.scale = Vector2(0.96, 0.94)
+	create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT) \
+		.tween_property(c, "scale", Vector2.ONE, 0.18)
 
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(vbox)
+func _animate_open() -> void:
+	if _tween:
+		_tween.kill()
+	_root.position.y = 90.0
+	_root.modulate.a = 0.0
+	_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_tween.tween_property(_root, "position:y", 0.0, OPEN_TIME)
+	_tween.tween_property(_root, "modulate:a", 1.0, OPEN_TIME * 0.7)
 
-	_speaker_label = Label.new()
-	_speaker_label.add_theme_font_size_override("font_size", 20)
-	vbox.add_child(_speaker_label)
-
-	_text_label = RichTextLabel.new()
-	_text_label.fit_content = true
-	_text_label.scroll_active = false
-	_text_label.custom_minimum_size = Vector2(0, 72)
-	_text_label.add_theme_font_size_override("normal_font_size", 18)
-	vbox.add_child(_text_label)
-
-	_continue_hint = Label.new()
-	_continue_hint.text = "Press E to continue — Esc to leave"
-	_continue_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_continue_hint.modulate = Color(1.0, 1.0, 1.0, 0.6)
-	vbox.add_child(_continue_hint)
-
-	_choice_list = VBoxContainer.new()
-	vbox.add_child(_choice_list)
+func _animate_close() -> void:
+	if _tween:
+		_tween.kill()
+	_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_tween.tween_property(_root, "position:y", 70.0, CLOSE_TIME)
+	_tween.tween_property(_root, "modulate:a", 0.0, CLOSE_TIME)
+	_tween.chain().tween_callback(func() -> void: visible = _open)
