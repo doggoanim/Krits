@@ -32,6 +32,8 @@ func _ready() -> void:
 		_slots.append(slot)
 
 func _process(_delta: float) -> void:
+	if interactive:
+		visible = MenuBase.open_menu == null   # the HUD copy steps aside for any menu (the inventory has its own)
 	var hotbar := Game.hotbar
 	for i in _slots.size():
 		var slot := _slots[i]
