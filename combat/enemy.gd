@@ -438,6 +438,7 @@ func _do_leap_attack() -> void:
 
 	global_position = land
 	rotation = Vector3.ZERO   # land upright, whatever the tumble left it at
+	_play_sfx(data.sfx_land)
 	_land_leap(land)
 	zone.fade_out()
 

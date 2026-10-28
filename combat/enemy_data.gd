@@ -67,6 +67,7 @@ func has_leap() -> bool:
 @export_group("Sounds")
 @export var sfx_footsteps: Array[AudioStream] = []
 @export var sfx_leap: AudioStream
+@export var sfx_land: AudioStream   ## when a leap touches down
 @export var sfx_shoot: Array[AudioStream] = []
 
 func has_burst_shoot() -> bool:

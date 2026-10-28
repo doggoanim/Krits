@@ -12,6 +12,7 @@ const SLIME_SHOOT: Array[AudioStream] = [
 	preload(SLIME_SFX_DIR + "slime_shoot_1.wav"), preload(SLIME_SFX_DIR + "slime_shoot_2.wav"),
 	preload(SLIME_SFX_DIR + "slime_shoot_3.wav"), preload(SLIME_SFX_DIR + "slime_shoot_4.wav")]
 const SLIME_LEAP: AudioStream = preload(SLIME_SFX_DIR + "slime_leap.wav")
+const SLIME_LAND: AudioStream = preload(SLIME_SFX_DIR + "slime_land.wav")
 
 static func green_slime() -> EnemyData:
 	var d := EnemyData.new()
@@ -49,6 +50,7 @@ static func green_slime() -> EnemyData:
 	d.sfx_footsteps = SLIME_FOOTSTEPS
 	d.sfx_shoot = SLIME_SHOOT
 	d.sfx_leap = SLIME_LEAP
+	d.sfx_land = SLIME_LAND
 
 	d.leaves_puddle_trail = true
 	d.puddle_interval = 0.5
