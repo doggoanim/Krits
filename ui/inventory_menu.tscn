@@ -322,6 +322,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="HotbarBar" parent="Margin/Content" instance=ExtResource("7")]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 interactive = false
