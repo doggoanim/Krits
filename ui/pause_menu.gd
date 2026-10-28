@@ -1,25 +1,24 @@
 class_name PauseMenu
 extends MenuBase
 ## Esc in the world: freezes the game (MenuBase pauses the tree and frees the
-## mouse) and shows Resume / Settings / Save Game / Main Menu / Quit. Built on
+## mouse) and shows Resume / Settings / Main Menu / Quit. Built on
 ## MenuBase so it shares the "only one menu open at a time" rule with the stats
 ## / travel / shop menus, but its layout is a full-screen overlay defined in
 ## pause_menu.tscn, not MenuBase's small centred panel.
 ##
 ## Three layers, one visible at a time: the button page (`Content`), the
 ## Settings page (the same SettingsScreen the title menu uses), and a
-## Yes/Cancel confirmation for the two actions that throw away unsaved
-## progress. Esc always steps back one layer, and closes the menu from the top.
+## Yes/Cancel confirmation for the two actions that throw away progress since
+## the last checkpoint (the game only saves at fast-travel points — see
+## Spawnpoint.activate(); there is deliberately no manual save).
+## Esc always steps back one layer, and closes the menu from the top.
 
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
-const SAVED_MESSAGE_TIME := 1.5
 
 @onready var _resume: Button = %ResumeButton
 @onready var _settings_button: Button = %SettingsButton
-@onready var _save: Button = %SaveButton
 @onready var _main_menu: Button = %MainMenuButton
 @onready var _quit: Button = %QuitButton
-@onready var _save_status: Label = %SaveStatus
 @onready var _settings: SettingsScreen = %Settings
 @onready var _confirm: Control = %Confirm
 @onready var _confirm_message: Label = %ConfirmMessage
@@ -27,15 +26,13 @@ const SAVED_MESSAGE_TIME := 1.5
 @onready var _confirm_no: Button = %ConfirmNo
 
 var _on_confirmed := Callable()
-var _status_tween: Tween
 
 func _ready() -> void:
 	super()
 	_resume.pressed.connect(close)
 	_settings_button.pressed.connect(_open_settings)
-	_save.pressed.connect(_on_save)
-	_main_menu.pressed.connect(_ask.bind("Return to the main menu?\nUnsaved progress is lost.", _go_main_menu))
-	_quit.pressed.connect(_ask.bind("Quit the game?\nUnsaved progress is lost.", get_tree().quit))
+	_main_menu.pressed.connect(_ask.bind("Return to the main menu?\nProgress since your last\ncheckpoint is lost.", _go_main_menu))
+	_quit.pressed.connect(_ask.bind("Quit the game?\nProgress since your last\ncheckpoint is lost.", get_tree().quit))
 	_confirm_yes.pressed.connect(_accept)
 	_confirm_no.pressed.connect(_close_confirm)
 	_settings.navigate.connect(func(_target: StringName, _payload: Dictionary) -> void: _close_settings())
@@ -50,7 +47,6 @@ func open() -> void:
 	_settings.visible = false
 	_confirm.visible = false
 	content.visible = true
-	_save_status.text = ""
 	_resume.grab_focus()
 
 # MenuBase's open() calls these; the pause menu's content is fixed in the scene.
@@ -85,18 +81,6 @@ func _close_settings() -> void:
 	_settings.exit()
 	content.visible = true
 	_settings_button.grab_focus()
-
-# --- Save ---------------------------------------------------------------------
-
-func _on_save() -> void:
-	Game.save()
-	_save_status.text = "Saved to Slot %d" % Game.current_slot
-	_save_status.modulate.a = 1.0
-	if _status_tween and _status_tween.is_valid():
-		_status_tween.kill()
-	_status_tween = create_tween()
-	_status_tween.tween_interval(SAVED_MESSAGE_TIME)
-	_status_tween.tween_property(_save_status, "modulate:a", 0.0, 0.5)
 
 # --- Confirmation -------------------------------------------------------------
 
