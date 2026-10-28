@@ -205,7 +205,7 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	_use_button.visible = false
 	_drop_button.visible = false
 	_detail_name.text = item.display_name
-	var equipped := Game.stats.equipped_armor if item is ArmorData \
+	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)
 	_detail_kind.text = "Equipped" if equipped != null and equipped.id == item.id else "Press to equip"
 	_detail_text.text = _gear_text(item)
