@@ -21,13 +21,19 @@ const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
 const SELECTED_FONT := 88
 const FONT_SCALES: Array[float] = [1.0, 0.78, 0.52, 0.44]
 
-## Open/close animation: the backdrop blurs/darkens in, the heading and list
-## fade in while sliding SLIDE_DISTANCE px in from the left.
+## Open/close animation: the whole screen blurs lightly (Backdrop); a darker,
+## more heavily blurred side panel slides in from the left behind the list,
+## and the heading + list fade in while sliding SLIDE_DISTANCE px.
+## Opening Settings widens that side panel to the full screen and shows the
+## Settings page centred on it (PANEL_TIME, PAGE_FADE).
 const OPEN_TIME := 0.28
 const CLOSE_TIME := 0.18
 const SLIDE_DISTANCE := 50.0
+const PANEL_TIME := 0.3
+const PAGE_FADE := 0.15
 
 @onready var _backdrop: ColorRect = %Backdrop
+@onready var _side_panel: ColorRect = %SidePanel
 @onready var _heading_margin: MarginContainer = %HeadingMargin
 @onready var _menu_margin: MarginContainer = %MenuMargin
 @onready var _items: Array[Node] = %Items.get_children()
@@ -44,16 +50,24 @@ const SLIDE_DISTANCE := 50.0
 var _on_confirmed := Callable()
 var _anim: Tween
 var _closing := false
-var _blur_lod := 0.0                 ## resting backdrop values, read from the scene
-var _tint := Color.TRANSPARENT
+var _transitioning := false          ## a Settings open/close is mid-animation
+var _backdrop_lod := 0.0             ## resting blur/tint of each layer, read from the scene
+var _backdrop_tint := Color.TRANSPARENT
+var _side_lod := 0.0
+var _side_tint := Color.TRANSPARENT
+var _side_width := 0.0               ## the side panel's resting anchor_right (fraction of the screen)
 var _heading_left := 0
 var _menu_left := 0
 
 func _ready() -> void:
 	super()
-	var mat := _backdrop.material as ShaderMaterial
-	_blur_lod = mat.get_shader_parameter("blur_lod")
-	_tint = mat.get_shader_parameter("tint")
+	var backdrop_mat := _backdrop.material as ShaderMaterial
+	_backdrop_lod = backdrop_mat.get_shader_parameter("blur_lod")
+	_backdrop_tint = backdrop_mat.get_shader_parameter("tint")
+	var side_mat := _side_panel.material as ShaderMaterial
+	_side_lod = side_mat.get_shader_parameter("blur_lod")
+	_side_tint = side_mat.get_shader_parameter("tint")
+	_side_width = _side_panel.anchor_right
 	_heading_left = _heading_margin.get_theme_constant("margin_left")
 	_menu_left = _menu_margin.get_theme_constant("margin_left")
 	for node in _items:
@@ -76,6 +90,7 @@ func open() -> void:
 	if open_menu != self:
 		return
 	_settings.visible = false
+	_settings.modulate.a = 1.0
 	_confirm.visible = false
 	content.visible = true
 	_resume.grab_focus()
@@ -99,7 +114,7 @@ func refresh() -> void:
 	pass
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _closing or not event.is_action_pressed(&"ui_cancel_menu"):
+	if _closing or _transitioning or not event.is_action_pressed(&"ui_cancel_menu"):
 		return
 	if not visible:
 		open()
@@ -124,13 +139,20 @@ func _play(opening: bool) -> void:
 
 ## 0 = fully clear (as if the menu weren't there), 1 = fully shown.
 func _set_progress(k: float) -> void:
-	var mat := _backdrop.material as ShaderMaterial
-	mat.set_shader_parameter("blur_lod", _blur_lod * k)
-	mat.set_shader_parameter("tint", Color(_tint.r, _tint.g, _tint.b, _tint.a * k))
+	_set_layer(_backdrop, _backdrop_lod, _backdrop_tint, k)
+	_set_layer(_side_panel, _side_lod, _side_tint, k)
+	# The side panel slides in from the left edge as it opens.
+	_side_panel.anchor_left = -_side_width * (1.0 - k)
+	_side_panel.anchor_right = _side_width * k
 	content.modulate.a = k
 	var slide := int(SLIDE_DISTANCE * (1.0 - k))
 	_heading_margin.add_theme_constant_override("margin_left", _heading_left - slide)
 	_menu_margin.add_theme_constant_override("margin_left", _menu_left - slide)
+
+func _set_layer(rect: ColorRect, lod: float, tint: Color, k: float) -> void:
+	var mat := rect.material as ShaderMaterial
+	mat.set_shader_parameter("blur_lod", lod * k)
+	mat.set_shader_parameter("tint", Color(tint.r, tint.g, tint.b, tint.a * k))
 
 ## Sizes every entry by its distance from the focused one.
 func _update_item_sizes() -> void:
@@ -147,16 +169,43 @@ func _update_item_sizes() -> void:
 
 # --- Settings page ------------------------------------------------------------
 
+## Settings: the list fades out, the side panel widens to cover the whole
+## screen, then the Settings page fades in centred on it. Closing reverses it.
 func _open_settings() -> void:
+	if _transitioning:
+		return
+	_transitioning = true
+	await _fade(content, 0.0)
 	content.visible = false
+	await _widen_panel(1.0)
+	_settings.modulate.a = 0.0
 	_settings.visible = true
 	_settings.enter({})
+	await _fade(_settings, 1.0)
+	_transitioning = false
 
 func _close_settings() -> void:
+	if _transitioning:
+		return
+	_transitioning = true
+	await _fade(_settings, 0.0)
 	_settings.visible = false
 	_settings.exit()
+	await _widen_panel(_side_width)
 	content.visible = true
+	await _fade(content, 1.0)
 	_settings_button.grab_focus()
+	_transitioning = false
+
+func _fade(node: CanvasItem, alpha: float) -> void:
+	var tw := create_tween()
+	tw.tween_property(node, "modulate:a", alpha, PAGE_FADE)
+	await tw.finished
+
+func _widen_panel(target: float) -> void:
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(_side_panel, "anchor_right", target, PANEL_TIME)
+	await tw.finished
 
 # --- Confirmation -------------------------------------------------------------
 
