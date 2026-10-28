@@ -8,7 +8,7 @@ extends HBoxContainer
 @export var slot_styles: Array[StyleBox] = []   ## nine-sliced plates, one per slot (cycled)
 @export var interactive := true
 @export var slot_size := 96.0
-@export var group_gap := 90.0   ## extra space between the ability slots (1-3) and consumable slots (4-6)
+@export var group_gap := 240.0   ## extra space between the ability slots (1-3) and consumable slots (4-6)
 
 var _slots: Array[InventorySlot] = []
 
