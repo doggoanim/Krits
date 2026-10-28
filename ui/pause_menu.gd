@@ -245,4 +245,4 @@ func _go_main_menu() -> void:
 	close_immediately()   # unpauses and clears open_menu
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	MainMenu.return_to_title = true
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	LoadingScreen.instance.go_to_scene(MAIN_MENU_SCENE)   # the shared iris wipe

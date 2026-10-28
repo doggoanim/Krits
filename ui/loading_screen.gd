@@ -7,9 +7,13 @@ extends CanvasLayer
 ## `radius` uniform and times the swap around it. The level swap happens the
 ## instant the hole is fully shut, where nothing behind it is visible at all.
 ##
-## One instance, built by UiRoot same as Hud/DialogueBox/etc. Main is the
-## only caller: `await LoadingScreen.instance.run(swap_callable)` closes the
-## iris, calls `swap_callable` once fully shut, then reopens it.
+## One instance, registered as the `Iris` autoload (so it survives scene
+## changes and is the single loading screen for everything):
+##   - level swaps (doors): `await LoadingScreen.instance.run(swap_callable)`
+##     closes the iris, calls `swap_callable` once fully shut, then reopens it.
+##   - scene changes (menu -> game, game -> menu):
+##     `LoadingScreen.instance.go_to_scene(path)` — don't await it from a node
+##     that the scene change will free.
 
 ## Radius (in the shader's own aspect-corrected units — see
 ## iris_mask.gdshader) big enough that the circle's edge sits off past every
@@ -55,6 +59,29 @@ func run(swap: Callable) -> void:
 	await _animate_radius(MAX_RADIUS, 0.0)
 	await get_tree().create_timer(HOLD_TIME).timeout
 	await swap.call()
+	await get_tree().create_timer(HOLD_TIME).timeout
+	await _animate_radius(0.0, MAX_RADIUS)
+	visible = false
+
+## Iris out, change the whole scene while nothing is visible, then iris in once
+## the new scene has had a couple of frames to build itself. `on_fail` (optional)
+## runs if the scene can't be loaded; the iris reopens either way.
+func go_to_scene(path: String, on_fail := Callable()) -> void:
+	visible = true
+	await _animate_radius(MAX_RADIUS, 0.0)
+	await get_tree().create_timer(HOLD_TIME).timeout
+	var err := get_tree().change_scene_to_file(path)
+	if err != OK:
+		push_error("LoadingScreen: could not load %s (error %d)" % [path, err])
+		await _animate_radius(0.0, MAX_RADIUS)
+		visible = false
+		if on_fail.is_valid():
+			on_fail.call()
+		return
+	# The new scene is swapped in at the end of this frame and builds itself in
+	# its _ready — give it that long before revealing it.
+	await get_tree().process_frame
+	await get_tree().process_frame
 	await get_tree().create_timer(HOLD_TIME).timeout
 	await _animate_radius(0.0, MAX_RADIUS)
 	visible = false

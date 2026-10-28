@@ -24,6 +24,7 @@ Game="*res://core/game.gd"
 Music="*res://core/music_player.gd"
 Settings="*res://core/settings.gd"
 ShaderClock="*res://core/shader_clock.gd"
+Iris="*res://ui/loading_screen.tscn"
 
 [display]
 

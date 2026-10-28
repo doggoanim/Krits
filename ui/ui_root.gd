@@ -11,7 +11,6 @@ const INVENTORY_MENU_SCENE := preload("res://ui/inventory_menu.tscn")
 const SHOP_MENU_SCENE := preload("res://ui/shop_menu.tscn")
 const INTERACT_PROMPT_SCENE := preload("res://ui/interact_prompt.tscn")
 const PAUSE_MENU_SCENE := preload("res://ui/pause_menu.tscn")
-const LOADING_SCREEN_SCENE := preload("res://ui/loading_screen.tscn")
 
 var travel_menu: TravelMenu
 
@@ -25,4 +24,3 @@ func _ready() -> void:
 	add_child(SHOP_MENU_SCENE.instantiate())   # no toggle_action — opened by a ShopKeeper, see ShopMenu
 	add_child(PAUSE_MENU_SCENE.instantiate())   # Esc — see PauseMenu
 	add_child(DialogueBox.create())   # the one shared conversation UI — see DialogueBox
-	add_child(LOADING_SCREEN_SCENE.instantiate())   # Door's level-swap cover — see LoadingScreen

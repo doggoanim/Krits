@@ -105,7 +105,7 @@ func _hide(screen: MenuScreen) -> void:
 	screen.exit()
 
 ## Points Game at the chosen slot (creating a brand-new save first when the
-## name prompt asked for one), fades to black, and hands off to the game —
+## name prompt asked for one), wipes to black with the iris, and hands off to the game —
 ## Main's own Game.load_game() then reads whichever slot is current.
 func _start_game(payload: Dictionary) -> void:
 	var slot: int = payload.get("slot", Game.current_slot)
@@ -113,15 +113,6 @@ func _start_game(payload: Dictionary) -> void:
 		Game.start_new_game(slot, String(payload.get("name", "Krits")))
 	else:
 		Game.select_slot(slot)
-	var tw := create_tween()
-	tw.tween_property(_fade, "color:a", 1.0, FADE_TO_GAME)
-	await tw.finished
-	var err := get_tree().change_scene_to_file(GAME_SCENE)
-	if err != OK:
-		# The game scene (or one of its dependencies) failed to load —
-		# surface it instead of leaving the player on a black screen.
-		push_error("MainMenu: could not load %s (error %d)" % [GAME_SCENE, err])
-		var back := create_tween()
-		back.tween_property(_fade, "color:a", 0.0, FADE_TO_GAME)
-		await back.finished
-		_busy = false
+	# The shared iris wipe (see LoadingScreen) — it keeps playing across the
+	# scene change, so don't await it from here; this node is about to be freed.
+	LoadingScreen.instance.go_to_scene(GAME_SCENE, func() -> void: _busy = false)
