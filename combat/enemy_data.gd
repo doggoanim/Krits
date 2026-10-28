@@ -64,6 +64,7 @@ func has_leap() -> bool:
 @export var shoot_damage := 6.0
 @export var shoot_rate_ramp := 1.5     ## each following shot comes this many times faster than the last (1 = steady)
 @export var shoot_ball_radius := 0.28   ## size of each ball
+@export_range(0.0, 1.0) var shoot_lead := 1.0   ## how much shots lead a moving player (0 = aim where they are now, 1 = full prediction)
 @export var anim_shoot: StringName = &""
 
 ## Sounds (all optional). One of a list is picked at random each time.

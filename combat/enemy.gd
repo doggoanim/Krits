@@ -494,7 +494,7 @@ func _do_burst_shoot() -> void:
 		if _dying or not is_instance_valid(target):
 			aim.queue_free()
 			return
-		_face_point_instant(target.global_position)
+		_face_point_instant(_predicted_point())
 		if _visual:
 			_visual.play_shoot()
 		_fire_slime_ball()
@@ -513,8 +513,9 @@ func _wait_aiming(seconds: float, aim: Telegraph) -> bool:
 		if _dying or not is_instance_valid(target):
 			aim.queue_free()
 			return false
-		aim.set_line(center_point(), _aim_point())
-		_face_point_instant(target.global_position)
+		var aim_at := _predicted_point()
+		aim.set_line(center_point(), aim_at)
+		_face_point_instant(aim_at)
 		await get_tree().physics_frame
 		waited += get_physics_process_delta_time()
 	return true
@@ -523,9 +524,40 @@ func _wait_aiming(seconds: float, aim: Telegraph) -> bool:
 func _aim_point() -> Vector3:
 	return target.global_position + Vector3.UP * (Player.STAND_HEIGHT * 0.55)
 
+## Where the player will be when a ball fired now arrives (ULTRAKILL-style
+## lead). Solves "ball speed vs. player's horizontal velocity" for the
+## intercept time; falls back to the current position if there is no
+## solution (player outrunning the ball) or the enemy has shoot_lead = 0.
+## Vertical motion is ignored — jumps/falls are too short-lived to lead.
+func _predicted_point() -> Vector3:
+	var here := _aim_point()
+	if data.shoot_lead <= 0.0 or not (target is CharacterBody3D):
+		return here
+	var v := (target as CharacterBody3D).velocity
+	v.y = 0.0
+	var rel := here - center_point()
+	rel.y = 0.0
+	var s := data.shoot_speed
+	# |rel + v*t| = s*t  ->  (v.v - s^2) t^2 + 2 (rel.v) t + rel.rel = 0
+	var a := v.dot(v) - s * s
+	var b := 2.0 * rel.dot(v)
+	var c := rel.dot(rel)
+	var t := 0.0
+	if absf(a) < 0.0001:
+		t = -c / b if absf(b) > 0.0001 else 0.0
+	else:
+		var disc := b * b - 4.0 * a * c
+		if disc >= 0.0:
+			var root := sqrt(disc)
+			var t1 := (-b - root) / (2.0 * a)
+			var t2 := (-b + root) / (2.0 * a)
+			t = minf(t1, t2) if t1 > 0.0 and t2 > 0.0 else maxf(t1, t2)
+	t = clampf(t, 0.0, 1.5) * data.shoot_lead
+	return here + v * t
+
 func _fire_slime_ball() -> void:
 	var origin := center_point()   # from the middle of the body, not the pivot at its feet
-	var dir := _aim_point() - origin
+	var dir := _predicted_point() - origin
 	if dir.length() < 0.01:
 		return
 	var b := Bullet.new()
