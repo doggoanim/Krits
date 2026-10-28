@@ -37,6 +37,7 @@ var _repeat_count := 0         ## how many times in a row that same kind has run
 ## in-flight coroutine — safely cancelling it mid-arc isn't worth the
 ## complexity this is meant to add, a battlefield debuff, not a hard stop).
 var _speed_mult := 1.0
+var _lead_scale := 1.0         ## prediction strength of the next shot; shrinks through a volley
 var _slow_t := 0.0
 var _stun_t := 0.0
 var _burn_dps := 0.0
@@ -477,6 +478,7 @@ func _land_leap(land: Vector3) -> void:
 ## re-triggering anim_shoot and colored with this enemy's accent color.
 func _do_burst_shoot() -> void:
 	var count := randi_range(data.shoot_count_min, data.shoot_count_max)
+	_lead_scale = 1.0
 	# Telegraph: "!" + an aim line that tracks the player through the wind-up
 	# and the whole volley.
 	Telegraph.exclaim(self, body_height(data) + 0.5)
@@ -498,6 +500,7 @@ func _do_burst_shoot() -> void:
 		if _visual:
 			_visual.play_shoot()
 		_fire_slime_ball()
+		_lead_scale *= data.shoot_lead_falloff   # the next shot predicts worse
 		if i < count - 1:
 			if not await _wait_aiming(spacing, aim):
 				return
@@ -552,7 +555,7 @@ func _predicted_point() -> Vector3:
 			var t1 := (-b - root) / (2.0 * a)
 			var t2 := (-b + root) / (2.0 * a)
 			t = minf(t1, t2) if t1 > 0.0 and t2 > 0.0 else maxf(t1, t2)
-	t = clampf(t, 0.0, 1.5) * data.shoot_lead
+	t = clampf(t, 0.0, 1.5) * data.shoot_lead * _lead_scale
 	return here + v * t
 
 func _fire_slime_ball() -> void:
