@@ -17,7 +17,6 @@ extends Control
 ## clipped to a circle (see CIRCLE_MASK_SHADER_CODE) so the frame's border
 ## shows through cleanly all the way around instead of a square poking out.
 
-const CAMERA_DISTANCE := 0.9
 const CAMERA_HEIGHT_FRAC := 0.62         ## fraction up the model's height the camera frames (a bust shot)
 const OUTLINE_COLOR := Color.BLACK
 
@@ -26,6 +25,7 @@ const OUTLINE_COLOR := Color.BLACK
 ## right-turned, clickable portrait.
 @export_group("Render")
 @export var render_size := 256         ## SubViewport resolution, independent of the Control's size
+@export var camera_distance := 0.9     ## how far the camera sits from the character — larger = smaller in frame (less clipping)
 @export var circular := true           ## clip the render to a circle (HUD frame) — off for a free-standing portrait
 @export var outline_width_px := 2.0    ## same screen-space-dilation idea as OutlineSystem, sized for this render, not the main viewport's
 @export var turn := 0.32               ## extra yaw (rad) so it isn't a flat mirror-facing shot: positive turns the character left, negative right
@@ -161,7 +161,7 @@ func _build_scene() -> void:
 	# MODEL_FACING_OFFSET turns the model to face -Z (Godot's forward), so the
 	# camera has to sit on the -Z side to see the front of the face rather
 	# than the back of the head.
-	cam.position = look_at_pos + Vector3(0.0, 0.0, -CAMERA_DISTANCE)
+	cam.position = look_at_pos + Vector3(0.0, 0.0, -camera_distance)
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
