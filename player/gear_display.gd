@@ -18,6 +18,8 @@ extends Node3D
 @export var shield_rest := Vector3(0.0, 1.0, 0.3)   ## relative to the player's facing; +Z is behind
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
 @export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
+@export var follow_speed := 30.0   ## how tightly the gear tracks the player (higher = less lag)
+@export var turn_speed := 20.0     ## same, for turning to match the player's facing
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
 @export var swing_follow := 12.0       ## spring stiffness (higher = snappier)
@@ -37,6 +39,8 @@ func _ready() -> void:
 	_player = get_parent() as Player   # created by Player, which must already have its visual
 	_anchor = FloatingAnchor.new()
 	_anchor.name = "ShieldAnchor"
+	_anchor.position_follow = follow_speed
+	_anchor.turn_follow = turn_speed
 	add_child(_anchor)
 	_weapon_pivot = Node3D.new()
 	_weapon_pivot.name = "WeaponPivot"
