@@ -265,7 +265,6 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 60
 text = "Item"
 autowrap_mode = 3
-max_lines_visible = 2
 
 [node name="DetailKind" type="Label" parent="Margin/Content/Body/Details/Column"]
 unique_name_in_owner = true
@@ -280,7 +279,6 @@ size_flags_vertical = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 38
 autowrap_mode = 3
-max_lines_visible = 7
 
 [node name="Message" type="Label" parent="Margin/Content/Body/Details/Column"]
 unique_name_in_owner = true
@@ -288,7 +286,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.7)
 theme_override_font_sizes/font_size = 32
 autowrap_mode = 3
-max_lines_visible = 2
 
 [node name="UseButton" type="Button" parent="Margin/Content/Body/Details/Column"]
 unique_name_in_owner = true
@@ -304,6 +301,7 @@ text = "Drop 1"
 
 [node name="AssignLabel" type="Label" parent="Margin/Content/Body/Details/Column"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.7)
 theme_override_font_sizes/font_size = 32
@@ -311,7 +309,6 @@ text = "Hotbar slot:"
 
 [node name="AssignRow" type="HBoxContainer" parent="Margin/Content/Body/Details/Column"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 theme_override_constants/separation = 12
 

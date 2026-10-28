@@ -151,8 +151,8 @@ func _on_slot_pressed(index: int) -> void:
 
 func _update_item_details() -> void:
 	var stacks := Game.inventory.stacks
-	_show_ctrl(_use_button, false)
-	_show_ctrl(_drop_button, false)
+	_use_button.visible = false
+	_drop_button.visible = false
 	_clear_assign()
 	if _selected >= stacks.size():
 		_detail_name.text = "Empty slot"
@@ -166,8 +166,8 @@ func _update_item_details() -> void:
 	if item.sell_price > 0:
 		text += "\n\nSells for %dg." % item.sell_price
 	_detail_text.text = text
-	_show_ctrl(_use_button, item.is_usable())
-	_show_ctrl(_drop_button, item.can_drop())
+	_use_button.visible = item.is_usable()
+	_drop_button.visible = item.can_drop()
 	_drop_button.text = "Drop 1"
 	if item.is_usable():
 		_set_assign(item.id, [3, 4, 5])
@@ -191,23 +191,15 @@ func _drop_selected() -> void:
 
 # ---------------------------------------------------------------- hotbar assignment
 
-## Show/hide a control in the detail panel WITHOUT changing the layout: a
-## hidden one keeps its space (invisible, unclickable, unfocusable), so moving
-## the selection never makes the panel — and everything around it — jump.
-func _show_ctrl(c: Control, shown: bool) -> void:
-	c.modulate.a = 1.0 if shown else 0.0
-	c.mouse_filter = Control.MOUSE_FILTER_STOP if shown else Control.MOUSE_FILTER_IGNORE
-	c.focus_mode = Control.FOCUS_ALL if shown else Control.FOCUS_NONE
-
 func _clear_assign() -> void:
-	_show_ctrl(_assign_label, false)
+	_assign_label.visible = false
 	_clear_children(_assign_row)
 
 ## Buttons to put `id` on one of the hotbar `slots` (indices), plus Unequip
 ## if it's already on the bar.
 func _set_assign(id: StringName, slots: Array) -> void:
 	_clear_children(_assign_row)
-	_show_ctrl(_assign_label, true)
+	_assign_label.visible = true
 	var current := Game.hotbar.slot_of(id)
 	for slot in slots:
 		var b := Button.new()
@@ -261,8 +253,8 @@ func _on_ability_focused(index: int) -> void:
 	_update_ability_details()
 
 func _update_ability_details() -> void:
-	_show_ctrl(_use_button, false)
-	_show_ctrl(_drop_button, false)
+	_use_button.visible = false
+	_drop_button.visible = false
 	_clear_assign()
 	var known := Game.hotbar.known
 	if _selected_ability >= known.size():
@@ -318,8 +310,8 @@ func _focus_gear() -> void:
 
 func _on_gear_focused(item: EquipmentData) -> void:
 	_gear_focus = item.id
-	_show_ctrl(_use_button, false)
-	_show_ctrl(_drop_button, false)
+	_use_button.visible = false
+	_drop_button.visible = false
 	_clear_assign()
 	_detail_name.text = item.display_name
 	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
