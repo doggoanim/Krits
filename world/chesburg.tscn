@@ -22,7 +22,6 @@
 [ext_resource type="PackedScene" uid="uid://bkxlyousnd7ld" path="res://assets/world/nature/tree_chesburg_7.glb" id="16_i8mdn"]
 [ext_resource type="PackedScene" uid="uid://chhgtlftglyvi" path="res://assets/world/house_chesburg_2.glb" id="17_qxovf"]
 [ext_resource type="Shader" uid="uid://cr440h5lag4q3" path="res://world/water/water.gdshader" id="18_water2_shader"]
-[ext_resource type="Texture2D" uid="uid://dkrydxsdd4k7r" path="res://assets/textures/water.jpg" id="19_water2_tex"]
 [ext_resource type="PackedScene" uid="uid://1wp1ik5osfqg" path="res://assets/world/well.glb" id="20_38blh"]
 [ext_resource type="PackedScene" uid="uid://bdjiv52blcoau" path="res://assets/world/nature/tree_stump_2.glb" id="20_jq25j"]
 [ext_resource type="PackedScene" uid="uid://clkm5ngwo17ku" path="res://assets/world/nature/tree_chesburg_6.glb" id="24_i8mdn"]
@@ -75,16 +74,15 @@ size = Vector3(4, 18.6, 0.1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
 shader = ExtResource("18_water2_shader")
-shader_parameter/albedo_texture = ExtResource("19_water2_tex")
-shader_parameter/uv_scroll_speed = Vector2(0, 0)
-shader_parameter/shallow_color = Color(1, 1, 1, 1)
-shader_parameter/deep_color = Color(1, 1, 1, 0.9019608)
-shader_parameter/wave_height = 0.01
+shader_parameter/uv_scroll_speed = Vector2(0.05, 0.03)
+shader_parameter/shallow_color = Color(0.4, 0.8, 0.85, 0.65)
+shader_parameter/deep_color = Color(0.05, 0.25, 0.45, 0.9)
+shader_parameter/wave_height = 0.08
 shader_parameter/wave_scale = 1.3
-shader_parameter/wave_speed = 1.995
+shader_parameter/wave_speed = 0.6
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
-shader_parameter/sparkle_strength = 0.8
+shader_parameter/sparkle_strength = 0.0
 shader_parameter/sparkle_density = 40.0
 shader_parameter/sparkle_speed = 2.5
 shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)

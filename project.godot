@@ -55,13 +55,13 @@ theme/custom_font="res://assets/fonts/zyzol/Zyzol.otf"
 3d_physics/layer_6="trigger"
 3d_physics/layer_8="camera_push"
 
+[physics]
+
+common/physics_ticks_per_second=120
+
 [shader_globals]
 
 game_time={
 "type": "float",
 "value": 0.0
 }
-
-[physics]
-
-common/physics_ticks_per_second=120
