@@ -12,11 +12,14 @@ signal touched(enemy: WorldEnemy)
 @export var despawn_radius := 32.0
 @export var wander_radius := 8.0
 @export var gravity := 30.0
+@export var respawn_time := 10.0   ## seconds until it comes back — only for enemies with an EMPTY enemy_id (ids are saved as cleared for good)
 
 ## Set by the encounter sequence. Also hides this actor for the duration: the
 ## fight itself plays out nearby using a freshly-spawned Enemy inside the
 ## Arena, so this original would otherwise just stand there frozen in plain
 ## sight next to (or far from) the real fight, looking like a stray duplicate.
+var _dead := false          ## defeated, waiting to respawn (empty enemy_id only)
+
 var frozen := false:
 	set(value):
 		frozen = value
@@ -96,13 +99,31 @@ func is_awake() -> bool:
 func defeat() -> void:
 	if enemy_id != &"":
 		Game.set_flag(_cleared_key(), true)
-	queue_free()
+		queue_free()
+		return
+	_respawn_later()
+
+## No id = no save flag, so rather than vanishing for good it goes dormant at
+## its home and comes back after `respawn_time` (the timer pauses with the game).
+func _respawn_later() -> void:
+	_dead = true
+	_awake = false
+	_solid = false
+	_kill_tween()
+	collision_layer = 0
+	global_position = _home
+	velocity = Vector3.ZERO
+	_dest = _home
+	_set_dormant_visuals()
+	await get_tree().create_timer(respawn_time).timeout
+	collision_layer = 1 << 2
+	_dead = false
 
 func _cleared_key() -> StringName:
 	return StringName("cleared_" + str(enemy_id))
 
 func _physics_process(delta: float) -> void:
-	if frozen:
+	if frozen or _dead:
 		return
 	if _player == null:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
