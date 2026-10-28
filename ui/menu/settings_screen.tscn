@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://ui/menu/settings_screen.gd" id="1"]
 
+[sub_resource type="ButtonGroup" id="TabGroup"]
+
 [node name="SettingsScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -29,95 +31,348 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -500.0
-offset_top = -330.0
-offset_right = 500.0
-offset_bottom = 330.0
+offset_left = -700.0
+offset_top = -460.0
+offset_right = 700.0
+offset_bottom = 380.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 40
-alignment = 1
+theme_override_constants/separation = 24
 
 [node name="Heading" type="Label" parent="Content"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 110
+theme_override_font_sizes/font_size = 100
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="MasterRow" type="HBoxContainer" parent="Content"]
+[node name="Tabs" type="HBoxContainer" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="DisplayTabButton" type="Button" parent="Content/Tabs"]
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+toggle_mode = true
+button_group = SubResource("TabGroup")
+text = "Display"
+
+[node name="AudioTabButton" type="Button" parent="Content/Tabs"]
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+toggle_mode = true
+button_group = SubResource("TabGroup")
+text = "Audio"
+
+[node name="ControlsTabButton" type="Button" parent="Content/Tabs"]
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+toggle_mode = true
+button_group = SubResource("TabGroup")
+text = "Controls"
+
+[node name="AccessibilityTabButton" type="Button" parent="Content/Tabs"]
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+toggle_mode = true
+button_group = SubResource("TabGroup")
+text = "Accessibility"
+
+[node name="Pages" type="Control" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 560)
+layout_mode = 2
+
+[node name="DisplayPage" type="VBoxContainer" parent="Content/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+metadata/section = "display"
+
+[node name="WindowModeRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/MasterRow"]
-custom_minimum_size = Vector2(300, 0)
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/WindowModeRow"]
+custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
+text = "Window Mode"
+
+[node name="WindowMode" type="OptionButton" parent="Content/Pages/DisplayPage/WindowModeRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 3
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+popup/item_1/text = "Borderless"
+popup/item_1/id = 1
+popup/item_2/text = "Exclusive Fullscreen"
+popup/item_2/id = 2
+metadata/setting = &"display/window_mode"
+
+[node name="VSyncRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/VSyncRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "VSync"
+
+[node name="VSync" type="CheckButton" parent="Content/Pages/DisplayPage/VSyncRow"]
+layout_mode = 2
+metadata/setting = &"display/vsync"
+
+[node name="FpsCapRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/FpsCapRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "FPS Cap"
+
+[node name="FpsCap" type="OptionButton" parent="Content/Pages/DisplayPage/FpsCapRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 6
+popup/item_0/text = "30"
+popup/item_0/id = 30
+popup/item_1/text = "60"
+popup/item_1/id = 60
+popup/item_2/text = "120"
+popup/item_2/id = 120
+popup/item_3/text = "144"
+popup/item_3/id = 144
+popup/item_4/text = "240"
+popup/item_4/id = 240
+popup/item_5/text = "Unlimited"
+popup/item_5/id = 0
+metadata/setting = &"display/fps_cap"
+
+[node name="RenderDistanceRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/RenderDistanceRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Render Distance"
+
+[node name="RenderDistance" type="OptionButton" parent="Content/Pages/DisplayPage/RenderDistanceRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 4
+popup/item_0/text = "Short"
+popup/item_0/id = 80
+popup/item_1/text = "Medium"
+popup/item_1/id = 200
+popup/item_2/text = "Long"
+popup/item_2/id = 500
+popup/item_3/text = "Max"
+popup/item_3/id = 4000
+metadata/setting = &"display/render_distance"
+
+[node name="AudioPage" type="VBoxContainer" parent="Content/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+metadata/section = "audio"
+
+[node name="MasterSliderRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AudioPage/MasterSliderRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
 text = "Master"
 
-[node name="MasterSlider" type="HSlider" parent="Content/MasterRow"]
-unique_name_in_owner = true
+[node name="MasterSlider" type="HSlider" parent="Content/Pages/AudioPage/MasterSliderRow"]
 custom_minimum_size = Vector2(600, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+min_value = 0.0
 max_value = 1.0
 step = 0.05
-value = 1.0
+value = 0.0
+metadata/setting = &"audio/master"
 
-[node name="MusicRow" type="HBoxContainer" parent="Content"]
+[node name="MusicSliderRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/MusicRow"]
-custom_minimum_size = Vector2(300, 0)
+[node name="Label" type="Label" parent="Content/Pages/AudioPage/MusicSliderRow"]
+custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
 text = "Music"
 
-[node name="MusicSlider" type="HSlider" parent="Content/MusicRow"]
-unique_name_in_owner = true
+[node name="MusicSlider" type="HSlider" parent="Content/Pages/AudioPage/MusicSliderRow"]
 custom_minimum_size = Vector2(600, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+min_value = 0.0
 max_value = 1.0
 step = 0.05
-value = 1.0
+value = 0.0
+metadata/setting = &"audio/music"
 
-[node name="SfxRow" type="HBoxContainer" parent="Content"]
+[node name="SfxSliderRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/SfxRow"]
-custom_minimum_size = Vector2(300, 0)
+[node name="Label" type="Label" parent="Content/Pages/AudioPage/SfxSliderRow"]
+custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
 text = "Effects"
 
-[node name="SfxSlider" type="HSlider" parent="Content/SfxRow"]
-unique_name_in_owner = true
+[node name="SfxSlider" type="HSlider" parent="Content/Pages/AudioPage/SfxSliderRow"]
 custom_minimum_size = Vector2(600, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+min_value = 0.0
 max_value = 1.0
 step = 0.05
-value = 1.0
+value = 0.0
+metadata/setting = &"audio/sfx"
 
-[node name="FullscreenRow" type="HBoxContainer" parent="Content"]
+[node name="MuteUnfocusedRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/FullscreenRow"]
-custom_minimum_size = Vector2(300, 0)
+[node name="Label" type="Label" parent="Content/Pages/AudioPage/MuteUnfocusedRow"]
+custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
-text = "Fullscreen"
+theme_override_font_sizes/font_size = 52
+text = "Mute When Unfocused"
 
-[node name="FullscreenCheck" type="CheckButton" parent="Content/FullscreenRow"]
+[node name="MuteUnfocused" type="CheckButton" parent="Content/Pages/AudioPage/MuteUnfocusedRow"]
+layout_mode = 2
+metadata/setting = &"audio/mute_unfocused"
+
+[node name="ControlsPage" type="VBoxContainer" parent="Content/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+metadata/section = "controls"
+
+[node name="SensSliderRow" type="HBoxContainer" parent="Content/Pages/ControlsPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/ControlsPage/SensSliderRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Camera Sensitivity"
+
+[node name="SensSlider" type="HSlider" parent="Content/Pages/ControlsPage/SensSliderRow"]
+custom_minimum_size = Vector2(600, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.25
+max_value = 2.0
+step = 0.05
+value = 0.25
+metadata/setting = &"controls/camera_sens"
+
+[node name="InvertYRow" type="HBoxContainer" parent="Content/Pages/ControlsPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/ControlsPage/InvertYRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Invert Camera Y"
+
+[node name="InvertY" type="CheckButton" parent="Content/Pages/ControlsPage/InvertYRow"]
+layout_mode = 2
+metadata/setting = &"controls/invert_y"
+
+[node name="Scroll" type="ScrollContainer" parent="Content/Pages/ControlsPage"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="BindingList" type="VBoxContainer" parent="Content/Pages/ControlsPage/Scroll"]
 unique_name_in_owner = true
 layout_mode = 2
-button_pressed = true
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="AccessibilityPage" type="VBoxContainer" parent="Content/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+metadata/section = "accessibility"
+
+[node name="ScreenShakeRow" type="HBoxContainer" parent="Content/Pages/AccessibilityPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AccessibilityPage/ScreenShakeRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Screen Shake"
+
+[node name="ScreenShake" type="CheckButton" parent="Content/Pages/AccessibilityPage/ScreenShakeRow"]
+layout_mode = 2
+metadata/setting = &"accessibility/screen_shake"
+
+[node name="ResetButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 70)
+layout_mode = 1
+anchors_preset = 2
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = -110.0
+offset_right = 420.0
+offset_bottom = -40.0
+grow_horizontal = 1
+grow_vertical = 0
+theme_override_font_sizes/font_size = 34
+text = "Reset to Defaults"
 
 [node name="ReturnButton" type="Button" parent="."]
 unique_name_in_owner = true

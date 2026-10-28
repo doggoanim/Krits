@@ -15,6 +15,7 @@ extends Node3D
 ## too, so normal raycasts/physics still see it as world geometry).
 const GROUND_LAYER := 1 << 7
 
+## Base look speed; the player's Settings > Controls sensitivity multiplies it.
 @export var mouse_sensitivity := 0.003
 @export var follow_speed := 14.0
 @export var base_distance := 6.0
@@ -28,6 +29,8 @@ var extra_distance := 0.0   ## set by the arena to frame the whole fight
 var _arm: SpringArm3D
 var _cam: Camera3D
 var _shake := 0.0
+var _sens_scale := 1.0     ## cached from Settings (controls/camera_sens)
+var _pitch_dir := 1.0      ## -1 when Settings has invert-Y on
 
 func _ready() -> void:
 	top_level = true
@@ -57,11 +60,22 @@ func _ready() -> void:
 	_cam.fov = 70.0
 	_arm.add_child(_cam)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Settings.changed.connect(_on_setting_changed)
+	_read_settings()
+
+func _read_settings() -> void:
+	_sens_scale = Settings.get_value(&"controls/camera_sens")
+	_pitch_dir = -1.0 if Settings.get_value(&"controls/invert_y") else 1.0
+	_cam.far = Settings.get_value(&"display/render_distance")
+
+func _on_setting_changed(_key: StringName) -> void:
+	_read_settings()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		yaw -= event.relative.x * mouse_sensitivity
-		pitch = clampf(pitch - event.relative.y * mouse_sensitivity, pitch_limits.x, pitch_limits.y)
+		var sens := mouse_sensitivity * _sens_scale
+		yaw -= event.relative.x * sens
+		pitch = clampf(pitch - event.relative.y * sens * _pitch_dir, pitch_limits.x, pitch_limits.y)
 
 func get_camera() -> Camera3D:
 	return _cam
@@ -71,6 +85,8 @@ func snap() -> void:
 		global_position = target.global_position + Vector3.UP * 1.4
 
 func shake(amount: float) -> void:
+	if not Settings.get_value(&"accessibility/screen_shake"):
+		return
 	_shake = maxf(_shake, amount)
 
 func _process(delta: float) -> void:

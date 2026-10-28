@@ -30,9 +30,14 @@ backdrop plus a stack of full-screen pages, shown one at a time with fades:
 4. **Save slots** — three tall rectangles (left/middle/right) + a small Return button. A
    used slot loads straight into the game (a Delete button under it, with confirmation,
    wipes it); an empty one goes to the name prompt.
-   **Settings** (`ui/menu/settings_screen.*`) — Master / Music / Effects volume + fullscreen.
-   Values live in the `Settings` autoload (`core/settings.gd`), saved to `user://settings.cfg`
-   and applied at startup; buses are in `default_bus_layout.tres` (Master, Music, SFX).
+   **Settings** (`ui/menu/settings_screen.*`) — four tabs: Display (window mode, VSync, FPS cap,
+   render distance), Audio (master/music/effects, mute when unfocused), Controls (camera
+   sensitivity, invert Y, key rebinding) and Accessibility (screen shake). Values live in the
+   `Settings` autoload (`core/settings.gd`: one DEFAULTS table, saved to `user://settings.cfg`,
+   applied at startup). To add an option: add its key to DEFAULTS, add a control to the scene
+   with `metadata/setting` = that key (bound automatically), and handle it in `Settings._apply()`
+   or read `Settings.get_value()` where it's used. Rebindable actions are listed in
+   `InputSetup.BINDINGS`. "Reset to Defaults" resets the tab being viewed.
 5. **Name prompt** — "What's my name?"; the first character typed snaps the box to "Krits"
    and the shared `DialogueBox` says "oh yeah I remember it now". Dismissing that line
    creates the save and starts the game.

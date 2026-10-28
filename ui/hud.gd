@@ -105,6 +105,8 @@ func _punch_portrait() -> void:
 ## step, then settling exactly back — same idea as PlayerVisual.squash_stretch()'s
 ## pop, just on a 2D position instead of a 3D scale.
 func _shake_hp_bar() -> void:
+	if not Settings.get_value(&"accessibility/screen_shake"):
+		return
 	if _hp_shake_tween and _hp_shake_tween.is_valid():
 		_hp_shake_tween.kill()
 	_hp_shake_tween = create_tween()
