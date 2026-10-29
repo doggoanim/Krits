@@ -154,13 +154,13 @@ func from_dict(d: Dictionary) -> void:
 	owned_weapons = _load_id_array(d.get("owned_weapons", []), EquipmentLibrary.starting_weapon().id)
 	# A missing key means an old save (wear the starter); an empty string means
 	# "deliberately took it off".
-	equipped_armor = EquipmentLibrary.by_id(StringName(d.get("equipped_armor", ""))) as ArmorData
+	equipped_armor = EquipmentLibrary.by_id(LegacyIds.fix(StringName(d.get("equipped_armor", "")))) as ArmorData
 	if equipped_armor == null and d.has("equipped_armor") == false:
 		equipped_armor = EquipmentLibrary.starting_armor()
-	equipped_shield = EquipmentLibrary.by_id(StringName(d.get("equipped_shield", ""))) as ShieldData
+	equipped_shield = EquipmentLibrary.by_id(LegacyIds.fix(StringName(d.get("equipped_shield", "")))) as ShieldData
 	if equipped_shield == null and d.has("equipped_shield") == false:
 		equipped_shield = EquipmentLibrary.starting_shield()
-	equipped_weapon = EquipmentLibrary.by_id(StringName(d.get("equipped_weapon", ""))) as WeaponData
+	equipped_weapon = EquipmentLibrary.by_id(LegacyIds.fix(StringName(d.get("equipped_weapon", "")))) as WeaponData
 	if equipped_weapon == null: equipped_weapon = EquipmentLibrary.starting_weapon()
 	full_heal()
 
@@ -171,7 +171,7 @@ func from_dict(d: Dictionary) -> void:
 func _load_id_array(raw: Array, fallback: StringName) -> Array[StringName]:
 	var out: Array[StringName] = []
 	for id in raw:
-		out.append(StringName(id))
+		out.append(LegacyIds.fix(StringName(id)))
 	if fallback not in out:
 		out.append(fallback)
 	return out

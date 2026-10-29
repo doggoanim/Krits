@@ -12,14 +12,14 @@ extends RefCounted
 ## their bonuses are deliberately 0 so a fresh save's numbers match the
 ## old flat BASE_HP/BASE_SHIELD/BASE_DAMAGE exactly.
 
-static func starting_armor() -> ArmorData: return cloth_tunic()
-static func starting_shield() -> ShieldData: return buckler()
-static func starting_weapon() -> WeaponData: return rusty_sword()
+static func starting_armor() -> ArmorData: return tunic()
+static func starting_shield() -> ShieldData: return wooden_shield()
+static func starting_weapon() -> WeaponData: return wooden_sword()
 
 # ---------------------------------------------------------------- armor
-static func cloth_tunic() -> ArmorData:
+static func tunic() -> ArmorData:
 	var a := ArmorData.new()
-	a.id = &"cloth_tunic"
+	a.id = &"tunic"
 	a.price = 0
 	a.hp_bonus = 0.0
 	a.display_name = Descriptions.text("names", a.id)
@@ -42,12 +42,12 @@ static func iron_plate() -> ArmorData:
 	return a
 
 static func all_armors() -> Array[ArmorData]:
-	return [cloth_tunic(), leather_armor(), iron_plate()]
+	return [tunic(), leather_armor(), iron_plate()]
 
 # ---------------------------------------------------------------- shield
-static func buckler() -> ShieldData:
+static func wooden_shield() -> ShieldData:
 	var s := ShieldData.new()
-	s.id = &"buckler"
+	s.id = &"wooden_shield"
 	s.price = 0
 	s.shield_bonus = 10.0
 	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
@@ -71,12 +71,12 @@ static func tower_shield() -> ShieldData:
 	return s
 
 static func all_shields() -> Array[ShieldData]:
-	return [buckler(), round_shield(), tower_shield()]
+	return [wooden_shield(), round_shield(), tower_shield()]
 
 # ---------------------------------------------------------------- weapon
-static func rusty_sword() -> WeaponData:
+static func wooden_sword() -> WeaponData:
 	var w := WeaponData.new()
-	w.id = &"rusty_sword"
+	w.id = &"wooden_sword"
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 0.0
@@ -115,7 +115,7 @@ static func apprentice_staff() -> WeaponData:
 	return w
 
 static func all_weapons() -> Array[WeaponData]:
-	return [rusty_sword(), steel_sword(), hunter_bow(), apprentice_staff()]
+	return [wooden_sword(), steel_sword(), hunter_bow(), apprentice_staff()]
 
 # ---------------------------------------------------------------- lookup
 ## Resolves a saved id back to its real EquipmentData, regardless of slot —

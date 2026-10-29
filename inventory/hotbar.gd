@@ -17,7 +17,7 @@ var cooldowns := {}   ## ability id -> seconds left
 func _init() -> void:
 	for a in AbilityLibrary.starting():
 		known.append(a.id)
-	slots[0] = &"second_wind"
+	slots[0] = &"heal"
 	slots[1] = &"super_jump"
 
 static func is_ability_slot(index: int) -> bool:
@@ -109,10 +109,11 @@ func from_dict(d: Dictionary) -> void:
 	if d.is_empty():
 		return   # an old save with no hotbar: keep the starting loadout
 	known.clear()
-	for id in d.get("known", []):
-		if AbilityLibrary.by_id(StringName(id)) != null:
-			known.append(StringName(id))
+	for raw_id in d.get("known", []):
+		var id := LegacyIds.fix(StringName(raw_id))
+		if AbilityLibrary.by_id(id) != null:
+			known.append(id)
 	var raw: Array = d.get("slots", [])
 	for i in SLOT_COUNT:
-		slots[i] = StringName(raw[i]) if i < raw.size() else &""
+		slots[i] = LegacyIds.fix(StringName(raw[i])) if i < raw.size() else &""
 	changed.emit()

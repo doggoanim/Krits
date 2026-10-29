@@ -8,8 +8,8 @@ extends RefCounted
 
 const ICON_DIR := "res://assets/abilities/"
 
-static func second_wind() -> AbilityData:
-	var a := _make(&"second_wind",
+static func heal() -> AbilityData:
+	var a := _make(&"heal",
 		AbilityData.Effect.HEAL, 15.0, 0, Color(1.0, 0.5, 0.55))
 	a.amount = 30.0
 	return a
@@ -34,10 +34,10 @@ static func shockwave() -> AbilityData:
 	return a
 
 static func all_abilities() -> Array[AbilityData]:
-	return [second_wind(), super_jump(), guard_up(), shockwave()]
+	return [heal(), super_jump(), guard_up(), shockwave()]
 
 static func starting() -> Array[AbilityData]:
-	return [second_wind(), super_jump()]
+	return [heal(), super_jump()]
 
 static func by_id(id: StringName) -> AbilityData:
 	for a in all_abilities():

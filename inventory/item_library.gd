@@ -15,8 +15,8 @@ static func health_potion() -> ItemData:
 	i.heal_hp = 40.0
 	return i
 
-static func shield_tonic() -> ItemData:
-	var i := _make(&"shield_tonic", ItemData.Category.CONSUMABLE,
+static func shield_restore() -> ItemData:
+	var i := _make(&"shield_restore", ItemData.Category.CONSUMABLE,
 		Color(0.4, 0.7, 1.0), 25, 10)
 	i.heal_shield = 9999.0
 	return i
@@ -34,7 +34,7 @@ static func key() -> ItemData:
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_tonic(), slime_goo(), key()]
+	return [health_potion(), shield_restore(), slime_goo(), key()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():

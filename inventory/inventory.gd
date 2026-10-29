@@ -160,7 +160,7 @@ func from_dict(d: Dictionary) -> void:
 	stacks.clear()
 	backpack_id = StringName(d.get("backpack", ""))
 	for raw in d.get("stacks", []):
-		var id := StringName(raw.get("id", ""))
+		var id := LegacyIds.fix(StringName(raw.get("id", "")))
 		if ItemLibrary.by_id(id) != null and stacks.size() < capacity():
 			stacks.append({"id": id, "count": int(raw.get("count", 1))})
 	changed.emit()
