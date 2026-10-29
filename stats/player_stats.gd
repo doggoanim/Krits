@@ -62,8 +62,13 @@ func grant_rock_armor(amount: float) -> void:
 
 ## Breaks the armor (shield drained, or the spell recast) with the shatter effect.
 func break_rock_armor() -> void:
-	if not rock_armor_active():
-		return
+	if rock_armor_active():
+		_shatter_rock_armor()
+
+## Clears the armor and plays the break. Separate from break_rock_armor() because
+## take_damage() calls it after the shield has already hit 0 — at which point
+## rock_armor_active() is false and the public check would skip the clear.
+func _shatter_rock_armor() -> void:
 	clear_rock_armor()
 	Events.rock_armor_broken.emit()
 
@@ -91,7 +96,7 @@ func take_damage(amount: float, pierces_shield := false) -> bool:
 		rock_shield -= rock_absorbed
 		amount -= rock_absorbed
 		if rock_shield <= 0.0:
-			break_rock_armor()
+			_shatter_rock_armor()
 		else:
 			Events.rock_armor_changed.emit(rock_shield, rock_shield_max)
 	if pierces_shield:
