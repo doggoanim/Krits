@@ -53,16 +53,6 @@ static func green_slime() -> EnemyData:
 	d.sfx_leap = SLIME_LEAP
 	d.sfx_land = SLIME_LAND
 
-	var goo := ItemDrop.new()
-	goo.item_id = &"slime_goo"
-	goo.chance = 0.8
-	goo.min_count = 1
-	goo.max_count = 2
-	var potion := ItemDrop.new()
-	potion.item_id = &"health_potion"
-	potion.chance = 0.15
-	d.drops = [goo, potion]
-
 	d.leaves_puddle_trail = true
 	d.puddle_interval = 0.5
 	d.puddle_radius = 1.3
@@ -70,6 +60,7 @@ static func green_slime() -> EnemyData:
 	d.puddle_damage = 4.0
 	d.puddle_tick_interval = 0.9
 	d.puddle_landing_radius_mult = 1.6
+	d.drops = Drops.for_enemy(d.id)   # data/drops.cfg
 	return d
 
 static func spinner() -> EnemyData:
@@ -85,6 +76,7 @@ static func spinner() -> EnemyData:
 	s.arms = 3
 	s.bullet_speed = 6.0
 	d.patterns.assign([s])
+	d.drops = Drops.for_enemy(d.id)   # data/drops.cfg
 	return d
 
 static func piercer() -> EnemyData:
@@ -103,4 +95,5 @@ static func piercer() -> EnemyData:
 	p.bullet_speed = 10.0
 	p.pierces_shield = true   # ignores the shield bar
 	d.patterns.assign([p])
+	d.drops = Drops.for_enemy(d.id)   # data/drops.cfg
 	return d
