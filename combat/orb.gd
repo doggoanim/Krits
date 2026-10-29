@@ -35,31 +35,36 @@ enum Kind { PLAIN, ARROW, SHOOT, FIRE, ICE, EARTH, CAST }
 ## Arena._overload_staff()) — one source of truth for "what color is this
 ## element" rather than duplicating them there.
 const KIND_COLORS := {
-	Kind.PLAIN: [Color(0.2, 0.9, 1.0), Color(0.85, 1.0, 1.0)],
-	Kind.ARROW: [Color(0.35, 0.9, 0.35), Color(0.85, 1.0, 0.85)],
-	Kind.SHOOT: [Color(1.0, 0.6, 0.15), Color(1.0, 0.9, 0.7)],
+	Kind.PLAIN: [Color(1.0, 0.2, 0.2), Color(1.0, 0.8, 0.8)],   # sword: red
+	Kind.ARROW: [Color(0.3, 0.9, 0.3), Color(0.85, 1.0, 0.85)],   # bow: green
+	Kind.SHOOT: [Color(0.3, 0.9, 0.3), Color(0.85, 1.0, 0.85)],
 	Kind.FIRE: [Color(1.0, 0.55, 0.1), Color(1.0, 0.85, 0.6)],
 	Kind.ICE: [Color(0.4, 0.8, 1.0), Color(0.85, 0.97, 1.0)],
 	Kind.EARTH: [Color(0.55, 0.35, 0.15), Color(0.85, 0.75, 0.6)],
-	Kind.CAST: [Color(1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0)],
+	Kind.CAST: [Color(0.65, 0.3, 1.0), Color(0.9, 0.8, 1.0)],   # magic: purple
 }
 
-## Kinds that are collected rather than fought over (Bow's arrow bank, every
-## Staff rune) get the hollow-glass treatment in _refresh() plus a billboard
-## icon identifying them, instead of the plain solid core every other kind
-## uses. The value is the icon's texture path — drop an image in at that path
-## and it'll show automatically; until then the icon node is just blank, no
-## error (see _ready()'s ResourceLoader.exists() guard).
+## Every orb is a hollow glass shell (see _refresh()) with a billboard icon in
+## its center, tinted with the orb's own color (see orb_icon.gdshader). The
+## value is the icon's texture path; a missing file just leaves the center
+## empty (see _ready()'s ResourceLoader.exists() guard) — the element runes'
+## art isn't made yet.
 const ICON_TEXTURE_PATHS := {
-	Kind.ARROW: "res://assets/sprites/icons/orb_arrow.png",
+	Kind.PLAIN: "res://assets/ui/sword_icon.png",
+	Kind.ARROW: "res://assets/ui/arrow_icon.png",
+	Kind.SHOOT: "res://assets/ui/bow_icon.png",
+	Kind.CAST: "res://assets/ui/staff_icon.png",
 	Kind.FIRE: "res://assets/sprites/icons/orb_fire.png",
 	Kind.ICE: "res://assets/sprites/icons/orb_ice.png",
 	Kind.EARTH: "res://assets/sprites/icons/orb_earth.png",
 }
-const CORE_HOLLOW_ALPHA := 0.35   ## how see-through the glass-shell core is for ICON_TEXTURE_PATHS kinds
+const ICON_SHADER := preload("res://combat/orb_icon.gdshader")
+const ICON_SIZE := 0.62   ## world-space width/height of the icon quad
+const CORE_HOLLOW_ALPHA := 0.35   ## how see-through the glass-shell core is
 
 var kind: Kind = Kind.PLAIN
-var _icon: Sprite3D   ## only built for ICON_TEXTURE_PATHS kinds — see _ready()
+var _icon: MeshInstance3D   ## billboard icon quad — see _ready()
+var _icon_mat: ShaderMaterial
 
 const CORE_RADIUS := 0.4
 const RING_INNER_RADIUS := 0.5
@@ -123,18 +128,21 @@ func _ready() -> void:
 	_ring.material_override = _ring_mat
 	add_child(_ring)
 
-	if ICON_TEXTURE_PATHS.has(kind):
-		_icon = Sprite3D.new()
-		_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED   # always faces the player
-		_icon.shaded = false
-		_icon.double_sided = true
-		_icon.no_depth_test = true   # reads clearly through the hollow core either way
-		var path: String = ICON_TEXTURE_PATHS[kind]
-		if ResourceLoader.exists(path):
-			_icon.texture = load(path)
-		# else: blank until the art's dropped in at that path — nothing to warn
-		# about, this is the expected state until then.
-		add_child(_icon)
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE * ICON_SIZE
+	_icon_mat = ShaderMaterial.new()
+	_icon_mat.shader = ICON_SHADER
+	_icon_mat.render_priority = 1   # over the core, ring and outline
+	var path: String = ICON_TEXTURE_PATHS.get(kind, "")
+	if path != "" and ResourceLoader.exists(path):
+		_icon_mat.set_shader_parameter(&"icon", load(path))
+	else:
+		_icon_mat.set_shader_parameter(&"fade", 0.0)   # no art yet — draw nothing
+	_icon = MeshInstance3D.new()
+	_icon.mesh = quad
+	_icon.material_override = _icon_mat
+	_icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_icon)
 
 	_build_shadow()
 	_refresh()
@@ -241,18 +249,14 @@ func relocate(pos: Vector3) -> void:
 
 func _refresh() -> void:
 	var colors: Array = KIND_COLORS[kind]
-	# ICON_TEXTURE_PATHS kinds (arrow/fire/ice/earth — everything you collect
-	# rather than fight over) get a hollow, semi-transparent "glass" core
-	# instead of a solid one: CULL_FRONT on a closed sphere hides the near-
-	# side faces, leaving the far-side inside wall visible through it, which
-	# reads as hollow rather than solid. The ring (the "outer layer") stays
-	# exactly as solid as every other kind — only the core changes.
-	var hollow := ICON_TEXTURE_PATHS.has(kind)
+	# Hollow glass core: CULL_FRONT on a closed sphere hides the near-side
+	# faces, leaving the far-side inside wall visible through it, which reads
+	# as hollow rather than solid. The cel outline and the ring stay solid.
 	if active:
 		_core_mat.albedo_color = colors[0]
-		_core_mat.albedo_color.a = CORE_HOLLOW_ALPHA if hollow else 1.0
-		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if hollow else BaseMaterial3D.TRANSPARENCY_DISABLED
-		_core_mat.cull_mode = BaseMaterial3D.CULL_FRONT if hollow else BaseMaterial3D.CULL_BACK
+		_core_mat.albedo_color.a = CORE_HOLLOW_ALPHA
+		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_core_mat.cull_mode = BaseMaterial3D.CULL_FRONT
 	else:
 		_core_mat.albedo_color = INACTIVE_COLOR
 		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -264,4 +268,5 @@ func _refresh() -> void:
 		_outline_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	if _icon:
 		_icon.visible = active
+		_icon_mat.set_shader_parameter(&"tint", colors[0])
 	_base_scale = 1.0 if active else 0.5
