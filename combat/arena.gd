@@ -436,14 +436,23 @@ func _handle_sword_hit(orb: Orb) -> void:
 ## frame, a squash on each enemy, damage numbers and a screen kick.
 func _land_sword_combo() -> void:
 	var pounded := player.pound_landed_frame == Engine.get_physics_frames()
-	var total := _sword_banked * (POUND_BONUS if pounded else 1.0)
+	var banked := _sword_banked
 	var hits := combo
 	_sword_banked = 0.0
 	_sword_hits.clear()
+	_deal_hit(banked, hits, pounded, WeaponData.Kind.SWORD)
+
+## The damaging-hit presentation every weapon shares (sword landing, bow
+## release, staff cast): pound bonus multiplier, sound, a burst + squash +
+## knockback on every enemy, the damage plate, screen kick and hit-stop.
+## `hits` is how many hits/arrows/runes this blow stacks — it scales the
+## feedback, and a lone x1 hit gets no freeze (a pound bonus still does).
+func _deal_hit(base_damage: float, hits: int, pounded: bool, kind: WeaponData.Kind) -> void:
+	var total := base_damage * (POUND_BONUS if pounded else 1.0)
 	if pounded:
 		player.audio.play_pound_bonus()
 	else:
-		player.audio.play_damage_hit(WeaponData.Kind.SWORD, hits)
+		player.audio.play_damage_hit(kind, hits)
 	var power := float(hits)
 	for e in enemies.duplicate():
 		if is_instance_valid(e):
@@ -454,8 +463,14 @@ func _land_sword_combo() -> void:
 	Events.combo_landed.emit(total, hits, pounded)
 	if player.camera_rig:
 		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8) + (0.2 if pounded else 0.0))
-	if hits > 1 or pounded:   # a lone x1 hit gets no freeze (a pound bonus still does)
+	if hits > 1 or pounded:
 		HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.6 if pounded else 1.0))
+
+## True while the player is ground-pounding (windup or slam) — the bow and
+## staff release on orb contact, so "pound into the orb" means touching it
+## in this state.
+func _is_pounding() -> bool:
+	return player.machine.current_name == &"Pound"
 
 ## ARROW orbs bank damage without hitting anything; the next SHOOT orb
 ## releases the whole bank at once (and does nothing if nothing's banked —
@@ -475,10 +490,11 @@ func _handle_bow_hit(orb: Orb) -> void:
 		return
 	combo += 1
 	var dmg := _arrow_stack
+	var arrows := _arrow_count
 	_arrow_stack = 0.0
 	_arrow_count = 0
 	Events.arrows_changed.emit(0)
-	_resolve_hit(orb, dmg, combo)
+	_resolve_hit(orb, dmg, combo, arrows)
 
 ## A rune (FIRE/ICE/EARTH) just queues itself, no damage dealt and no bounce
 ## — it's a pickup, not combat feedback (see Orb.Kind's doc comment). CAST is
@@ -528,6 +544,7 @@ func _cast_rune_buffer(orb: Orb) -> void:
 		_respawn_orb_later(orb)
 		return
 	var spell: Dictionary = _lookup_spell(_rune_buffer)
+	var runes := _rune_buffer.size()
 	_rune_buffer.clear()
 	_rune_buffer_t = 0.0
 	_update_buffer_label()
@@ -535,7 +552,7 @@ func _cast_rune_buffer(orb: Orb) -> void:
 	var dmg := Game.stats.damage() * (spell.mult as float)
 	for status in (spell.statuses as Array):
 		_apply_element_status(status)
-	_resolve_hit(orb, dmg, combo)
+	_resolve_hit(orb, dmg, combo, runes)
 
 func _apply_element_status(element: Orb.Kind) -> void:
 	for e in enemies:
@@ -617,25 +634,17 @@ func _rune_name(k: Orb.Kind) -> String:
 ## The part every damage-dealing orb hit shares, regardless of which weapon
 ## got it there: hit every enemy, bounce the player, fire the usual combo/
 ## orb_hit events, and schedule the orb's respawn.
-func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int) -> void:
-	player.audio.play_damage_hit(_equipped_weapon_kind())
-	for e in enemies.duplicate():
-		if is_instance_valid(e):
-			e.knockback(player.global_position, 3.0)
-			e.take_damage(dmg)   # same damage to every enemy
+func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int, hits: int) -> void:
+	var pounded := _is_pounding()   # read before the bounce changes state
 	player.bounce_off_orb(combo_for_feedback)
-	if _over:
-		# That damage just finished off the last enemy — take_damage()'s
-		# defeat chain ran synchronously inside the loop above and already
-		# called _end(), which reset the combo to 0 for the HUD. Emitting
-		# this hit's own (now-stale) nonzero combo below would stomp that
-		# reset right back to the finishing count, and with the fight over
-		# there's no later hit or landing left to clear it again — it would
-		# just sit there on screen. Skip it instead.
-		return
+	# Combo events go out BEFORE the damage: if this blow finishes the last
+	# enemy, _end() resets the combo to 0 inside the damage loop, and that
+	# reset must be the last word (and must not wipe the damage plate).
 	Events.orb_hit.emit(combo_for_feedback, dmg)
 	Events.combo_changed.emit(combo_for_feedback)
-	_respawn_orb_later(orb)
+	_deal_hit(dmg, hits, pounded, _equipped_weapon_kind())
+	if not _over:
+		_respawn_orb_later(orb)
 
 func _respawn_orb_later(orb: Orb) -> void:
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
