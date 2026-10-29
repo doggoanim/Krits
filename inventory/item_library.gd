@@ -26,14 +26,14 @@ static func slime_goo() -> ItemData:
 		"Wobbly and a little warm. Shops pay for it.", Color(0.45, 0.75, 0.3), 0, 4)
 
 # ---------------------------------------------------------------- key items
-static func old_key() -> ItemData:
-	var i := _make(&"old_key", "Old Key", ItemData.Category.KEY,
+static func key() -> ItemData:
+	var i := _make(&"key", "Key", ItemData.Category.KEY,
 		"Heavy and rusty. It must open something.", Color(0.9, 0.8, 0.4))
 	i.max_stack = 1
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_tonic(), slime_goo(), old_key()]
+	return [health_potion(), shield_tonic(), slime_goo(), key()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():
