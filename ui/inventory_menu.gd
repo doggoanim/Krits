@@ -74,7 +74,7 @@ func open() -> void:
 func refresh() -> void:
 	var s := Game.stats
 	_gold.text = "Gold: %d" % s.gold
-	_stats_label.text = "HP %d/%d   Shield %d/%d   Damage %d" % [s.hp, s.max_hp(), s.shield, s.max_shield(), s.damage()]
+	_stats_label.text = "HP %d/%d   Shield %d/%d   Damage %s" % [s.hp, s.max_hp(), s.shield, s.max_shield(), String.num(s.damage())]
 	_build_items()
 	_build_gear()
 	_build_abilities()

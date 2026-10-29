@@ -14,7 +14,7 @@ extends RefCounted
 
 const BASE_HP := 100.0
 const BASE_SHIELD := 0.0    ## no shield worn = no shield bar
-const BASE_DAMAGE := 1.0   ## orb hits are the only thing that uses this — combo scaling
+const BASE_DAMAGE := 0.0   ## orb hits are the only thing that uses this — combo scaling
                            ## (see Arena.COMBO_BONUS) still ramps up from here as normal
 const DEATH_GOLD_LOSS := 0.25   ## fraction of your gold dropped when you die
 const SHIELD_RECHARGE_DELAY := 3.0

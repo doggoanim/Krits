@@ -79,7 +79,7 @@ static func wooden_sword() -> WeaponData:
 	w.id = &"wooden_sword"
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
-	w.damage_bonus = 0.0
+	w.damage_bonus = 0.5
 	# Hangs from the shield's top edge by its handle, blade pointing down. The
 	# glb's origin is the pommel with the blade along +Y, so flip it 180° and
 	# shift it up so the handle (not the pommel) sits on the hang point.
@@ -92,7 +92,7 @@ static func steel_sword() -> WeaponData:
 	w.id = &"steel_sword"
 	w.price = 60
 	w.kind = WeaponData.Kind.SWORD
-	w.damage_bonus = 4.0
+	w.damage_bonus = 5.0
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
@@ -101,7 +101,7 @@ static func hunter_bow() -> WeaponData:
 	w.id = &"hunter_bow"
 	w.price = 80
 	w.kind = WeaponData.Kind.BOW
-	w.damage_bonus = 3.0
+	w.damage_bonus = 4.0
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
@@ -110,7 +110,7 @@ static func apprentice_staff() -> WeaponData:
 	w.id = &"apprentice_staff"
 	w.price = 80
 	w.kind = WeaponData.Kind.STAFF
-	w.damage_bonus = 3.0
+	w.damage_bonus = 4.0
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
@@ -151,5 +151,5 @@ static func _look(item: EquipmentData, file: String, model_scale: float,
 static func stat_line(item: EquipmentData) -> String:
 	if item is ArmorData: return "Armor: +%d max HP" % item.hp_bonus
 	if item is ShieldData: return "Shield: +%d max shield" % item.shield_bonus
-	if item is WeaponData: return "Weapon: +%d damage" % item.damage_bonus
+	if item is WeaponData: return "Weapon: %s damage" % String.num(item.damage_bonus)
 	return ""
