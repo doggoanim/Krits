@@ -745,7 +745,7 @@ script = ExtResource("1_spawn")
 display_name = "Town Square"
 
 [node name="OverlookSpawn" type="Area3D" parent="Spawnpoints" unique_id=1205227977]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.5436, 5.2576275, 0)
 script = ExtResource("1_spawn")
 spawn_id = &"overlook"
 display_name = "Hilltop"
