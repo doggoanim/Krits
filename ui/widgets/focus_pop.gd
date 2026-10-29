@@ -65,13 +65,13 @@ func _on_mouse_entered() -> void:
 	if (base != null and base.disabled) or target.focus_mode == Control.FOCUS_NONE:
 		return
 	if _in_inventory():
-		return   # the inventory only focuses on click (or keyboard), never on hover
+		return   # the inventory and shop only focus on click (or keyboard), never on hover
 	target.grab_focus()   # hovering selects, same as the keyboard
 
 func _in_inventory() -> bool:
 	var node: Node = target.get_parent()
 	while node != null:
-		if node is InventoryMenu:
+		if node is InventoryMenu or node is ShopMenu:
 			return true
 		node = node.get_parent()
 	return false
