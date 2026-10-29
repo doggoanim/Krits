@@ -995,7 +995,8 @@ func jump_off_wall(away: Vector3) -> void:
 ## `toward` (optional): a world position to arc the bounce toward instead of
 ## popping straight up — the launch is a ballistic arc that reaches that
 ## point's height on the way down (or its apex, if it's too high to reach),
-## with the horizontal speed capped at ORB_ARC_MAX_SPEED.
+## scaled down to ORB_ARC_ASSIST of the way and capped at ORB_ARC_MAX_SPEED —
+## a slight push toward the target, the player still has to steer the rest.
 func bounce_off_orb(combo := 1, toward: Variant = null) -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
@@ -1009,10 +1010,12 @@ func bounce_off_orb(combo := 1, toward: Variant = null) -> void:
 	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
 
-const ORB_ARC_MAX_SPEED := 22.0   ## horizontal speed cap for bounces aimed at another orb
+const ORB_ARC_ASSIST := 0.35      ## fraction of the full arc to the target that a bounce actually pushes you along — a nudge, not autopilot
+const ORB_ARC_MAX_SPEED := 8.0    ## horizontal speed cap for that nudge
 
-## Horizontal velocity that carries the player from here to `target` over the
-## bounce's own flight time (see bounce_off_orb()).
+## A fraction (ORB_ARC_ASSIST) of the horizontal velocity that would carry the
+## player from here to `target` over the bounce's own flight time (see
+## bounce_off_orb()).
 func _arc_hvel(target: Vector3) -> Vector3:
 	var vy := config.orb_bounce_velocity
 	var g := config.gravity
@@ -1020,7 +1023,7 @@ func _arc_hvel(target: Vector3) -> Vector3:
 	var disc := vy * vy - 2.0 * g * dy
 	var t := (vy + sqrt(disc)) / g if disc > 0.0 else vy / g   # the descending crossing of the target's height
 	var flat := Vector3(target.x - global_position.x, 0.0, target.z - global_position.z)
-	return (flat / maxf(t, 0.1)).limit_length(ORB_ARC_MAX_SPEED)
+	return (flat / maxf(t, 0.1) * ORB_ARC_ASSIST).limit_length(ORB_ARC_MAX_SPEED)
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move
 ## horizontal velocity. Always launches into Air with an upward pop — this is
