@@ -20,28 +20,25 @@ static func starting_weapon() -> WeaponData: return rusty_sword()
 static func cloth_tunic() -> ArmorData:
 	var a := ArmorData.new()
 	a.id = &"cloth_tunic"
-	a.display_name = "Tunic"
 	a.price = 0
 	a.hp_bonus = 0.0
-	a.display_name = Descriptions.text("names", a.id, a.display_name)
+	a.display_name = Descriptions.text("names", a.id)
 	return a
 
 static func leather_armor() -> ArmorData:
 	var a := ArmorData.new()
 	a.id = &"leather_armor"
-	a.display_name = "Leather Armor"
 	a.price = 50
 	a.hp_bonus = 40.0
-	a.display_name = Descriptions.text("names", a.id, a.display_name)
+	a.display_name = Descriptions.text("names", a.id)
 	return a
 
 static func iron_plate() -> ArmorData:
 	var a := ArmorData.new()
 	a.id = &"iron_plate"
-	a.display_name = "Iron Plate"
 	a.price = 150
 	a.hp_bonus = 90.0
-	a.display_name = Descriptions.text("names", a.id, a.display_name)
+	a.display_name = Descriptions.text("names", a.id)
 	return a
 
 static func all_armors() -> Array[ArmorData]:
@@ -51,29 +48,26 @@ static func all_armors() -> Array[ArmorData]:
 static func buckler() -> ShieldData:
 	var s := ShieldData.new()
 	s.id = &"buckler"
-	s.display_name = "Wooden Shield"
 	s.price = 0
 	s.shield_bonus = 10.0
 	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
-	s.display_name = Descriptions.text("names", s.id, s.display_name)
+	s.display_name = Descriptions.text("names", s.id)
 	return s
 
 static func round_shield() -> ShieldData:
 	var s := ShieldData.new()
 	s.id = &"round_shield"
-	s.display_name = "Round Shield"
 	s.price = 50
 	s.shield_bonus = 30.0
-	s.display_name = Descriptions.text("names", s.id, s.display_name)
+	s.display_name = Descriptions.text("names", s.id)
 	return s
 
 static func tower_shield() -> ShieldData:
 	var s := ShieldData.new()
 	s.id = &"tower_shield"
-	s.display_name = "Tower Shield"
 	s.price = 150
 	s.shield_bonus = 70.0
-	s.display_name = Descriptions.text("names", s.id, s.display_name)
+	s.display_name = Descriptions.text("names", s.id)
 	return s
 
 static func all_shields() -> Array[ShieldData]:
@@ -83,7 +77,6 @@ static func all_shields() -> Array[ShieldData]:
 static func rusty_sword() -> WeaponData:
 	var w := WeaponData.new()
 	w.id = &"rusty_sword"
-	w.display_name = "Wooden Sword"
 	w.price = 0
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 0.0
@@ -91,37 +84,34 @@ static func rusty_sword() -> WeaponData:
 	# glb's origin is the pommel with the blade along +Y, so flip it 180° and
 	# shift it up so the handle (not the pommel) sits on the hang point.
 	_look(w, "sword_wooden", 0.3, Vector3(0.0, 0.1, 0.0), Vector3(0.0, 0.0, 180.0))
-	w.display_name = Descriptions.text("names", w.id, w.display_name)
+	w.display_name = Descriptions.text("names", w.id)
 	return w
 
 static func steel_sword() -> WeaponData:
 	var w := WeaponData.new()
 	w.id = &"steel_sword"
-	w.display_name = "Steel Sword"
 	w.price = 60
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 4.0
-	w.display_name = Descriptions.text("names", w.id, w.display_name)
+	w.display_name = Descriptions.text("names", w.id)
 	return w
 
 static func hunter_bow() -> WeaponData:
 	var w := WeaponData.new()
 	w.id = &"hunter_bow"
-	w.display_name = "Hunter's Bow"
 	w.price = 80
 	w.kind = WeaponData.Kind.BOW
 	w.damage_bonus = 3.0
-	w.display_name = Descriptions.text("names", w.id, w.display_name)
+	w.display_name = Descriptions.text("names", w.id)
 	return w
 
 static func apprentice_staff() -> WeaponData:
 	var w := WeaponData.new()
 	w.id = &"apprentice_staff"
-	w.display_name = "Apprentice Staff"
 	w.price = 80
 	w.kind = WeaponData.Kind.STAFF
 	w.damage_bonus = 3.0
-	w.display_name = Descriptions.text("names", w.id, w.display_name)
+	w.display_name = Descriptions.text("names", w.id)
 	return w
 
 static func all_weapons() -> Array[WeaponData]:
