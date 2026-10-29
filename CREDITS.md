@@ -29,4 +29,4 @@ Made with [Godot Engine](https://godotengine.org) — MIT License,
 
 ## Audio
 
-*Add sound effect and music credits here (author, source link, license).*
+SFX from Soundly, Pixabay
