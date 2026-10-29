@@ -578,17 +578,17 @@ func _handle_staff_hit(orb: Orb) -> void:
 	player.bounce_off_orb(_rune_buffer.size(), next_orb.global_position if next_orb else null)
 	_respawn_orb_later(orb)
 
-## The rune timer ran out: the queued magic fizzles back on the caster — the
-## same self-inflicted, shield-piercing damage as an overload (minus the
-## fling), with the runes' own colors bursting off the player.
+## The rune timer ran out: the most recently queued rune fizzles away (no
+## damage), and the timer restarts for whatever is left — so an idle buffer
+## drains one rune per timeout instead of being wiped at once.
 func _fizzle_staff() -> void:
-	for rune in _rune_buffer:
+	if _rune_buffer.is_empty():
+		return
+	var rune: int = _rune_buffer.pop_back()
+	if is_instance_valid(player):
 		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[rune][0], 1.0)
-	_rune_buffer.clear()
-	_rune_buffer_t = 0.0
+	_rune_buffer_t = STAFF_BUFFER_TIMEOUT if not _rune_buffer.is_empty() else 0.0
 	_publish_runes()
-	if is_instance_valid(player) and not player.dead and not _over:
-		player.hit(STAFF_OVERLOAD_DAMAGE, true)
 
 ## Queuing a 4th rune overloads the staff: the whole buffer dumps itself as
 ## self-inflicted damage (pierces the shield, same as a real hit that
