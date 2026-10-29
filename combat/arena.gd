@@ -728,7 +728,10 @@ func _on_stats_changed() -> void:
 	Events.combo_changed.emit(0)
 	Events.arrows_changed.emit(0)
 	_publish_runes()
-	var count := orbs.size()
+	var count := 0
+	for o in orbs:
+		if is_instance_valid(o) and not o.has_meta(&"stacked"):
+			count += 1   # stacked extras aren't part of the base set
 	for o in orbs:
 		if is_instance_valid(o):
 			VFX.shatter(self, o.global_position, Orb.KIND_COLORS[o.kind][0])
