@@ -19,7 +19,7 @@ extends Node3D
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
 @export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
 @export var staff_mount_drop := 0.315   ## the staff's mount sits this far below the shield's top edge — its centre, so it tilts about the middle
-@export var staff_tilt_deg := 12.0   ## how far a floating staff leans toward the player's right
+@export var staff_tilt_deg := 22.0   ## how far a floating staff leans toward the player's right
 @export var follow_speed := 90.0   ## how tightly the gear tracks the player (higher = less lag)
 @export var turn_speed := 20.0     ## same, for turning to match the player's facing
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
