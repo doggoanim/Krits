@@ -137,8 +137,7 @@ func _process(delta: float) -> void:
 		return
 	_rune_buffer_t -= delta
 	if _rune_buffer_t <= 0.0:
-		_rune_buffer.clear()
-		_publish_runes()
+		_fizzle_staff()
 
 ## `origin` is the fight's centre, normally the player's own feet where the
 ## encounter was triggered. The player is never moved — the barrier simply
@@ -533,6 +532,18 @@ func _handle_staff_hit(orb: Orb) -> void:
 	_publish_runes()
 	_respawn_orb_later(orb)
 
+## The rune timer ran out: the queued magic fizzles back on the caster — the
+## same self-inflicted, shield-piercing damage as an overload (minus the
+## fling), with the runes' own colors bursting off the player.
+func _fizzle_staff() -> void:
+	for rune in _rune_buffer:
+		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[rune][0], 1.0)
+	_rune_buffer.clear()
+	_rune_buffer_t = 0.0
+	_publish_runes()
+	if is_instance_valid(player) and not player.dead and not _over:
+		player.hit(STAFF_OVERLOAD_DAMAGE, true)
+
 ## Queuing a 4th rune overloads the staff: the whole buffer dumps itself as
 ## self-inflicted damage (pierces the shield, same as a real hit that
 ## ignores it — see Player.hit()) with a tri-color burst (one per element,
@@ -699,12 +710,26 @@ func _on_player_landed() -> void:
 ## Getting hit costs one step of the combo (and, for the sword, that step's
 ## banked damage).
 func _on_player_hurt(_from: Vector3) -> void:
-	if combo <= 0 or _over:
+	if _over:
 		return
-	if not _sword_hits.is_empty():
-		_sword_banked = maxf(0.0, _sword_banked - _sword_hits.pop_back())
-	combo -= 1
-	Events.combo_changed.emit(combo)
+	match _equipped_weapon_kind():
+		WeaponData.Kind.BOW:   # lose one stacked arrow
+			if _arrow_count > 0:
+				_arrow_count -= 1
+				_arrow_stack = maxf(0.0, _arrow_stack - Game.stats.damage())
+				if _arrow_count == 0:
+					_arrow_stack = 0.0
+				Events.arrows_changed.emit(_arrow_count)
+		WeaponData.Kind.STAFF:   # lose the most recently queued rune
+			if not _rune_buffer.is_empty():
+				_rune_buffer.pop_back()
+				_publish_runes()
+		_:
+			if combo > 0:
+				if not _sword_hits.is_empty():
+					_sword_banked = maxf(0.0, _sword_banked - _sword_hits.pop_back())
+				combo -= 1
+				Events.combo_changed.emit(combo)
 
 func _on_enemy_defeated(e: Enemy) -> void:
 	enemies.erase(e)
