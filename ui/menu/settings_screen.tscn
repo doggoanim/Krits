@@ -219,11 +219,11 @@ popup/item_0/id = 1
 popup/item_1/text = "Fine"
 popup/item_1/id = 2
 popup/item_2/text = "Normal"
-popup/item_2/id = 4
+popup/item_2/id = 3
 popup/item_3/text = "Chunky"
-popup/item_3/id = 6
+popup/item_3/id = 4
 popup/item_4/text = "Extra Chunky"
-popup/item_4/id = 8
+popup/item_4/id = 6
 metadata/setting = &"display/pixelation"
 
 [node name="AudioPage" type="VBoxContainer" parent="Content/Pages"]
