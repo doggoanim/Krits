@@ -60,9 +60,20 @@ func _clear() -> void:
 ## swallow it before MenuBase's _unhandled_input ever saw it — so while open,
 ## catch the toggle here, ahead of GUI focus handling.
 func _input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed(toggle_action):
+	if not visible:
+		return
+	if event.is_action_pressed(toggle_action):
 		close()
 		get_viewport().set_input_as_handled()
+		return
+	# With an item/ability selected, its hotbar number key assigns it directly
+	# (same as clicking that number's button below the details).
+	if _assign_id != &"" and event is InputEventKey and not (event as InputEventKey).echo:
+		for slot: int in _assign_slots:
+			if event.is_action_pressed(StringName("hotbar_%d" % (slot + 1))):
+				_assign(_assign_id, slot)
+				get_viewport().set_input_as_handled()
+				return
 
 func open() -> void:
 	super()
@@ -187,7 +198,12 @@ func _drop_selected() -> void:
 
 # ---------------------------------------------------------------- hotbar assignment
 
+var _assign_id: StringName = &""   ## what the number keys would assign right now (see _input())
+var _assign_slots: Array = []
+
 func _clear_assign() -> void:
+	_assign_id = &""
+	_assign_slots = []
 	_assign_label.visible = false
 	_clear_children(_assign_row)
 
@@ -196,6 +212,8 @@ func _clear_assign() -> void:
 func _set_assign(id: StringName, slots: Array) -> void:
 	_clear_children(_assign_row)
 	_assign_label.visible = true
+	_assign_id = id
+	_assign_slots = slots
 	var current := Game.hotbar.slot_of(id)
 	for slot in slots:
 		var b := Button.new()

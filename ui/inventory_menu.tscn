@@ -314,7 +314,7 @@ visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.7)
 theme_override_font_sizes/font_size = 32
-text = "Hotbar slot:"
+text = "Hotbar slot (click or press its number):"
 
 [node name="AssignRow" type="HBoxContainer" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
 unique_name_in_owner = true
