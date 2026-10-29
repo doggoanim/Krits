@@ -65,7 +65,7 @@ static func _make(id: StringName, name: String, cat: ItemData.Category, desc: St
 		color: Color, buy := 0, sell := 0) -> ItemData:
 	var i := ItemData.new()
 	i.id = id
-	i.display_name = name
+	i.display_name = Descriptions.text("names", id, name)
 	i.category = cat
 	i.description = Descriptions.text("items", id, desc)
 	i.color = color
@@ -79,7 +79,7 @@ static func _make(id: StringName, name: String, cat: ItemData.Category, desc: St
 static func _bag(id: StringName, name: String, price: int, slots: int) -> BackpackData:
 	var b := BackpackData.new()
 	b.id = id
-	b.display_name = name
+	b.display_name = Descriptions.text("names", id, name)
 	b.price = price
 	b.slots = slots
 	return b

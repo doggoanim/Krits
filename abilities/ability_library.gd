@@ -48,7 +48,7 @@ static func _make(id: StringName, name: String, desc: String, effect: AbilityDat
 		cooldown: float, price: int, color: Color) -> AbilityData:
 	var a := AbilityData.new()
 	a.id = id
-	a.display_name = name
+	a.display_name = Descriptions.text("names", id, name)
 	a.description = Descriptions.text("abilities", id, desc)
 	a.effect = effect
 	a.cooldown = cooldown
