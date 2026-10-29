@@ -21,14 +21,20 @@ static func focus() -> void:
 	_last_focus_msec = now
 	_play(FOCUS)
 
-static func _play(stream: AudioStream) -> void:
+## The dialogue typewriter's tick — the focus sound with extra pitch wobble
+## so a run of them reads as typing, not a machine gun. No debounce (the
+## caller already thins them out).
+static func blip() -> void:
+	_play(FOCUS, 0.16)
+
+static func _play(stream: AudioStream, pitch_variance := PITCH_VARIANCE) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
 		return
 	var p := AudioStreamPlayer.new()
 	p.stream = stream
 	p.bus = &"SFX"
-	p.pitch_scale = 1.0 + randf_range(-PITCH_VARIANCE, PITCH_VARIANCE)
+	p.pitch_scale = 1.0 + randf_range(-pitch_variance, pitch_variance)
 	p.process_mode = Node.PROCESS_MODE_ALWAYS
 	tree.root.add_child(p)
 	p.play()

@@ -42,6 +42,7 @@ var _current: DialogueNode
 var _stage: DialogueStage
 var _line_done := false
 var _opened_frame := -1
+var _typed := 0   ## visible characters revealed so far, for thinning out the typing sound
 var _tween: Tween
 
 static func create() -> DialogueBox:
@@ -51,6 +52,7 @@ func _ready() -> void:
 	instance = self
 	visible = false
 	_typewriter.finished.connect(_on_line_finished)
+	_typewriter.character_revealed.connect(_on_character_revealed)
 	for c in [_plate, _name_tag]:
 		c.resized.connect(_center_pivot.bind(c))
 		_center_pivot(c)
@@ -108,6 +110,15 @@ func _press_interact() -> void:
 				focused.pressed.emit()
 		else:
 			_advance()
+
+## Typing sound: a soft tick on every other visible character (spaces and
+## punctuation stay silent), using the UI focus sound.
+func _on_character_revealed(character: String) -> void:
+	if character.strip_edges() == "":
+		return
+	_typed += 1
+	if _typed % 2 == 0:
+		UiSfx.blip()
 
 func _on_setting_changed(key: StringName) -> void:
 	if key == &"controls/bindings":
