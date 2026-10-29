@@ -81,6 +81,7 @@ const SPAWN_CLEARANCE_LIFT := 0.4  ## see is_spot_clear()
 
 ## ---- reveal sequence (see play_intro()) ----
 const WALL_SHADER := preload("res://combat/arena_wall.gdshader")
+const PLATFORM_SHADER := preload("res://combat/arena_platform.gdshader")
 const POST_EVERY := 4           ## a post at every Nth wall segment
 const POST_HEIGHT := 2.2
 const POST_RADIUS := 0.3
@@ -772,9 +773,9 @@ func _build_platform() -> void:
 	_platform_mesh = MeshInstance3D.new()
 	_platform_mesh.mesh = cyl
 	_platform_mesh.position.y = -1.02
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.82, 0.78, 0.7)
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var mat := ShaderMaterial.new()   # same chalky hand-drawn look as the barrier wall
+	mat.shader = PLATFORM_SHADER
+	mat.set_shader_parameter(&"radius", disc_radius)
 	_platform_mesh.material_override = mat
 	_platform_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	body.add_child(_platform_mesh)
