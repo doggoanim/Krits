@@ -9,9 +9,15 @@
 [ext_resource type="Script" uid="uid://cji8cv4nhnvxx" path="res://ui/widgets/portrait_viewport.gd" id="7"]
 [ext_resource type="Script" path="res://ui/widgets/rune_bar.gd" id="rune_bar"]
 [ext_resource type="Script" path="res://ui/widgets/rock_armor_indicator.gd" id="rock_indicator"]
+[ext_resource type="Shader" path="res://ui/widgets/earth_fill.gdshader" id="earth_shader"]
+[ext_resource type="Texture2D" path="res://assets/sprites/dirt_texture.png" id="dirt_tex"]
 [ext_resource type="Texture2D" uid="uid://c120af7sqe3ml" path="res://assets/ui/button_1.png" id="plate_1"]
 [ext_resource type="Texture2D" uid="uid://ctbnugoakkam8" path="res://assets/ui/button_2.png" id="plate_2"]
 [ext_resource type="Texture2D" uid="uid://dxnfu8qr88oqk" path="res://assets/ui/button_3.png" id="plate_3"]
+
+[sub_resource type="ShaderMaterial" id="EarthFill"]
+shader = ExtResource("earth_shader")
+shader_parameter/dirt = ExtResource("dirt_tex")
 
 [sub_resource type="StyleBoxTexture" id="ComboPlate1"]
 content_margin_left = 54.0
@@ -88,6 +94,7 @@ texture = ExtResource("2")
 [node name="RockShieldFill" type="Control" parent="HpGroup"]
 unique_name_in_owner = true
 visible = false
+material = SubResource("EarthFill")
 anchors_preset = 0
 offset_right = 270.0
 offset_bottom = 52.0
