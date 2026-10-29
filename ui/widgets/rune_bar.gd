@@ -8,11 +8,12 @@ extends Control
 ## in hud.tscn, the look is the exported values below.
 
 @export var slot_count := 3
-@export var slot_size := 76.0
-@export var slot_gap := 16.0
-@export var plate_color := Color(0.07, 0.06, 0.1, 0.88)
-@export var empty_color := Color(1, 1, 1, 0.14)
-@export var corner_radius := 18
+@export var slot_size := 96.0
+@export var slot_gap := 10.0
+@export var plate_styles: Array[StyleBox] = []   ## the hand-drawn button plates (hud.tscn assigns button_1..3), one per slot, cycled
+@export var plate_margin := 24.0                 ## nine-slice margin used at slot size (the plates are wide, the slots square)
+@export var empty_tint := Color(1, 1, 1, 0.3)    ## tint of an unfilled slot's plate
+@export var ink := Color(0.05, 0.04, 0.06)       ## outline color of the glyphs, matching the plates' black linework
 
 var _runes: Array = []        ## Orb.Kind values, oldest first
 var _pops: Array[float] = []  ## per-slot squash-and-stretch multiplier (1.0 = rest)
@@ -67,68 +68,70 @@ func _draw() -> void:
 		var half := slot_size * 0.5 * pop
 		var rect := Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0)
 		var element: Orb.Kind = _runes[i] if filled else Orb.Kind.FIRE
-		var color: Color = Orb.KIND_COLORS[element][0] if filled else empty_color
-		_draw_plate(rect, color, filled)
+		var color: Color = Orb.KIND_COLORS[element][0] if filled else empty_tint
+		_draw_plate(rect, i, color)
 		if filled:
 			var bob := sin(_t * 3.0 + i) * 1.5
-			_draw_glyph(element, center + Vector2(0, bob), half * 0.52, color)
+			_draw_glyph(element, center + Vector2(0, bob), half * 0.5)
 	# Timer line: drains left→right-to-left until the buffer expires.
-	var y := slot_size + 12.0
+	var y := slot_size + 16.0
 	var frac := clampf(_time_left / _lifetime, 0.0, 1.0)
-	draw_line(Vector2(origin.x, y), Vector2(origin.x + total_w, y), Color(0, 0, 0, 0.45), 6.0, true)
+	draw_line(Vector2(origin.x, y), Vector2(origin.x + total_w, y), Color(0, 0, 0, 0.35), 10.0, true)
 	if frac > 0.0:
-		var warn := Color(1, 0.35, 0.3) if frac < 0.3 else Color(1, 1, 1, 0.9)
-		draw_line(Vector2(origin.x, y), Vector2(origin.x + total_w * frac, y), warn, 4.0, true)
+		var warn := Color(1, 0.35, 0.3) if frac < 0.3 else Color.WHITE
+		draw_line(Vector2(origin.x + 2.0, y), Vector2(origin.x + total_w * frac - 2.0, y), ink, 10.0, true)
+		draw_line(Vector2(origin.x + 4.0, y), Vector2(origin.x + total_w * frac - 4.0, y), warn, 5.0, true)
 
-func _draw_plate(rect: Rect2, color: Color, filled: bool) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.set_corner_radius_all(corner_radius)
-	sb.bg_color = plate_color
-	sb.set_border_width_all(4 if filled else 2)
-	sb.border_color = color
-	if filled:
-		sb.shadow_color = Color(color, 0.55)
-		sb.shadow_size = 10
-	draw_style_box(sb, rect)
-	if filled:   # soft inner tint so the plate glows in the element's color
-		var inner := StyleBoxFlat.new()
-		inner.set_corner_radius_all(maxi(corner_radius - 5, 2))
-		inner.bg_color = Color(color, 0.22)
-		draw_style_box(inner, rect.grow(-5.0))
+## The user's hand-drawn plate texture, nine-sliced to a square and tinted
+## with the element's color (the art is white with a black outline).
+func _draw_plate(rect: Rect2, slot: int, tint: Color) -> void:
+	if plate_styles.is_empty():
+		draw_rect(rect, tint)
+		return
+	var base := plate_styles[slot % plate_styles.size()]
+	var style := base.duplicate() as StyleBox
+	if style is StyleBoxTexture:
+		var tex_style := style as StyleBoxTexture
+		tex_style.texture_margin_left = plate_margin
+		tex_style.texture_margin_right = plate_margin
+		tex_style.texture_margin_top = plate_margin
+		tex_style.texture_margin_bottom = plate_margin
+		tex_style.modulate_color = tint
+	draw_style_box(style, rect)
 
-## Hand-drawn element glyphs: flame, snow crystal, rock. `r` is the half-size.
-func _draw_glyph(element: Orb.Kind, c: Vector2, r: float, color: Color) -> void:
-	var light := color.lerp(Color.WHITE, 0.55)
+## Element glyphs — flame, snow crystal, rock — white with a black outline,
+## the same inked look as the plates. `r` is the half-size.
+func _draw_glyph(element: Orb.Kind, c: Vector2, r: float) -> void:
 	match element:
 		Orb.Kind.FIRE:
-			var flame := PackedVector2Array([
+			_poly(PackedVector2Array([
 				Vector2(0.05, -1.0), Vector2(0.6, -0.15), Vector2(0.55, 0.5), Vector2(0.0, 1.0),
-				Vector2(-0.55, 0.5), Vector2(-0.6, -0.05), Vector2(-0.25, -0.35)])
-			draw_colored_polygon(_xf(flame, c, r), color.lerp(Color.WHITE, 0.15))
-			var core := PackedVector2Array([
-				Vector2(0.0, -0.1), Vector2(0.32, 0.45), Vector2(0.0, 0.85), Vector2(-0.32, 0.45)])
-			draw_colored_polygon(_xf(core, c, r), light)
+				Vector2(-0.55, 0.5), Vector2(-0.6, -0.05), Vector2(-0.25, -0.35)]), c, r, Color.WHITE)
+			_poly(PackedVector2Array([
+				Vector2(0.0, -0.1), Vector2(0.32, 0.45), Vector2(0.0, 0.85), Vector2(-0.32, 0.45)]), c, r, Color(1, 0.9, 0.55))
 		Orb.Kind.ICE:
 			for a in 3:
 				var dir := Vector2.UP.rotated(a * PI / 3.0) * r
-				draw_line(c - dir, c + dir, light, 4.0, true)
-				# little barbs near each tip
-				for sgn: float in [-1.0, 1.0]:
-					var tip: Vector2 = dir * sgn
-					var barb := tip * 0.62
-					var side := tip.orthogonal().normalized() * r * 0.24
-					draw_line(c + barb, c + barb + side - tip * 0.18, light, 3.0, true)
-					draw_line(c + barb, c + barb - side - tip * 0.18, light, 3.0, true)
-			draw_circle(c, r * 0.18, Color.WHITE)
+				draw_line(c - dir, c + dir, ink, 9.0, true)
+			for a in 3:
+				var dir := Vector2.UP.rotated(a * PI / 3.0) * r
+				draw_line(c - dir, c + dir, Color.WHITE, 4.5, true)
+			draw_circle(c, r * 0.22, ink)
+			draw_circle(c, r * 0.14, Color.WHITE)
 		Orb.Kind.EARTH:
-			var rock := PackedVector2Array([
+			_poly(PackedVector2Array([
 				Vector2(-0.45, -0.85), Vector2(0.5, -0.7), Vector2(0.95, 0.0), Vector2(0.6, 0.8),
-				Vector2(-0.4, 0.9), Vector2(-0.95, 0.1)])
-			draw_colored_polygon(_xf(rock, c, r), color.lerp(Color.WHITE, 0.1))
-			var facet := PackedVector2Array([
-				Vector2(-0.45, -0.85), Vector2(0.5, -0.7), Vector2(0.1, -0.1), Vector2(-0.5, 0.0)])
-			draw_colored_polygon(_xf(facet, c, r), light)
-			draw_polyline(_xf(PackedVector2Array([Vector2(0.1, -0.1), Vector2(0.35, 0.55)]), c, r), light, 3.0, true)
+				Vector2(-0.4, 0.9), Vector2(-0.95, 0.1)]), c, r, Color.WHITE)
+			_poly(PackedVector2Array([
+				Vector2(-0.45, -0.85), Vector2(0.5, -0.7), Vector2(0.1, -0.1), Vector2(-0.5, 0.0)]), c, r, Color(0.85, 0.85, 0.85))
+
+## A filled polygon with an ink outline.
+func _poly(points: PackedVector2Array, c: Vector2, r: float, fill: Color) -> void:
+	var pts := _xf(points, c, r)
+	draw_colored_polygon(pts, fill)
+	var closed := pts.duplicate()
+	closed.append(pts[0])
+	draw_polyline(closed, ink, 3.0, true)
 
 func _xf(points: PackedVector2Array, c: Vector2, r: float) -> PackedVector2Array:
 	var out := PackedVector2Array()
