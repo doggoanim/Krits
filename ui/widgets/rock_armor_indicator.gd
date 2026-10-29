@@ -1,31 +1,30 @@
 class_name RockArmorIndicator
 extends PanelContainer
-## HUD plate shown for as long as the Earth spell's rock armor is up — the
-## same hand-drawn plate treatment as the pound bonus ("POUND x1.25!"), in
-## earth brown: "ROCK ARMOR x1.5!". It says nothing about how much shield is
-## left (the HUD's shield bar shows that). Driven by Events.rock_armor_changed.
-## The plate art and layout are assigned in hud.tscn.
+## The Earth spell's damage-bonus plate: the same hand-drawn plate treatment
+## and pop as the pound bonus ("POUND x1.25!"), in earth brown — "ROCK ARMOR
+## x1.5!". Like the pound plate it only shows when a hit lands with the bonus
+## applied (Hud calls pop() from the landed-damage event while the armor is up),
+## then fades. Plate art and layout are assigned in hud.tscn.
 
 @export var tint := Color(0.85, 0.6, 0.35)
 
-var _last := 0.0
+var _tween: Tween
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 	modulate = tint
-	resized.connect(func() -> void: pivot_offset = size * 0.5)
-	Events.rock_armor_changed.connect(_on_changed)
-	_on_changed(Game.stats.rock_shield, Game.stats.rock_shield_max)
 
-func _on_changed(shield: float, _max_shield: float) -> void:
-	var was_visible := visible
-	visible = shield > 0.0
-	if not visible:
-		_last = 0.0
-		return
-	if not was_visible or shield < _last:   # pops on gaining armor and on every hit it soaks
-		scale = Vector2(1.2, 1.2)
-		create_tween().tween_property(self, "scale", Vector2.ONE, 0.25) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_last = shield
+func pop() -> void:
+	if _tween:
+		_tween.kill()
+	pivot_offset = size * 0.5
+	visible = true
+	scale = Vector2.ONE * 2.0
+	_tween = create_tween()
+	_tween.tween_property(self, "scale", Vector2.ONE, 0.3) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_tween.tween_interval(0.7)
+	_tween.tween_property(self, "scale", Vector2.ZERO, 0.2) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_tween.tween_callback(func() -> void: visible = false)

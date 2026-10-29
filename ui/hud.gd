@@ -37,6 +37,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _xp: ProgressBar = %XpBar
 @onready var _hint: Label = %HintLabel
 @onready var _combo_plate: PanelContainer = %ComboPlate   ## small hand-drawn plate beside the bars
+@onready var _rock_plate: RockArmorIndicator = %RockArmorIndicator   ## "ROCK ARMOR x1.5!" — pops on a hit landed with the Earth armor up
 @onready var _pound_plate: PanelContainer = %PoundPlate   ## shown under the combo plate on a ground-pound bonus
 @onready var _combo: Label = %ComboLabel
 
@@ -144,6 +145,8 @@ func _on_combo_landed(damage: float, _hits: int, pound_bonus: bool) -> void:
 	_pop_combo_plate(1.8, 0.25)
 	if pound_bonus:
 		_show_pound_plate()
+	if Game.stats.rock_armor_active():
+		_rock_plate.pop()
 	_combo_tween.tween_interval(0.5)
 	_combo_tween.tween_property(_combo_plate, "scale", Vector2.ZERO, 0.2) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
