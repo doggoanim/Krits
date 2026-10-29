@@ -566,6 +566,12 @@ func _handle_staff_hit(orb: Orb) -> void:
 	_rune_buffer.append(orb.kind)
 	_rune_buffer_t = STAFF_BUFFER_TIMEOUT
 	_publish_runes()
+	# Bounce on toward the nearest other orb of the same element (the chain),
+	# else the cast orb, else straight up — same slight push as the arrows.
+	var next_orb := _nearest_active_orb(orb, orb.kind)
+	if next_orb == null:
+		next_orb = _nearest_active_orb(orb, Orb.Kind.CAST)
+	player.bounce_off_orb(_rune_buffer.size(), next_orb.global_position if next_orb else null)
 	_respawn_orb_later(orb)
 
 ## The rune timer ran out: the queued magic fizzles back on the caster — the
