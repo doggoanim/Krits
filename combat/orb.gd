@@ -275,7 +275,8 @@ func _refresh() -> void:
 		_core_mat.albedo_color = INACTIVE_COLOR
 		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_core_mat.cull_mode = BaseMaterial3D.CULL_BACK
-	_ring_mat.albedo_color = colors[1] if active else INACTIVE_COLOR
+	# Hollow orbs' rings take the orb's own color; solid orbs keep the pale shade.
+	_ring_mat.albedo_color = (colors[0] if _hollow else colors[1]) if active else INACTIVE_COLOR
 	_ring_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	var outline_alpha := 1.0 if active else INACTIVE_COLOR.a
 	if _outline_mat is ShaderMaterial:
@@ -286,7 +287,7 @@ func _refresh() -> void:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	if _icon:
 		_icon.visible = active
-		# Hollow: white icon on the colored glass. Solid: the orb's own color
-		# would vanish into the core, so use its pale shade.
-		_icon_mat.set_shader_parameter(&"tint", Color.WHITE if _hollow else colors[1])
+		# Hollow: the icon takes the orb's color. Solid: the same color would
+		# vanish into the core, so use its pale shade.
+		_icon_mat.set_shader_parameter(&"tint", colors[0] if _hollow else colors[1])
 	_base_scale = 1.0 if active else 0.5
