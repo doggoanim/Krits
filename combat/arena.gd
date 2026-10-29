@@ -46,6 +46,7 @@ const ORB_HEIGHT := Vector2(1.8, 4.4)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
 const POUND_PICKUP_COUNT := 2      ## Bow/Staff: ground-pounding into an arrow/element orb collects this many instead of 1
+const SWORD_POUND_ASSIST := 0.3    ## Sword: fraction of the arc to the nearest orb that a pound bounce pushes you along
 const POUND_BONUS := 1.25         ## Sword: landing the combo with a ground pound multiplies the damage
 const LAND_HITSTOP_BASE := 0.07   ## seconds of freeze on a landing hit...
 const LAND_HITSTOP_PER_HIT := 0.015   ## ...plus this per orb in the combo...
@@ -428,7 +429,9 @@ func _handle_sword_hit(orb: Orb) -> void:
 	var dmg := Game.stats.damage() * (1.0 + COMBO_BONUS * (combo - 1))
 	_sword_banked += dmg
 	_sword_hits.append(dmg)
-	player.bounce_off_orb(combo)
+	# A ground pound into the orb nudges you toward the nearest other orb.
+	var next_orb := _nearest_active_orb(orb, Orb.Kind.PLAIN) if _is_pounding() else null
+	player.bounce_off_orb(combo, next_orb.global_position if next_orb else null, SWORD_POUND_ASSIST)
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
 	_respawn_orb_later(orb)
