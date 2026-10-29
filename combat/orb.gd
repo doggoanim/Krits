@@ -287,7 +287,7 @@ func _refresh() -> void:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	if _icon:
 		_icon.visible = active
-		# Hollow: the icon takes the orb's color. Solid: the same color would
-		# vanish into the core, so use its pale shade.
-		_icon_mat.set_shader_parameter(&"tint", colors[0] if _hollow else colors[1])
+		# Hollow: white icon. Solid: the orb's own color would vanish into the
+		# core, so use its pale shade.
+		_icon_mat.set_shader_parameter(&"tint", Color.WHITE if _hollow else colors[1])
 	_base_scale = 1.0 if active else 0.5
