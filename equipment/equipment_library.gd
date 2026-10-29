@@ -113,7 +113,7 @@ static func apprentice_staff() -> WeaponData:
 	w.id = &"apprentice_staff"
 	w.price = 80
 	w.kind = WeaponData.Kind.STAFF
-	w.damage_bonus = 0.5
+	w.damage_bonus = 1.25
 	# The glb's origin is the butt of the staff, the head ~2.2 units up +Y.
 	# Upright, pivoting about its middle: shifted down half its scaled length
 	# (~0.63) so its centre sits on the mount (see GearDisplay's staff mount).
