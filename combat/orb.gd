@@ -140,6 +140,7 @@ func _ready() -> void:
 	_ring.rotation.x = deg_to_rad(RING_TILT)
 	_ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_ring.material_override = _ring_mat
+	_ring.visible = kind != Kind.ARROW   # arrow orbs are just the glass core, no ring
 	add_child(_ring)
 
 	var quad := QuadMesh.new()
