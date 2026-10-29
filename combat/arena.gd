@@ -482,6 +482,7 @@ func _handle_bow_hit(orb: Orb) -> void:
 		_arrow_stack += Game.stats.damage()
 		_arrow_count += 1
 		Events.arrows_changed.emit(_arrow_count)
+		player.audio.play_orb_attack(_arrow_count)   # same pickup sound as a normal attack orb
 		_respawn_orb_later(orb)
 		return
 	if _arrow_stack <= 0.0:
