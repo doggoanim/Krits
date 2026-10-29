@@ -18,6 +18,7 @@ extends Node3D
 @export var shield_rest := Vector3(0.0, 1.0, 0.3)   ## relative to the player's facing; +Z is behind
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
 @export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
+@export var staff_mount_drop := 0.315   ## the staff's mount sits this far below the shield's top edge — its centre, so it tilts about the middle
 @export var staff_tilt_deg := 12.0   ## how far a floating staff leans toward the player's right
 @export var follow_speed := 90.0   ## how tightly the gear tracks the player (higher = less lag)
 @export var turn_speed := 20.0     ## same, for turning to match the player's facing
@@ -133,7 +134,7 @@ func _place_weapon_pivot() -> void:
 	if _shield_model and is_instance_valid(_shield_model):
 		top = _top_edge(_shield_model)
 	_weapon_pivot.position = Vector3(0.0, top, weapon_hang_back)
-	_staff_mount.position = _weapon_pivot.position
+	_staff_mount.position = _weapon_pivot.position - Vector3(0.0, staff_mount_drop, 0.0)
 
 ## Highest point of a model's meshes, in the anchor's space.
 func _top_edge(model: Node3D) -> float:

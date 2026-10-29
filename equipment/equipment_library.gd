@@ -115,9 +115,9 @@ static func apprentice_staff() -> WeaponData:
 	w.kind = WeaponData.Kind.STAFF
 	w.damage_bonus = 0.5
 	# The glb's origin is the butt of the staff, the head ~2.2 units up +Y.
-	# Upright, hanging from its top: shifted down by its scaled length so the
-	# head sits on the hang point and the shaft drops below it.
-	_look(w, "staff_apprentice", 0.28, Vector3(0.0, -0.63, 0.0), Vector3.ZERO)
+	# Upright, pivoting about its middle: shifted down half its scaled length
+	# (~0.63) so its centre sits on the mount (see GearDisplay's staff mount).
+	_look(w, "staff_apprentice", 0.28, Vector3(0.0, -0.315, 0.0), Vector3.ZERO)
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
