@@ -507,12 +507,18 @@ func _handle_bow_hit(orb: Orb) -> void:
 ## `count` extra orbs in a vertical column on top of it (a long chain of
 ## bounces to ride up). The extras take the weapon's style — plain orbs for
 ## the sword, arrow orbs for the bow, random runes for the staff (there's only ever
-## one CAST orb) — and vanish once hit. Returns false if there's no orb.
+## one CAST orb) — and vanish once hit. With a bow only arrow orbs count as
+## the base. Returns false if there's no suitable orb.
 func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
 	var base: Orb = null
 	var best_d := INF
+	var bow := _equipped_weapon_kind() == WeaponData.Kind.BOW
 	for o in orbs:
-		if is_instance_valid(o) and o.active and o.global_position.distance_squared_to(from) < best_d:
+		if not is_instance_valid(o) or not o.active:
+			continue
+		if bow and o.kind != Orb.Kind.ARROW:
+			continue   # the bow only builds on arrow orbs
+		if o.global_position.distance_squared_to(from) < best_d:
 			best_d = o.global_position.distance_squared_to(from)
 			base = o
 	if base == null or count <= 0:
