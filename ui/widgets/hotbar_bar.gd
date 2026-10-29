@@ -30,8 +30,18 @@ func _ready() -> void:
 			var style := slot_styles[i % slot_styles.size()]
 			for style_name in [&"normal", &"hover", &"pressed", &"disabled"]:
 				slot.add_theme_stylebox_override(style_name, style)
-		slot.set_key_text(str(i + 1))
+		slot.set_key_text(_key_text(i))
 		_slots.append(slot)
+	Settings.changed.connect(_on_setting_changed)
+
+## The slot's key as bound in Settings (hotbar_1..6), e.g. "1" or "Q".
+func _key_text(index: int) -> String:
+	return InputSetup.key_label(Settings.get_binding(StringName("hotbar_%d" % (index + 1))))
+
+func _on_setting_changed(key: StringName) -> void:
+	if key == &"controls/bindings":
+		for i in _slots.size():
+			_slots[i].set_key_text(_key_text(i))
 
 func _process(_delta: float) -> void:
 	if interactive:
