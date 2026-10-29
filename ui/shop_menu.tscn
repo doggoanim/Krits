@@ -1,7 +1,256 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://ui/menu_base.tscn" id="1"]
-[ext_resource type="Script" path="res://ui/shop_menu.gd" id="2"]
+[ext_resource type="Script" path="res://ui/shop_menu.gd" id="1"]
+[ext_resource type="Theme" path="res://ui/menu/menu_theme.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_1.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_2.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_3.png" id="5"]
+[ext_resource type="PackedScene" path="res://ui/widgets/inventory_slot.tscn" id="6"]
 
-[node name="ShopMenu" instance=ExtResource("1")]
-script = ExtResource("2")
+[sub_resource type="StyleBoxFlat" id="Dim"]
+bg_color = Color(0, 0, 0, 0.62)
+
+[sub_resource type="StyleBoxTexture" id="Plate1"]
+content_margin_left = 36.0
+content_margin_top = 36.0
+content_margin_right = 36.0
+content_margin_bottom = 36.0
+texture = ExtResource("3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate2"]
+content_margin_left = 36.0
+content_margin_top = 36.0
+content_margin_right = 36.0
+content_margin_bottom = 36.0
+texture = ExtResource("4")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Plate3"]
+content_margin_left = 36.0
+content_margin_top = 36.0
+content_margin_right = 36.0
+content_margin_bottom = 36.0
+texture = ExtResource("5")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[sub_resource type="StyleBoxTexture" id="Details"]
+content_margin_left = 60.0
+content_margin_top = 50.0
+content_margin_right = 60.0
+content_margin_bottom = 50.0
+texture = ExtResource("3")
+texture_margin_left = 40.0
+texture_margin_top = 40.0
+texture_margin_right = 40.0
+texture_margin_bottom = 40.0
+
+[node name="ShopMenu" type="PanelContainer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+theme_override_styles/panel = SubResource("Dim")
+script = ExtResource("1")
+slot_scene = ExtResource("6")
+slot_styles = Array[StyleBox]([SubResource("Plate1"), SubResource("Plate2"), SubResource("Plate3")])
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 120
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 120
+theme_override_constants/margin_bottom = 70
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Header" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 84
+text = "Shop"
+
+[node name="GoldLabel" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 52
+text = "Gold: 0"
+
+[node name="Tabs" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="GearTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Gear"
+
+[node name="AbilitiesTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Abilities"
+
+[node name="SuppliesTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Supplies"
+
+[node name="SellTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Sell"
+
+[node name="Body" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 40
+
+[node name="Pages" type="Control" parent="Margin/Content/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Content/Body/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Grid" type="GridContainer" parent="Margin/Content/Body/Pages/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 5
+
+[node name="DetailsHolder" type="Control" parent="Margin/Content/Body"]
+custom_minimum_size = Vector2(620, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Details" type="PanelContainer" parent="Margin/Content/Body/DetailsHolder"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Details")
+
+[node name="Column" type="VBoxContainer" parent="Margin/Content/Body/DetailsHolder/Details"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="DetailName" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 60
+text = "Item"
+autowrap_mode = 3
+
+[node name="DetailKind" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0.6)
+theme_override_font_sizes/font_size = 34
+autowrap_mode = 3
+
+[node name="DetailText" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 38
+autowrap_mode = 3
+
+[node name="PriceLabel" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="QuantityRow" type="HBoxContainer" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="MinusButton" type="Button" parent="Margin/Content/Body/DetailsHolder/Details/Column/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "-"
+
+[node name="QtyLabel" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlusButton" type="Button" parent="Margin/Content/Body/DetailsHolder/Details/Column/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "+"
+
+[node name="MaxButton" type="Button" parent="Margin/Content/Body/DetailsHolder/Details/Column/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Max"
+
+[node name="Message" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0.7)
+theme_override_font_sizes/font_size = 32
+autowrap_mode = 3
+
+[node name="ActionButton" type="Button" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Buy"

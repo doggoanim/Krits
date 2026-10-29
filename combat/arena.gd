@@ -102,7 +102,6 @@ var cancelled := false
 var player: Player
 var enemies: Array[Enemy] = []
 var orbs: Array[Orb] = []
-var gold_reward := 0
 var loot: Dictionary = {}   ## item id -> count rolled from defeated enemies; added to the bag on victory
 var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released by the next SHOOT orb
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
@@ -662,7 +661,6 @@ func _on_player_hurt(_from: Vector3) -> void:
 
 func _on_enemy_defeated(e: Enemy) -> void:
 	enemies.erase(e)
-	gold_reward += e.data.gold
 	for drop in e.data.drops:
 		var n := drop.roll()
 		if n > 0:
@@ -694,7 +692,6 @@ func _end(victory: bool) -> void:
 	if _buffer_label:
 		_buffer_label.queue_free()   # a child of player, not of this arena — won't go with it otherwise
 	if victory:
-		Game.stats.add_gold(gold_reward)
 		for id in loot:
 			Game.inventory.add(id, loot[id])
 	Events.combo_changed.emit(0)

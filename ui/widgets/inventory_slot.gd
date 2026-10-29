@@ -18,6 +18,25 @@ func show_item(item: ItemData, count: int) -> void:
 	_initial.add_theme_color_override(&"font_color", item.color)
 	_count.text = "x%d" % count if count > 1 else ""
 
+## Any other thing worth showing in a slot (shop gear, backpacks...).
+func show_custom(icon: Texture2D, label: String, color: Color, count_text := "") -> void:
+	_icon.texture = icon
+	_icon.visible = icon != null
+	_initial.visible = icon == null
+	_initial.text = label
+	_initial.add_theme_color_override(&"font_color", color)
+	_count.text = count_text
+
+## Applies nine-sliced plates (normal, hover, pressed) to a slot and lets
+## FocusPop pick among them on focus. Shared by every screen with a slot grid.
+static func apply_styles(slot: InventorySlot, styles: Array[StyleBox]) -> void:
+	if styles.size() < 3:
+		return
+	slot.add_theme_stylebox_override(&"normal", styles[0])
+	slot.add_theme_stylebox_override(&"hover", styles[1])
+	slot.add_theme_stylebox_override(&"pressed", styles[2])
+	slot.set_meta(FocusPop.LOOKS_META, styles)
+
 func show_empty() -> void:
 	_icon.visible = false
 	_initial.visible = false

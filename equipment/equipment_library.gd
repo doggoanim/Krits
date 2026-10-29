@@ -146,3 +146,10 @@ static func _look(item: EquipmentData, file: String, model_scale: float,
 	item.model_scale = model_scale
 	item.model_offset = offset
 	item.model_rotation_deg = rotation_deg
+
+## One-line stat summary ("Armor: +20 max HP") for item details everywhere.
+static func stat_line(item: EquipmentData) -> String:
+	if item is ArmorData: return "Armor: +%d max HP" % item.hp_bonus
+	if item is ShieldData: return "Shield: +%d max shield" % item.shield_bonus
+	if item is WeaponData: return "Weapon: +%d damage" % item.damage_bonus
+	return ""

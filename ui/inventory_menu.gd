@@ -122,11 +122,7 @@ func _build_items() -> void:
 func _new_slot(parent: Control) -> InventorySlot:
 	var slot := slot_scene.instantiate() as InventorySlot
 	parent.add_child(slot)
-	if slot_styles.size() >= 3:
-		slot.add_theme_stylebox_override(&"normal", slot_styles[0])
-		slot.add_theme_stylebox_override(&"hover", slot_styles[1])
-		slot.add_theme_stylebox_override(&"pressed", slot_styles[2])
-		slot.set_meta(FocusPop.LOOKS_META, slot_styles)
+	InventorySlot.apply_styles(slot, slot_styles)
 	return slot
 
 func _clear_children(node: Node) -> void:
@@ -322,10 +318,7 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	_detail_text.text = _gear_text(item)
 
 func _gear_text(item: EquipmentData) -> String:
-	var stat := ""
-	if item is ArmorData: stat = "Armor: +%d max HP" % item.hp_bonus
-	elif item is ShieldData: stat = "Shield: +%d max shield" % item.shield_bonus
-	elif item is WeaponData: stat = "Weapon: +%d damage" % item.damage_bonus
+	var stat := EquipmentLibrary.stat_line(item)
 	var flavor := item.flavor()
 	return stat if flavor == "" else flavor + "\n\n" + stat
 

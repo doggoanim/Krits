@@ -5,7 +5,7 @@ extends Resource
 @export var id: StringName = &"grunt"
 @export var display_name := "Grunt"
 @export var max_hp := 60.0
-@export var gold := 20
+@export var gold := 0   ## unused: enemies no longer pay gold — sell their drops at a shop instead
 @export var move_speed := 3.5
 ## Used for the placeholder sphere when no model is set, and also as the
 ## accent color for this enemy's slime trail / special-attack projectiles
