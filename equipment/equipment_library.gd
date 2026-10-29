@@ -96,9 +96,9 @@ static func steel_sword() -> WeaponData:
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
-static func hunter_bow() -> WeaponData:
+static func wooden_bow() -> WeaponData:
 	var w := WeaponData.new()
-	w.id = &"hunter_bow"
+	w.id = &"wooden_bow"
 	w.price = 80
 	w.kind = WeaponData.Kind.BOW
 	w.damage_bonus = 4.0
@@ -115,7 +115,7 @@ static func apprentice_staff() -> WeaponData:
 	return w
 
 static func all_weapons() -> Array[WeaponData]:
-	return [wooden_sword(), steel_sword(), hunter_bow(), apprentice_staff()]
+	return [wooden_sword(), steel_sword(), wooden_bow(), apprentice_staff()]
 
 # ---------------------------------------------------------------- lookup
 ## Resolves a saved id back to its real EquipmentData, regardless of slot —
