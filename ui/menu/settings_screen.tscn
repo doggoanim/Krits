@@ -124,6 +124,33 @@ popup/item_2/text = "Exclusive Fullscreen"
 popup/item_2/id = 2
 metadata/setting = &"display/window_mode"
 
+[node name="ResolutionRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/ResolutionRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Window Size"
+
+[node name="Resolution" type="OptionButton" parent="Content/Pages/DisplayPage/ResolutionRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 5
+popup/item_0/text = "1280 × 720"
+popup/item_0/id = 720
+popup/item_1/text = "1600 × 900"
+popup/item_1/id = 900
+popup/item_2/text = "1920 × 1080"
+popup/item_2/id = 1080
+popup/item_3/text = "2560 × 1440"
+popup/item_3/id = 1440
+popup/item_4/text = "3840 × 2160"
+popup/item_4/id = 2160
+metadata/setting = &"display/resolution"
+
 [node name="VSyncRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
 layout_mode = 2
 theme_override_constants/separation = 40

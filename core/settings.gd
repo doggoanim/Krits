@@ -23,13 +23,13 @@ const SAVE_DELAY := 0.5   ## seconds of quiet before writing, so dragging a slid
 const WINDOWED := 0
 const FULLSCREEN := 1             ## borderless, fills the screen
 const EXCLUSIVE_FULLSCREEN := 2   ## matches the project's default window mode
-const WINDOWED_SIZE := Vector2i(1600, 900)
 
 const BINDINGS_KEY := &"controls/bindings"   ## {action: physical keycode} — only keys changed from default
 
 const DEFAULTS := {
 	&"display/window_mode": EXCLUSIVE_FULLSCREEN,
 	&"display/vsync": true,
+	&"display/resolution": 900,         ## windowed-mode size, as the window HEIGHT (16:9 — see _windowed_size())
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
 	&"display/pixelation": 3,           ## PixelateEffect block size in screen pixels (1 = off)
@@ -134,6 +134,9 @@ func _apply(key: StringName) -> void:
 			_apply_volumes()
 		&"display/window_mode":
 			_apply_window_mode()
+		&"display/resolution":
+			if int(_values[&"display/window_mode"]) == WINDOWED:
+				_apply_window_mode()
 		&"display/vsync":
 			DisplayServer.window_set_vsync_mode(
 				DisplayServer.VSYNC_ENABLED if _values[key] else DisplayServer.VSYNC_DISABLED)
@@ -161,14 +164,30 @@ func _apply_window_mode() -> void:
 	match int(_values[&"display/window_mode"]):
 		WINDOWED:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-			var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
-			var size := Vector2i(mini(WINDOWED_SIZE.x, usable.size.x), mini(WINDOWED_SIZE.y, usable.size.y))
-			DisplayServer.window_set_size(size)
-			DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
+			# Coming back from (exclusive) fullscreen can leave the window
+			# without its title bar — borderless is a separate flag from the mode.
+			DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+			_place_window.call_deferred()   # the mode change needs a frame to settle before sizing
 		FULLSCREEN:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		_:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+
+## Sizes and centres the window for Windowed mode (from the Resolution setting),
+## shrunk to fit if the screen can't hold it.
+func _place_window() -> void:
+	if int(_values[&"display/window_mode"]) != WINDOWED:
+		return
+	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var wanted := _windowed_size()
+	var size := Vector2i(mini(wanted.x, usable.size.x), mini(wanted.y, usable.size.y))
+	DisplayServer.window_set_size(size)
+	DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
+
+## The Resolution dropdown stores the window height; width follows at 16:9.
+func _windowed_size() -> Vector2i:
+	var h := int(_values[&"display/resolution"])
+	return Vector2i(roundi(h * 16.0 / 9.0), h)
 
 # --- Persistence ----------------------------------------------------------
 
