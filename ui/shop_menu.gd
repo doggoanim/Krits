@@ -52,6 +52,13 @@ func _ready() -> void:
 	_action.pressed.connect(_do_action)
 	FocusPop.attach_all(self, true)
 
+## The inventory key (Tab) also closes the shop. Caught in _input, ahead of GUI
+## focus handling, since Tab is a focus-navigation key too.
+func _input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed(&"menu_inventory"):
+		close()
+		get_viewport().set_input_as_handled()
+
 ## Content holds the fixed layout from the scene — nothing to clear on open.
 func _clear() -> void:
 	pass
