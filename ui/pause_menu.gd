@@ -125,6 +125,8 @@ func refresh() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _closing or _transitioning or not event.is_action_pressed(&"ui_cancel_menu"):
 		return
+	if open_menu != null and open_menu != self:
+		return   # another menu (shop, inventory...) is open: Esc is theirs to handle, not ours to swallow
 	if not visible:
 		open()
 	elif _confirm.visible:
