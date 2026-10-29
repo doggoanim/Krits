@@ -25,6 +25,7 @@ signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frame
 signal player_died
 signal player_landed
 signal stats_changed
+signal game_saved   ## a save was just written to disk — the SaveIndicator badge shows
 
 # World
 signal spawnpoint_activated(id: StringName)

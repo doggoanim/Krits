@@ -116,7 +116,10 @@ func save() -> void:
 		"last_spawn": String(last_spawn),
 	}
 	var f := FileAccess.open(slot_path(current_slot), FileAccess.WRITE)
-	if f: f.store_string(JSON.stringify(data))
+	if f:
+		f.store_string(JSON.stringify(data))
+		f.close()
+		Events.game_saved.emit()
 
 func load_game() -> bool:
 	if not has_save():
