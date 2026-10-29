@@ -22,7 +22,7 @@ const SHIELD_RECHARGE_DELAY := 3.0
 const SHIELD_RECHARGE_RATE := 12.0
 const MAX_STAMINA := 100.0        ## abilities spend it (AbilityData.stamina_cost)
 const STAMINA_REGEN_DELAY := 1.0  ## seconds after spending before it refills
-const STAMINA_REGEN_RATE := 20.0  ## per second
+const STAMINA_REGEN_RATE := 10.0  ## per second
 
 var gold := 0
 var owned_armors: Array[StringName] = []
