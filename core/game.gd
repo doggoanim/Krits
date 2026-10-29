@@ -20,6 +20,7 @@ var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
 var god_mode := false
 var input_locked := false   ## true during encounter transitions
+var in_combat := false      ## true for the whole of an encounter (set by EncounterManager) — doors refuse while it is
 
 func _ready() -> void:
 	_migrate_legacy_save()

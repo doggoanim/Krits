@@ -55,6 +55,7 @@ func _ready() -> void:
 		c.resized.connect(_center_pivot.bind(c))
 		_center_pivot(c)
 	Settings.changed.connect(_on_setting_changed)
+	Events.player_died.connect(_end)   # dying cancels any conversation
 
 func _exit_tree() -> void:
 	if instance == self:
@@ -85,11 +86,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"ui_cancel_menu"):
 		_end()
-	elif event.is_action_pressed(&"interact"):
+	elif event.is_action_pressed(&"interact") or _is_enter(event):
 		_press_interact()
 	else:
 		return
 	get_viewport().set_input_as_handled()
+
+## Enter (main or numpad) advances/skips like the interact key does.
+func _is_enter(event: InputEvent) -> bool:
+	var key := event as InputEventKey
+	return key != null and key.pressed and not key.echo \
+		and (key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER)
 
 func _press_interact() -> void:
 	if _typewriter.is_typing():

@@ -169,7 +169,7 @@ func _ready() -> void:
 												## to catch a real solid in the way, not every
 												## graze against the climbed wall's own edge
 	_obstruction_cast.shape = obstruction_shape
-	_obstruction_cast.collision_mask = 1   # world geometry — not CLIMBABLE_MASK; that's handled separately
+	_obstruction_cast.collision_mask = 1 | (1 << 6)   # world geometry + arena barrier (layer 7) — so climbing can't slide through it; CLIMBABLE_MASK is handled separately
 	_obstruction_cast.add_exception(self)
 	_obstruction_cast.enabled = false
 	add_child(_obstruction_cast)

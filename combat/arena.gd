@@ -116,6 +116,7 @@ var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
 var _over := false
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
+var _platform_mesh: MeshInstance3D            ## visible top of the arena's floor platform (see _build_platform())
 var _posts: Array[Node3D] = []                 ## chunky corner posts, one every POST_EVERY segments
 var _post_segment: Array[int] = []             ## which ring segment each post stands at (same order as _posts)
                                                 ## as _wall_meshes
@@ -178,9 +179,12 @@ func play_intro() -> void:
 		piece.scale = Vector3.ZERO
 	for post in _posts:
 		post.scale = Vector3.ZERO
+	_platform_mesh.scale = Vector3.ZERO
 
 	var ring_tween := create_tween()
 	ring_tween.set_parallel(true)
+	ring_tween.tween_property(_platform_mesh, "scale", Vector3.ONE, RING_DRAW_TIME) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	for i in _ring_pieces.size():
 		var start_t := RING_DRAW_TIME * float(i) / float(_ring_pieces.size())
 		ring_tween.tween_property(_ring_pieces[i], "scale", Vector3.ONE, RING_POP_TIME) \
@@ -203,6 +207,8 @@ func play_intro() -> void:
 ## Awaited by EncounterManager before it frees the arena.
 func play_outro() -> void:
 	var tw := create_tween().set_parallel(true)
+	tw.tween_property(_platform_mesh, "scale", Vector3.ZERO, OUTRO_RING_TIME + 0.2) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_method(_set_wall_growth, 1.0, 0.0, OUTRO_WALL_TIME) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	for i in _ring_pieces.size():
@@ -697,6 +703,7 @@ func _end(victory: bool) -> void:
 ## Everything goes under stage_root so WorldDissolver can crumble just this,
 ## leaving the real world (and the enemies/orbs inside it) untouched.
 func _build_barrier() -> void:
+	_build_platform()
 	stage_root = Node3D.new()
 	add_child(stage_root)
 	_wall_meshes.clear()
@@ -739,6 +746,39 @@ func _build_barrier() -> void:
 			post_pos.y = local_ground_y
 			_posts.append(_build_post(post_pos, i % (POST_EVERY * 2) == 0))
 			_post_segment.append(i)
+
+## A solid disc under the whole arena (world layer, so ground_height() and
+## the player's floor all see it) so a fight over a gap, a cliff edge or the
+## water's edge never drops the player — its top sits level with the arena's
+## origin. The collider stays for the whole fight; only the visible disc
+## grows in/out with the ring (see play_intro()/play_outro()).
+func _build_platform() -> void:
+	var body := StaticBody3D.new()
+	body.name = "Platform"
+	body.collision_layer = 1
+	var disc_radius := radius + 1.5
+	var shape := CylinderShape3D.new()
+	shape.radius = disc_radius
+	shape.height = 2.0
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	cs.position.y = -1.02   # top just under the origin, so it never z-fights the ground
+	body.add_child(cs)
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = disc_radius
+	cyl.bottom_radius = disc_radius
+	cyl.height = 2.0
+	cyl.radial_segments = 48
+	_platform_mesh = MeshInstance3D.new()
+	_platform_mesh.mesh = cyl
+	_platform_mesh.position.y = -1.02
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.82, 0.78, 0.7)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_platform_mesh.material_override = mat
+	_platform_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	body.add_child(_platform_mesh)
+	add_child(body)
 
 ## A chunky rounded post with a bold black outline, standing on the ground at
 ## `pos` (stage_root-local). A root node at the base so it can pop up from

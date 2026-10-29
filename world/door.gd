@@ -39,7 +39,8 @@ extends Interactable
 ## one on top of it.
 func _can_interact() -> bool:
 	return not target_level.is_empty() and player != null and not player.dead \
-		and player.machine.current_name == &"Ground" and not Game.input_locked
+		and player.machine.current_name == &"Ground" and not Game.input_locked \
+		and not Game.in_combat
 
 func _interact() -> void:
 	Events.level_travel_requested.emit(load(target_level) as PackedScene, target_spawn_id)

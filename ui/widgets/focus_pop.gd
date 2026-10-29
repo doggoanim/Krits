@@ -64,7 +64,17 @@ func _on_mouse_entered() -> void:
 	var base := target as BaseButton
 	if (base != null and base.disabled) or target.focus_mode == Control.FOCUS_NONE:
 		return
+	if _in_inventory():
+		return   # the inventory only focuses on click (or keyboard), never on hover
 	target.grab_focus()   # hovering selects, same as the keyboard
+
+func _in_inventory() -> bool:
+	var node: Node = target.get_parent()
+	while node != null:
+		if node is InventoryMenu:
+			return true
+		node = node.get_parent()
+	return false
 
 func _on_focus_entered() -> void:
 	UiSfx.focus()

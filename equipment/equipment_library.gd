@@ -101,7 +101,7 @@ static func wooden_bow() -> WeaponData:
 	w.id = &"wooden_bow"
 	w.price = 80
 	w.kind = WeaponData.Kind.BOW
-	w.damage_bonus = 0.5
+	w.damage_bonus = 1.0
 	# The glb is ~2 units tall, centred on its grip, limbs along +/-Y. Hung by
 	# its top tip from the shield's top edge: shift down by half its scaled height.
 	_look(w, "bow_wooden", 0.3, Vector3(0.0, -0.3, 0.0), Vector3.ZERO)
@@ -115,8 +115,9 @@ static func apprentice_staff() -> WeaponData:
 	w.kind = WeaponData.Kind.STAFF
 	w.damage_bonus = 0.5
 	# The glb's origin is the butt of the staff, the head ~2.2 units up +Y.
-	# Flipped 180° so it hangs by its butt end with the head dangling, like the sword.
-	_look(w, "staff_apprentice", 0.28, Vector3(0.0, 0.05, 0.0), Vector3(0.0, 0.0, 180.0))
+	# Upright, hanging from its top: shifted down by its scaled length so the
+	# head sits on the hang point and the shaft drops below it.
+	_look(w, "staff_apprentice", 0.28, Vector3(0.0, -0.63, 0.0), Vector3.ZERO)
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 

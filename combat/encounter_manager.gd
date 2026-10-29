@@ -36,6 +36,8 @@ func _process(delta: float) -> void:
 func _on_touched(enemy: WorldEnemy) -> void:
 	if busy or _grace > 0.0 or player.dead:
 		return
+	if world_root != null and world_root.is_in_group(&"interior_level"):
+		return   # no fights indoors
 	var group: Array[WorldEnemy] = [enemy]
 	for n in get_tree().get_nodes_in_group(&"world_enemies"):
 		var other := n as WorldEnemy
@@ -52,6 +54,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	if busy:
 		return
 	busy = true
+	Game.in_combat = true
 	Game.input_locked = true
 
 	var origins := {}
@@ -96,4 +99,5 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 
 	_grace = GRACE_TIME
 	Game.input_locked = false
+	Game.in_combat = false
 	busy = false
