@@ -117,6 +117,7 @@ var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
 var _over := false
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
+var _weapon_kind := WeaponData.Kind.SWORD   ## the weapon style the fight is currently set up for — see _on_stats_changed()
 var _platform_mesh: MeshInstance3D            ## visible top of the arena's floor platform (see _build_platform())
 var _posts: Array[Node3D] = []                 ## chunky corner posts, one every POST_EVERY segments
 var _post_segment: Array[int] = []             ## which ring segment each post stands at (same order as _posts)
@@ -153,6 +154,8 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 		_spawn_enemy(d)
 	if p.camera_rig:
 		p.camera_rig.extra_distance = radius * 0.7
+	_weapon_kind = _equipped_weapon_kind()
+	Events.stats_changed.connect(_on_stats_changed)
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
 	Events.player_hurt.connect(_on_player_hurt)
@@ -480,7 +483,12 @@ func _handle_bow_hit(orb: Orb) -> void:
 		_arrow_stack += Game.stats.damage()
 		_arrow_count += 1
 		Events.arrows_changed.emit(_arrow_count)
-		player.audio.play_orb_attack(_arrow_count)   # same pickup sound as a normal attack orb
+		# Bounce on toward the nearest other arrow (the chain), else the nearest
+		# shoot orb, else straight up.
+		var next_orb := _nearest_active_orb(orb, Orb.Kind.ARROW)
+		if next_orb == null:
+			next_orb = _nearest_active_orb(orb, Orb.Kind.SHOOT)
+		player.bounce_off_orb(_arrow_count, next_orb.global_position if next_orb else null)
 		_respawn_orb_later(orb)
 		return
 	if _arrow_stack <= 0.0:
@@ -494,6 +502,19 @@ func _handle_bow_hit(orb: Orb) -> void:
 	_arrow_count = 0
 	Events.arrows_changed.emit(0)
 	_resolve_hit(orb, dmg, combo, arrows)
+
+## The closest active orb of `kind` to `from_orb` (not `from_orb` itself), or null.
+func _nearest_active_orb(from_orb: Orb, kind: Orb.Kind) -> Orb:
+	var best: Orb = null
+	var best_d := INF
+	for o in orbs:
+		if not is_instance_valid(o) or o == from_orb or not o.active or o.kind != kind:
+			continue
+		var d := o.global_position.distance_squared_to(from_orb.global_position)
+		if d < best_d:
+			best_d = d
+			best = o
+	return best
 
 ## A rune (FIRE/ICE/EARTH) just queues itself, no damage dealt and no bounce
 ## — it's a pickup, not combat feedback (see Orb.Kind's doc comment). CAST is
@@ -638,6 +659,34 @@ func _respawn_orb_later(orb: Orb) -> void:
 				if is_instance_valid(o):
 					taken.append(o.global_position)
 			orb.relocate(_free_orb_position(taken)))
+
+## Equipping a different weapon type mid-fight switches the whole combat
+## style on the spot: the old style's combo, banked sword damage, arrows and
+## queued runes are wiped, and the orbs are replaced with the new weapon's mix.
+func _on_stats_changed() -> void:
+	if _over or not is_instance_valid(player):
+		return
+	var kind := _equipped_weapon_kind()
+	if kind == _weapon_kind:
+		return
+	_weapon_kind = kind
+	combo = 0
+	_sword_banked = 0.0
+	_sword_hits.clear()
+	_arrow_stack = 0.0
+	_arrow_count = 0
+	_rune_buffer.clear()
+	_rune_buffer_t = 0.0
+	Events.combo_changed.emit(0)
+	Events.arrows_changed.emit(0)
+	_publish_runes()
+	var count := orbs.size()
+	for o in orbs:
+		if is_instance_valid(o):
+			VFX.shatter(self, o.global_position, Orb.KIND_COLORS[o.kind][0])
+			o.queue_free()
+	orbs.clear()
+	_spawn_orbs(count)
 
 func _on_player_landed() -> void:
 	if combo > 0:

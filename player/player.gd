@@ -991,9 +991,16 @@ func jump_off_wall(away: Vector3) -> void:
 ## a chain) — forwarded to the attack sound so it climbs with the combo
 ## instead of playing identically on every hit. Defaults to 1 for any other
 ## caller that doesn't track a combo.
-func bounce_off_orb(combo := 1) -> void:
+##
+## `toward` (optional): a world position to arc the bounce toward instead of
+## popping straight up — the launch is a ballistic arc that reaches that
+## point's height on the way down (or its apex, if it's too high to reach),
+## with the horizontal speed capped at ORB_ARC_MAX_SPEED.
+func bounce_off_orb(combo := 1, toward: Variant = null) -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
 	velocity.y = config.orb_bounce_velocity
+	if toward is Vector3:
+		set_hvel(_arc_hvel(toward as Vector3))
 	can_dive = true
 	# Hold the attack pose for roughly as long as the bounce takes to reach its
 	# apex, not a flat duration — so the falling pose never pops in mid-rise.
@@ -1001,6 +1008,19 @@ func bounce_off_orb(combo := 1) -> void:
 	visual.play_random_attack(rise_time * config.orb_attack_hold_mult)
 	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
+
+const ORB_ARC_MAX_SPEED := 22.0   ## horizontal speed cap for bounces aimed at another orb
+
+## Horizontal velocity that carries the player from here to `target` over the
+## bounce's own flight time (see bounce_off_orb()).
+func _arc_hvel(target: Vector3) -> Vector3:
+	var vy := config.orb_bounce_velocity
+	var g := config.gravity
+	var dy := target.y - global_position.y
+	var disc := vy * vy - 2.0 * g * dy
+	var t := (vy + sqrt(disc)) / g if disc > 0.0 else vy / g   # the descending crossing of the target's height
+	var flat := Vector3(target.x - global_position.x, 0.0, target.z - global_position.z)
+	return (flat / maxf(t, 0.1)).limit_length(ORB_ARC_MAX_SPEED)
 
 ## Call after move_and_slide() from Dive / LongJump / Roll with the pre-move
 ## horizontal velocity. Always launches into Air with an upward pop — this is
