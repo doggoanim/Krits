@@ -56,6 +56,7 @@ const BOW_ARROW_WEIGHT := 0.6   ## vs. BOW_SHOOT_WEIGHT when randomly picking ea
 const BOW_SHOOT_WEIGHT := 0.4   ## kind — weighted more toward arrows since a shoot orb
                                  ## spends the whole stack in one go
 const STAFF_SLOW_MULT := 0.5
+const STAFF_SLOW_TIME := {1: 6.0, 2: 15.0, 3: 30.0}   ## Ice slow duration by queued runes
 ## How long each element's status effect lasts once a spell applies it —
 ## shared by all of them for simplicity; split these out per-status if any
 ## one of them ever needs to be tuned independently.
@@ -650,7 +651,7 @@ func _apply_element_status(element: Orb.Kind, runes: int) -> void:
 			continue
 		match element:
 			Orb.Kind.FIRE: e.apply_burn(Game.stats.damage(), STAFF_STATUS_TIME * runes)   # burns for the staff's damage every second
-			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_STATUS_TIME * runes)
+			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_SLOW_TIME[clampi(runes, 1, 3)])
 
 ## Tells the HUD's RuneBar what's queued (see Events.runes_changed).
 func _publish_runes() -> void:
