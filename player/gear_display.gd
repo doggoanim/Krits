@@ -18,6 +18,7 @@ extends Node3D
 @export var shield_rest := Vector3(0.0, 1.0, 0.3)   ## relative to the player's facing; +Z is behind
 @export var shield_default_top := 0.25   ## height of the shield's top edge when there is no shield model
 @export var weapon_hang_back := 0.05     ## weapon offset along the anchor's Z, onto the shield's player-facing side (flip the sign if it lands on the wrong face)
+@export var staff_tilt_deg := 12.0   ## how far a floating staff leans toward the player's right
 @export var follow_speed := 90.0   ## how tightly the gear tracks the player (higher = less lag)
 @export var turn_speed := 20.0     ## same, for turning to match the player's facing
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
@@ -28,6 +29,7 @@ extends Node3D
 var _player: Player
 var _anchor: FloatingAnchor
 var _weapon_pivot: Node3D
+var _staff_mount: Node3D   ## where a staff floats: same spot as the weapon pivot, but rigid like the shield (no pendulum swing) and tilted
 var _shield_model: Node3D
 var _weapon_model: Node3D
 var _shield_id: StringName = &"?"
@@ -45,6 +47,10 @@ func _ready() -> void:
 	_weapon_pivot = Node3D.new()
 	_weapon_pivot.name = "WeaponPivot"
 	_anchor.add_child(_weapon_pivot)
+	_staff_mount = Node3D.new()
+	_staff_mount.name = "StaffMount"
+	_staff_mount.rotation_degrees.z = -staff_tilt_deg   # -Z roll leans the top toward +X, the player's right
+	_anchor.add_child(_staff_mount)
 	Events.stats_changed.connect(_refresh)
 	_place_weapon_pivot()
 	_refresh()
@@ -93,7 +99,9 @@ func _refresh() -> void:
 		_place_weapon_pivot()
 	if weapon_id != _weapon_id:
 		_weapon_id = weapon_id
-		_weapon_model = _swap(_weapon_model, _weapon_pivot, weapon)
+		# Swords/bows hang and swing from the shield; a staff floats rigidly beside it.
+		var staff := weapon != null and weapon.kind == WeaponData.Kind.STAFF
+		_weapon_model = _swap(_weapon_model, _staff_mount if staff else _weapon_pivot, weapon)
 
 ## Frees `old`, instances `item`'s model under `parent` (if it has one) with
 ## the item's scale/offset/tilt applied, and returns it (or null).
@@ -125,6 +133,7 @@ func _place_weapon_pivot() -> void:
 	if _shield_model and is_instance_valid(_shield_model):
 		top = _top_edge(_shield_model)
 	_weapon_pivot.position = Vector3(0.0, top, weapon_hang_back)
+	_staff_mount.position = _weapon_pivot.position
 
 ## Highest point of a model's meshes, in the anchor's space.
 func _top_edge(model: Node3D) -> float:
