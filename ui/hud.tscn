@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://sjd0lyqkiai" path="res://ui/widgets/textured_slanted_bar.gd" id="6"]
 [ext_resource type="Script" uid="uid://cji8cv4nhnvxx" path="res://ui/widgets/portrait_viewport.gd" id="7"]
 [ext_resource type="Script" path="res://ui/widgets/rune_bar.gd" id="rune_bar"]
+[ext_resource type="Script" path="res://ui/widgets/rock_armor_indicator.gd" id="rock_indicator"]
 [ext_resource type="Texture2D" uid="uid://c120af7sqe3ml" path="res://assets/ui/button_1.png" id="plate_1"]
 [ext_resource type="Texture2D" uid="uid://ctbnugoakkam8" path="res://assets/ui/button_2.png" id="plate_2"]
 [ext_resource type="Texture2D" uid="uid://dxnfu8qr88oqk" path="res://assets/ui/button_3.png" id="plate_3"]
@@ -234,3 +235,13 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("rune_bar")
 plate_styles = Array[StyleBox]([SubResource("ComboPlate1"), SubResource("ComboPlate2"), SubResource("ComboPlate3")])
+
+[node name="RockArmorIndicator" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 250.0
+offset_right = 420.0
+offset_bottom = 360.0
+mouse_filter = 2
+script = ExtResource("rock_indicator")
+plate_style = SubResource("ComboPlate1")

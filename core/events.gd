@@ -18,6 +18,8 @@ signal item_gained(id: StringName, count: int)
 signal inventory_full(id: StringName)   ## something didn't fit in the bag
 
 # Player
+signal rock_armor_changed(shield: float, max_shield: float)   ## the Earth spell's armor shield (0 = none) — HUD badge and the cubes on the player follow it
+signal rock_armor_broken   ## the rock armor just broke (shield drained or recast) — shatter effects
 signal player_damaged(hp: float, shield: float)
 signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frames); from = where it came from, or Vector3.INF
 signal player_died

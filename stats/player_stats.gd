@@ -17,6 +17,7 @@ const BASE_SHIELD := 0.0    ## no shield worn = no shield bar
 const BASE_DAMAGE := 0.0   ## orb hits are the only thing that uses this — combo scaling
                            ## (see Arena.COMBO_BONUS) still ramps up from here as normal
 const DEATH_GOLD_LOSS := 0.25   ## fraction of your gold dropped when you die
+const ROCK_ARMOR_DAMAGE_MULT := 1.5   ## damage multiplier while the Earth spell's rock armor is up
 const SHIELD_RECHARGE_DELAY := 3.0
 const SHIELD_RECHARGE_RATE := 12.0
 
@@ -28,6 +29,8 @@ var equipped_armor: ArmorData
 var equipped_shield: ShieldData
 var equipped_weapon: WeaponData
 
+var rock_shield := 0.0       ## the Earth spell's separate shield: soaks hits (piercing ones too) before the normal shield
+var rock_shield_max := 0.0
 var hp := BASE_HP
 var shield := BASE_SHIELD
 var _since_hit := 0.0
@@ -44,7 +47,34 @@ func _init() -> void:
 
 func max_hp() -> float: return BASE_HP + (equipped_armor.hp_bonus if equipped_armor else 0.0)
 func max_shield() -> float: return BASE_SHIELD + (equipped_shield.shield_bonus if equipped_shield else 0.0)
-func damage() -> float: return BASE_DAMAGE + (equipped_weapon.damage_bonus if equipped_weapon else 0.0)
+func damage() -> float:
+	var base := BASE_DAMAGE + (equipped_weapon.damage_bonus if equipped_weapon else 0.0)
+	return base * (ROCK_ARMOR_DAMAGE_MULT if rock_armor_active() else 1.0)
+
+func rock_armor_active() -> bool: return rock_shield > 0.0
+
+## Puts the rock armor up with `amount` of shield (replacing any left over).
+func grant_rock_armor(amount: float) -> void:
+	rock_shield = amount
+	rock_shield_max = amount
+	Events.rock_armor_changed.emit(rock_shield, rock_shield_max)
+	Events.stats_changed.emit()
+
+## Breaks the armor (shield drained, or the spell recast) with the shatter effect.
+func break_rock_armor() -> void:
+	if not rock_armor_active():
+		return
+	clear_rock_armor()
+	Events.rock_armor_broken.emit()
+
+## Removes the armor quietly (fight over, respawn).
+func clear_rock_armor() -> void:
+	var had := rock_armor_active()
+	rock_shield = 0.0
+	rock_shield_max = 0.0
+	Events.rock_armor_changed.emit(0.0, 0.0)
+	if had:
+		Events.stats_changed.emit()
 
 func tick(delta: float) -> void:
 	_since_hit += delta
@@ -54,6 +84,16 @@ func tick(delta: float) -> void:
 ## Returns true if the player died.
 func take_damage(amount: float, pierces_shield := false) -> bool:
 	_since_hit = 0.0
+	# The rock armor soaks first and nothing gets past it for free — not even
+	# piercing hits. Whatever it can't hold carries on to the normal shield/HP.
+	if rock_armor_active():
+		var rock_absorbed := minf(rock_shield, amount)
+		rock_shield -= rock_absorbed
+		amount -= rock_absorbed
+		if rock_shield <= 0.0:
+			break_rock_armor()
+		else:
+			Events.rock_armor_changed.emit(rock_shield, rock_shield_max)
 	if pierces_shield:
 		hp -= amount
 	else:
@@ -65,6 +105,7 @@ func take_damage(amount: float, pierces_shield := false) -> bool:
 	return hp <= 0.0
 
 func full_heal() -> void:
+	clear_rock_armor()
 	hp = max_hp()
 	shield = max_shield()
 	Events.player_damaged.emit(hp, shield)

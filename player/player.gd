@@ -180,6 +180,8 @@ func _ready() -> void:
 	gear = GearDisplay.new()
 	add_child(gear)
 
+	visual.add_child(RockArmorFx.new())   # the Earth spell's cube armor, follows the model
+
 	effects = PlayerEffects.new()
 	add_child(effects)
 

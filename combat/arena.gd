@@ -60,7 +60,10 @@ const STAFF_SLOW_MULT := 0.5
 ## shared by all of them for simplicity; split these out per-status if any
 ## one of them ever needs to be tuned independently.
 const STAFF_STATUS_TIME := 3.0   ## per queued rune — a cast with N runes lasts N times this
-const STAFF_STUN_TIME := 1.0   ## Earth's stun, per queued rune
+## Earth: rock armor on the player instead of a status on enemies — a separate
+## shield (also soaks piercing hits) sized by how many earth runes were queued.
+## Casting earth again while it's up breaks it instead.
+const ROCK_ARMOR_SHIELD := {1: 5.0, 2: 10.0, 3: 30.0}
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUT := 4.0  ## seconds of not queueing a new rune before the buffer clears itself
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
@@ -625,9 +628,20 @@ func _cast_rune_buffer(orb: Orb) -> void:
 	_rune_buffer_t = 0.0
 	_publish_runes()
 	combo += 1
+	# Damage is read now, while any rock armor is still up (its 1.5x counts for this hit).
+	var dmg := Game.stats.damage()
 	for element: Orb.Kind in per_element:
 		_apply_element_status(element, int(per_element[element]))
-	_resolve_hit(orb, Game.stats.damage(), combo, runes)
+	_resolve_hit(orb, dmg, combo, runes)
+	if per_element.has(Orb.Kind.EARTH) and not _over:
+		_cast_rock_armor(int(per_element[Orb.Kind.EARTH]))
+
+## Earth cast: puts the rock armor up, or breaks it if it's already up.
+func _cast_rock_armor(runes: int) -> void:
+	if Game.stats.rock_armor_active():
+		Game.stats.break_rock_armor()
+	else:
+		Game.stats.grant_rock_armor(ROCK_ARMOR_SHIELD[clampi(runes, 1, 3)])
 
 ## Applies `element`'s status to every enemy, lasting `runes` times its base duration.
 func _apply_element_status(element: Orb.Kind, runes: int) -> void:
@@ -637,7 +651,6 @@ func _apply_element_status(element: Orb.Kind, runes: int) -> void:
 		match element:
 			Orb.Kind.FIRE: e.apply_burn(Game.stats.damage(), STAFF_STATUS_TIME * runes)   # burns for the staff's damage every second
 			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_STATUS_TIME * runes)
-			Orb.Kind.EARTH: e.apply_stun(STAFF_STUN_TIME * runes)
 
 ## Tells the HUD's RuneBar what's queued (see Events.runes_changed).
 func _publish_runes() -> void:
@@ -752,6 +765,7 @@ func _end(victory: bool) -> void:
 	if _over:
 		return
 	_over = true
+	Game.stats.clear_rock_armor()   # the armor doesn't outlast the fight
 	Events.player_landed.disconnect(_on_player_landed)
 	Events.player_died.disconnect(_on_player_died)
 	Events.player_hurt.disconnect(_on_player_hurt)
