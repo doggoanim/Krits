@@ -11,7 +11,9 @@ static var _cfg: ConfigFile
 static func for_enemy(enemy_id: StringName) -> Array[ItemDrop]:
 	if _cfg == null:
 		_cfg = ConfigFile.new()
-		_cfg.load(PATH)   # missing file -> no drops anywhere
+		var err := _cfg.load(PATH)   # missing file -> no drops anywhere
+		if err != OK:
+			push_error("Drops: could not load %s (error %d) — is data/*.cfg in the export filter?" % [PATH, err])
 	var out: Array[ItemDrop] = []
 	var section := String(enemy_id)
 	if not _cfg.has_section(section):
