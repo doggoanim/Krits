@@ -505,8 +505,8 @@ func _handle_bow_hit(orb: Orb) -> void:
 
 ## The Orb Stack ability: finds the active orb nearest to `from` and stacks
 ## `count` extra orbs in a vertical column on top of it (a long chain of
-## bounces to ride up). The extras take the weapon's style — same kind as
-## the base orb for sword/bow, random runes for the staff (there's only ever
+## bounces to ride up). The extras take the weapon's style — plain orbs for
+## the sword, arrow orbs for the bow, random runes for the staff (there's only ever
 ## one CAST orb) — and vanish once hit. Returns false if there's no orb.
 func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
 	var base: Orb = null
@@ -523,7 +523,8 @@ func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
 	else:
 		kinds = []
 		kinds.resize(count)
-		kinds.fill(base.kind)
+		# Bow stacks arrows (never shoot orbs); sword copies its plain orb.
+		kinds.fill(Orb.Kind.ARROW if _equipped_weapon_kind() == WeaponData.Kind.BOW else base.kind)
 	for i in count:
 		var o := Orb.new()
 		o.kind = kinds[i]
