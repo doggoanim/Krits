@@ -45,6 +45,7 @@ const ORBS_PER_ENEMY := 2
 const ORB_HEIGHT := Vector2(1.8, 4.4)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
+const POUND_PICKUP_COUNT := 2      ## Bow/Staff: ground-pounding into an arrow/element orb collects this many instead of 1
 const POUND_BONUS := 1.25         ## Sword: landing the combo with a ground pound multiplies the damage
 const LAND_HITSTOP_BASE := 0.07   ## seconds of freeze on a landing hit...
 const LAND_HITSTOP_PER_HIT := 0.015   ## ...plus this per orb in the combo...
@@ -479,8 +480,9 @@ func _is_pounding() -> bool:
 ## just a pickup (see Orb.Kind's doc comment), not combat feedback.
 func _handle_bow_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.ARROW:
-		_arrow_stack += Game.stats.damage()
-		_arrow_count += 1
+		var gained := POUND_PICKUP_COUNT if _is_pounding() else 1   # read before the bounce changes state
+		_arrow_stack += Game.stats.damage() * gained
+		_arrow_count += gained
 		Events.arrows_changed.emit(_arrow_count)
 		# Bounce on toward the nearest other arrow (the chain), else the nearest
 		# shoot orb, else straight up.
@@ -567,7 +569,9 @@ func _handle_staff_hit(orb: Orb) -> void:
 	if _rune_buffer.size() >= STAFF_BUFFER_MAX:
 		_overload_staff(orb)
 		return
-	_rune_buffer.append(orb.kind)
+	var gained := POUND_PICKUP_COUNT if _is_pounding() else 1   # read before the bounce changes state
+	for _i in mini(gained, STAFF_BUFFER_MAX - _rune_buffer.size()):
+		_rune_buffer.append(orb.kind)
 	_rune_buffer_t = STAFF_BUFFER_TIMEOUT
 	_publish_runes()
 	# Bounce on toward the nearest other orb of the same element (the chain),
