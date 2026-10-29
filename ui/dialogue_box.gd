@@ -187,7 +187,7 @@ func _end() -> void:
 
 func _refresh_hint() -> void:
 	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
-	_hint.text = "%s  Next" % key
+	_hint.text = key
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5
