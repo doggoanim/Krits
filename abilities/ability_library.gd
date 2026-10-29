@@ -42,7 +42,7 @@ static func orb_stack() -> AbilityData:
 		AbilityData.Effect.ORB_STACK, 14.0, 100, Color(1.0, 0.7, 0.3))
 	a.amount = 10.0        # extra orbs stacked on the nearest orb...
 	a.staff_amount = 2.0   # ...but only 2 with a staff
-	a.stamina_cost = 60.0
+	a.stamina_cost = 80.0
 	return a
 
 static func all_abilities() -> Array[AbilityData]:
