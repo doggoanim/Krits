@@ -999,15 +999,16 @@ func jump_off_wall(away: Vector3) -> void:
 ## point's height on the way down (or its apex, if it's too high to reach),
 ## scaled down to ORB_ARC_ASSIST of the way and capped at ORB_ARC_MAX_SPEED —
 ## a slight push toward the target, the player still has to steer the rest.
-func bounce_off_orb(combo := 1, toward: Variant = null, assist := ORB_ARC_ASSIST) -> void:
+func bounce_off_orb(combo := 1, toward: Variant = null, assist := ORB_ARC_ASSIST, lift := 1.0) -> void:
 	set_hvel(Vector3.ZERO)   # a clean vertical pop, even out of a fast dive
-	velocity.y = config.orb_bounce_velocity
+	var vy := config.orb_bounce_velocity * lift   # `lift` > 1 = a higher bounce (sword ground-pound)
+	velocity.y = vy
 	if toward is Vector3:
-		set_hvel(_arc_hvel(toward as Vector3, assist))
+		set_hvel(_arc_hvel(toward as Vector3, assist, vy))
 	can_dive = true
 	# Hold the attack pose for roughly as long as the bounce takes to reach its
 	# apex, not a flat duration — so the falling pose never pops in mid-rise.
-	var rise_time := config.orb_bounce_velocity / config.gravity
+	var rise_time := vy / config.gravity
 	visual.play_random_attack(rise_time * config.orb_attack_hold_mult)
 	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
@@ -1018,8 +1019,7 @@ const ORB_ARC_MAX_SPEED := 8.0    ## horizontal speed cap for that nudge
 ## A fraction (`assist`, default ORB_ARC_ASSIST) of the horizontal velocity that would carry the
 ## player from here to `target` over the bounce's own flight time (see
 ## bounce_off_orb()).
-func _arc_hvel(target: Vector3, assist: float) -> Vector3:
-	var vy := config.orb_bounce_velocity
+func _arc_hvel(target: Vector3, assist: float, vy: float) -> Vector3:
 	var g := config.gravity
 	var dy := target.y - global_position.y
 	var disc := vy * vy - 2.0 * g * dy
