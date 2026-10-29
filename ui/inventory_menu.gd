@@ -48,7 +48,7 @@ func _ready() -> void:
 	super()
 	for i in _tabs.size():
 		_tabs[i].pressed.connect(_show_page.bind(i))
-	_use_button.pressed.connect(_use_selected)
+	_use_button.pressed.connect(_on_use_pressed)
 	_drop_button.pressed.connect(_drop_selected)
 
 ## The base class frees everything under Content on open; here Content holds
@@ -173,11 +173,27 @@ func _update_item_details() -> void:
 	if item.sell_price > 0:
 		text += "\n\nSells for %dg." % item.sell_price
 	_detail_text.text = text
+	_use_button.text = "Use"
+	_use_button.disabled = false
 	_use_button.visible = item.is_usable()
 	_drop_button.visible = item.can_drop()
 	_drop_button.text = "Drop 1"
 	if item.is_usable():
 		_set_assign(item.id, [3, 4, 5])
+
+var _gear_selected: EquipmentData   ## the gear entry currently focused on the Gear page
+
+## The one action button: Use on the Items page, Equip/Take off on Gear.
+func _on_use_pressed() -> void:
+	if _page == Page.GEAR:
+		if _gear_selected == null:
+			return
+		var s := Game.stats
+		var worn: EquipmentData = s.equipped_armor if _gear_selected is ArmorData \
+			else (s.equipped_shield if _gear_selected is ShieldData else s.equipped_weapon)
+		_toggle_gear(_gear_selected, worn != null and worn.id == _gear_selected.id)
+	else:
+		_use_selected()
 
 func _use_selected() -> void:
 	if _selected >= Game.inventory.stacks.size():
@@ -308,7 +324,6 @@ func _fill_gear(list: VBoxContainer, owned: Array, equipped: EquipmentData) -> v
 		b.add_theme_font_size_override(&"font_size", 40)
 		b.set_meta(GEAR_ID_META, item.id)
 		b.focus_entered.connect(_on_gear_focused.bind(item))
-		b.pressed.connect(_toggle_gear.bind(item, is_equipped))
 		list.add_child(b)
 
 func _focus_gear() -> void:
@@ -324,22 +339,31 @@ func _focus_gear() -> void:
 
 func _on_gear_focused(item: EquipmentData) -> void:
 	_gear_focus = item.id
-	_use_button.visible = false
+	_gear_selected = item
 	_drop_button.visible = false
 	_clear_assign()
 	_detail_name.text = item.display_name
 	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)
 	var worn := equipped != null and equipped.id == item.id
-	_detail_kind.text = "Equipped" if worn else "Press to equip"
+	_detail_kind.text = "Equipped" if worn else "Not equipped"
 	_detail_text.text = _gear_text(item)
+	# Equipping is a button, not a click on the list entry. Worn armor/shield
+	# can be taken off; a worn weapon has nothing to do.
+	_use_button.visible = true
+	if worn and not (item is ArmorData or item is ShieldData):
+		_use_button.text = "Equipped"
+		_use_button.disabled = true
+	else:
+		_use_button.text = "Take off" if worn else "Equip"
+		_use_button.disabled = false
 
 func _gear_text(item: EquipmentData) -> String:
 	var stat := EquipmentLibrary.stat_line(item)
 	var flavor := item.flavor()
 	return stat if flavor == "" else flavor + "\n\n" + stat
 
-## Pressing worn armor/shield takes it off; anything else equips it.
+## The Equip button: worn armor/shield comes off; anything else equips.
 func _toggle_gear(item: EquipmentData, is_equipped: bool) -> void:
 	if is_equipped and (item is ArmorData or item is ShieldData):
 		Game.stats.unequip(item)   # emits stats_changed -> refresh()
