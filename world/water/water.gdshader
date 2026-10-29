@@ -30,14 +30,31 @@ uniform vec4 sparkle_color : source_color = vec4(1.0, 1.0, 0.95, 1.0);
 varying float wave_offset;
 varying vec2 world_xz;   // only needed by the sparkle pass below, but cheap enough to always compute
 
-// Cheap per-cell pseudo-random value, no texture lookup needed — same
-// "hash a 2D point to 0..1" trick used all over shader sparkle/glitter
-// effects. Not meant to be a good general-purpose noise, just a fast way to
-// give each sparkle cell its own stable-but-changing on/off roll.
+// Cheap per-cell pseudo-random value, no texture lookup needed. This is the
+// well-mixed "hash without sine" variant: the older fract(p * k) product hash
+// leaves visible diagonal/straight-line patterns in the lit cells.
 float sparkle_hash(vec2 p) {
-	p = fract(p * vec2(123.34, 456.21));
-	p += dot(p, p + 45.32);
-	return fract(p.x * p.y);
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+// One layer of glints: a randomly rotated cell grid (so no axis-aligned
+// lattice), where every cell has its own timing (they don't all re-roll on the
+// same beat), its own brightness and fades in/out instead of popping.
+float sparkle_layer(vec2 p, float density, float angle, float seed, float t) {
+	float c = cos(angle);
+	float s = sin(angle);
+	vec2 q = mat2(vec2(c, s), vec2(-s, c)) * p * density;
+	vec2 cell = floor(q) + seed;
+	float phase = sparkle_hash(cell * 1.31);
+	float clock = t * sparkle_speed + phase * 11.0;
+	float roll = floor(clock);
+	float n = sparkle_hash(cell + roll * 17.7);
+	float lit = step(0.992, n);
+	float pulse = sin(fract(clock) * 3.14159);   // fade in and out across the roll
+	float bright = 0.5 + 0.5 * sparkle_hash(cell + roll * 3.1);
+	return lit * pulse * bright;
 }
 
 void vertex() {
@@ -72,18 +89,13 @@ void fragment() {
 	METALLIC = 0.0;
 
 	if (sparkle_strength > 0.0) {
-		// Each wave crest nudges the cell grid it samples, so a sparkle
-		// cell's on/off roll re-happens as the water moves rather than
-		// sitting in a perfectly static world-space lattice — reads as
-		// glints riding the surface motion instead of a fixed glitter
-		// pattern painted on top of it.
-		vec2 cell = floor((world_xz + wave_offset * 0.1) * sparkle_density);
-		float roll = floor((TIME - time_offset) * sparkle_speed);
-		float n = sparkle_hash(cell + roll);
-		// Narrow threshold: only a sparse handful of cells are "lit" on any
-		// given roll, which is what reads as scattered glints rather than a
-		// uniform shimmer over the whole surface.
-		float twinkle = step(0.992, n);
+		// Two glint layers at different densities and angles, each nudged by the
+		// wave height so they ride the surface motion rather than sitting in a
+		// fixed lattice.
+		vec2 p = world_xz + wave_offset * 0.1;
+		float t = TIME - time_offset;
+		float twinkle = sparkle_layer(p, sparkle_density, 0.61, 0.0, t)
+				+ sparkle_layer(p, sparkle_density * 0.57, 2.17, 37.0, t);
 		// Glints only belong near the water's own bright/grazing highlight,
 		// same view-facing term fresnel already uses above — keeps them
 		// looking like light catching the surface rather than floating
