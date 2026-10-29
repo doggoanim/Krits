@@ -21,6 +21,7 @@ var _dest := Vector3.ZERO
 var _mesh: MeshInstance3D   ## placeholder sphere, only built when data.model is unset
 var _mat := StandardMaterial3D.new()
 var _visual: EnemyVisual    ## animated model, only built when data.model is set
+var _fx: StatusFx           ## burn / slow / stun visuals — see StatusFx
 var _flash := 0.0
 var _dying := false   ## true once defeated, so a lingering death animation isn't overridden
 
@@ -112,6 +113,9 @@ func _ready() -> void:
 		_mesh.material_override = _mat
 		add_child(_mesh)
 		CelOutline.apply(_mesh, sphere_radius * SPHERE_OUTLINE_RATIO)
+	_fx = StatusFx.new()
+	add_child(_fx)
+	_fx.setup(_visual, body_height(data) * 0.5 - feet_offset(data), body_height(data), body_radius(data))
 	_dest = global_position
 
 func _build_collider() -> void:
@@ -279,11 +283,13 @@ func _shoot(delta: float) -> void:
 func apply_slow(mult: float, duration: float) -> void:
 	_speed_mult = mult
 	_slow_t = duration
+	_fx.set_active(&"slow", true)
 
 ## Stops _move()/_shoot() entirely for `duration` — takes the longer of the
 ## current and new duration rather than stacking, same reasoning as slow.
 func apply_stun(duration: float) -> void:
 	_stun_t = maxf(_stun_t, duration)
+	_fx.set_active(&"stun", true)
 
 ## Ticks `dps` damage per second for `duration`, refreshing like slow (a
 ## second Fire hit resets the burn's clock rather than adding a second,
@@ -291,17 +297,23 @@ func apply_stun(duration: float) -> void:
 func apply_burn(dps: float, duration: float) -> void:
 	_burn_dps = dps
 	_burn_t = duration
+	_fx.set_active(&"burn", true)
 
 func _update_status_effects(delta: float) -> void:
 	if _slow_t > 0.0:
 		_slow_t -= delta
 		if _slow_t <= 0.0:
 			_speed_mult = 1.0
+			_fx.set_active(&"slow", false)
 	if _stun_t > 0.0:
 		_stun_t -= delta
+		if _stun_t <= 0.0:
+			_fx.set_active(&"stun", false)
 	if _burn_t > 0.0:
 		_burn_t -= delta
 		take_damage(_burn_dps * delta)
+		if _burn_t <= 0.0:
+			_fx.set_active(&"burn", false)
 
 ## Squash-and-stretch reaction for a heavy hit (Arena calls it once per landed
 ## combo — not from take_damage(), which burn damage calls every frame).
@@ -320,6 +332,7 @@ func take_damage(amount: float) -> void:
 		_visual.flash()
 	if hp <= 0.0:
 		_dying = true
+		_fx.clear_all()
 		defeated.emit(self)
 		if _visual:
 			var death_len := _visual.play_death()

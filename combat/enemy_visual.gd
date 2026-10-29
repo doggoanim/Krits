@@ -11,6 +11,8 @@ var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
 var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
+var _status_tint := Color.WHITE   ## magic status color (see StatusFx), blended over the base color
+var _status_amount := 0.0
 var _anim_idle: StringName
 var _anim_move: StringName
 var _anim_death: StringName
@@ -72,6 +74,11 @@ func play_death() -> float:
 func flash() -> void:
 	_flash_t = 0.12
 
+## Tints the whole model toward `color` by `amount` (0..1) — burn/slow/stun.
+func set_status_tint(color: Color, amount: float) -> void:
+	_status_tint = color
+	_status_amount = clampf(amount, 0.0, 1.0)
+
 func _play(anim_name: StringName, restart := false) -> void:
 	if _anim == null or anim_name == &"" or not _anim.has_animation(anim_name):
 		return
@@ -87,5 +94,6 @@ func _process(delta: float) -> void:
 	else:
 		for m in _materials:
 			var base: Color = _base_colors.get(m, ModelUtil.get_tint(m))
-			if ModelUtil.get_tint(m) != base:
-				ModelUtil.set_tint(m, base)
+			var shown := base.lerp(_status_tint, _status_amount) if _status_amount > 0.0 else base
+			if ModelUtil.get_tint(m) != shown:
+				ModelUtil.set_tint(m, shown)
