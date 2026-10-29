@@ -44,8 +44,12 @@ const KIND_COLORS := {
 	Kind.CAST: [Color(0.65, 0.3, 1.0), Color(0.9, 0.8, 1.0)],   # magic: purple
 }
 
-## Every orb is a hollow glass shell (see _refresh()) with a billboard icon in
-## its center, tinted with the orb's own color (see orb_icon.gdshader). The
+## Kinds drawn as a hollow glass shell (the collectibles: arrows and the
+## element runes); every other kind is a solid core. See _refresh().
+const HOLLOW_KINDS: Array[Kind] = [Kind.ARROW, Kind.FIRE, Kind.ICE, Kind.EARTH]
+
+## Every orb has a billboard icon in its center, tinted with the orb's own
+## color (see orb_icon.gdshader). The
 ## value is the icon's texture path; a missing file just leaves the center
 ## empty (see _ready()'s ResourceLoader.exists() guard) — the element runes'
 ## art isn't made yet.
@@ -88,7 +92,8 @@ var _mesh_outline: MeshInstance3D
 var _ring: MeshInstance3D
 var _core_mat := StandardMaterial3D.new()
 var _ring_mat := StandardMaterial3D.new()
-var _outline_mat: ShaderMaterial   ## rim-only outline (orb_outline.gdshader) — see _ready()
+var _hollow := false
+var _outline_mat: Material   ## hollow kinds: rim-only ShaderMaterial (orb_outline.gdshader); solid kinds: CelOutline's plain black material
 var _base_scale := 1.0   ## target scale from _refresh() (1.0 active, 0.5 inactive); the
                           ## per-frame breathing pulse multiplies on top of this
 var _t := randf() * TAU
@@ -113,13 +118,19 @@ func _ready() -> void:
 	_mesh.material_override = _core_mat
 	add_child(_mesh)
 	_mesh_outline = CelOutline.apply(_mesh, OUTLINE_THICKNESS)
-	# The core is hollow, so CelOutline's plain inverted hull would show its far
-	# wall through the glass as a dark fill. Swap in the rim-only outline shader.
-	_outline_mat = ShaderMaterial.new()
-	_outline_mat.shader = OUTLINE_SHADER
-	_outline_mat.set_shader_parameter(&"grow", OUTLINE_THICKNESS)
-	_outline_mat.set_shader_parameter(&"core_radius", CORE_RADIUS)
-	_mesh_outline.material_override = _outline_mat
+	_hollow = kind in HOLLOW_KINDS
+	if _hollow:
+		# A plain inverted hull would show its far wall through the glass as a
+		# dark fill, so hollow cores get the rim-only outline shader instead.
+		var rim := ShaderMaterial.new()
+		rim.shader = OUTLINE_SHADER
+		rim.set_shader_parameter(&"grow", OUTLINE_THICKNESS)
+		rim.set_shader_parameter(&"core_radius", CORE_RADIUS)
+		_mesh_outline.material_override = rim
+	# CelOutline's own material is plain opaque black — left alone it would
+	# stay solid once the core fades to the inactive color, so _refresh()
+	# fades it along with the core.
+	_outline_mat = _mesh_outline.material_override
 
 	var tm := TorusMesh.new()
 	tm.inner_radius = RING_INNER_RADIUS
@@ -252,23 +263,30 @@ func relocate(pos: Vector3) -> void:
 
 func _refresh() -> void:
 	var colors: Array = KIND_COLORS[kind]
-	# Hollow glass core: CULL_FRONT on a closed sphere hides the near-side
-	# faces, leaving the far-side inside wall visible through it, which reads
-	# as hollow rather than solid. The cel outline and the ring stay solid.
+	# Hollow kinds: CULL_FRONT on a closed sphere hides the near-side faces,
+	# leaving the far-side inside wall visible through it, which reads as
+	# hollow rather than solid. The outline and the ring stay solid.
 	if active:
 		_core_mat.albedo_color = colors[0]
-		_core_mat.albedo_color.a = CORE_HOLLOW_ALPHA
-		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		_core_mat.cull_mode = BaseMaterial3D.CULL_FRONT
+		_core_mat.albedo_color.a = CORE_HOLLOW_ALPHA if _hollow else 1.0
+		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if _hollow else BaseMaterial3D.TRANSPARENCY_DISABLED
+		_core_mat.cull_mode = BaseMaterial3D.CULL_FRONT if _hollow else BaseMaterial3D.CULL_BACK
 	else:
 		_core_mat.albedo_color = INACTIVE_COLOR
 		_core_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_core_mat.cull_mode = BaseMaterial3D.CULL_BACK
 	_ring_mat.albedo_color = colors[1] if active else INACTIVE_COLOR
 	_ring_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
-	if _outline_mat:
-		_outline_mat.set_shader_parameter(&"alpha", 1.0 if active else INACTIVE_COLOR.a)
+	var outline_alpha := 1.0 if active else INACTIVE_COLOR.a
+	if _outline_mat is ShaderMaterial:
+		(_outline_mat as ShaderMaterial).set_shader_parameter(&"alpha", outline_alpha)
+	elif _outline_mat is StandardMaterial3D:
+		var m := _outline_mat as StandardMaterial3D
+		m.albedo_color.a = outline_alpha
+		m.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if active else BaseMaterial3D.TRANSPARENCY_ALPHA
 	if _icon:
 		_icon.visible = active
-		_icon_mat.set_shader_parameter(&"tint", colors[0])
+		# Hollow: the icon sits on glass, so it takes the orb's color. Solid:
+		# the same color would vanish into the core, so use its pale shade.
+		_icon_mat.set_shader_parameter(&"tint", colors[0] if _hollow else colors[1])
 	_base_scale = 1.0 if active else 0.5
