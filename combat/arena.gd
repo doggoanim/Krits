@@ -67,7 +67,7 @@ const STAFF_STATUS_TIME := 3.0   ## per queued rune — a cast with N runes last
 ## Casting earth again while it's up breaks it instead.
 const ROCK_ARMOR_SHIELD := {1: 5.0, 2: 10.0, 3: 30.0}
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
-const STAFF_BUFFER_TIMEOUT := 4.0  ## seconds of not queueing a new rune before the buffer clears itself
+const STAFF_BUFFER_TIMEOUTS := [6.0, 4.0, 3.0]  ## seconds of not queueing a new rune before one fizzles, by how many are queued (1, 2, 3) — more runes, less patience
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
                                         ## an overload is a mistake, not something a shield should soften
 const STAFF_OVERLOAD_FLING_UP := 8.0     ## vertical pop from an overload — gentler than a real
@@ -572,7 +572,7 @@ func _handle_staff_hit(orb: Orb) -> void:
 	var gained := POUND_PICKUP_COUNT if _is_pounding() else 1   # read before the bounce changes state
 	for _i in mini(gained, STAFF_BUFFER_MAX - _rune_buffer.size()):
 		_rune_buffer.append(orb.kind)
-	_rune_buffer_t = STAFF_BUFFER_TIMEOUT
+	_rune_buffer_t = _rune_timeout()
 	_publish_runes()
 	# Bounce on toward the nearest other orb of the same element (the chain),
 	# else the cast orb, else straight up — same slight push as the arrows.
@@ -591,7 +591,7 @@ func _fizzle_staff() -> void:
 	var rune: int = _rune_buffer.pop_back()
 	if is_instance_valid(player):
 		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[rune][0], 1.0)
-	_rune_buffer_t = STAFF_BUFFER_TIMEOUT if not _rune_buffer.is_empty() else 0.0
+	_rune_buffer_t = _rune_timeout() if not _rune_buffer.is_empty() else 0.0
 	_publish_runes()
 
 ## Queuing a 4th rune overloads the staff: the whole buffer dumps itself as
@@ -657,9 +657,14 @@ func _apply_element_status(element: Orb.Kind, runes: int) -> void:
 			Orb.Kind.FIRE: e.apply_burn(Game.stats.damage(), STAFF_STATUS_TIME * runes)   # burns for the staff's damage every second
 			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_SLOW_TIME[clampi(runes, 1, 3)])
 
+## Idle time allowed before the next rune fizzles, for the current rune count.
+func _rune_timeout() -> float:
+	var idx := clampi(_rune_buffer.size(), 1, STAFF_BUFFER_TIMEOUTS.size()) - 1
+	return STAFF_BUFFER_TIMEOUTS[idx]
+
 ## Tells the HUD's RuneBar what's queued (see Events.runes_changed).
 func _publish_runes() -> void:
-	Events.runes_changed.emit(_rune_buffer.duplicate(), STAFF_BUFFER_TIMEOUT)
+	Events.runes_changed.emit(_rune_buffer.duplicate(), _rune_timeout())
 
 ## The part every damage-dealing orb hit shares, regardless of which weapon
 ## got it there: hit every enemy, bounce the player, fire the usual combo/
