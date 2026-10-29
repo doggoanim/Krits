@@ -313,8 +313,7 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	var equipped: EquipmentData = Game.stats.equipped_armor if item is ArmorData \
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)
 	var worn := equipped != null and equipped.id == item.id
-	var removable := item is ArmorData or item is ShieldData
-	_detail_kind.text = ("Equipped — press to take off" if removable else "Equipped") if worn else "Press to equip"
+	_detail_kind.text = "Equipped" if worn else "Press to equip"
 	_detail_text.text = _gear_text(item)
 
 func _gear_text(item: EquipmentData) -> String:
