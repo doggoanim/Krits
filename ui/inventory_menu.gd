@@ -294,7 +294,7 @@ func _update_ability_details() -> void:
 		return
 	var a := AbilityLibrary.by_id(known[_selected_ability])
 	_detail_name.text = a.display_name
-	_detail_kind.text = "Ability   Cooldown %ds" % int(a.cooldown)
+	_detail_kind.text = "Ability   Cooldown %ds   Stamina %d" % [int(a.cooldown), int(a.stamina_cost)]
 	_detail_text.text = a.description
 	_set_assign(a.id, [0, 1, 2])
 

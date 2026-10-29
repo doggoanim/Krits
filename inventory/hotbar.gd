@@ -87,10 +87,14 @@ func use_slot(index: int, player: Player) -> bool:
 		if cooldown_left(id) > 0.0:
 			Events.notice.emit("%s: %.0fs" % [ability.display_name, ceilf(cooldown_left(id))])
 			return false
+		if not Game.stats.can_afford(ability.stamina_cost):
+			Events.notice.emit("Not enough stamina.")
+			return false
 		var problem := AbilityRunner.activate(ability, player, Engine.get_main_loop() as SceneTree)
 		if problem != "":
 			Events.notice.emit(problem)
 			return false
+		Game.stats.spend_stamina(ability.stamina_cost)
 		cooldowns[id] = ability.cooldown
 		Events.notice.emit("%s!" % ability.display_name)
 		return true

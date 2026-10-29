@@ -10,6 +10,7 @@ enum Effect { HEAL, GUARD, SUPER_JUMP, SHOCKWAVE, ORB_STACK }
 @export var display_name := ""
 @export_multiline var description := ""
 @export var effect: Effect = Effect.HEAL
+@export var stamina_cost := 0.0   ## spent from the stamina bar on use; can't be used without enough
 @export var cooldown := 10.0       ## seconds before it can be used again
 @export var price := 0             ## 0 = not sold in shops
 @export var amount := 0.0          ## heal HP / damage multiplier / jump velocity, per effect

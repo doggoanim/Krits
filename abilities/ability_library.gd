@@ -12,18 +12,21 @@ static func heal() -> AbilityData:
 	var a := _make(&"heal",
 		AbilityData.Effect.HEAL, 15.0, 0, Color(1.0, 0.5, 0.55))
 	a.amount = 30.0
+	a.stamina_cost = 40.0
 	return a
 
 static func super_jump() -> AbilityData:
 	var a := _make(&"super_jump",
 		AbilityData.Effect.SUPER_JUMP, 4.0, 0, Color(0.5, 0.85, 1.0))
 	a.amount = 26.0
+	a.stamina_cost = 20.0
 	return a
 
 static func guard_up() -> AbilityData:
 	var a := _make(&"guard_up",
 		AbilityData.Effect.GUARD, 18.0, 80, Color(1.0, 0.9, 0.4))
 	a.duration = 2.5
+	a.stamina_cost = 35.0
 	return a
 
 static func shockwave() -> AbilityData:
@@ -31,6 +34,7 @@ static func shockwave() -> AbilityData:
 		AbilityData.Effect.SHOCKWAVE, 10.0, 120, Color(0.8, 0.55, 1.0))
 	a.amount = 3.0   # x your damage stat
 	a.radius = 9.0
+	a.stamina_cost = 50.0
 	return a
 
 static func orb_stack() -> AbilityData:
@@ -38,6 +42,7 @@ static func orb_stack() -> AbilityData:
 		AbilityData.Effect.ORB_STACK, 14.0, 100, Color(1.0, 0.7, 0.3))
 	a.amount = 10.0        # extra orbs stacked on the nearest orb...
 	a.staff_amount = 2.0   # ...but only 2 with a staff
+	a.stamina_cost = 30.0
 	return a
 
 static func all_abilities() -> Array[AbilityData]:

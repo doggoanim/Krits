@@ -20,6 +20,9 @@ const DEATH_GOLD_LOSS := 0.25   ## fraction of your gold dropped when you die
 const ROCK_ARMOR_DAMAGE_MULT := 1.5   ## damage multiplier while the Earth spell's rock armor is up
 const SHIELD_RECHARGE_DELAY := 3.0
 const SHIELD_RECHARGE_RATE := 12.0
+const MAX_STAMINA := 100.0        ## abilities spend it (AbilityData.stamina_cost)
+const STAMINA_REGEN_DELAY := 1.0  ## seconds after spending before it refills
+const STAMINA_REGEN_RATE := 20.0  ## per second
 
 var gold := 0
 var owned_armors: Array[StringName] = []
@@ -33,7 +36,9 @@ var rock_shield := 0.0       ## the Earth spell's separate shield: soaks hits (p
 var rock_shield_max := 0.0
 var hp := BASE_HP
 var shield := BASE_SHIELD
+var stamina := MAX_STAMINA
 var _since_hit := 0.0
+var _since_stamina_use := 0.0
 
 func _init() -> void:
 	equipped_armor = EquipmentLibrary.starting_armor()
@@ -81,7 +86,19 @@ func clear_rock_armor() -> void:
 	if had:
 		Events.stats_changed.emit()
 
+func can_afford(cost: float) -> bool:
+	return stamina >= cost
+
+## Spends `cost` stamina (the caller has already checked can_afford()) and
+## restarts the refill delay.
+func spend_stamina(cost: float) -> void:
+	stamina = maxf(0.0, stamina - cost)
+	_since_stamina_use = 0.0
+
 func tick(delta: float) -> void:
+	_since_stamina_use += delta
+	if _since_stamina_use >= STAMINA_REGEN_DELAY and stamina < MAX_STAMINA:
+		stamina = minf(MAX_STAMINA, stamina + STAMINA_REGEN_RATE * delta)
 	_since_hit += delta
 	if _since_hit >= SHIELD_RECHARGE_DELAY and shield < max_shield():
 		shield = minf(max_shield(), shield + SHIELD_RECHARGE_RATE * delta)
@@ -111,6 +128,7 @@ func take_damage(amount: float, pierces_shield := false) -> bool:
 
 func full_heal() -> void:
 	clear_rock_armor()
+	stamina = MAX_STAMINA
 	hp = max_hp()
 	shield = max_shield()
 	Events.player_damaged.emit(hp, shield)

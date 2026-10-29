@@ -87,10 +87,8 @@ func _refresh() -> void:
 	_shield_outline.max_value = maxf(s.max_shield(), 1.0)
 	_shield_outline.visible = s.max_shield() > 0.0   # no shield worn, no bar
 	_shield_outline.value = s.shield
-	# Stamina has no gameplay source yet (reserved for future abilities) —
-	# shown full until something drains it.
-	_stamina_fill.max_value = 1.0
-	_stamina_fill.value = 1.0
+	_stamina_fill.max_value = PlayerStats.MAX_STAMINA   # abilities spend it, see Hotbar.use_slot
+	_stamina_fill.value = s.stamina
 
 	# No more XP/levels (stats are equipment-driven now, see PlayerStats) —
 	# the bar that used to track XP-to-next-level just stays hidden; the
