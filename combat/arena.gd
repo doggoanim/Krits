@@ -93,6 +93,7 @@ const OUTRO_RING_TIME := 0.35
 const RING_DRAW_TIME := 0.5     ## total time for the ground ring to sweep fully around
 const RING_POP_TIME := 0.12     ## how long each individual ring segment's own pop-in takes
 const WALL_GROW_TIME := 0.45    ## how long the walls take to rise once the ring's done
+const ORB_STACK_SPACING := 1.15   ## vertical gap between orbs stacked by the Orb Stack ability
 const ORB_DROP_HEIGHT := 9.0    ## how far above its landing spot each orb starts
 const ORB_DROP_TIME := 0.6
 const ORB_DROP_STAGGER := 0.05  ## added delay per orb so they don't all land in lockstep
@@ -502,6 +503,37 @@ func _handle_bow_hit(orb: Orb) -> void:
 	Events.arrows_changed.emit(0)
 	_resolve_hit(orb, dmg, combo, arrows)
 
+## The Orb Stack ability: finds the active orb nearest to `from` and stacks
+## `count` extra orbs in a vertical column on top of it (a long chain of
+## bounces to ride up). The extras take the weapon's style — same kind as
+## the base orb for sword/bow, random runes for the staff (there's only ever
+## one CAST orb) — and vanish once hit. Returns false if there's no orb.
+func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
+	var base: Orb = null
+	var best_d := INF
+	for o in orbs:
+		if is_instance_valid(o) and o.active and o.global_position.distance_squared_to(from) < best_d:
+			best_d = o.global_position.distance_squared_to(from)
+			base = o
+	if base == null or count <= 0:
+		return false
+	var kinds: Array
+	if _equipped_weapon_kind() == WeaponData.Kind.STAFF:
+		kinds = _random_kinds(count, [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH], [1.0, 1.0, 1.0])
+	else:
+		kinds = []
+		kinds.resize(count)
+		kinds.fill(base.kind)
+	for i in count:
+		var o := Orb.new()
+		o.kind = kinds[i]
+		o.set_meta(&"stacked", true)
+		add_child(o)
+		o.hit.connect(_on_orb_hit)
+		orbs.append(o)
+		o.drop_in(base.global_position + Vector3.UP * ORB_STACK_SPACING * (i + 1), 3.0, 0.35, i * 0.04)
+	return true
+
 ## The closest active orb of `kind` to `from_orb` (not `from_orb` itself), or null.
 func _nearest_active_orb(from_orb: Orb, kind: Orb.Kind) -> Orb:
 	var best: Orb = null
@@ -663,6 +695,11 @@ func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int, hits: int) -> v
 		_respawn_orb_later(orb)
 
 func _respawn_orb_later(orb: Orb) -> void:
+	if orb.has_meta(&"stacked"):
+		# An ability-stacked extra: used up once hit, instead of relocating.
+		orbs.erase(orb)
+		orb.queue_free()
+		return
 	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
 		if is_instance_valid(orb) and not _over:
 			var taken: Array[Vector3] = []

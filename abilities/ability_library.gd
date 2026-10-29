@@ -33,8 +33,15 @@ static func shockwave() -> AbilityData:
 	a.radius = 9.0
 	return a
 
+static func orb_stack() -> AbilityData:
+	var a := _make(&"orb_stack",
+		AbilityData.Effect.ORB_STACK, 14.0, 100, Color(1.0, 0.7, 0.3))
+	a.amount = 10.0        # extra orbs stacked on the nearest orb...
+	a.staff_amount = 2.0   # ...but only 2 with a staff
+	return a
+
 static func all_abilities() -> Array[AbilityData]:
-	return [heal(), super_jump(), guard_up(), shockwave()]
+	return [heal(), super_jump(), guard_up(), shockwave(), orb_stack()]
 
 static func starting() -> Array[AbilityData]:
 	return [heal(), super_jump()]

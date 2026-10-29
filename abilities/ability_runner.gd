@@ -26,6 +26,15 @@ static func activate(ability: AbilityData, player: Player, tree: SceneTree) -> S
 			if arena == null:
 				return "Only usable in a fight."
 			_shockwave(ability, player, arena)
+		AbilityData.Effect.ORB_STACK:
+			var arena := tree.get_first_node_in_group(&"arena") as Arena
+			if arena == null:
+				return "Only usable in a fight."
+			var staff := Game.stats.equipped_weapon != null \
+				and Game.stats.equipped_weapon.kind == WeaponData.Kind.STAFF
+			var count := int(ability.staff_amount if staff and ability.staff_amount > 0.0 else ability.amount)
+			if not arena.stack_orbs_on_nearest(player.global_position, count):
+				return "No orbs to stack on."
 	return ""
 
 static func _shockwave(ability: AbilityData, player: Player, arena: Arena) -> void:
