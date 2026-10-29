@@ -92,7 +92,7 @@ static func steel_sword() -> WeaponData:
 	w.id = &"steel_sword"
 	w.price = 60
 	w.kind = WeaponData.Kind.SWORD
-	w.damage_bonus = 5.0
+	w.damage_bonus = 1.0
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
