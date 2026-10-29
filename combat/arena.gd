@@ -505,19 +505,228 @@ func _handle_bow_hit(orb: Orb) -> void:
 
 ## The Orb Stack ability: finds the active orb nearest to `from` and stacks
 ## `count` extra orbs in a vertical column on top of it (a long chain of
-## bounces to ride up). The extras take the weapon's style — plain orbs for
-## the sword, arrow orbs for the bow, random runes for the staff (there's only ever
-## one CAST orb) — and vanish once hit. With a bow only arrow orbs count as
-## the base. Returns false if there's no suitable orb.
+## bounces to ride up). The extras copy the base orb's type and vanish once
+## hit. With a bow only arrow orbs count as the base, with a staff only rune
+## orbs (there's only ever one CAST orb). Returns false if there's none.
 func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
 	var base: Orb = null
 	var best_d := INF
-	var bow := _equipped_weapon_kind() == WeaponData.Kind.BOW
+	var weapon := _equipped_weapon_kind()
 	for o in orbs:
 		if not is_instance_valid(o) or not o.active:
 			continue
-		if bow and o.kind != Orb.Kind.ARROW:
+		if weapon == WeaponData.Kind.BOW and o.kind != Orb.Kind.ARROW:
 			continue   # the bow only builds on arrow orbs
+		if weapon == WeaponData.Kind.STAFF and o.kind == Orb.Kind.CAST:
+			continue   # the staff builds on a rune — there is only ever one cast orb
+		if o.global_position.distance_squared_to(from) < best_d:
+			best_d = o.global_position.distance_squared_to(from)
+			base = o
+	if base == null or count <= 0:
+		return false
+	# The extras copy the base orb's own type: plain for the sword, arrows for
+	# the bow, the same element for the staff.
+	var kinds: Array = []
+	kinds.resize(count)
+	kinds.fill(base.kind)
+	for i in count:
+		var o := Orb.new()
+		o.kind = kinds[i]   # before add_child() — _ready()'s _refresh() needs it to pick the right color
+		add_child(o)
+		var pos := _free_orb_position(targets)
+		targets.append(pos)
+		o.hit.connect(_on_orb_hit)
+		orbs.append(o)
+		o.drop_in(pos, ORB_DROP_HEIGHT, ORB_DROP_TIME, i * ORB_DROP_STAGGER)
+
+## What kind each of `count` freshly-spawned orbs should be, picked purely by
+## the currently equipped weapon — Sword spawns all plain orbs (today's
+## original behavior), Bow spawns a weighted mix of arrow/shoot, Staff an
+## even mix of the three elements. A relocated orb (see _on_orb_hit()'s
+## respawn scheduling) keeps whatever kind it already had rather than
+## re-rolling — simpler, and it means the overall mix this picks at the
+## start of the fight roughly holds for its whole duration.
+func _orb_kinds_for_weapon(count: int) -> Array:
+	match _equipped_weapon_kind():
+		WeaponData.Kind.BOW:
+			return _random_kinds(count, [Orb.Kind.ARROW, Orb.Kind.SHOOT],
+					[BOW_ARROW_WEIGHT, BOW_SHOOT_WEIGHT])
+		WeaponData.Kind.STAFF:
+			# Exactly one CAST orb per fight, regardless of size — multiple would
+			# just mean never needing to wait for one, which flattens the whole
+			# "queue runes, then commit" rhythm the buffer's built around. The
+			# rest are an even mix of the three runes.
+			var out := _random_kinds(maxi(0, count - 1),
+					[Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH],
+					[1.0, 1.0, 1.0])
+			out.append(Orb.Kind.CAST)
+			out.shuffle()
+			return out
+		_:
+			var out: Array = []
+			out.resize(count)
+			out.fill(Orb.Kind.PLAIN)
+			return out
+
+func _equipped_weapon_kind() -> WeaponData.Kind:
+	var w := Game.stats.equipped_weapon
+	return w.kind if w else WeaponData.Kind.SWORD
+
+func _random_kinds(count: int, kinds: Array, weights: Array) -> Array:
+	var total := 0.0
+	for w in weights: total += w
+	var out: Array = []
+	for _i in count:
+		var roll := randf() * total
+		var acc := 0.0
+		for i in kinds.size():
+			acc += weights[i]
+			if roll <= acc:
+				out.append(kinds[i])
+				break
+	return out
+
+## A ground spot kept away from `existing` positions (best-candidate sampling).
+## Callers pass whatever set of positions should count as "already taken" —
+## other orbs' chosen landing spots during the initial spawn, or the current
+## (landed) orbs' live positions when relocating one after a hit.
+func _free_orb_position(existing: Array[Vector3]) -> Vector3:
+	var best := Vector3.ZERO
+	var best_d := -1.0
+	for _i in 12:   # best-candidate sampling keeps orbs spread out
+		var pos := random_point(0.9)
+		pos.y += randf_range(ORB_HEIGHT.x, ORB_HEIGHT.y)   # float above whatever ground is under it
+		var nearest := INF
+		for t in existing:
+			nearest = minf(nearest, t.distance_to(pos))
+		if nearest > best_d:
+			best_d = nearest
+			best = pos
+	return best
+
+## Casts straight down from above `pos` to find the real terrain height there
+## (world geometry is collision layer 1). Falls back to the arena's own
+## ground level if nothing is hit, e.g. a candidate point over a gap/ledge.
+## Public: Enemy also uses this to land a leap attack on real ground.
+func ground_height(pos: Vector3) -> float:
+	var from := pos + Vector3.UP * GROUND_PROBE_UP
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * GROUND_PROBE_DOWN, 1)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.position.y if not hit.is_empty() else global_position.y
+
+# ---------------------------------------------------------------- combat
+
+## Dispatches purely on the currently equipped weapon — each handler decides
+## for itself what this particular orb touch does (deal damage, bank it,
+## nothing at all) and, if it actually dealt damage, calls _resolve_hit() for
+## the bookkeeping every damaging hit shares.
+func _on_orb_hit(orb: Orb) -> void:
+	if _over:
+		return
+	match _equipped_weapon_kind():
+		WeaponData.Kind.BOW: _handle_bow_hit(orb)
+		WeaponData.Kind.STAFF: _handle_staff_hit(orb)
+		_: _handle_sword_hit(orb)
+
+## Sword: an orb hit in the air only BANKS its damage (combo scaling still
+## applies) and bounces you back up — no damage, no hitstop yet. Everything
+## is dealt at once when the player touches the ground, see _land_sword_combo().
+func _handle_sword_hit(orb: Orb) -> void:
+	combo += 1
+	var dmg := Game.stats.damage() * (1.0 + COMBO_BONUS * (combo - 1))
+	_sword_banked += dmg
+	_sword_hits.append(dmg)
+	player.bounce_off_orb(combo)
+	Events.orb_hit.emit(combo, dmg)
+	Events.combo_changed.emit(combo)
+	_respawn_orb_later(orb)
+
+## The landing: hit every enemy for the whole banked combo, with a freeze
+## frame, a squash on each enemy, damage numbers and a screen kick.
+func _land_sword_combo() -> void:
+	var pounded := player.pound_landed_frame == Engine.get_physics_frames()
+	var banked := _sword_banked
+	var hits := combo
+	_sword_banked = 0.0
+	_sword_hits.clear()
+	_deal_hit(banked, hits, pounded, WeaponData.Kind.SWORD)
+
+## The damaging-hit presentation every weapon shares (sword landing, bow
+## release, staff cast): pound bonus multiplier, sound, a burst + squash +
+## knockback on every enemy, the damage plate, screen kick and hit-stop.
+## `hits` is how many hits/arrows/runes this blow stacks — it scales the
+## feedback, and a lone x1 hit gets no freeze (a pound bonus still does).
+func _deal_hit(base_damage: float, hits: int, pounded: bool, kind: WeaponData.Kind) -> void:
+	var total := base_damage * (POUND_BONUS if pounded else 1.0)
+	if pounded:
+		player.audio.play_pound_bonus()
+	else:
+		player.audio.play_damage_hit(kind, hits)
+	var power := float(hits)
+	for e in enemies.duplicate():
+		if is_instance_valid(e):
+			HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), total, power, pounded)
+			e.punch()
+			e.knockback(player.global_position, minf(3.0 + 0.5 * hits, 9.0))
+			e.take_damage(total)   # same damage to every enemy
+	Events.combo_landed.emit(total, hits, pounded)
+	if player.camera_rig:
+		player.camera_rig.shake(minf(0.25 + 0.06 * hits, 0.8) + (0.2 if pounded else 0.0))
+	if hits > 1 or pounded:
+		HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.6 if pounded else 1.0))
+
+## True while the player is ground-pounding (windup or slam) — the bow and
+## staff release on orb contact, so "pound into the orb" means touching it
+## in this state.
+func _is_pounding() -> bool:
+	return player.machine.current_name == &"Pound"
+
+## ARROW orbs bank damage without hitting anything; the next SHOOT orb
+## releases the whole bank at once (and does nothing if nothing's banked —
+## you still touched it, so it still respawns, just with no effect this time).
+## Collecting an arrow doesn't bounce the player like a real hit does — it's
+## just a pickup (see Orb.Kind's doc comment), not combat feedback.
+func _handle_bow_hit(orb: Orb) -> void:
+	if orb.kind == Orb.Kind.ARROW:
+		_arrow_stack += Game.stats.damage()
+		_arrow_count += 1
+		Events.arrows_changed.emit(_arrow_count)
+		# Bounce on toward the nearest other arrow (the chain), else the nearest
+		# shoot orb, else straight up.
+		var next_orb := _nearest_active_orb(orb, Orb.Kind.ARROW)
+		if next_orb == null:
+			next_orb = _nearest_active_orb(orb, Orb.Kind.SHOOT)
+		player.bounce_off_orb(_arrow_count, next_orb.global_position if next_orb else null)
+		_respawn_orb_later(orb)
+		return
+	if _arrow_stack <= 0.0:
+		player.bounce_off_orb(1)   # a whiff — nothing was stacked to release
+		_respawn_orb_later(orb)
+		return
+	combo += 1
+	var dmg := _arrow_stack
+	var arrows := _arrow_count
+	_arrow_stack = 0.0
+	_arrow_count = 0
+	Events.arrows_changed.emit(0)
+	_resolve_hit(orb, dmg, combo, arrows)
+
+## The Orb Stack ability: finds the active orb nearest to `from` and stacks
+## `count` extra orbs in a vertical column on top of it (a long chain of
+## bounces to ride up). The extras copy the base orb's type and vanish once
+## hit. With a bow only arrow orbs count as the base, with a staff only rune
+## orbs (there's only ever one CAST orb). Returns false if there's none.
+func stack_orbs_on_nearest(from: Vector3, count: int) -> bool:
+	var base: Orb = null
+	var best_d := INF
+	var weapon := _equipped_weapon_kind()
+	for o in orbs:
+		if not is_instance_valid(o) or not o.active:
+			continue
+		if weapon == WeaponData.Kind.BOW and o.kind != Orb.Kind.ARROW:
+			continue   # the bow only builds on arrow orbs
+		if weapon == WeaponData.Kind.STAFF and o.kind == Orb.Kind.CAST:
+			continue   # the staff builds on a rune — there is only ever one cast orb
 		if o.global_position.distance_squared_to(from) < best_d:
 			best_d = o.global_position.distance_squared_to(from)
 			base = o
@@ -563,6 +772,10 @@ func _handle_staff_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.CAST:
 		_cast_rune_buffer(orb)
 		return
+	# The queue holds one element at a time: a different element replaces
+	# whatever was queued instead of adding to it.
+	if not _rune_buffer.is_empty() and _rune_buffer[0] != orb.kind:
+		_rune_buffer.clear()
 	if _rune_buffer.size() >= STAFF_BUFFER_MAX:
 		_overload_staff(orb)
 		return
