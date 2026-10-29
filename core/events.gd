@@ -7,6 +7,7 @@ signal encounter_ended(arena: Node, victory: bool)
 signal encounter_returned(player_defeated: bool)   ## back in the overworld
 signal orb_hit(combo: int, damage: float)
 signal combo_changed(combo: int)
+signal arrows_changed(count: int)   ## Bow: arrows currently stacked (0 = none) — the HUD shows this instead of the combo counter
 signal combo_landed(damage: float, hits: int, pound_bonus: bool)   ## the Sword's banked combo was just dealt on landing (pound_bonus: landed with a ground pound)
 signal enemy_defeated(enemy: Node, gold: int)
 

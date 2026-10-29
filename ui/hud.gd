@@ -67,6 +67,7 @@ func _ready() -> void:
 	Events.stats_changed.connect(_refresh)
 	Events.combo_changed.connect(_on_combo)
 	Events.combo_landed.connect(_on_combo_landed)
+	Events.arrows_changed.connect(_on_arrows)
 	Events.item_gained.connect(_on_item_gained)
 	Events.notice.connect(_toast)
 	Events.inventory_full.connect(_on_inventory_full)
@@ -97,7 +98,25 @@ func _refresh() -> void:
 		InputSetup.key_label(Settings.get_binding(&"menu_inventory")),
 		InputSetup.key_label(Settings.get_binding(&"menu_travel"))]
 
+## The bow shows how many arrows are stacked, in the combo plate's place.
+func _on_arrows(n: int) -> void:
+	if n <= 0:
+		_hide_combo_plate()
+		return
+	_combo_slamming = false
+	_pound_plate.visible = false
+	_combo.text = "x%d" % n
+	var tier := mini((n - 1) / COMBO_PER_TIER, COMBO_TIER_COLORS.size() - 1)
+	_combo_plate.modulate = COMBO_TIER_COLORS[tier]
+	_pop_combo_plate(1.5, 0.4)
+
+func _using_bow() -> bool:
+	var w := Game.stats.equipped_weapon
+	return w != null and w.kind == WeaponData.Kind.BOW
+
 func _on_combo(c: int) -> void:
+	if _using_bow():
+		return   # the arrow counter owns the plate (see _on_arrows)
 	if c <= 0:
 		if not _combo_slamming:   # a landing slam hides itself when it's done
 			_hide_combo_plate()

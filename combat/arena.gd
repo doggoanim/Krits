@@ -103,6 +103,7 @@ var player: Player
 var enemies: Array[Enemy] = []
 var orbs: Array[Orb] = []
 var loot: Dictionary = {}   ## item id -> count rolled from defeated enemies; added to the bag on victory
+var _arrow_count := 0   ## Bow only — how many arrows make up _arrow_stack (shown on the HUD)
 var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released by the next SHOOT orb
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
                                  ## released/cleared by the next CAST orb — see _lookup_spell()
@@ -464,6 +465,8 @@ func _land_sword_combo() -> void:
 func _handle_bow_hit(orb: Orb) -> void:
 	if orb.kind == Orb.Kind.ARROW:
 		_arrow_stack += Game.stats.damage()
+		_arrow_count += 1
+		Events.arrows_changed.emit(_arrow_count)
 		_respawn_orb_later(orb)
 		return
 	if _arrow_stack <= 0.0:
@@ -473,6 +476,8 @@ func _handle_bow_hit(orb: Orb) -> void:
 	combo += 1
 	var dmg := _arrow_stack
 	_arrow_stack = 0.0
+	_arrow_count = 0
+	Events.arrows_changed.emit(0)
 	_resolve_hit(orb, dmg, combo)
 
 ## A rune (FIRE/ICE/EARTH) just queues itself, no damage dealt and no bounce
@@ -695,6 +700,7 @@ func _end(victory: bool) -> void:
 		for id in loot:
 			Game.inventory.add(id, loot[id])
 	Events.combo_changed.emit(0)
+	Events.arrows_changed.emit(0)
 	Events.encounter_ended.emit(self, victory)
 	finished.emit(victory)
 
