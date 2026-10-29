@@ -274,6 +274,7 @@ func _shoot(delta: float) -> void:
 		if _timers[i] <= 0.0:
 			var p := data.patterns[i]
 			_timers[i] = p.interval
+			p.speed_scale = _speed_mult   # slow slows the projectiles too
 			p.fire(global_position, target.global_position, arena, _steps[i])
 			_steps[i] += 1
 
@@ -422,7 +423,7 @@ func _do_leap_attack() -> void:
 		_place_leap_zone(zone)
 		zone.set_fill(waited / data.leap_ready_time)
 		await get_tree().physics_frame
-		waited += get_physics_process_delta_time()
+		waited += get_physics_process_delta_time() * _speed_mult   # slowed: the wind-up takes longer
 	if _dying:
 		zone.queue_free()
 		return
@@ -435,7 +436,7 @@ func _do_leap_attack() -> void:
 	if _visual:
 		_visual.play_leap()
 
-	var dur := maxf(0.05, data.leap_travel_time)
+	var dur := maxf(0.05, data.leap_travel_time) / maxf(_speed_mult, 0.1)   # slowed: a slower flight
 	var spin_axis := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)).normalized()
 	var spin_speed := randf_range(4.0, 7.0)   # rad/s — a few tumbles over the arc
 	var t := 0.0
@@ -553,7 +554,7 @@ func _predicted_point() -> Vector3:
 	v.y = 0.0
 	var rel := here - center_point()
 	rel.y = 0.0
-	var s := data.shoot_speed
+	var s := data.shoot_speed * _speed_mult   # the ball's real speed, so the lead stays accurate while slowed
 	# |rel + v*t| = s*t  ->  (v.v - s^2) t^2 + 2 (rel.v) t + rel.rel = 0
 	var a := v.dot(v) - s * s
 	var b := 2.0 * rel.dot(v)
@@ -578,7 +579,7 @@ func _fire_slime_ball() -> void:
 		return
 	var b := Bullet.new()
 	b.damage = data.shoot_damage
-	b.velocity = dir.normalized() * data.shoot_speed
+	b.velocity = dir.normalized() * data.shoot_speed * _speed_mult   # slow slows the projectile too
 	b.color_override = data.color
 	b.radius = data.shoot_ball_radius
 	arena.add_child(b)

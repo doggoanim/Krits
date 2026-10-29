@@ -9,6 +9,10 @@ const MAX_HEIGHT_TILT := 65.0   ## degrees; caps how far a ring/spiral tilts tow
 @export var damage := 8.0
 @export var pierces_shield := false
 
+## Set by the owning Enemy right before fire() — scales every bullet's speed
+## (a slowed enemy shoots slower projectiles). Not a saved/exported setting.
+var speed_scale := 1.0
+
 ## origin: world position of the shooter. target: player. parent: node to add bullets to.
 func fire(_origin: Vector3, _target: Vector3, _parent: Node, _step: int) -> void:
 	pass
@@ -28,8 +32,8 @@ func _spawn(parent: Node, origin: Vector3, dir: Vector3, speed := -1.0, accel :=
 	var b := Bullet.new()
 	b.damage = damage
 	b.pierces_shield = pierces_shield
-	b.velocity = dir.normalized() * (bullet_speed if speed < 0.0 else speed)
-	b.accel = accel
+	b.velocity = dir.normalized() * (bullet_speed if speed < 0.0 else speed) * speed_scale
+	b.accel = accel * speed_scale
 	parent.add_child(b)
 	b.global_position = origin
 	return b
