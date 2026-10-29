@@ -64,6 +64,8 @@ const INTERIOR_GROUP := &"interior_level"
 @export var low_hp_vignette_color := Color(0.5, 0.0, 0.0)
 
 var player: Player
+var _respawning := false
+var _gold_lost := 0   ## filled in while the iris is closed, announced after it opens
 var cam: CameraRig
 var encounters: EncounterManager
 var level: Node3D   ## the currently active level root — see _swap_level()
@@ -137,6 +139,7 @@ func _ready() -> void:
 	ui.travel_menu.is_in_combat = func() -> bool: return encounters.busy
 
 	Events.encounter_returned.connect(_on_encounter_returned)
+	Events.player_died.connect(_on_player_died)
 	Events.fast_travel_requested.connect(_on_fast_travel_requested)
 	Events.level_travel_requested.connect(_on_level_travel_requested)
 	_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
@@ -207,8 +210,33 @@ func _find_spawn_in(root: Node, id: StringName) -> Variant:
 
 func _on_encounter_returned(player_defeated: bool) -> void:
 	if player_defeated:
+		_respawn_after_death()
+
+## The player died (see Player._begin_death()): the music muffles right away.
+## If it happened in a fight, EncounterManager calls _respawn_after_death()
+## once the arena has wrapped up; anywhere else we do it ourselves.
+func _on_player_died() -> void:
+	Music.force_muffle = true
+	await get_tree().create_timer(2.5, true, false, true).timeout   # real time
+	if player.dead and not encounters.busy:
+		_respawn_after_death()
+
+## Iris wipe, then — while the screen is fully covered — lose some gold, heal
+## and put the player back at the last spawnpoint.
+func _respawn_after_death() -> void:
+	if _respawning:
+		return
+	_respawning = true
+	Game.input_locked = true
+	await LoadingScreen.instance.run(func():
+		_gold_lost = Game.stats.lose_gold(PlayerStats.DEATH_GOLD_LOSS)
 		Game.stats.full_heal()
 		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
+		Music.force_muffle = false)
+	Game.input_locked = false
+	_respawning = false
+	if _gold_lost > 0:
+		Events.notice.emit("Dropped %d gold." % _gold_lost)
 
 ## Builds the one Sun/WorldEnvironment pair the whole game uses, as direct
 ## children of Main rather than part of the swappable `level` (see `level`'s

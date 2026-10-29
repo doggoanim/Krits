@@ -27,6 +27,7 @@ const OPEN_CUTOFF_HZ := 20500.0   ## lowpass fully open = no audible effect
 
 var _player: AudioStreamPlayer
 var _lowpass: AudioEffectLowPassFilter
+var force_muffle := false   ## set by anything that wants the muffled mix without a menu (e.g. the death sequence)
 var _blend := 0.0   ## 0 = normal, 1 = fully muffled (menu open)
 
 func _ready() -> void:
@@ -43,7 +44,7 @@ func _ready() -> void:
 	add_child(_player)
 
 func _process(delta: float) -> void:
-	var target := 1.0 if MenuBase.open_menu != null else 0.0
+	var target := 1.0 if (MenuBase.open_menu != null or force_muffle) else 0.0
 	_blend = move_toward(_blend, target, menu_blend_speed * delta)
 	if _lowpass:
 		# Interpolate in log space so the sweep sounds even.

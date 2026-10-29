@@ -16,6 +16,7 @@ const BASE_HP := 100.0
 const BASE_SHIELD := 0.0    ## no shield worn = no shield bar
 const BASE_DAMAGE := 1.0   ## orb hits are the only thing that uses this — combo scaling
                            ## (see Arena.COMBO_BONUS) still ramps up from here as normal
+const DEATH_GOLD_LOSS := 0.25   ## fraction of your gold dropped when you die
 const SHIELD_RECHARGE_DELAY := 3.0
 const SHIELD_RECHARGE_RATE := 12.0
 
@@ -74,6 +75,14 @@ func heal(hp_amount: float, shield_amount := 0.0) -> void:
 	shield = minf(max_shield(), shield + shield_amount)
 	Events.player_damaged.emit(hp, shield)
 	Events.stats_changed.emit()
+
+## Death penalty: drops `fraction` of the current gold (rounded down) and
+## returns how much was lost.
+func lose_gold(fraction: float) -> int:
+	var lost := int(floor(gold * clampf(fraction, 0.0, 1.0)))
+	gold -= lost
+	Events.stats_changed.emit()
+	return lost
 
 func add_gold(amount: int) -> void:
 	gold += amount

@@ -230,6 +230,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if dead:
+		_dead_physics(delta)
 		return
 	if Input.is_action_just_pressed(UNSTICK_ACTION):
 		_unstick()
@@ -1076,6 +1077,48 @@ func set_crouching(c: bool) -> void:
 	_shape.height = h
 	_shape_node.position.y = h * 0.5
 
+## ---- death sequence (no text, just motion): a big slow-motion beat while the
+## player is knocked up and back, tumbles over and ends up lying on their back.
+## Main then wipes to the last spawnpoint (see Main._respawn_after_death()).
+const DEATH_POP := 7.5          ## upward knock
+const DEATH_PUSH := 5.5         ## horizontal knock, away from whatever hit them
+const DEATH_GRAVITY := 26.0
+const DEATH_SLOWMO_SCALE := 0.25
+const DEATH_SLOWMO_HOLD := 1.1  ## real seconds at slow speed...
+const DEATH_SLOWMO_FADE := 0.6  ## ...then eased back to normal
+const DEATH_TUMBLE_TIME := 0.9
+const DEATH_SHAKE := 1.0
+
+var _death_tween: Tween
+
+func _begin_death(from: Vector3) -> void:
+	dead = true
+	var away := global_position - from if from != Vector3.INF else -facing
+	away.y = 0.0
+	away = away.normalized() if away.length() > 0.01 else -facing
+	velocity = away * DEATH_PUSH + Vector3.UP * DEATH_POP
+	set_crouching(false)
+	visual.cancel_hold()
+	visual.play(PlayerVisual.ANIM_FALLING)
+	visual.show_hurt()
+	# Flip over backwards and end up lying down (-450° == -90°).
+	if _death_tween:
+		_death_tween.kill()
+	_death_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_death_tween.tween_property(visual, "rotation:x", -TAU - PI * 0.5, DEATH_TUMBLE_TIME)
+	if camera_rig:
+		camera_rig.shake(DEATH_SHAKE)
+	HitStop.finisher(DEATH_SLOWMO_HOLD, DEATH_SLOWMO_FADE, DEATH_SLOWMO_SCALE)
+
+## While dead the state machine is off, but the body still falls and slides to
+## a stop like anything else — otherwise it would hang in mid-air.
+func _dead_physics(delta: float) -> void:
+	velocity.y = maxf(velocity.y - DEATH_GRAVITY * delta, -config.terminal_velocity)
+	if is_on_floor():
+		velocity.x = move_toward(velocity.x, 0.0, 25.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 25.0 * delta)
+	move_and_slide()
+
 func can_stand() -> bool:
 	return not test_move(global_transform, Vector3.UP * (STAND_HEIGHT - CROUCH_HEIGHT))
 
@@ -1084,6 +1127,9 @@ func enter_cinematic() -> void:
 	machine.transition_to(&"Frozen")
 
 func teleport(pos: Vector3) -> void:
+	if _death_tween:
+		_death_tween.kill()
+	visual.set_lean(0.0, 0.0, 1.0, 1.0)   # undo the death tumble
 	global_position = pos
 	velocity = Vector3.ZERO
 	dead = false
@@ -1179,6 +1225,5 @@ func hit(amount: float, pierces_shield := false, from := Vector3.INF) -> void:
 		_react_to_hit(from)
 		Events.player_hurt.emit(from)
 	if died:
-		dead = true
-		velocity = Vector3.ZERO
+		_begin_death(from)
 		Events.player_died.emit()
