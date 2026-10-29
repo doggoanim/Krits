@@ -37,7 +37,7 @@ anchor_bottom = 0.5
 offset_left = -700.0
 offset_top = -460.0
 offset_right = 700.0
-offset_bottom = 380.0
+offset_bottom = 440.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 24
@@ -88,7 +88,7 @@ text = "Accessibility"
 
 [node name="Pages" type="Control" parent="Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 560)
+custom_minimum_size = Vector2(0, 620)
 layout_mode = 2
 
 [node name="DisplayPage" type="VBoxContainer" parent="Content/Pages"]
@@ -98,7 +98,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 28
+theme_override_constants/separation = 14
 metadata/section = "display"
 
 [node name="WindowModeRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
