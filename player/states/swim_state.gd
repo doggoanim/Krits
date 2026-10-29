@@ -25,6 +25,7 @@ var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — 
 ## stroke phase like the sfx above; a flat interval reads fine for a purely
 ## cosmetic trailing ring and is simpler than another phase-crossing check.
 const WAKE_INTERVAL := 0.3
+const MAX_SWIM_PITCH := deg_to_rad(55.0)   ## steepest body tilt while swimming diagonally
 var _wake_t := 0.0
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
@@ -42,6 +43,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_wake_t = 0.0
 
 func exit(_next: StringName) -> void:
+	player.swim_pitch = 0.0
 	player.visual.set_upside_down(false)
 	player.effects.set_swim_bubbles(false)
 
@@ -82,7 +84,16 @@ func physics_update(delta: float) -> void:
 	# that merely happens to also be gaining height. Treading water (neither
 	# held) falls back to its own idle loop instead of the paddling one.
 	var active_anim := PlayerVisual.ANIM_SWIM_IDLE
-	if absf(vertical) > 0.1:
+	p.swim_pitch = 0.0
+	if absf(vertical) > 0.1 and h.length() > 0.1:
+		# Moving sideways AND up/down: keep the horizontal paddle pose and just
+		# tip the whole body toward where it's heading, instead of flipping to
+		# the straight-up/down clip (which looked wrong while travelling
+		# forward). Nose-down is negative pitch — see Player._update_lean().
+		p.visual.set_upside_down(false)
+		active_anim = PlayerVisual.ANIM_SWIM
+		p.swim_pitch = clampf(atan2(vertical * c.swim_vertical_speed, c.swim_speed), -MAX_SWIM_PITCH, MAX_SWIM_PITCH)
+	elif absf(vertical) > 0.1:
 		p.visual.set_upside_down(vertical < 0.0)
 		active_anim = PlayerVisual.ANIM_SWIM_VERTICAL
 	elif h.length() > 0.1:

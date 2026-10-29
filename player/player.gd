@@ -59,6 +59,7 @@ const JUMP_FLOOR_SNAP := 0.0
 
 var camera_rig: CameraRig
 var visual: PlayerVisual
+var swim_pitch := 0.0   ## body tilt (radians, negative = nose down) while swimming diagonally — see SwimState
 var gear: GearDisplay   ## floating shield + weapon behind the player
 var effects: PlayerEffects
 var audio: PlayerAudio
@@ -284,6 +285,8 @@ func _update_lean(delta: float) -> void:
 		# left), so banking into the turn means matching yaw_rate's sign directly.
 		target_bank = clampf(yaw_rate * LEAN_TURN_SCALE, -LEAN_BANK_MAX, LEAN_BANK_MAX)
 
+	elif machine.current_name == &"Swim":
+		target_pitch = swim_pitch   # set by SwimState: tilt toward a diagonal dive/rise
 	visual.set_lean(target_pitch, target_bank, LEAN_SMOOTH, delta)
 
 func _update_timers(delta: float) -> void:
