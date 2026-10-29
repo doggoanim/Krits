@@ -110,8 +110,6 @@ var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values),
 var _rune_buffer_t := 0.0      ## counts down to 0 while _rune_buffer isn't empty; see _process()
 var _sword_hits: Array[float] = []   ## Sword only — each banked hit's damage, newest last (getting hit takes the last one back)
 var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, dealt when the player lands
-var _buffer_label: Label3D     ## floats over the player showing the queued runes — Staff only,
-                                 ## built in begin() and freed in _end()
 var _spell_table: Dictionary = {}   ## built once in _ready() — see _build_spell_table()
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
@@ -137,7 +135,7 @@ func _process(delta: float) -> void:
 	_rune_buffer_t -= delta
 	if _rune_buffer_t <= 0.0:
 		_rune_buffer.clear()
-		_update_buffer_label()
+		_publish_runes()
 
 ## `origin` is the fight's centre, normally the player's own feet where the
 ## encounter was triggered. The player is never moved — the barrier simply
@@ -153,13 +151,6 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 		_spawn_enemy(d)
 	if p.camera_rig:
 		p.camera_rig.extra_distance = radius * 0.7
-	if _equipped_weapon_kind() == WeaponData.Kind.STAFF:
-		_buffer_label = Label3D.new()
-		_buffer_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		_buffer_label.no_depth_test = true
-		_buffer_label.position = Vector3(0, 2.3, 0)
-		_buffer_label.visible = false
-		p.add_child(_buffer_label)   # tracks the player automatically; freed in _end()
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
 	Events.player_hurt.connect(_on_player_hurt)
@@ -511,7 +502,7 @@ func _handle_staff_hit(orb: Orb) -> void:
 		return
 	_rune_buffer.append(orb.kind)
 	_rune_buffer_t = STAFF_BUFFER_TIMEOUT
-	_update_buffer_label()
+	_publish_runes()
 	_respawn_orb_later(orb)
 
 ## Queuing a 4th rune overloads the staff: the whole buffer dumps itself as
@@ -524,7 +515,7 @@ func _handle_staff_hit(orb: Orb) -> void:
 func _overload_staff(orb: Orb) -> void:
 	_rune_buffer.clear()
 	_rune_buffer_t = 0.0
-	_update_buffer_label()
+	_publish_runes()
 	for element in [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]:
 		VFX.shatter(self, player.global_position, Orb.KIND_COLORS[element][0], 1.3)
 	player.hit(STAFF_OVERLOAD_DAMAGE, true)
@@ -548,7 +539,7 @@ func _cast_rune_buffer(orb: Orb) -> void:
 	var runes := _rune_buffer.size()
 	_rune_buffer.clear()
 	_rune_buffer_t = 0.0
-	_update_buffer_label()
+	_publish_runes()
 	combo += 1
 	var dmg := Game.stats.damage() * (spell.mult as float)
 	for status in (spell.statuses as Array):
@@ -613,24 +604,9 @@ func _rune_key(buffer: Array) -> String:
 	sorted.sort()
 	return ",".join(sorted.map(func(k): return str(k)))
 
-func _update_buffer_label() -> void:
-	if not _buffer_label:
-		return
-	if _rune_buffer.is_empty():
-		_buffer_label.visible = false
-		return
-	_buffer_label.visible = true
-	var parts: PackedStringArray = []
-	for k in _rune_buffer:
-		parts.append(_rune_name(k))
-	_buffer_label.text = " + ".join(parts)
-
-func _rune_name(k: Orb.Kind) -> String:
-	match k:
-		Orb.Kind.FIRE: return "Fire"
-		Orb.Kind.ICE: return "Ice"
-		Orb.Kind.EARTH: return "Earth"
-		_: return "?"
+## Tells the HUD's RuneBar what's queued (see Events.runes_changed).
+func _publish_runes() -> void:
+	Events.runes_changed.emit(_rune_buffer.duplicate(), STAFF_BUFFER_TIMEOUT)
 
 ## The part every damage-dealing orb hit shares, regardless of which weapon
 ## got it there: hit every enemy, bounce the player, fire the usual combo/
@@ -704,8 +680,8 @@ func _end(victory: bool) -> void:
 		player.camera_rig.extra_distance = 0.0
 	_sword_banked = 0.0
 	_sword_hits.clear()
-	if _buffer_label:
-		_buffer_label.queue_free()   # a child of player, not of this arena — won't go with it otherwise
+	_rune_buffer.clear()
+	_publish_runes()
 	if victory:
 		for id in loot:
 			Game.inventory.add(id, loot[id])
