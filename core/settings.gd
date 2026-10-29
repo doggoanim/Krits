@@ -32,7 +32,7 @@ const DEFAULTS := {
 	&"display/vsync": true,
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
-	&"display/pixelation": 4, "display/pixelation": 3,           ## PixelateEffect block size in screen pixels (1 = off)
+	&"display/pixelation": 3,           ## PixelateEffect block size in screen pixels (1 = off)
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,
