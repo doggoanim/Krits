@@ -40,11 +40,6 @@ const INTERIOR_GROUP := &"interior_level"
 ## Music (core/music_player.gd) for the actual looping playback.
 @export var outdoor_music: AudioStream = preload("res://sounds/Music/chesburg.ogg")
 
-## Retro pixelation overlay (see core/pixelate_effect.gd) — block size in
-## real screen pixels. Lower = subtler, higher = chunkier. Set to 1.0 to
-## effectively turn it off without removing the node.
-@export var pixelate_size := 4.0
-
 ## Footstep sound sets, one per FootstepSurfaces.Surface (see
 ## core/footstep_surfaces.gd for how a surface is detected underfoot).
 ## Editable here, not in player_audio.gd, because Player/PlayerAudio are
@@ -104,12 +99,9 @@ func _ready() -> void:
 
 	# Retro pixelation overlay — sits above the outline pass, below the HUD
 	# (see PixelateEffect's header comment). Purely cosmetic; doesn't need
-	# anything set up before it. `pixelate_size` is editable on this node
-	# (select "Main" in main.tscn) since PixelateEffect itself is built in
-	# code and never appears as its own node in a saved scene.
-	var pixelate := PixelateEffect.new()
-	pixelate.pixel_size = pixelate_size
-	add_child(pixelate)
+	# anything set up before it. The block size comes from the player's
+	# Settings ("display/pixelation", Options > Display).
+	add_child(PixelateEffect.new())
 
 	var low_hp_vignette := LowHpVignette.new()
 	low_hp_vignette.low_hp_threshold = low_hp_vignette_threshold

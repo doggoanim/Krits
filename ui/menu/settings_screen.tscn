@@ -199,6 +199,33 @@ popup/item_3/text = "Max"
 popup/item_3/id = 4000
 metadata/setting = &"display/render_distance"
 
+[node name="PixelationRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/PixelationRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Pixelation"
+
+[node name="Pixelation" type="OptionButton" parent="Content/Pages/DisplayPage/PixelationRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 5
+popup/item_0/text = "Off"
+popup/item_0/id = 1
+popup/item_1/text = "Fine"
+popup/item_1/id = 2
+popup/item_2/text = "Normal"
+popup/item_2/id = 4
+popup/item_3/text = "Chunky"
+popup/item_3/id = 6
+popup/item_4/text = "Extra Chunky"
+popup/item_4/id = 8
+metadata/setting = &"display/pixelation"
+
 [node name="AudioPage" type="VBoxContainer" parent="Content/Pages"]
 layout_mode = 1
 anchors_preset = 15
