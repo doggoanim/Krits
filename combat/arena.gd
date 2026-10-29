@@ -12,7 +12,7 @@ extends Node3D
 ## What touching an orb actually does depends on the equipped weapon (see
 ## _on_orb_hit()/_spawn_orbs()) — Sword's plain combo hits, Bow's stack-then-
 ## release arrow/shoot pair, Staff's rune-buffer/spell system (queue runes,
-## release them together with a CAST orb — see _lookup_spell()).
+## release them together with a CAST orb).
 ## Bullets are parented here so they vanish with the arena. The
 ## EncounterManager owns its lifetime (it frees the arena once the barrier
 ## has dissolved away).
@@ -60,8 +60,8 @@ const STAFF_SLOW_MULT := 0.5
 ## How long each element's status effect lasts once a spell applies it —
 ## shared by all of them for simplicity; split these out per-status if any
 ## one of them ever needs to be tuned independently.
-const STAFF_STATUS_TIME := 3.0
-const STAFF_STUN_TIME := 1.0   ## Earth's stun, applied by any cast spell that includes it
+const STAFF_STATUS_TIME := 3.0   ## per queued rune — a cast with N runes lasts N times this
+const STAFF_STUN_TIME := 1.0   ## Earth's stun, per queued rune
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUT := 4.0  ## seconds of not queueing a new rune before the buffer clears itself
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
@@ -108,11 +108,10 @@ var loot: Dictionary = {}   ## item id -> count rolled from defeated enemies; ad
 var _arrow_count := 0   ## Bow only — how many arrows make up _arrow_stack (shown on the HUD)
 var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released by the next SHOOT orb
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
-                                 ## released/cleared by the next CAST orb — see _lookup_spell()
+                                 ## released/cleared by the next CAST orb
 var _rune_buffer_t := 0.0      ## counts down to 0 while _rune_buffer isn't empty; see _process()
 var _sword_hits: Array[float] = []   ## Sword only — each banked hit's damage, newest last (getting hit takes the last one back)
 var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, dealt when the player lands
-var _spell_table: Dictionary = {}   ## built once in _ready() — see _build_spell_table()
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
 var _over := false
@@ -128,7 +127,6 @@ static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
 
 func _ready() -> void:
-	_build_spell_table()
 
 ## Ticks the rune buffer's own idle timeout — stalling too long after
 ## queueing a rune clears it, same spirit as a jump buffer/coyote window
@@ -607,82 +605,36 @@ func _overload_staff(orb: Orb) -> void:
 		player.machine.transition_to(&"Air")
 	_respawn_orb_later(orb)
 
-## Looks up whatever's queued as a spell (see _lookup_spell()), applies its
-## damage multiplier and status effects, then clears the buffer either way —
-## a cast always consumes it, even on a combination with no table entry.
+## Casts whatever's queued: the hit itself is plain weapon damage, and each
+## queued rune lengthens its element's status effect on every enemy — one
+## rune is the base duration, three runes triple it. The cast always consumes
+## the buffer.
 func _cast_rune_buffer(orb: Orb) -> void:
 	if _rune_buffer.is_empty():
 		player.bounce_off_orb(1)   # nothing queued — a whiff, same as Bow's empty shoot
 		_respawn_orb_later(orb)
 		return
-	var spell: Dictionary = _lookup_spell(_rune_buffer)
 	var runes := _rune_buffer.size()
+	var per_element := {}   # Orb.Kind -> how many of that rune were queued
+	for rune in _rune_buffer:
+		per_element[rune] = int(per_element.get(rune, 0)) + 1
 	_rune_buffer.clear()
 	_rune_buffer_t = 0.0
 	_publish_runes()
 	combo += 1
-	var dmg := Game.stats.damage() * (spell.mult as float)
-	for status in (spell.statuses as Array):
-		_apply_element_status(status)
-	_resolve_hit(orb, dmg, combo, runes)
+	for element: Orb.Kind in per_element:
+		_apply_element_status(element, int(per_element[element]))
+	_resolve_hit(orb, Game.stats.damage(), combo, runes)
 
-func _apply_element_status(element: Orb.Kind) -> void:
+## Applies `element`'s status to every enemy, lasting `runes` times its base duration.
+func _apply_element_status(element: Orb.Kind, runes: int) -> void:
 	for e in enemies:
 		if not is_instance_valid(e):
 			continue
 		match element:
-			Orb.Kind.FIRE: e.apply_burn(STAFF_BURN_DPS, STAFF_STATUS_TIME)
-			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_STATUS_TIME)
-			Orb.Kind.EARTH: e.apply_stun(STAFF_STUN_TIME)
-
-## Named combinations (order doesn't matter — a multiset lookup, so Fire+Ice
-## and Ice+Fire are the same spell), each a {mult, statuses} pair: `mult`
-## multiplies Game.stats.damage() same as a combo step would, `statuses` is
-## every element whose effect the cast applies (a spell with two elements in
-## its name applies both). Add a new spell by adding a new entry here — it
-## needs nothing else touched, same as a new EquipmentLibrary item.
-##
-## Any combination NOT listed here (including any single rune not given its
-## own entry) falls back to _fallback_spell(): never a dead end, just not as
-## good as a combo you've actually learned — see _lookup_spell().
-func _build_spell_table() -> void:
-	_spell_table = {
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.FIRE]): {"mult": 2.4, "statuses": [Orb.Kind.FIRE]},
-		_rune_key([Orb.Kind.ICE, Orb.Kind.ICE]): {"mult": 1.8, "statuses": [Orb.Kind.ICE]},
-		_rune_key([Orb.Kind.EARTH, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.EARTH]},
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.ICE]): {"mult": 2.0, "statuses": [Orb.Kind.FIRE, Orb.Kind.ICE]},
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.FIRE, Orb.Kind.EARTH]},
-		_rune_key([Orb.Kind.ICE, Orb.Kind.EARTH]): {"mult": 2.0, "statuses": [Orb.Kind.ICE, Orb.Kind.EARTH]},
-		_rune_key([Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]): {"mult": 3.5,
-				"statuses": [Orb.Kind.FIRE, Orb.Kind.ICE, Orb.Kind.EARTH]},
-	}
-
-## `buffer`'s spell, from the table above if it's a combination that's been
-## given one, otherwise a sensible default so casting anything is never
-## wasted: one hit per queued rune's own worth of damage, with every element's
-## status applied — i.e. exactly what a single Fire/Ice/Earth rune already
-## does on its own below, just added up.
-func _lookup_spell(buffer: Array) -> Dictionary:
-	var key := _rune_key(buffer)
-	if _spell_table.has(key):
-		return _spell_table[key]
-	return _fallback_spell(buffer)
-
-func _fallback_spell(buffer: Array) -> Dictionary:
-	var statuses: Array = []
-	for rune in buffer:
-		if rune not in statuses:
-			statuses.append(rune)
-	return {"mult": float(buffer.size()), "statuses": statuses}
-
-## A canonical, order-independent key for a set of runes — Fire+Ice and
-## Ice+Fire must look up the same table entry. Dictionary keys need to be
-## hashable/comparable as a single value, not an array, hence joining into a
-## string rather than using the sorted array itself as the key.
-func _rune_key(buffer: Array) -> String:
-	var sorted: Array = buffer.duplicate()
-	sorted.sort()
-	return ",".join(sorted.map(func(k): return str(k)))
+			Orb.Kind.FIRE: e.apply_burn(STAFF_BURN_DPS, STAFF_STATUS_TIME * runes)
+			Orb.Kind.ICE: e.apply_slow(STAFF_SLOW_MULT, STAFF_STATUS_TIME * runes)
+			Orb.Kind.EARTH: e.apply_stun(STAFF_STUN_TIME * runes)
 
 ## Tells the HUD's RuneBar what's queued (see Events.runes_changed).
 func _publish_runes() -> void:
