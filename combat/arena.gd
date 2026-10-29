@@ -125,8 +125,6 @@ var _post_segment: Array[int] = []             ## which ring segment each post s
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
 
-func _ready() -> void:
-
 ## Ticks the rune buffer's own idle timeout — stalling too long after
 ## queueing a rune clears it, same spirit as a jump buffer/coyote window
 ## expiring, so Staff can't just be planned out indefinitely mid-fight.
