@@ -43,6 +43,8 @@ const WALL_SEGMENTS := 28       ## faceted approximation of a circle
 const ORBS_BASE := 5
 const ORBS_PER_ENEMY := 2
 const ORB_HEIGHT := Vector2(1.8, 4.4)
+const ORB_CLEARANCE := 0.9      ## radius kept free of world geometry around a spawning orb
+const ORB_SPAWN_TRIES := 24     ## candidate spots sampled per orb (see _free_orb_position)
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
 const POUND_PICKUP_COUNT := 2      ## Bow/Staff: ground-pounding into an arrow/element orb collects this many instead of 1
@@ -386,16 +388,32 @@ func _random_kinds(count: int, kinds: Array, weights: Array) -> Array:
 func _free_orb_position(existing: Array[Vector3]) -> Vector3:
 	var best := Vector3.ZERO
 	var best_d := -1.0
-	for _i in 12:   # best-candidate sampling keeps orbs spread out
+	var fallback := Vector3.ZERO   # best spot overall, used only if every candidate is inside geometry
+	var fallback_d := -1.0
+	for _i in ORB_SPAWN_TRIES:   # best-candidate sampling keeps orbs spread out
 		var pos := random_point(0.9)
 		pos.y += randf_range(ORB_HEIGHT.x, ORB_HEIGHT.y)   # float above whatever ground is under it
 		var nearest := INF
 		for t in existing:
 			nearest = minf(nearest, t.distance_to(pos))
-		if nearest > best_d:
+		if nearest > fallback_d:
+			fallback_d = nearest
+			fallback = pos
+		if nearest > best_d and not _orb_spot_blocked(pos):
 			best_d = nearest
 			best = pos
-	return best
+	return best if best_d >= 0.0 else fallback
+
+## True if an orb-sized sphere at `pos` overlaps world geometry or the
+## arena barrier — a wall, rock or prop — so orbs never spawn embedded in one.
+func _orb_spot_blocked(pos: Vector3) -> bool:
+	var shape := SphereShape3D.new()
+	shape.radius = ORB_CLEARANCE
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis.IDENTITY, pos)
+	query.collision_mask = 1 | WALL_LAYER   # world geometry and the arena barrier
+	return not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 ## Casts straight down from above `pos` to find the real terrain height there
 ## (world geometry is collision layer 1). Falls back to the arena's own
