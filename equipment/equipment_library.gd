@@ -101,7 +101,7 @@ static func wooden_bow() -> WeaponData:
 	w.id = &"wooden_bow"
 	w.price = 80
 	w.kind = WeaponData.Kind.BOW
-	w.damage_bonus = 4.0
+	w.damage_bonus = 0.5
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
@@ -110,7 +110,7 @@ static func apprentice_staff() -> WeaponData:
 	w.id = &"apprentice_staff"
 	w.price = 80
 	w.kind = WeaponData.Kind.STAFF
-	w.damage_bonus = 4.0
+	w.damage_bonus = 0.5
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
