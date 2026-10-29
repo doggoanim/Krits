@@ -53,16 +53,20 @@ func enter(_payload: Dictionary = {}) -> void:
 	_tween.tween_interval(HOLD)
 	_tween.tween_callback(_finish)
 
-func _unhandled_input(event: InputEvent) -> void:
+## _input, not _unhandled_input: this screen is a full-rect Control, which
+## swallows mouse clicks before they ever reach _unhandled_input — so a click
+## wouldn't count as "any key".
+func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree() or _done:
 		return
 	var skip := false
 	if event is InputEventKey:
-		skip = event.pressed and not event.echo
+		var key := event as InputEventKey
+		skip = key.pressed and not key.echo
 	elif event is InputEventMouseButton:
-		skip = event.pressed
+		skip = (event as InputEventMouseButton).pressed
 	elif event is InputEventJoypadButton:
-		skip = event.pressed
+		skip = (event as InputEventJoypadButton).pressed
 	if skip:
 		get_viewport().set_input_as_handled()
 		_finish()
