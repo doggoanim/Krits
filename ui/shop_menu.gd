@@ -127,7 +127,6 @@ func _build_grid() -> void:
 		slot.show_custom(o.icon, o.display_name.left(1), o.color, count_text)
 		slot.set_dim(o.tab != ShopOffer.Tab.SELL and o.is_owned())
 		slot.focus_entered.connect(_on_slot_focused.bind(i))
-		slot.pressed.connect(_do_action)
 	FocusPop.attach_all(_grid, true)
 	if visible and not _offers.is_empty():
 		_focus_restored = true
