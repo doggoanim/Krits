@@ -33,7 +33,7 @@ static func green_slime() -> EnemyData:
 	d.leap_ready_time = 1.0
 	d.leap_travel_time = 0.6
 	d.leap_height = 3.0
-	d.leap_damage = 14.0
+	d.leap_damage = 40.0
 	d.leap_radius = 2.0
 	d.anim_leap_ready = &"leap_ready"
 	d.anim_leap = &"leap"
@@ -46,7 +46,7 @@ static func green_slime() -> EnemyData:
 	d.shoot_ready_time = 0.6
 	d.shoot_interval = 0.12
 	d.shoot_speed = 21.6
-	d.shoot_damage = 5.0
+	d.shoot_damage = 15.0
 	d.anim_shoot = &"shoot"
 	d.sfx_footsteps = SLIME_FOOTSTEPS
 	d.sfx_shoot = SLIME_SHOOT
@@ -57,7 +57,7 @@ static func green_slime() -> EnemyData:
 	d.puddle_interval = 0.5
 	d.puddle_radius = 1.3
 	d.puddle_lifetime = 5.0
-	d.puddle_damage = 4.0
+	d.puddle_damage = 8.0
 	d.puddle_tick_interval = 0.9
 	d.puddle_landing_radius_mult = 1.6
 	d.drops = Drops.for_enemy(d.id)   # data/drops.cfg
