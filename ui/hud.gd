@@ -30,6 +30,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _hp_group: Control = %HpGroup   ## wraps the HP track/fill/shield-outline bars — shaken as one unit
 @onready var _hp_fill: TexturedSlantedBar = %Fill
 @onready var _shield_outline: TexturedSlantedBar = %ShieldOutline
+@onready var _rock_shield: TexturedSlantedBar = %RockShieldOutline   ## the rock armor's shield, drawn over the normal shield bar
 @onready var _stamina_fill: TexturedSlantedBar = %StaminaFill
 @onready var _portrait_group: Control = %PortraitGroup   ## wraps the portrait frame art + live render — bounced/flashed as one unit
 @onready var _level: Label = %LevelLabel
@@ -66,6 +67,7 @@ func _ready() -> void:
 	Events.player_damaged.connect(_on_player_damaged)
 	Events.stats_changed.connect(_refresh)
 	Events.combo_changed.connect(_on_combo)
+	Events.rock_armor_changed.connect(_on_rock_armor)
 	Events.combo_landed.connect(_on_combo_landed)
 	Events.arrows_changed.connect(_on_arrows)
 	Events.item_gained.connect(_on_item_gained)
@@ -113,6 +115,13 @@ func _on_arrows(n: int) -> void:
 func _using_bow() -> bool:
 	var w := Game.stats.equipped_weapon
 	return w != null and w.kind == WeaponData.Kind.BOW
+
+## The Earth spell's rock armor: its own shield drawn over the normal shield bar
+## (no numbers — the bar draining is the readout).
+func _on_rock_armor(shield: float, max_shield: float) -> void:
+	_rock_shield.visible = shield > 0.0
+	_rock_shield.max_value = maxf(max_shield, 1.0)
+	_rock_shield.value = shield
 
 func _on_combo(c: int) -> void:
 	if _using_bow():

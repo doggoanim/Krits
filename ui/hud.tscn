@@ -93,6 +93,18 @@ offset_bottom = 52.0
 script = ExtResource("6")
 texture = ExtResource("3")
 
+[node name="RockShieldOutline" type="Control" parent="HpGroup"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 0
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 273.0
+offset_bottom = 55.0
+script = ExtResource("6")
+texture = ExtResource("3")
+tint = Color(0.62, 0.4, 0.17, 1)
+
 [node name="StaminaTrack" type="Control" parent="." unique_id=662885565]
 anchors_preset = 0
 offset_left = 164.0
@@ -238,10 +250,19 @@ plate_styles = Array[StyleBox]([SubResource("ComboPlate1"), SubResource("ComboPl
 
 [node name="RockArmorIndicator" type="PanelContainer" parent="."]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 250.0
-offset_right = 420.0
-offset_bottom = 360.0
+offset_left = 450.0
+offset_top = 290.0
+offset_right = 740.0
+offset_bottom = 384.0
+rotation = -0.03
 mouse_filter = 2
 script = ExtResource("rock_indicator")
-plate_style = SubResource("ComboPlate1")
+theme_override_styles/panel = SubResource("ComboPlate3")
+
+[node name="RockLabel" type="Label" parent="RockArmorIndicator"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "ROCK ARMOR x1.5!"
+horizontal_alignment = 1
+vertical_alignment = 1
