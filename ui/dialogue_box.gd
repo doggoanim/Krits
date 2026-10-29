@@ -194,7 +194,7 @@ func _end() -> void:
 
 func _refresh_hint() -> void:
 	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
-	_hint.text = key
+	_hint.text = "%s     Esc" % key   # Esc (fixed) closes the conversation
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5
