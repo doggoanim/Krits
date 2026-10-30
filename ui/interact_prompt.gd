@@ -15,6 +15,7 @@ static var instance: InteractPrompt
 
 const ACTION := &"interact"
 const POP_TIME := 0.16
+const SHOW_VERB := false   ## also draw the action word beside the key
 const PROMPT_SCALE := 0.5   ## whole prompt drawn at this fraction of its authored size
 const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several actions
 
@@ -83,8 +84,10 @@ func _show(verb: String) -> void:
 	if not plate_styles.is_empty():
 		_plate.add_theme_stylebox_override(&"panel", plate_styles.pick_random())
 	_key.text = _key_for(_actions[0])
+	# Key only — no action word. `verb` is still passed in by callers (their
+	# prompt_text) but deliberately not shown; flip SHOW_VERB to bring it back.
 	_verb.text = verb
-	_verb.visible = verb != ""
+	_verb.visible = SHOW_VERB and verb != ""
 	_box.reset_size()
 	_box.pivot_offset = _box.get_combined_minimum_size() * 0.5
 	_box.scale = Vector2.ONE * PROMPT_SCALE * 0.6
