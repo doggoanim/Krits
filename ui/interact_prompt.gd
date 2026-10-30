@@ -26,6 +26,7 @@ const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several 
 @onready var _key: Label = %Key
 @onready var _verb: Label = %Verb
 
+var _scroll_hint: Label   ## "Scroll 1/2" badge, shown while several prompts overlap
 var _owner: Object
 var _world_pos := Vector3.ZERO
 var _pop: Tween
@@ -35,6 +36,10 @@ var _cycle_i := 0
 
 func _ready() -> void:
 	instance = self
+	_scroll_hint = _verb.duplicate() as Label
+	_scroll_hint.add_theme_font_size_override(&"font_size", 34)
+	_scroll_hint.visible = false
+	_box.add_child(_scroll_hint)
 	process_mode = Node.PROCESS_MODE_ALWAYS   # so it can hide itself while the game is paused
 	visible = false
 
@@ -47,10 +52,12 @@ func _exit_tree() -> void:
 ## `actions` overrides which input action's key is shown (default: interact);
 ## give several and they cycle in order — a wordless "press A, then B" hint
 ## (see TutorialHint).
+## `choices` > 1 means several prompts overlap: a "scroll" badge shows which
+## one (`choice_index`) is selected out of how many.
 static func request(for_owner: Object, world_pos: Vector3, verb: String,
-		actions: Array[StringName] = []) -> void:
+		actions: Array[StringName] = [], choices := 1, choice_index := 0) -> void:
 	if instance != null:
-		instance._request(for_owner, world_pos, verb, actions)
+		instance._request(for_owner, world_pos, verb, actions, choices, choice_index)
 
 ## Called by an Interactable when it stops being usable.
 static func release(for_owner: Object) -> void:
@@ -58,8 +65,9 @@ static func release(for_owner: Object) -> void:
 		instance._owner = null
 
 func _request(for_owner: Object, world_pos: Vector3, verb: String,
-		actions: Array[StringName]) -> void:
+		actions: Array[StringName], choices: int, choice_index: int) -> void:
 	_world_pos = world_pos
+	_update_scroll_hint(choices, choice_index)
 	if _owner == for_owner:
 		return
 	_owner = for_owner
@@ -84,6 +92,16 @@ func _show(verb: String) -> void:
 		_pop.kill()
 	_pop = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_pop.tween_property(_box, "scale", Vector2.ONE, POP_TIME)
+
+func _update_scroll_hint(choices: int, choice_index: int) -> void:
+	var show_hint := choices > 1
+	if show_hint:
+		var text := "Scroll %d/%d" % [choice_index + 1, choices]
+		if _scroll_hint.text != text:
+			_scroll_hint.text = text
+	if _scroll_hint.visible != show_hint:
+		_scroll_hint.visible = show_hint
+		_box.reset_size()
 
 func _key_for(action: StringName) -> String:
 	return InputSetup.key_label(Settings.get_binding(action))
