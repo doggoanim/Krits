@@ -1,9 +1,5 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/offer.tres" id="1_mira_dialogue"]
-[ext_resource type="Script" path="res://dialogue/dialogue_variant.gd" id="1_variant_script"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="1_variant_done"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_accepted.tres" id="1_variant_accepted"]
 [ext_resource type="Script" path="res://world/well_entrance.gd" id="1_well_entrance"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
@@ -102,17 +98,6 @@ height = 0.693
 [sub_resource type="CylinderShape3D" id="Shape_WellHollow"]
 height = 1.0
 radius = 0.55
-
-[sub_resource type="CapsuleShape3D" id="Shape_MiraBody"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_MiraRobe"]
-albedo_color = Color(0.3764706, 0.28627452, 0.5529412, 1)
-
-[sub_resource type="CapsuleMesh" id="Mesh_MiraBody"]
-radius = 0.4
-height = 1.8
 
 [sub_resource type="CapsuleShape3D" id="Shape_ShopBody"]
 radius = 0.4
@@ -325,6 +310,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.706156, 0, -7.0017056)
 
 [node name="house_chesburg_3" parent="Buildings" unique_id=1391076820 instance=ExtResource("24_iolvd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.33178, 8.084409, -24.818865)
+
+[node name="Door_House3" type="StaticBody3D" parent="Buildings/house_chesburg_3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.77, 4.8)
+script = ExtResource("47_door")
+target_level = "res://world/house_3_interior.tscn"
+target_spawn_id = &"enter"
+prompt_text = "Press E to enter"
+
+[node name="House3EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.77, 4.4)
+script = ExtResource("47_door_spawn")
+spawn_id = &"house_3_entrance"
 
 [node name="house_chesburg_4" parent="Buildings" unique_id=1975904037 instance=ExtResource("28_lybmh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -21)
@@ -730,21 +727,6 @@ height = 60.0
 cloud_size = Vector2(27, 27)
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
-
-[node name="MayorArse" type="StaticBody3D" parent="NPCs" unique_id=-1165481586]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -6)
-script = ExtResource("1_npc")
-dialogue = ExtResource("1_mira_dialogue")
-variants = Array[ExtResource("1_variant_script")]([ExtResource("1_variant_done"), ExtResource("1_variant_accepted")])
-
-[node name="Collision" type="CollisionShape3D" parent="NPCs/MayorArse" unique_id=-1165481585]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("Shape_MiraBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/MayorArse" unique_id=-1165481584]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("Mat_MiraRobe")
-mesh = SubResource("Mesh_MiraBody")
 
 [node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86206126, 0, -6)

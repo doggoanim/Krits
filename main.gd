@@ -69,11 +69,21 @@ var level: Node3D   ## the currently active level root — see _swap_level()
 var _sun: DirectionalLight3D
 var _env: Environment
 
+## Where a brand-new game starts: the player's own house (a level path, loaded
+## lazily like a Door's target), arriving at its DoorSpawn `start_spawn_id`
+## (the room's centre if it has none). Empty = start in `level_scene` as before.
+@export_file("*.tscn") var start_level_path := "res://world/house_1_interior.tscn"
+@export var start_spawn_id: StringName = &"enter"
+
 func _ready() -> void:
 	Game.load_game()
 	_build_environment()
 
-	level = level_scene.instantiate() if level_scene else TestLevel.new()
+	# A brand-new game (no spawnpoint reached yet) begins inside the player's own
+	# house instead of out in the town.
+	var starting_indoors := Game.last_spawn == &"" and not start_level_path.is_empty()
+	var first_scene: PackedScene = load(start_level_path) if starting_indoors else level_scene
+	level = first_scene.instantiate() if first_scene else TestLevel.new()
 	add_child(level)
 	_apply_level_lighting(level)
 	_apply_level_music(level)
@@ -134,7 +144,12 @@ func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.fast_travel_requested.connect(_on_fast_travel_requested)
 	Events.level_travel_requested.connect(_on_level_travel_requested)
-	_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
+	if starting_indoors:
+		var start_pos: Variant = _find_spawn_in(level, start_spawn_id)
+		player.teleport(start_pos if start_pos != null else level.global_position)
+		cam.global_position = player.global_position
+	else:
+		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 
 func _travel_to(id: StringName) -> void:
 	for n in get_tree().get_nodes_in_group(&"spawnpoints"):
