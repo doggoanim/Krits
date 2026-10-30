@@ -86,7 +86,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	# The press that opened the conversation must not also advance it.
 	if not _open or Engine.get_process_frames() == _opened_frame:
 		return
-	if event.is_action_pressed(&"ui_cancel_menu"):
+	# The inventory key counts as Esc here too: it closes the conversation (and is
+	# consumed below, so it doesn't also open the inventory).
+	if event.is_action_pressed(&"ui_cancel_menu") or event.is_action_pressed(&"menu_inventory"):
 		_end()
 	elif event.is_action_pressed(&"interact") or _is_enter(event):
 		_press_interact()
