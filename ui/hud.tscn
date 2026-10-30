@@ -9,7 +9,6 @@
 [ext_resource type="Script" uid="uid://cji8cv4nhnvxx" path="res://ui/widgets/portrait_viewport.gd" id="7"]
 [ext_resource type="Script" path="res://ui/widgets/rune_bar.gd" id="rune_bar"]
 [ext_resource type="Script" path="res://ui/widgets/rock_armor_indicator.gd" id="rock_indicator"]
-[ext_resource type="Script" path="res://ui/widgets/quest_tracker.gd" id="quest_tracker"]
 [ext_resource type="Shader" path="res://ui/widgets/earth_fill.gdshader" id="earth_shader"]
 [ext_resource type="Texture2D" path="res://assets/sprites/dirt_texture.png" id="dirt_tex"]
 [ext_resource type="Texture2D" uid="uid://c120af7sqe3ml" path="res://assets/ui/button_1.png" id="plate_1"]
@@ -274,12 +273,3 @@ theme_override_font_sizes/font_size = 32
 text = "ROCK ARMOR x1.5!"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="QuestTracker" type="VBoxContainer" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 260.0
-offset_right = 424.0
-offset_bottom = 260.0
-mouse_filter = 2
-script = ExtResource("quest_tracker")

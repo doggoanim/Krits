@@ -17,6 +17,7 @@ extends RefCounted
 ## long road there is side content; this stays on the tracker until you arrive.
 static func water_for_the_desert() -> QuestData:
 	var q := _make(&"water_for_the_desert", true)
+	q.start_flag = &"water_quest_accepted"   # nothing in the log until Mayor Arse gives it
 	q.objectives = [
 		QuestObjective.make(QuestObjective.Kind.FLAG, &"water_quest_accepted"),
 		QuestObjective.make(QuestObjective.Kind.COLLECT, &"water_spirits", 1, true),

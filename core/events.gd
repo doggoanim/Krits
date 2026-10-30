@@ -32,7 +32,7 @@ signal game_saved   ## a save was just written to disk — the SaveIndicator bad
 signal spawnpoint_activated(id: StringName)
 signal fast_travel_requested(id: StringName)
 signal story_flag_changed(flag: StringName, value: Variant)
-signal quests_changed   ## the quest log re-checked — a quest started, progressed or finished (the HUD tracker redraws)
+signal quests_changed   ## the quest log re-checked — a quest started, progressed or finished (the Quests tab redraws)
 signal quest_completed(id: StringName)
 ## A Door was used — Main swaps the active level for `level_scene` and places
 ## the player at whichever Spawnpoint/DoorSpawn inside it has `spawn_id`,
