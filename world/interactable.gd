@@ -66,7 +66,10 @@ func _on_body_exited(body: Node3D) -> void:
 		player = null
 
 func _process(_delta: float) -> void:
-	var can_use := _in_range and _can_interact()
+	# Nothing else is usable while a conversation is open (a door standing
+	# next to the speaker, say) — the dialogue owns the interact key.
+	var talking := DialogueBox.instance != null and DialogueBox.instance.is_active()
+	var can_use := _in_range and not talking and _can_interact()
 	if can_use and not _usable.has(self):
 		_usable.append(self)
 	elif not can_use:
