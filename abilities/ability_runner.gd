@@ -39,12 +39,14 @@ static func activate(ability: AbilityData, player: Player, tree: SceneTree) -> S
 
 static func _shockwave(ability: AbilityData, player: Player, arena: Arena) -> void:
 	var dmg := Game.stats.damage() * ability.amount
+	ShockwaveFx.spawn(arena, player.global_position, ability.radius, ability.color)
 	for e in arena.enemies.duplicate():
 		if not is_instance_valid(e):
 			continue
 		if e.global_position.distance_to(player.global_position) > ability.radius:
 			continue
 		HitBurst.spawn(arena, e.center_point(), dmg, 2.0)
+		VFX.shatter(arena, e.center_point(), ability.color, 1.0)
 		e.punch()
 		e.knockback(player.global_position, 8.0)
 		e.take_damage(dmg)
