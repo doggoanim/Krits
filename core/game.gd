@@ -16,6 +16,7 @@ var stats := PlayerStats.new()
 var inventory := Inventory.new()
 var hotbar := Hotbar.new()
 var story_flags := {}
+var quests := QuestLog.new()   ## which quests are done; progress is derived from flags + the bag (see QuestLog)
 var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
 var god_mode := false
@@ -24,6 +25,7 @@ var in_combat := false      ## true for the whole of an encounter (set by Encoun
 
 func _ready() -> void:
 	_migrate_legacy_save()
+	quests.connect_signals()
 
 func _process(delta: float) -> void:
 	stats.tick(delta)
@@ -72,6 +74,7 @@ func delete_save(slot := -1) -> void:
 	inventory = Inventory.new()
 	hotbar = Hotbar.new()
 	story_flags.clear()
+	quests.completed.clear()
 	unlocked_spawns.clear()
 	last_spawn = &""
 	player_name = "Krits"
@@ -111,7 +114,7 @@ func start_new_game(slot: int, new_name: String) -> void:
 func save() -> void:
 	var data := {
 		"player_name": player_name,
-		"stats": stats.to_dict(), "inventory": inventory.to_dict(), "hotbar": hotbar.to_dict(), "flags": story_flags,
+		"stats": stats.to_dict(), "inventory": inventory.to_dict(), "hotbar": hotbar.to_dict(), "flags": story_flags, "quests": quests.to_dict(),
 		"spawns": unlocked_spawns.map(func(s): return String(s)),
 		"last_spawn": String(last_spawn),
 	}
@@ -132,7 +135,9 @@ func load_game() -> bool:
 	inventory.from_dict(parsed.get("inventory", {}))
 	hotbar.from_dict(parsed.get("hotbar", {}))
 	story_flags = parsed.get("flags", {})
+	quests.from_dict(parsed.get("quests", {}))
 	unlocked_spawns.clear()
 	for s in parsed.get("spawns", []): unlocked_spawns.append(StringName(s))
 	last_spawn = StringName(parsed.get("last_spawn", ""))
+	quests.evaluate()
 	return true
