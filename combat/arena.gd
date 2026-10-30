@@ -160,6 +160,9 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 	if p.camera_rig:
 		p.camera_rig.extra_distance = radius * 0.7
 	_weapon_kind = _equipped_weapon_kind()
+	var links := OrbLinks.new()   # glowing chain between the arrow orbs (only exist while a bow is equipped)
+	links.arena = self
+	add_child(links)
 	Events.stats_changed.connect(_on_stats_changed)
 	Events.player_landed.connect(_on_player_landed)
 	Events.player_died.connect(_on_player_died)
