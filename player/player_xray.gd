@@ -26,6 +26,7 @@ const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of ST
 
 var player: Player
 var _copies: Array[MeshInstance3D] = []
+var _sources: Array[MeshInstance3D] = []   ## _sources[i] is the mesh _copies[i] mirrors
 var _t := 0.0
 var _occluded := false
 
@@ -39,10 +40,12 @@ func attach(model: Node3D) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = SHADER
 	mat.render_priority = 10
+	if model.is_queued_for_deletion():
+		return
 	var before := _copies.size()
 	_collect(model, mat)
 	for i in range(before, _copies.size()):
-		_copies[i].visible = _occluded
+		_copies[i].visible = _occluded and _sources[i].is_visible_in_tree()
 
 func _build_copies(model: Node3D) -> void:
 	var mat := ShaderMaterial.new()
@@ -58,10 +61,7 @@ func _collect(n: Node, mat: ShaderMaterial) -> void:
 		dup.visible = false
 		mi.get_parent().add_child(dup)
 		_copies.append(dup)
-		# The copy sits beside its source, not under it — so when the source
-		# goes (gear unequipped/swapped), take the copy with it. Otherwise a
-		# model whose root IS the mesh leaves its halftone silhouette behind.
-		mi.tree_exited.connect(dup.queue_free)
+		_sources.append(mi)
 	for c in n.get_children():
 		_collect(c, mat)
 
@@ -71,11 +71,20 @@ func _process(delta: float) -> void:
 		return
 	_t = CHECK_INTERVAL
 	_occluded = _is_occluded()
-	for i in range(_copies.size() - 1, -1, -1):   # gear swaps free their copies
-		if is_instance_valid(_copies[i]):
-			_copies[i].visible = _occluded
-		else:
+	# A copy sits beside its source mesh, not under it, so it isn't freed with
+	# it: drop it as soon as the source is gone (gear unequipped/swapped, even
+	# one still pending deletion) and only show it while the source itself is.
+	for i in range(_copies.size() - 1, -1, -1):
+		var src := _sources[i]
+		var alive := is_instance_valid(src) and not src.is_queued_for_deletion() \
+				and is_instance_valid(_copies[i])
+		if not alive:
+			if is_instance_valid(_copies[i]):
+				_copies[i].queue_free()
 			_copies.remove_at(i)
+			_sources.remove_at(i)
+		else:
+			_copies[i].visible = _occluded and src.is_visible_in_tree()
 
 func _is_occluded() -> bool:
 	if player == null or player.camera_rig == null:
