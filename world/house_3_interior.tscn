@@ -1,0 +1,191 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="1"]
+[ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="2"]
+[ext_resource type="Script" uid="uid://bf0u4pce3srrb" path="res://world/cutaway_wall.gd" id="3"]
+[ext_resource type="Script" path="res://world/npc.gd" id="npc"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/offer.tres" id="mayor_offer"]
+[ext_resource type="Script" path="res://dialogue/dialogue_variant.gd" id="variant_script"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="variant_done"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_accepted.tres" id="variant_accepted"]
+[ext_resource type="PackedScene" uid="uid://dbiov62udfua1" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Bed_07.glb" id="4_4q5kq"]
+
+[sub_resource type="StandardMaterial3D" id="OuterMat"]
+albedo_color = Color(0.82, 0.74, 0.6, 1)
+
+[sub_resource type="BoxMesh" id="FloorMesh"]
+size = Vector3(8, 0.2, 8)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ysumd"]
+points = PackedVector3Array(-4, -0.1, -4, -4, 0.1, -4, 4, -0.1, -4, -4, -0.1, 4, -4, 0.1, 4, 4, 0.1, -4, 4, -0.1, 4, 4, 0.1, 4)
+
+[sub_resource type="StandardMaterial3D" id="InnerMat"]
+cull_mode = 1
+albedo_color = Color(0.82, 0.74, 0.6, 1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_4q5kq"]
+points = PackedVector3Array(-4, -0.1, -4, -4, 0.1, -4, 4, -0.1, -4, -4, -0.1, 4, -4, 0.1, 4, 4, 0.1, -4, 4, -0.1, 4, 4, 0.1, 4)
+
+[sub_resource type="BoxMesh" id="NSWallMesh"]
+size = Vector3(8, 5, 0.2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fasv0"]
+points = PackedVector3Array(4, 2.5, 0.1, 4, 2.5, -0.1, -4, 2.5, 0.1, 4, -2.5, 0.1, 4, -2.5, -0.1, -4, 2.5, -0.1, -4, -2.5, 0.1, -4, -2.5, -0.1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kbm7p"]
+points = PackedVector3Array(4, 2.5, 0.1, 4, 2.5, -0.1, -4, 2.5, 0.1, 4, -2.5, 0.1, 4, -2.5, -0.1, -4, 2.5, -0.1, -4, -2.5, 0.1, -4, -2.5, -0.1)
+
+[sub_resource type="BoxMesh" id="EWWallMesh"]
+size = Vector3(0.2, 5, 8)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_wumov"]
+points = PackedVector3Array(-0.1, -2.5, -4, 0.1, -2.5, -4, -0.1, -2.5, 4, -0.1, 2.5, -4, 0.1, 2.5, -4, 0.1, -2.5, 4, -0.1, 2.5, 4, 0.1, 2.5, 4)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_wyoau"]
+points = PackedVector3Array(-0.1, -2.5, -4, 0.1, -2.5, -4, -0.1, -2.5, 4, -0.1, 2.5, -4, 0.1, 2.5, -4, 0.1, -2.5, 4, -0.1, 2.5, 4, 0.1, 2.5, 4)
+
+[sub_resource type="CapsuleShape3D" id="Shape_MayorBody"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_MayorRobe"]
+albedo_color = Color(0.3764706, 0.28627452, 0.5529412, 1)
+
+[sub_resource type="CapsuleMesh" id="Mesh_MayorBody"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="DoorShape"]
+size = Vector3(1.2, 2.2, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="DoorMat"]
+albedo_color = Color(0.35, 0.22, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="DoorMesh"]
+size = Vector3(1.2, 2.2, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wgm46"]
+size = Vector3(1.325, 1.4, 2.1)
+
+[node name="House3Interior" type="Node3D" unique_id=1336413871 groups=["interior_level"]]
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=2105265729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor" unique_id=827068073]
+material_override = SubResource("OuterMat")
+mesh = SubResource("FloorMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1110356795]
+shape = SubResource("ConvexPolygonShape3D_ysumd")
+
+[node name="Ceiling" type="StaticBody3D" parent="." unique_id=1666054002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
+script = ExtResource("3")
+normal_axis = Vector3(0, 1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ceiling" unique_id=473521490]
+material_override = SubResource("InnerMat")
+mesh = SubResource("FloorMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=195700002]
+shape = SubResource("ConvexPolygonShape3D_4q5kq")
+
+[node name="WallNorth" type="StaticBody3D" parent="." unique_id=1861953727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 4)
+script = ExtResource("3")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallNorth" unique_id=1767383489]
+material_override = SubResource("InnerMat")
+mesh = SubResource("NSWallMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallNorth" unique_id=578446000]
+shape = SubResource("ConvexPolygonShape3D_fasv0")
+
+[node name="WallSouth" type="StaticBody3D" parent="." unique_id=1608215960]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -4)
+script = ExtResource("3")
+normal_axis = Vector3(0, 0, -1)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallSouth" unique_id=2127598197]
+material_override = SubResource("InnerMat")
+mesh = SubResource("NSWallMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallSouth" unique_id=1125502089]
+shape = SubResource("ConvexPolygonShape3D_kbm7p")
+
+[node name="WallEast" type="StaticBody3D" parent="." unique_id=245659978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2.5, 0)
+script = ExtResource("3")
+normal_axis = Vector3(1, 0, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallEast" unique_id=1987255519]
+material_override = SubResource("InnerMat")
+mesh = SubResource("EWWallMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallEast" unique_id=935431534]
+shape = SubResource("ConvexPolygonShape3D_wumov")
+
+[node name="WallWest" type="StaticBody3D" parent="." unique_id=1719540168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.5, 0)
+script = ExtResource("3")
+normal_axis = Vector3(-1, 0, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallWest" unique_id=1099163910]
+material_override = SubResource("InnerMat")
+mesh = SubResource("EWWallMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallWest" unique_id=1940097064]
+shape = SubResource("ConvexPolygonShape3D_wyoau")
+
+[node name="Lamp" type="OmniLight3D" parent="." unique_id=1311946840]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+light_color = Color(1, 0.88, 0.7, 1)
+light_energy = 1.4
+omni_range = 12.6
+
+[node name="ReturnDoor" type="StaticBody3D" parent="." unique_id=301559801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.8000002)
+script = ExtResource("1")
+target_level = "res://world/chesburg.tscn"
+target_spawn_id = &"house_3_entrance"
+prompt_text = "Press E to exit"
+
+[node name="Collision" type="CollisionShape3D" parent="ReturnDoor" unique_id=545707350]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("DoorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="ReturnDoor" unique_id=967589929]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+material_override = SubResource("DoorMat")
+mesh = SubResource("DoorMesh")
+
+[node name="ReturnSpawn" type="Node3D" parent="." unique_id=1518829199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.5)
+script = ExtResource("2")
+spawn_id = &"enter"
+
+[node name="Bed_072" parent="." unique_id=385095744 instance=ExtResource("4_4q5kq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1000001, 0, -2.9)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Bed_072" unique_id=188398858]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bed_072/StaticBody3D" unique_id=417095395]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.19999999, 0.25)
+shape = SubResource("BoxShape3D_wgm46")
+
+[node name="MayorArse" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -1)
+script = ExtResource("npc")
+dialogue = ExtResource("mayor_offer")
+variants = Array[ExtResource("variant_script")]([ExtResource("variant_done"), ExtResource("variant_accepted")])
+
+[node name="Collision" type="CollisionShape3D" parent="MayorArse"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_MayorBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="MayorArse"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+material_override = SubResource("Mat_MayorRobe")
+mesh = SubResource("Mesh_MayorBody")
