@@ -314,10 +314,14 @@ func _gear_list_root() -> Node:
 
 func _fill_gear(list: VBoxContainer, owned: Array, equipped: EquipmentData) -> void:
 	_clear_children(list)
+	var items: Array[EquipmentData] = []
 	for id in owned:
-		var item := EquipmentLibrary.by_id(id)
-		if item == null:
-			continue
+		var found := EquipmentLibrary.by_id(id)
+		if found != null:
+			items.append(found)
+	if not items.is_empty() and items[0] is WeaponData:   # armor/shields keep their buy order (sort_custom isn't stable)
+		items.sort_custom(EquipmentLibrary.is_listed_before)
+	for item in items:
 		var b := Button.new()
 		var is_equipped := equipped != null and equipped.id == item.id
 		b.text = ("★ " if is_equipped else "") + item.display_name

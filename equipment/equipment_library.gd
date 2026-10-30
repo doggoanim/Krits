@@ -156,6 +156,17 @@ static func _look(item: EquipmentData, file: String, model_scale: float,
 	item.model_offset = offset
 	item.model_rotation_deg = rotation_deg
 
+## Inventory order: weapons grouped sword, then bow, then staff (WeaponData.Kind
+## order), each group worst to best by damage. Only used for weapon lists.
+static func is_listed_before(a: EquipmentData, b: EquipmentData) -> bool:
+	if a is WeaponData and b is WeaponData:
+		var wa := a as WeaponData
+		var wb := b as WeaponData
+		if wa.kind != wb.kind:
+			return wa.kind < wb.kind
+		return wa.damage_bonus < wb.damage_bonus
+	return false
+
 ## One-line stat summary ("Armor: +20 max HP") for item details everywhere.
 static func stat_line(item: EquipmentData) -> String:
 	if item is ArmorData: return "Armor: +%d max HP" % item.hp_bonus
