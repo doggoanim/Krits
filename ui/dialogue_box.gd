@@ -96,6 +96,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	get_viewport().set_input_as_handled()
 
+## Mouse wheel moves between the choices (wrapping). In _input rather than
+## _unhandled_input: a choice button under the cursor would swallow the wheel
+## before the unhandled pass ever saw it.
+func _input(event: InputEvent) -> void:
+	var mb := event as InputEventMouseButton
+	if mb == null or not mb.pressed or not _open or not _line_done:
+		return
+	if mb.button_index != MOUSE_BUTTON_WHEEL_UP and mb.button_index != MOUSE_BUTTON_WHEEL_DOWN:
+		return
+	var count := _choices.get_child_count()
+	if count == 0:
+		return
+	var current := 0
+	var focused := get_viewport().gui_get_focus_owner()
+	if focused != null and _choices.is_ancestor_of(focused):
+		current = focused.get_index()
+	var step := 1 if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1
+	(_choices.get_child(posmod(current + step, count)) as Button).grab_focus()
+	get_viewport().set_input_as_handled()
+
 ## Enter (main or numpad) advances/skips like the interact key does.
 func _is_enter(event: InputEvent) -> bool:
 	var key := event as InputEventKey
