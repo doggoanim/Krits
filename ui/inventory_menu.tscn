@@ -136,6 +136,14 @@ theme_override_font_sizes/font_size = 48
 toggle_mode = true
 text = "Abilities"
 
+[node name="QuestsTab" type="Button" parent="Margin/Content/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "Quests"
+
 [node name="Body" type="HBoxContainer" parent="Margin/Content"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -168,12 +176,36 @@ size_flags_vertical = 3
 follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="Grid" type="GridContainer" parent="Margin/Content/Body/Pages/ItemsPage/Scroll"]
+[node name="ItemsContent" type="VBoxContainer" parent="Margin/Content/Body/Pages/ItemsPage/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 24
+
+[node name="Grid" type="GridContainer" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 columns = 6
+
+[node name="KeyHeading" type="Label" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Key items — no bag space, can't be sold"
+
+[node name="KeyGrid" type="GridContainer" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 6
+
+[node name="KeyEmpty" type="Label" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 34
+text = "None yet."
 
 [node name="GearPage" type="HBoxContainer" parent="Margin/Content/Body/Pages"]
 unique_name_in_owner = true
@@ -247,6 +279,34 @@ layout_mode = 2
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 columns = 6
+
+[node name="QuestsPage" type="VBoxContainer" parent="Margin/Content/Body/Pages"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="Heading" type="Label" parent="Margin/Content/Body/Pages/QuestsPage"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Quest log"
+
+[node name="QuestScroll" type="ScrollContainer" parent="Margin/Content/Body/Pages/QuestsPage"]
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="QuestList" type="VBoxContainer" parent="Margin/Content/Body/Pages/QuestsPage/QuestScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="DetailsHolder" type="Control" parent="Margin/Content/Body"]
 custom_minimum_size = Vector2(620, 0)

@@ -13,6 +13,9 @@ const BASE_SLOTS := 10
 ## kept in the order items arrived.
 var stacks: Array[Dictionary] = []
 var backpack_id: StringName = &""
+## Key items (ItemData.Category.KEY) live apart from the bag: they take no slots,
+## never count toward capacity and can't be sold or dropped. id -> count.
+var key_items: Dictionary = {}
 
 func capacity() -> int:
 	var bag := ItemLibrary.backpack_by_id(backpack_id)
@@ -22,7 +25,7 @@ func backpack() -> BackpackData:
 	return ItemLibrary.backpack_by_id(backpack_id)
 
 func count_of(id: StringName) -> int:
-	var total := 0
+	var total: int = int(key_items.get(id, 0))
 	for s in stacks:
 		if s["id"] == id:
 			total += s["count"]
@@ -39,6 +42,11 @@ func add(id: StringName, amount := 1) -> int:
 	var item := ItemLibrary.by_id(id)
 	if item == null or amount <= 0:
 		return amount
+	if item.category == ItemData.Category.KEY:
+		key_items[id] = mini(int(key_items.get(id, 0)) + amount, maxi(item.max_stack, 1))
+		Events.item_gained.emit(id, amount)
+		changed.emit()
+		return 0
 	var left := amount
 	for s in stacks:
 		if left == 0:
@@ -65,6 +73,8 @@ func can_fit(id: StringName, amount := 1) -> bool:
 	var item := ItemLibrary.by_id(id)
 	if item == null:
 		return false
+	if item.category == ItemData.Category.KEY:
+		return true   # key items take no bag space
 	var room := free_slots() * item.max_stack
 	for s in stacks:
 		if s["id"] == id:
@@ -83,7 +93,7 @@ func buy_item(item: ItemData) -> bool:
 ## Shop: sells up to `amount` of `id` at its sell price; returns gold earned.
 func sell_item(id: StringName, amount := 1) -> int:
 	var item := ItemLibrary.by_id(id)
-	if item == null or item.sell_price <= 0:
+	if item == null or item.sell_price <= 0 or item.category == ItemData.Category.KEY:
 		return 0
 	var n := mini(amount, count_of(id))
 	if n <= 0 or not remove(id, n):
@@ -109,6 +119,13 @@ func remove(id: StringName, amount := 1) -> bool:
 	if not has(id, amount):
 		return false
 	var left := amount
+	if key_items.has(id):   # only quests consume key items (QuestObjective.consume)
+		var take := mini(left, int(key_items[id]))
+		key_items[id] = int(key_items[id]) - take
+		if int(key_items[id]) <= 0:
+			key_items.erase(id)
+		left -= take
+		changed.emit()
 	var i := stacks.size() - 1
 	while i >= 0 and left > 0:
 		if stacks[i]["id"] == id:
@@ -154,13 +171,24 @@ func to_dict() -> Dictionary:
 	return {
 		"backpack": String(backpack_id),
 		"stacks": stacks.map(func(s): return {"id": String(s["id"]), "count": s["count"]}),
+		"key_items": key_items.keys().map(func(k): return {"id": String(k), "count": int(key_items[k])}),
 	}
 
 func from_dict(d: Dictionary) -> void:
 	stacks.clear()
+	key_items.clear()
 	backpack_id = StringName(d.get("backpack", ""))
 	for raw in d.get("stacks", []):
 		var id := LegacyIds.fix(StringName(raw.get("id", "")))
-		if ItemLibrary.by_id(id) != null and stacks.size() < capacity():
+		var item := ItemLibrary.by_id(id)
+		if item == null:
+			continue
+		if item.category == ItemData.Category.KEY:   # an older save kept keys in the bag
+			key_items[id] = int(key_items.get(id, 0)) + int(raw.get("count", 1))
+		elif stacks.size() < capacity():
 			stacks.append({"id": id, "count": int(raw.get("count", 1))})
+	for raw in d.get("key_items", []):
+		var id := LegacyIds.fix(StringName(raw.get("id", "")))
+		if ItemLibrary.by_id(id) != null:
+			key_items[id] = int(raw.get("count", 1))
 	changed.emit()

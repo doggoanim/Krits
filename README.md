@@ -347,6 +347,7 @@ restores them after, so whatever look you set here carries into combat too.
 **Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: a golden "POUND x1.25!" plate under the combo plate (`PoundPlate` in hud.tscn), golden damage numbers/confetti, its own hit sound (`attack_orb_sword_hit_pound.wav`, replaces the normal sword hit), a bigger kick and longer hitstop.
 
 ### Quests
+- The inventory has a **Quests** tab next to Abilities (active quests, main first, then finished ones, with objective checklists).
 - `quests/`: `QuestData` (title, objectives, rewards, `is_main`), `QuestObjective` (FLAG / DEFEAT / REACH / COLLECT), `QuestLibrary` (the catalog; texts in `data/descriptions.cfg` under `[quests]`), `QuestLog` (`Game.quests`, saves only the completed ids).
 - Progress is derived, never stored: every objective except COLLECT is a story flag (dialogue `sets_flag`, `cleared_<enemy_id>`, `reached_<place_id>`), COLLECT reads the bag. `QuestLog.evaluate()` re-checks on every flag/item change, pays rewards and sets `quest_done_<id>`.
 - A quest starts when its `start_flag` is set (empty = from the start of the game) and its `requires_quest` is done. `QuestTrigger` (`world/`) sets `reached_<place_id>` when the player walks in. The HUD's `QuestTracker` lists active quests, main first.

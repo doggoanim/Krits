@@ -30,7 +30,7 @@ static func sell_offers() -> Array[ShopOffer]:
 	var out: Array[ShopOffer] = []
 	for item in ItemLibrary.all_items():
 		var n := Game.inventory.count_of(item.id)
-		if item.sell_price > 0 and n > 0:
+		if item.sell_price > 0 and n > 0 and item.category != ItemData.Category.KEY:
 			var o := _supply(item)
 			o.tab = ShopOffer.Tab.SELL
 			o.price = item.sell_price

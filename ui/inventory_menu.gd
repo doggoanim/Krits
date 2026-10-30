@@ -1,26 +1,31 @@
 class_name InventoryMenu
 extends MenuBase
-## The bag screen (hotkey: "menu_inventory", default Tab). Three tabs:
+## The bag screen (hotkey: "menu_inventory", default Tab). Four tabs:
 ##   Items     — a grid of slots (Game.inventory; capacity grows with
 ##               backpacks). Pick one to read about it; Use / Drop, and put
-##               consumables on hotbar slots 4-6.
+##               consumables on hotbar slots 4-6. Key items sit in their own
+##               section below the bag (no slots used, can't be sold/dropped).
 ##   Gear      — every armor/shield/weapon you own; pick one to equip it.
 ##   Abilities — the abilities you know; put them on hotbar slots 1-3.
+##   Quests    — the quest log: active quests (main first) and finished ones.
 ## The hotbar itself is shown along the bottom (display only here — the
 ## number keys use it in the game, see HotbarBar). Layout and art live in
 ## inventory_menu.tscn; this script fills in the dynamic parts.
 
-enum Page { ITEMS, GEAR, ABILITIES }
+enum Page { ITEMS, GEAR, ABILITIES, QUESTS }
 
 @export var slot_scene: PackedScene
 @export var slot_styles: Array[StyleBox] = []   ## nine-sliced plates: normal, hover, pressed
 
 @onready var _gold: Label = %GoldLabel
 @onready var _stats_label: Label = %StatsLabel
-@onready var _tabs: Array[Button] = [%ItemsTab, %GearTab, %AbilitiesTab]
-@onready var _pages: Array[Control] = [%ItemsPage, %GearPage, %AbilitiesPage]
+@onready var _tabs: Array[Button] = [%ItemsTab, %GearTab, %AbilitiesTab, %QuestsTab]
+@onready var _pages: Array[Control] = [%ItemsPage, %GearPage, %AbilitiesPage, %QuestsPage]
 @onready var _capacity: Label = %CapacityLabel
 @onready var _grid: GridContainer = %Grid
+@onready var _key_grid: GridContainer = %KeyGrid
+@onready var _key_empty: Label = %KeyEmpty
+@onready var _quest_list: VBoxContainer = %QuestList
 @onready var _ability_grid: GridContainer = %AbilityGrid
 @onready var _armor_list: VBoxContainer = %ArmorList
 @onready var _shield_list: VBoxContainer = %ShieldList
@@ -39,6 +44,7 @@ const GEAR_ID_META := &"gear_id"
 var _page := Page.ITEMS
 var _selected := 0                  ## index of the focused bag slot
 var _selected_ability := 0          ## index of the focused ability
+var _selected_quest: StringName = &""   ## id of the focused quest (restored after a rebuild)
 var _gear_focus: StringName = &""   ## id of the focused gear button (restored after a rebuild)
 
 func _init() -> void:
@@ -48,8 +54,13 @@ func _ready() -> void:
 	super()
 	for i in _tabs.size():
 		_tabs[i].pressed.connect(_show_page.bind(i))
+	Events.quests_changed.connect(_on_quests_changed)
 	_use_button.pressed.connect(_on_use_pressed)
 	_drop_button.pressed.connect(_drop_selected)
+
+func _on_quests_changed() -> void:
+	if visible:
+		refresh()
 
 ## The base class frees everything under Content on open; here Content holds
 ## the fixed layout from the scene, so leave it alone.
@@ -89,6 +100,7 @@ func refresh() -> void:
 	_build_items()
 	_build_gear()
 	_build_abilities()
+	_build_quests()
 
 # ---------------------------------------------------------------- pages
 
@@ -107,6 +119,8 @@ func _show_page(page: int) -> void:
 		Page.ABILITIES:
 			_focus_selected_slot(_ability_grid, _selected_ability)
 			_update_ability_details()
+		Page.QUESTS:
+			_focus_quest.call_deferred()
 
 # ---------------------------------------------------------------- items
 
@@ -126,9 +140,33 @@ func _build_items() -> void:
 		slot.focus_entered.connect(_on_slot_focused.bind(i))
 		slot.pressed.connect(_on_slot_pressed.bind(i))
 	FocusPop.attach_all(_grid, true)
+	_build_key_items()
 	if _page == Page.ITEMS and visible:
 		_focus_selected_slot(_grid, _selected)
 		_update_item_details()
+
+## The key-item section under the bag: one slot per key item, no capacity use.
+func _build_key_items() -> void:
+	_clear_children(_key_grid)
+	var ids: Array = Game.inventory.key_items.keys()
+	_key_empty.visible = ids.is_empty()
+	for id: StringName in ids:
+		var item := ItemLibrary.by_id(id)
+		if item == null:
+			continue
+		var slot := _new_slot(_key_grid)
+		slot.show_item(item, int(Game.inventory.key_items[id]))
+		slot.focus_entered.connect(_on_key_focused.bind(item))
+	FocusPop.attach_all(_key_grid, true)
+
+func _on_key_focused(item: ItemData) -> void:
+	_message.text = ""
+	_use_button.visible = false
+	_drop_button.visible = false
+	_clear_assign()
+	_detail_name.text = item.display_name
+	_detail_kind.text = item.category_name()
+	_detail_text.text = item.description + "\n\nKey items don't take bag space and can't be sold or dropped."
 
 func _new_slot(parent: Control) -> InventorySlot:
 	var slot := slot_scene.instantiate() as InventorySlot
@@ -297,6 +335,71 @@ func _update_ability_details() -> void:
 	_detail_kind.text = "Ability   Cooldown %ds   Stamina %d" % [int(a.cooldown), int(a.stamina_cost)]
 	_detail_text.text = a.description
 	_set_assign(a.id, [0, 1, 2])
+
+# ---------------------------------------------------------------- quests
+
+func _build_quests() -> void:
+	_clear_children(_quest_list)
+	var quest_log := Game.quests
+	var entries: Array[QuestData] = []
+	entries.append_array(quest_log.active_quests())
+	entries.append_array(quest_log.completed_quests())
+	for q in entries:
+		var done := quest_log.is_complete(q.id)
+		var b := Button.new()
+		b.text = ("✓ " if done else ("★ " if q.is_main else "")) + q.title
+		b.add_theme_font_size_override(&"font_size", 40)
+		b.set_meta(GEAR_ID_META, q.id)   # reused meta key: the id this button stands for
+		b.focus_entered.connect(_on_quest_focused.bind(q))
+		_quest_list.add_child(b)
+	FocusPop.attach_all(_quest_list, true)
+	if _page == Page.QUESTS and visible:
+		_focus_quest.call_deferred()
+
+func _focus_quest() -> void:
+	var first: Control = null
+	for b in _quest_list.get_children():
+		first = first if first else b as Control
+		if b.get_meta(GEAR_ID_META) == _selected_quest:
+			(b as Control).grab_focus()
+			return
+	if first:
+		first.grab_focus()
+	else:
+		_show_no_quests()
+
+func _show_no_quests() -> void:
+	_use_button.visible = false
+	_drop_button.visible = false
+	_clear_assign()
+	_detail_name.text = "No quests"
+	_detail_kind.text = ""
+	_detail_text.text = "Nothing to do yet. Talk to people."
+
+func _on_quest_focused(q: QuestData) -> void:
+	_selected_quest = q.id
+	_message.text = ""
+	_use_button.visible = false
+	_drop_button.visible = false
+	_clear_assign()
+	var done := Game.quests.is_complete(q.id)
+	_detail_name.text = q.title
+	_detail_kind.text = "Completed" if done else ("Main quest" if q.is_main else "Side quest")
+	var text := q.description
+	text += "\n\n"
+	for o in q.objectives:
+		var p := o.progress()
+		var mark := "☑" if o.is_done() else "☐"
+		var count := "  (%d/%d)" % [int(p["have"]), int(p["need"])] if int(p["need"]) > 1 else ""
+		text += "%s %s%s\n" % [mark, o.text, count]
+	if q.reward_gold > 0 or not q.reward_items.is_empty():
+		text += "\nReward:"
+		if q.reward_gold > 0:
+			text += " %dg" % q.reward_gold
+		for item_id: StringName in q.reward_items:
+			var item := ItemLibrary.by_id(item_id)
+			text += "  %s x%d" % [item.display_name if item else String(item_id), int(q.reward_items[item_id])]
+	_detail_text.text = text
 
 # ---------------------------------------------------------------- gear
 
