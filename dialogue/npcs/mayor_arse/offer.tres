@@ -1,13 +1,13 @@
-[gd_resource type="Resource" script_class="DialogueNode" format=3]
+[gd_resource type="Resource" script_class="DialogueNode" format=3 uid="uid://2btwjslro653"]
 
-[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="s"]
-[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="cs"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/c_accept.tres" id="c0"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/c_info.tres" id="c1"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/c_later.tres" id="c2"]
+[ext_resource type="Script" uid="uid://v8ikwsq6vu2b" path="res://dialogue/dialogue_choice.gd" id="cs"]
+[ext_resource type="Script" uid="uid://br2ijnooxyrd7" path="res://dialogue/dialogue_node.gd" id="s"]
 
 [resource]
 script = ExtResource("s")
 speaker = "Mayor Arse"
-text = "Ah, a traveler with strong legs and no plans. Perfect. The desert town far beyond the plains is dying of thirst. Their wells ran dry years ago. Would you carry a message and a favor for me?"
+text = "Oh dear you actually came! "
 choices = Array[ExtResource("cs")]([ExtResource("c0"), ExtResource("c1"), ExtResource("c2")])
