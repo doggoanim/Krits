@@ -41,12 +41,14 @@ var _since_hit := 0.0
 var _since_stamina_use := 0.0
 
 func _init() -> void:
-	equipped_armor = EquipmentLibrary.starting_armor()
-	equipped_shield = EquipmentLibrary.starting_shield()
-	equipped_weapon = EquipmentLibrary.starting_weapon()
-	owned_armors = [equipped_armor.id]
-	owned_shields = [equipped_shield.id]
-	owned_weapons = [equipped_weapon.id]
+	# A new game owns and wears nothing: no armor, no shield and no weapon (so no
+	# fighting yet — see EncounterManager). The first gear comes from the story.
+	equipped_armor = null
+	equipped_shield = null
+	equipped_weapon = null
+	owned_armors = []
+	owned_shields = []
+	owned_weapons = []
 	hp = max_hp()
 	shield = max_shield()
 
@@ -213,9 +215,11 @@ func to_dict() -> Dictionary:
 
 func from_dict(d: Dictionary) -> void:
 	gold = int(d.get("gold", 0))
-	owned_armors = _load_id_array(d.get("owned_armors", []), EquipmentLibrary.starting_armor().id)
-	owned_shields = _load_id_array(d.get("owned_shields", []), EquipmentLibrary.starting_shield().id)
-	owned_weapons = _load_id_array(d.get("owned_weapons", []), EquipmentLibrary.starting_weapon().id)
+	# Only a save from before gear was saved at all (no keys) gets the old starter
+	# kit; a current save is taken exactly as written, empty hands included.
+	owned_armors = _load_id_array(d.get("owned_armors", []), EquipmentLibrary.starting_armor().id if not d.has("owned_armors") else &"")
+	owned_shields = _load_id_array(d.get("owned_shields", []), EquipmentLibrary.starting_shield().id if not d.has("owned_shields") else &"")
+	owned_weapons = _load_id_array(d.get("owned_weapons", []), EquipmentLibrary.starting_weapon().id if not d.has("owned_weapons") else &"")
 	# A missing key means an old save (wear the starter); an empty string means
 	# "deliberately took it off".
 	equipped_armor = EquipmentLibrary.by_id(LegacyIds.fix(StringName(d.get("equipped_armor", "")))) as ArmorData
@@ -225,7 +229,8 @@ func from_dict(d: Dictionary) -> void:
 	if equipped_shield == null and d.has("equipped_shield") == false:
 		equipped_shield = EquipmentLibrary.starting_shield()
 	equipped_weapon = EquipmentLibrary.by_id(LegacyIds.fix(StringName(d.get("equipped_weapon", "")))) as WeaponData
-	if equipped_weapon == null: equipped_weapon = EquipmentLibrary.starting_weapon()
+	if equipped_weapon == null and d.has("equipped_weapon") == false:
+		equipped_weapon = EquipmentLibrary.starting_weapon()
 	full_heal()
 
 ## Shared by the three owned_* loaders: StringName-ifies every saved id,
@@ -236,6 +241,6 @@ func _load_id_array(raw: Array, fallback: StringName) -> Array[StringName]:
 	var out: Array[StringName] = []
 	for id in raw:
 		out.append(LegacyIds.fix(StringName(id)))
-	if fallback not in out:
+	if fallback != &"" and fallback not in out:
 		out.append(fallback)
 	return out

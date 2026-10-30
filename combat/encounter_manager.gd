@@ -32,6 +32,7 @@ func register_world_enemy(e: WorldEnemy) -> void:
 
 func _process(delta: float) -> void:
 	_grace = maxf(0.0, _grace - delta)
+	_unarmed_notice_left = maxf(0.0, _unarmed_notice_left - delta)
 
 func _on_touched(enemy: WorldEnemy) -> void:
 	if busy or _grace > 0.0 or player.dead:
@@ -39,6 +40,9 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	if world_root != null and world_root.is_in_group(&"interior_level") \
 			and not world_root.is_in_group(&"combat_allowed"):
 		return   # no fights indoors, unless the level opts in (a dungeon like the Well Depths)
+	if Game.stats.equipped_weapon == null:
+		_warn_unarmed()
+		return   # can't start a fight bare-handed
 	var group: Array[WorldEnemy] = [enemy]
 	for n in get_tree().get_nodes_in_group(&"world_enemies"):
 		var other := n as WorldEnemy
@@ -49,6 +53,17 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	for w in group:
 		roster.append(w.data)
 	begin_encounter(roster, group)
+
+const UNARMED_NOTICE_COOLDOWN := 8.0
+var _unarmed_notice_left := 0.0
+
+## Touching an enemy with no weapon equipped just doesn't start anything; say
+## why now and then, so it doesn't look like the game is broken.
+func _warn_unarmed() -> void:
+	if _unarmed_notice_left > 0.0:
+		return
+	_unarmed_notice_left = UNARMED_NOTICE_COOLDOWN
+	Events.notice.emit("You can't fight without a weapon.")
 
 ## Full encounter. `world_enemies` are the overworld enemies taking part (may be empty, e.g. debug).
 func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] = []) -> void:
