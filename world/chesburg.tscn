@@ -77,12 +77,12 @@ size = Vector3(4, 18.6, 0.1)
 render_priority = 0
 shader = ExtResource("18_water2_shader")
 shader_parameter/albedo_texture = ExtResource("30_lcfa2")
-shader_parameter/uv_scroll_speed = Vector2(0.05, 0.03)
+shader_parameter/uv_scroll_speed = Vector2(0, 0)
 shader_parameter/shallow_color = Color(1, 1, 1, 1)
 shader_parameter/deep_color = Color(1, 1, 1, 0.9019608)
 shader_parameter/wave_height = 0.08
 shader_parameter/wave_scale = 1.3
-shader_parameter/wave_speed = 0.6
+shader_parameter/wave_speed = 0.1
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
 shader_parameter/sparkle_strength = 0.8
@@ -724,16 +724,16 @@ material_override = SubResource("Mat_MiraRobe")
 mesh = SubResource("Mesh_MiraBody")
 
 [node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86206126, 0, -6)
 script = ExtResource("1_shopkeeper")
 prompt_text = "Press E to shop"
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9839306, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.47978187, 0.9, 0)
 shape = SubResource("Shape_ShopBody")
 
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.49585128, 0.9, 0)
 material_override = SubResource("Mat_ShopRobe")
 mesh = SubResource("Mesh_ShopBody")
 
