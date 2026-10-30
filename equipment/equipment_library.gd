@@ -93,6 +93,8 @@ static func steel_sword() -> WeaponData:
 	w.price = 60
 	w.kind = WeaponData.Kind.SWORD
 	w.damage_bonus = 1.0
+	# Same mounting as the wooden sword (pommel at the glb's origin, blade along +Y).
+	_look(w, "sword_steel", 0.3, Vector3(0.0, 0.1, 0.0), Vector3(0.0, 0.0, 180.0))
 	w.display_name = Descriptions.text("names", w.id)
 	return w
 
