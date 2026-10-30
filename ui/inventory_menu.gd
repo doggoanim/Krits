@@ -166,7 +166,7 @@ func _on_key_focused(item: ItemData) -> void:
 	_clear_assign()
 	_detail_name.text = item.display_name
 	_detail_kind.text = item.category_name()
-	_detail_text.text = item.description + "\n\nKey items don't take bag space and can't be sold or dropped."
+	_detail_text.text = item.description
 
 func _new_slot(parent: Control) -> InventorySlot:
 	var slot := slot_scene.instantiate() as InventorySlot

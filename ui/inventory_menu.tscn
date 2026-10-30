@@ -191,7 +191,7 @@ columns = 6
 [node name="KeyHeading" type="Label" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Key items — no bag space, can't be sold"
+text = "Key items"
 
 [node name="KeyGrid" type="GridContainer" parent="Margin/Content/Body/Pages/ItemsPage/Scroll/ItemsContent"]
 unique_name_in_owner = true
