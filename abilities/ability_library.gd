@@ -4,7 +4,7 @@ extends RefCounted
 ## Add a builder + list it in all_abilities(). Icons: drop a PNG at
 ## res://assets/abilities/<id>.png and it's picked up automatically.
 ## Names/descriptions live in data/descriptions.cfg ([names] / [abilities]).
-## `starting()` are known (and hotbar-equipped) on a fresh save.
+## `starting()` are known (and hotbar-equipped) on a fresh save — currently none.
 
 const ICON_DIR := "res://assets/abilities/"
 
@@ -48,8 +48,9 @@ static func orb_stack() -> AbilityData:
 static func all_abilities() -> Array[AbilityData]:
 	return [heal(), super_jump(), guard_up(), shockwave(), orb_stack()]
 
+## A new game knows no abilities; they're learned from shops or the story.
 static func starting() -> Array[AbilityData]:
-	return [heal(), super_jump()]
+	return []
 
 static func by_id(id: StringName) -> AbilityData:
 	for a in all_abilities():

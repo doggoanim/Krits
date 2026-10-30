@@ -15,10 +15,11 @@ var known: Array[StringName] = []
 var cooldowns := {}   ## ability id -> seconds left
 
 func _init() -> void:
+	# Known abilities start on the first free ability slots (none right now —
+	# see AbilityLibrary.starting()).
 	for a in AbilityLibrary.starting():
 		known.append(a.id)
-	slots[0] = &"heal"
-	slots[1] = &"super_jump"
+		slots[mini(known.size() - 1, ABILITY_SLOTS - 1)] = a.id
 
 static func is_ability_slot(index: int) -> bool:
 	return index < ABILITY_SLOTS
