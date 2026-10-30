@@ -24,6 +24,11 @@ const OPEN_TIME := 0.28
 const CLOSE_TIME := 0.18
 
 static var instance: DialogueBox
+## When the last conversation ended (ticks, ms) — Interactable holds its prompt
+## back for PROMPT_DELAY after this, so closing a dialogue doesn't instantly
+## re-offer (or re-trigger) the same prompt.
+static var last_end_msec := -100000
+const PROMPT_DELAY := 0.6
 
 @export var plate_styles: Array[StyleBox] = []   ## one is picked at random per line
 
@@ -229,6 +234,7 @@ func _end() -> void:
 		_stage.end()
 		_stage = null
 	_animate_close()
+	last_end_msec = Time.get_ticks_msec()
 	Events.dialogue_ended.emit()
 
 # --- Presentation -----------------------------------------------------------

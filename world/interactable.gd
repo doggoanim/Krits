@@ -71,9 +71,11 @@ func _on_body_exited(body: Node3D) -> void:
 		player = null
 
 func _process(_delta: float) -> void:
-	# Nothing else is usable while a conversation is open (a door standing
-	# next to the speaker, say) — the dialogue owns the interact key.
-	var talking := DialogueBox.instance != null and DialogueBox.instance.is_active()
+	# Nothing is usable while a conversation is open (a door standing next to
+	# the speaker, say) — the dialogue owns the interact key — nor for a moment
+	# after it closes, so the prompt doesn't pop straight back.
+	var talking := (DialogueBox.instance != null and DialogueBox.instance.is_active()) \
+		or Time.get_ticks_msec() < DialogueBox.last_end_msec + int(DialogueBox.PROMPT_DELAY * 1000.0)
 	var can_use := _in_range and not talking and _can_interact()
 	if can_use and not _usable.has(self):
 		_usable.append(self)
