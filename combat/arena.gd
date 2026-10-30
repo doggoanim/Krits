@@ -68,8 +68,9 @@ const STAFF_SLOW_TIME := {1: 6.0, 2: 10.0, 3: 30.0}   ## Ice slow duration by qu
 const STAFF_BURN_TIME := {1: 3.0, 2: 4.0, 3: 9.0}   ## Fire burn duration by queued runes
 ## Earth: rock armor on the player instead of a status on enemies — a separate
 ## shield (also soaks piercing hits) sized by how many earth runes were queued.
-## Casting earth again while it's up breaks it instead.
+## Casting earth again while it's up spikes rock pillars under the enemies instead.
 const ROCK_ARMOR_SHIELD := {1: 5.0, 2: 10.0, 3: 30.0}
+const PILLAR_DAMAGE_MULT := {1: 2.0, 2: 4.0, 3: 8.0}   ## Earth cast while armored: x staff damage by runes
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUTS := [6.0, 4.0, 3.0]  ## seconds of not queueing a new rune before one fizzles, by how many are queued (1, 2, 3) — more runes, less patience
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
@@ -665,12 +666,31 @@ func _cast_rune_buffer(orb: Orb) -> void:
 	if per_element.has(Orb.Kind.EARTH) and not _over:
 		_cast_rock_armor(int(per_element[Orb.Kind.EARTH]))
 
-## Earth cast: puts the rock armor up, or breaks it if it's already up.
+## Earth cast: puts the rock armor up. Cast again while it's already up, it
+## instead spikes a pillar of rock up under every enemy (see _earth_pillars()).
 func _cast_rock_armor(runes: int) -> void:
 	if Game.stats.rock_armor_active():
-		Game.stats.break_rock_armor()
+		_earth_pillars(runes)
 	else:
 		Game.stats.grant_rock_armor(ROCK_ARMOR_SHIELD[clampi(runes, 1, 3)])
+
+## Pillar of rock under every enemy, hitting for the staff damage (with the
+## armor's own 1.5x, since it's up) times PILLAR_DAMAGE_MULT[runes].
+func _earth_pillars(runes: int) -> void:
+	var r := clampi(runes, 1, 3)
+	var dmg := Game.stats.damage() * PILLAR_DAMAGE_MULT[r]
+	for e in enemies.duplicate():
+		if not is_instance_valid(e):
+			continue
+		var ground := Vector3(e.global_position.x, ground_height(e.global_position), e.global_position.z)
+		EarthPillar.spawn(self, ground, 2.2 + 0.5 * r, 1.0 + 0.3 * r)
+		VFX.shatter(self, ground + Vector3.UP * 0.3, Orb.KIND_COLORS[Orb.Kind.EARTH][0], 1.0)
+		HitBurst.spawn(self, e.global_position + Vector3.UP * (0.8 * e.data.size), dmg, float(r), false)
+		e.punch()
+		e.take_damage(dmg)
+	if player.camera_rig:
+		player.camera_rig.shake(0.3 + 0.1 * r)
+	HitStop.freeze(0.06 + 0.03 * r)
 
 ## Applies `element`'s status to every enemy, lasting `runes` times its base duration.
 func _apply_element_status(element: Orb.Kind, runes: int) -> void:
