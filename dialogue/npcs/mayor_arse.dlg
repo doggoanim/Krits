@@ -6,7 +6,7 @@
 @when water_quest_accepted -> reminder
 
 == offer ==
-Oh dear you actually came!
+[wave]Oh dear[/wave]... [pause=0.8] you actually came!
 > I'll bring the spirits to the desert. -> accepted [set water_quest_accepted]
 > Why the well? -> info
 > Maybe later. -> later

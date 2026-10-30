@@ -54,4 +54,3 @@ func visible_choices() -> Array[DialogueChoice]:
 		if c != null and c.is_visible():
 			out.append(c)
 	return out
-
