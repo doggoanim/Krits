@@ -8,7 +8,8 @@ extends Node
 ## Punctuation also gets a small automatic beat so sentences breathe.
 ##
 ## Usage: add as a child, call play(label, markup); listen for `finished`.
-## Call finish() to reveal everything at once (the player pressed interact).
+## Call skip() when the player presses interact (stops at the next [pause]),
+## finish() to reveal everything at once.
 
 signal finished
 ## Emitted for every newly revealed visible character (hook sound blips here).
@@ -62,6 +63,24 @@ func finish() -> void:
 	set_process(false)
 	_label.visible_characters = -1
 	finished.emit()
+
+## The player's skip: fast-forwards to the next [pause] — everything before it
+## appears at once and the pause then plays out normally — or straight to the
+## end when none is left. A pause already in progress is cut short.
+func skip() -> void:
+	if not _typing:
+		return
+	_wait = 0.0
+	_budget = 0.0
+	var current := _label.visible_characters
+	var stop := -1
+	for index: int in _pauses.keys():
+		if index > current and (stop == -1 or index < stop):
+			stop = index
+	if stop == -1:
+		finish()
+	else:
+		_label.visible_characters = stop
 
 func _process(delta: float) -> void:
 	if _wait > 0.0:

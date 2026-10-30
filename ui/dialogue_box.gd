@@ -130,7 +130,7 @@ func _press_interact() -> void:
 	if Time.get_ticks_msec() < _locked_until_msec:
 		return
 	if _typewriter.is_typing():
-		_typewriter.finish()
+		_typewriter.skip()   # stops at the next [pause]; the press after that moves on
 	elif _line_done:
 		var focused := get_viewport().gui_get_focus_owner()
 		if _choices.get_child_count() > 0:
