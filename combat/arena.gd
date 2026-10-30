@@ -678,7 +678,7 @@ func _cast_rock_armor(runes: int) -> void:
 ## armor's own 1.5x, since it's up) times PILLAR_DAMAGE_MULT[runes].
 func _earth_pillars(runes: int) -> void:
 	var r := clampi(runes, 1, 3)
-	var dmg := Game.stats.damage() * PILLAR_DAMAGE_MULT[r]
+	var dmg: float = Game.stats.damage() * float(PILLAR_DAMAGE_MULT[r])
 	for e in enemies.duplicate():
 		if not is_instance_valid(e):
 			continue
