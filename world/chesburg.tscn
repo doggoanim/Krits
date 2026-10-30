@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/offer.tres" id="1_mira_dialogue"]
-[ext_resource type="Script" path="res://dialogue/dialogue_variant.gd" id="1_variant_script"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="1_variant_done"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_accepted.tres" id="1_variant_accepted"]
-[ext_resource type="Script" path="res://world/well_entrance.gd" id="1_well_entrance"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="1_npc"]
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_accepted.tres" id="1_variant_accepted"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="1_variant_done"]
+[ext_resource type="Script" uid="uid://hy3h5ijbb6lb" path="res://dialogue/dialogue_variant.gd" id="1_variant_script"]
+[ext_resource type="Script" uid="uid://cw6em46qlfo02" path="res://world/well_entrance.gd" id="1_well_entrance"]
 [ext_resource type="PackedScene" uid="uid://bqxxfugls4puo" path="res://assets/world/terrain/grass_terrain.glb" id="2_256to"]
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
 [ext_resource type="PackedScene" uid="uid://b17cmgjxs20u7" path="res://assets/world/terrain/nocol_darkened_grass_terrain.glb" id="4_256to"]
@@ -77,6 +77,10 @@ size = Vector3(4, 18.6, 0.1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_qie8l"]
 size = Vector3(4, 18.6, 0.1)
 
+[sub_resource type="CylinderShape3D" id="Shape_WellHollow"]
+height = 1.0
+radius = 0.55
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
 shader = ExtResource("18_water2_shader")
@@ -98,10 +102,6 @@ shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
 top_radius = 10.0
 bottom_radius = 10.0
 height = 0.693
-
-[sub_resource type="CylinderShape3D" id="Shape_WellHollow"]
-height = 1.0
-radius = 0.55
 
 [sub_resource type="CapsuleShape3D" id="Shape_MiraBody"]
 radius = 0.4
@@ -337,16 +337,15 @@ transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032
 [node name="well" parent="Props" unique_id=1061802426 instance=ExtResource("20_38blh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.034999855, -5.3904057)
 
-[node name="WellEntrance" type="Area3D" parent="Props"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 1.2, -5.3904057)
+[node name="WellEntrance" type="Area3D" parent="Props" unique_id=432407847]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.08489084, -5.3904057)
 script = ExtResource("1_well_entrance")
 target_level = "res://world/well_depths.tscn"
-target_spawn_id = &"well_drop"
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/WellEntrance"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/WellEntrance" unique_id=1508971445]
 shape = SubResource("Shape_WellHollow")
 
-[node name="WellExitSpawn" type="Node3D" parent="Props"]
+[node name="WellExitSpawn" type="Node3D" parent="Props" unique_id=709939757]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.05, -2.4)
 script = ExtResource("47_door_spawn")
 spawn_id = &"well_exit"
