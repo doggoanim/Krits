@@ -70,7 +70,7 @@ const STAFF_BURN_TIME := {1: 3.0, 2: 4.0, 3: 9.0}   ## Fire burn duration by que
 ## shield (also soaks piercing hits) sized by how many earth runes were queued.
 ## Casting earth again while it's up spikes rock pillars under the enemies instead.
 const ROCK_ARMOR_SHIELD := {1: 5.0, 2: 10.0, 3: 30.0}
-const PILLAR_DAMAGE_MULT := {1: 2.0, 2: 4.0, 3: 8.0}   ## Earth cast while armored: x staff damage by runes
+const PILLAR_DAMAGE_MULT := {1: 2.0, 2: 2.5, 3: 4.0}   ## Earth cast while armored: x staff damage by runes
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUTS := [6.0, 4.0, 3.0]  ## seconds of not queueing a new rune before one fizzles, by how many are queued (1, 2, 3) — more runes, less patience
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
