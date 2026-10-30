@@ -20,13 +20,21 @@ Low-poly furniture models used for props in the game.
 | Name | Author | License |
 |------|--------|---------|
 | [ProtonScatter](https://github.com/HungryProton/scatter) (`addons/proton_scatter`) | HungryProton | MIT |
-| Mesh Resize Gizmo (`addons/mesh_resize_gizmo`) | *add author/license* | *add license* |
+| Mesh Resize Gizmo (`addons/mesh_resize_gizmo`) | Krits (written for this project) | Same as the game |
 
 ## Engine
 
 Made with [Godot Engine](https://godotengine.org) — MIT License,
 © Juan Linietsky, Ariel Manzur and contributors.
 
+## Fonts
+
+| Font | Author | License |
+|------|--------|---------|
+| Zyzol (`assets/fonts/zyzol`) | Szymon Furjan ([furjandesign.com](https://www.furjandesign.com)) | SIL Open Font License 1.1 (`OFL.txt` alongside the font) |
+| Super Whales (`assets/fonts/super_whales`) | *add author and license* | *add license* |
+
 ## Audio
 
-SFX from Soundly, Pixabay
+- Sound effects: from Soundly and Pixabay.
+- Music (`sounds/Music`: `title_track`, `chesburg`, `combat_theme`): *add composer and license (the FL Studio project files sit beside the exports)*.
