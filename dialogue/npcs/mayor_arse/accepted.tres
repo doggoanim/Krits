@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DialogueNode" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="s"]
+
+[resource]
+script = ExtResource("s")
+speaker = "Mayor Arse"
+text = "Splendid! The well is in the middle of the square. Jump into the hollow and keep going down. The way is longer and nastier than you'd think. The spirits sleep at the very bottom. Bring them to the desert town's mayor and tell her Arse sent you."

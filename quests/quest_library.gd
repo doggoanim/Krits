@@ -12,16 +12,23 @@ extends RefCounted
 ##   - REACH objective: place a QuestTrigger with that `place_id`.
 ##   - COLLECT objective: just an item id + amount.
 
-## The main quest: a long-haul goal. Everything else the player does on the way
-## is side content; this one simply stays on the tracker until they arrive.
-static func reach_the_desert() -> QuestData:
-	var q := _make(&"reach_the_desert", true)
-	q.objectives = [QuestObjective.make(QuestObjective.Kind.REACH, &"desert")]
+## The main quest, part one: Mayor Arse sends you down Chesburg's well for water
+## spirits, which you carry across the world to the desert town's mayor. The
+## long road there is side content; this stays on the tracker until you arrive.
+static func water_for_the_desert() -> QuestData:
+	var q := _make(&"water_for_the_desert", true)
+	q.objectives = [
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"water_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.COLLECT, &"water_spirits", 1, true),
+		QuestObjective.make(QuestObjective.Kind.REACH, &"desert_town"),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"delivered_water_spirits"),
+	]
+	q.reward_gold = 200
 	_texts(q)
 	return q
 
 static func all_quests() -> Array[QuestData]:
-	return [reach_the_desert()]
+	return [water_for_the_desert()]
 
 static func by_id(id: StringName) -> QuestData:
 	for q in all_quests():

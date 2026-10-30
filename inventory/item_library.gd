@@ -33,8 +33,15 @@ static func key() -> ItemData:
 	i.max_stack = 1
 	return i
 
+## The main quest's cargo: spirits gathered from the bottom of Chesburg's well.
+static func water_spirits() -> ItemData:
+	var i := _make(&"water_spirits", ItemData.Category.KEY,
+		Color(0.5, 0.85, 1.0))
+	i.max_stack = 1
+	return i
+
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key()]
+	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():

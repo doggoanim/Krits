@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DialogueNode" format=3]
+
+[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="s"]
+[ext_resource type="Script" path="res://dialogue/dialogue_choice.gd" id="cs"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/c_accept.tres" id="c0"]
+[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/c_later.tres" id="c1"]
+
+[resource]
+script = ExtResource("s")
+speaker = "Mayor Arse"
+text = "The old stories say the spirits of water sleep beneath Chesburg. We never dared go after them. The tunnels are full of nasty things. But a young one with a good jump? That might work. Will you do it?"
+choices = Array[ExtResource("cs")]([ExtResource("c0"), ExtResource("c1")])

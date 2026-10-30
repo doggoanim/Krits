@@ -9,6 +9,9 @@ extends Interactable
 ## just supplies what "usable" and "interact" mean for a conversation.
 
 @export var dialogue: DialogueNode
+## Say something different once a story flag is set; the first variant whose
+## flag is set wins, otherwise `dialogue` is used. See DialogueVariant.
+@export var variants: Array[DialogueVariant] = []
 @export var head_height := 1.6          ## where the camera looks while talking
 @export var face_player := true         ## turn toward the player during a conversation
 @export var facing_offset := 0.0        ## radians; PI if the model's front is +Z instead of -Z
@@ -21,12 +24,18 @@ var _turn_tween: Tween
 ## triggered moves make before taking over (e.g. WallClimbState's regrab
 ## cooldown), just gating a talk instead of a move.
 func _can_interact() -> bool:
-	return (dialogue != null and player != null and not player.dead
+	return (_current_dialogue() != null and player != null and not player.dead
 		and player.machine.current_name == &"Ground"
 		and DialogueBox.instance != null and not DialogueBox.instance.is_active())
 
 func _interact() -> void:
-	DialogueBox.instance.start(dialogue, self)
+	DialogueBox.instance.start(_current_dialogue(), self)
+
+func _current_dialogue() -> DialogueNode:
+	for v in variants:
+		if v != null and v.dialogue != null and v.required_flag != &"" and Game.flag(v.required_flag):
+			return v.dialogue
+	return dialogue
 
 # --- DialogueStage speaker interface ------------------------------------
 
