@@ -15,6 +15,7 @@ static var instance: InteractPrompt
 
 const ACTION := &"interact"
 const POP_TIME := 0.16
+const PROMPT_SCALE := 0.5   ## whole prompt drawn at this fraction of its authored size
 const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several actions
 
 ## The three plate looks to pick between — StyleBoxTextures of button_1/2/3,
@@ -26,7 +27,7 @@ const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several 
 @onready var _key: Label = %Key
 @onready var _verb: Label = %Verb
 
-var _scroll_hint: Label   ## "Scroll 1/2" badge, shown while several prompts overlap
+var _scroll_hint: Label   ## "^ 1/2" badge, shown while several prompts overlap
 var _owner: Object
 var _world_pos := Vector3.ZERO
 var _pop: Tween
@@ -52,7 +53,7 @@ func _exit_tree() -> void:
 ## `actions` overrides which input action's key is shown (default: interact);
 ## give several and they cycle in order — a wordless "press A, then B" hint
 ## (see TutorialHint).
-## `choices` > 1 means several prompts overlap: a "scroll" badge shows which
+## `choices` > 1 means several prompts overlap: a "^ n/m" badge shows which
 ## one (`choice_index`) is selected out of how many.
 static func request(for_owner: Object, world_pos: Vector3, verb: String,
 		actions: Array[StringName] = [], choices := 1, choice_index := 0) -> void:
@@ -87,16 +88,16 @@ func _show(verb: String) -> void:
 	_verb.visible = verb != ""
 	_box.reset_size()
 	_box.pivot_offset = _box.get_combined_minimum_size() * 0.5
-	_box.scale = Vector2(0.6, 0.6)
+	_box.scale = Vector2.ONE * PROMPT_SCALE * 0.6
 	if _pop and _pop.is_valid():
 		_pop.kill()
 	_pop = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_pop.tween_property(_box, "scale", Vector2.ONE, POP_TIME)
+	_pop.tween_property(_box, "scale", Vector2.ONE * PROMPT_SCALE, POP_TIME)
 
 func _update_scroll_hint(choices: int, choice_index: int) -> void:
 	var show_hint := choices > 1
 	if show_hint:
-		var text := "Scroll %d/%d" % [choice_index + 1, choices]
+		var text := "^ %d/%d" % [choice_index + 1, choices]
 		if _scroll_hint.text != text:
 			_scroll_hint.text = text
 	if _scroll_hint.visible != show_hint:
