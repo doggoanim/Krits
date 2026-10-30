@@ -48,7 +48,8 @@ const ORB_SPAWN_TRIES := 24     ## candidate spots sampled per orb (see _free_or
 const ORB_RESPAWN_DELAY := 0.9
 const COMBO_BONUS := 0.25      ## +25% damage per combo step
 const POUND_PICKUP_COUNT := 2      ## Bow/Staff: ground-pounding into an arrow/element orb collects this many instead of 1
-const SWORD_POUND_ASSIST := 0.6    ## Sword: fraction of the arc to the nearest orb that a pound bounce pushes you along
+const SWORD_POUND_ASSIST := 0.9    ## Sword: fraction of the arc to the nearest orb that a pound bounce pushes you along
+const SWORD_POUND_MAX_SPEED := 16.0   ## horizontal speed cap for that push (normal bounces cap at 8) — lets it cover the distance fast
 const SWORD_POUND_LIFT := 1.5      ## Sword: a pound bounce launches this much higher than a normal orb bounce
 const POUND_BONUS := 1.25         ## Sword: landing the combo with a ground pound multiplies the damage
 const LAND_HITSTOP_BASE := 0.07   ## seconds of freeze on a landing hit...
@@ -456,7 +457,7 @@ func _handle_sword_hit(orb: Orb) -> void:
 	var pounding := _is_pounding()
 	var next_orb := _nearest_active_orb(orb, Orb.Kind.PLAIN) if pounding else null
 	player.bounce_off_orb(combo, next_orb.global_position if next_orb else null, SWORD_POUND_ASSIST,
-			SWORD_POUND_LIFT if pounding else 1.0)
+			SWORD_POUND_LIFT if pounding else 1.0, SWORD_POUND_MAX_SPEED)
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
 	_respawn_orb_later(orb)
