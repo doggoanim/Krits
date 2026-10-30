@@ -16,8 +16,45 @@ extends Interactable
 @export var face_player := true         ## turn toward the player during a conversation
 @export var facing_offset := 0.0        ## radians; PI if the model's front is +Z instead of -Z
 
+## Optional rigged model (e.g. assets/npcs/Mayor_Arse.glb). When set it replaces
+## the placeholder "Mesh" child, is scaled to `model_height` and loops
+## `idle_animation` (empty = the model's first real clip).
+@export var model: PackedScene
+@export var model_height := 1.9
+@export var idle_animation: StringName = &""
+
 var _rest_yaw := 0.0
 var _turn_tween: Tween
+
+func _ready() -> void:
+	super()
+	if model != null:
+		_build_model()
+
+## Swaps the placeholder mesh for `model` and starts its idle loop.
+func _build_model() -> void:
+	var placeholder := get_node_or_null("Mesh")
+	if placeholder != null:
+		placeholder.queue_free()
+	var node := model.instantiate() as Node3D
+	if node == null:
+		return
+	add_child(node)
+	ModelUtil.fit_height(node, model_height)
+	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark"))
+	var anim := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if anim == null:
+		return
+	var clip := idle_animation
+	if clip == &"" or not anim.has_animation(clip):
+		clip = &""
+		for clip_name in anim.get_animation_list():
+			if clip_name != &"RESET" and clip_name != &"Nothing":
+				clip = clip_name
+				break
+	if clip != &"":
+		anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+		anim.play(clip)
 
 ## Grounded (not mid-air/rolling/diving/etc.), alive, and nothing else
 ## already has a conversation open — same spirit as the checks other

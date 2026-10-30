@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="2"]
 [ext_resource type="Script" uid="uid://bf0u4pce3srrb" path="res://world/cutaway_wall.gd" id="3"]
 [ext_resource type="Script" path="res://world/npc.gd" id="npc"]
+[ext_resource type="PackedScene" path="res://assets/npcs/Mayor_Arse.glb" id="mayor_model"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/offer.tres" id="mayor_offer"]
 [ext_resource type="Script" path="res://dialogue/dialogue_variant.gd" id="variant_script"]
 [ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="variant_done"]
@@ -45,13 +46,6 @@ points = PackedVector3Array(-0.1, -2.5, -4, 0.1, -2.5, -4, -0.1, -2.5, 4, -0.1, 
 points = PackedVector3Array(-0.1, -2.5, -4, 0.1, -2.5, -4, -0.1, -2.5, 4, -0.1, 2.5, -4, 0.1, 2.5, -4, 0.1, -2.5, 4, -0.1, 2.5, 4, 0.1, 2.5, 4)
 
 [sub_resource type="CapsuleShape3D" id="Shape_MayorBody"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_MayorRobe"]
-albedo_color = Color(0.3764706, 0.28627452, 0.5529412, 1)
-
-[sub_resource type="CapsuleMesh" id="Mesh_MayorBody"]
 radius = 0.4
 height = 1.8
 
@@ -179,13 +173,10 @@ shape = SubResource("BoxShape3D_wgm46")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -1)
 script = ExtResource("npc")
 dialogue = ExtResource("mayor_offer")
+model = ExtResource("mayor_model")
+facing_offset = 3.14159
 variants = Array[ExtResource("variant_script")]([ExtResource("variant_done"), ExtResource("variant_accepted")])
 
 [node name="Collision" type="CollisionShape3D" parent="MayorArse"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_MayorBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="MayorArse"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("Mat_MayorRobe")
-mesh = SubResource("Mesh_MayorBody")
