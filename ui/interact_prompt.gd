@@ -27,7 +27,7 @@ const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several 
 @onready var _key: Label = %Key
 @onready var _verb: Label = %Verb
 
-var _scroll_hint: Label   ## "^ 1/2" badge, shown while several prompts overlap
+var _arrows: ScrollArrows   ## up/down chevrons, shown while several prompts overlap
 var _owner: Object
 var _world_pos := Vector3.ZERO
 var _pop: Tween
@@ -37,10 +37,9 @@ var _cycle_i := 0
 
 func _ready() -> void:
 	instance = self
-	_scroll_hint = _verb.duplicate() as Label
-	_scroll_hint.add_theme_font_size_override(&"font_size", 34)
-	_scroll_hint.visible = false
-	_box.add_child(_scroll_hint)
+	_arrows = ScrollArrows.new()
+	_arrows.visible = false
+	add_child(_arrows)
 	process_mode = Node.PROCESS_MODE_ALWAYS   # so it can hide itself while the game is paused
 	visible = false
 
@@ -53,12 +52,12 @@ func _exit_tree() -> void:
 ## `actions` overrides which input action's key is shown (default: interact);
 ## give several and they cycle in order — a wordless "press A, then B" hint
 ## (see TutorialHint).
-## `choices` > 1 means several prompts overlap: a "^ n/m" badge shows which
-## one (`choice_index`) is selected out of how many.
+## `choices` > 1 means several prompts overlap: up/down chevrons show that
+## the player can scroll between them.
 static func request(for_owner: Object, world_pos: Vector3, verb: String,
-		actions: Array[StringName] = [], choices := 1, choice_index := 0) -> void:
+		actions: Array[StringName] = [], choices := 1) -> void:
 	if instance != null:
-		instance._request(for_owner, world_pos, verb, actions, choices, choice_index)
+		instance._request(for_owner, world_pos, verb, actions, choices)
 
 ## Called by an Interactable when it stops being usable.
 static func release(for_owner: Object) -> void:
@@ -66,9 +65,9 @@ static func release(for_owner: Object) -> void:
 		instance._owner = null
 
 func _request(for_owner: Object, world_pos: Vector3, verb: String,
-		actions: Array[StringName], choices: int, choice_index: int) -> void:
+		actions: Array[StringName], choices: int) -> void:
 	_world_pos = world_pos
-	_update_scroll_hint(choices, choice_index)
+	_update_scroll_hint(choices)
 	if _owner == for_owner:
 		return
 	_owner = for_owner
@@ -94,15 +93,15 @@ func _show(verb: String) -> void:
 	_pop = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_pop.tween_property(_box, "scale", Vector2.ONE * PROMPT_SCALE, POP_TIME)
 
-func _update_scroll_hint(choices: int, choice_index: int) -> void:
+func _update_scroll_hint(choices: int) -> void:
 	var show_hint := choices > 1
-	if show_hint:
-		var text := "^ %d/%d" % [choice_index + 1, choices]
-		if _scroll_hint.text != text:
-			_scroll_hint.text = text
-	if _scroll_hint.visible != show_hint:
-		_scroll_hint.visible = show_hint
-		_box.reset_size()
+	if _arrows.visible != show_hint:
+		_arrows.visible = show_hint
+
+## The player scrolled between overlapping prompts (step -1 up, +1 down).
+static func pulse_scroll(step: int) -> void:
+	if instance != null:
+		instance._arrows.pulse(step)
 
 func _key_for(action: StringName) -> String:
 	return InputSetup.key_label(Settings.get_binding(action))
@@ -124,3 +123,5 @@ func _process(delta: float) -> void:
 			_owner = null
 		return
 	_box.position = cam.unproject_position(_world_pos) - _box.size * 0.5
+	_arrows.position = _box.position + _box.size * 0.5   # scaling pivots on the centre
+	_arrows.half_height = _box.size.y * 0.5 * PROMPT_SCALE

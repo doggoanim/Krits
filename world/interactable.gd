@@ -84,7 +84,7 @@ func _process(_delta: float) -> void:
 		var sorted := _sorted_usable()
 		var no_actions: Array[StringName] = []
 		InteractPrompt.request(self, global_position + Vector3.UP * prompt_height, _verb,
-				no_actions, sorted.size(), sorted.find(self))
+				no_actions, sorted.size())
 	elif _prompting:
 		InteractPrompt.release(self)
 	_prompting = usable
@@ -123,6 +123,7 @@ func _input(event: InputEvent) -> void:
 	var step := 1 if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1
 	var i := list.find(_chosen())
 	_choice = list[posmod(i + step, list.size())]
+	InteractPrompt.pulse_scroll(step)
 	get_viewport().set_input_as_handled()
 
 ## Overridden by subclasses to add their own gating (NPC: grounded, alive,
