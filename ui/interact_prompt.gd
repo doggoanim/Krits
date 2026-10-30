@@ -63,7 +63,10 @@ func _request(for_owner: Object, world_pos: Vector3, verb: String,
 	if _owner == for_owner:
 		return
 	_owner = for_owner
-	_actions = actions if not actions.is_empty() else [ACTION]
+	if actions.is_empty():
+		_actions = [ACTION]
+	else:
+		_actions = actions
 	_cycle_i = 0
 	_cycle_t = 0.0
 	_show(verb)
