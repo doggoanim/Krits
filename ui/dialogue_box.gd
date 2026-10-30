@@ -42,8 +42,12 @@ var _current: DialogueNode
 var _stage: DialogueStage
 var _line_done := false
 var _opened_frame := -1
+var _locked_until_msec := 0   ## interact presses are ignored until then (see SKIP_DELAY / ADVANCE_DELAY)
 var _typed := 0   ## visible characters revealed so far, for thinning out the typing sound
 var _tween: Tween
+
+const SKIP_DELAY := 0.25      ## seconds after a line appears before interact can skip its typing
+const ADVANCE_DELAY := 0.2    ## seconds after a line finishes before interact can move on
 
 static func create() -> DialogueBox:
 	return (load(SCENE_PATH) as PackedScene).instantiate() as DialogueBox
@@ -123,6 +127,8 @@ func _is_enter(event: InputEvent) -> bool:
 		and (key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER)
 
 func _press_interact() -> void:
+	if Time.get_ticks_msec() < _locked_until_msec:
+		return
 	if _typewriter.is_typing():
 		_typewriter.finish()
 	elif _line_done:
@@ -161,6 +167,7 @@ func _show_node(node: DialogueNode) -> void:
 	if node.gives_item != &"":
 		Game.inventory.add(node.gives_item, node.gives_count)
 	_line_done = false
+	_locked_until_msec = Time.get_ticks_msec() + int(SKIP_DELAY * 1000.0)
 	_clear_choices()
 	_hint.visible = false
 	_speaker_label.text = node.speaker
@@ -179,6 +186,7 @@ func _on_line_finished() -> void:
 	if not _open or _current == null:
 		return
 	_line_done = true
+	_locked_until_msec = Time.get_ticks_msec() + int(ADVANCE_DELAY * 1000.0)
 	var options := _current.visible_choices()
 	if not options.is_empty():
 		_show_choices(options)
