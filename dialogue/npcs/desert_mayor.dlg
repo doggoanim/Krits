@@ -1,0 +1,10 @@
+# The desert town's mayor — receives the water spirits. Format: dialogue/dialogue_parser.gd
+@speaker Desert Mayor
+
+== greet ==
+A traveler, here? We have little to offer... Wait. Is that the hum of water spirits? Mayor Arse sent you, didn't he?
+> Hand over the water spirits. -> thanks [item water_spirits] [set delivered_water_spirits]
+> Not yet.
+
+== thanks ==
+The spirits sing in your hands... Yes. With these I can wake the springs beneath the sand. Thank you, traveler. Our town will not forget this.

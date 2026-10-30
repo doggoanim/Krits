@@ -8,6 +8,9 @@ extends Interactable
 ## prompt/trigger plumbing itself lives in Interactable (see there) — this
 ## just supplies what "usable" and "interact" mean for a conversation.
 
+## Easiest way to give an NPC lines: a .dlg text file (format: see
+## dialogue/dialogue_parser.gd). When set it replaces `dialogue`/`variants`.
+@export_file("*.dlg") var dialogue_file: String
 @export var dialogue: DialogueNode
 ## Say something different once a story flag is set; the first variant whose
 ## flag is set wins, otherwise `dialogue` is used. See DialogueVariant.
@@ -26,8 +29,12 @@ extends Interactable
 var _rest_yaw := 0.0
 var _turn_tween: Tween
 
+var _script: DialogueScript   ## parsed from dialogue_file, if any
+
 func _ready() -> void:
 	super()
+	if not dialogue_file.is_empty():
+		_script = DialogueParser.load_file(dialogue_file)
 	if model != null:
 		_build_model()
 
@@ -69,6 +76,8 @@ func _interact() -> void:
 	DialogueBox.instance.start(_current_dialogue(), self)
 
 func _current_dialogue() -> DialogueNode:
+	if _script != null:
+		return _script.current()
 	for v in variants:
 		if v != null and v.dialogue != null and v.required_flag != &"" and Game.flag(v.required_flag):
 			return v.dialogue

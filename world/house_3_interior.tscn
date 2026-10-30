@@ -9,11 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://d2atpvqxq1a3" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Closet_01.glb" id="11_2gwfi"]
 [ext_resource type="PackedScene" uid="uid://bxfw0ahs7euv8" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Plants_05.glb" id="14_1fccd"]
 [ext_resource type="PackedScene" uid="uid://78s6i6j5jrwu" path="res://assets/npcs/Mayor_Arse.glb" id="mayor_model"]
-[ext_resource type="Resource" uid="uid://2btwjslro653" path="res://dialogue/npcs/mayor_arse/offer.tres" id="mayor_offer"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="npc"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_accepted.tres" id="variant_accepted"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/variant_done.tres" id="variant_done"]
-[ext_resource type="Script" uid="uid://hy3h5ijbb6lb" path="res://dialogue/dialogue_variant.gd" id="variant_script"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
 albedo_color = Color(0.20092598, 0.22079825, 0.22055647, 1)
@@ -186,8 +182,7 @@ spawn_id = &"enter"
 [node name="MayorArse" type="StaticBody3D" parent="." unique_id=485061302]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052152872, 0, 0.12543857)
 script = ExtResource("npc")
-dialogue = ExtResource("mayor_offer")
-variants = Array[ExtResource("variant_script")]([ExtResource("variant_done"), ExtResource("variant_accepted")])
+dialogue_file = "res://dialogue/npcs/mayor_arse.dlg"
 facing_offset = 3.14159
 model = ExtResource("mayor_model")
 

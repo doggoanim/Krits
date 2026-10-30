@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="DialogueVariant" format=3]
-
-[ext_resource type="Script" path="res://dialogue/dialogue_variant.gd" id="s"]
-[ext_resource type="Resource" path="res://dialogue/npcs/mayor_arse/thanks.tres" id="d"]
-
-[resource]
-script = ExtResource("s")
-required_flag = &"quest_done_water_for_the_desert"
-dialogue = ExtResource("d")

@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="DialogueNode" format=3]
-
-[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="s"]
-
-[resource]
-script = ExtResource("s")
-speaker = "Mayor Arse"
-text = "Fine, fine. Rest those legs. The desert isn't going anywhere, but its people are drying out, so don't take too long."

@@ -10,7 +10,7 @@
   armor/shield) through the story, a quest reward or a shop.
 - **Desert level.** Main quest "Water for the Desert" stops at step 3: no desert
   level yet. Needs the level, a `QuestTrigger` with `place_id = desert_town`, and
-  the desert mayor NPC using `dialogue/npcs/desert_mayor/greet.tres`.
+  the desert mayor NPC using `dialogue/npcs/desert_mayor.dlg` (`dialogue_file`).
 - **Well Depths polish.** `world/well_depths.tscn` is a first-pass layout; shape
   it in the editor. Dying inside respawns in place (level swap can't respawn
   across levels yet).

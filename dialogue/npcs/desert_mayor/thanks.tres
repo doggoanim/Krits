@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="DialogueNode" format=3]
-
-[ext_resource type="Script" path="res://dialogue/dialogue_node.gd" id="s"]
-
-[resource]
-script = ExtResource("s")
-speaker = "Desert Mayor"
-text = "The spirits sing in your hands... Yes. With these I can wake the springs beneath the sand. Thank you, traveler. Our town will not forget this."

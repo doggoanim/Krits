@@ -1,0 +1,29 @@
+# Mayor Arse — gives the water quest (Chesburg, house 3). Format: dialogue/dialogue_parser.gd
+@speaker Mayor Arse
+
+# Most advanced story state first.
+@when quest_done_water_for_the_desert -> thanks
+@when water_quest_accepted -> reminder
+
+== offer ==
+Oh dear you actually came!
+> I'll bring the spirits to the desert. -> accepted [set water_quest_accepted]
+> Why the well? -> info
+> Maybe later. -> later
+
+== info ==
+The old stories say the spirits of water sleep beneath Chesburg. We never dared go after them. The tunnels are full of nasty things. But a young one with a good jump? That might work. Will you do it?
+> I'll bring the spirits to the desert. -> accepted [set water_quest_accepted]
+> Maybe later. -> later
+
+== accepted ==
+Splendid! The well is in the middle of the square. Jump into the hollow and keep going down. The way is longer and nastier than you'd think. The spirits sleep at the very bottom. Bring them to the desert town's mayor and tell her Arse sent you.
+
+== later ==
+Fine, fine. Rest those legs. The desert isn't going anywhere, but its people are drying out, so don't take too long.
+
+== reminder ==
+Still here? The water spirits sleep at the bottom of the well. Jump into the hollow and keep going down. After that, the road east to the desert town.
+
+== thanks ==
+The desert has water again, thanks to you. Chesburg is proud. Take a rest. You've earned it.
