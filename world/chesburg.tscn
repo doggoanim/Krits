@@ -329,7 +329,7 @@ transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032
 [node name="well" parent="Props" unique_id=1061802426 instance=ExtResource("20_38blh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.034999855, -5.3904057)
 
-[node name="WellEntrance" type="Area3D" parent="Props" unique_id=192168218]
+[node name="WellEntrance" type="StaticBody3D" parent="Props" unique_id=192168218]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.043149233, -5.3904057)
 script = ExtResource("1_well_entrance")
 target_level = "res://world/well_depths.tscn"
