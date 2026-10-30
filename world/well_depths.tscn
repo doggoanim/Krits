@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://world/cutaway_wall.gd" id="cut"]
 [ext_resource type="Script" path="res://world/world_enemy.gd" id="enemy"]
 [ext_resource type="Script" path="res://world/key_item_pickup.gd" id="pickup"]
+[ext_resource type="Script" path="res://world/tutorial_hint.gd" id="hint"]
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
 albedo_color = Color(0.2, 0.25, 0.33, 1)
@@ -152,6 +153,48 @@ radius = 0.5
 [sub_resource type="SphereMesh" id="SphereMesh_40"]
 radius = 0.45
 height = 0.9
+
+[sub_resource type="BoxMesh" id="TH_FrontSlab_M"]
+size = Vector3(16, 0.4, 3.5)
+
+[sub_resource type="BoxShape3D" id="TH_FrontSlab_S"]
+size = Vector3(16, 0.4, 3.5)
+
+[sub_resource type="BoxMesh" id="TH_TunnelCeiling_M"]
+size = Vector3(6.2, 2, 3)
+
+[sub_resource type="BoxShape3D" id="TH_TunnelCeiling_S"]
+size = Vector3(6.2, 2, 3)
+
+[sub_resource type="BoxMesh" id="TH_PoundLedge_M"]
+size = Vector3(6, 4.5, 6)
+
+[sub_resource type="BoxShape3D" id="TH_PoundLedge_S"]
+size = Vector3(6, 4.5, 6)
+
+[sub_resource type="BoxMesh" id="TH_ChamberBFar_M"]
+size = Vector3(16, 0.4, 6.5)
+
+[sub_resource type="BoxShape3D" id="TH_ChamberBFar_S"]
+size = Vector3(16, 0.4, 6.5)
+
+[sub_resource type="BoxMesh" id="TH_GapPitFloor_M"]
+size = Vector3(16, 0.4, 8)
+
+[sub_resource type="BoxShape3D" id="TH_GapPitFloor_S"]
+size = Vector3(16, 0.4, 8)
+
+[sub_resource type="BoxMesh" id="TH_GapClimbWall_M"]
+size = Vector3(16, 4.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="TH_GapClimbWall_S"]
+size = Vector3(16, 4.2, 0.4)
+
+[sub_resource type="BoxMesh" id="TH_GapFarWall_M"]
+size = Vector3(16, 4.2, 0.4)
+
+[sub_resource type="BoxShape3D" id="TH_GapFarWall_S"]
+size = Vector3(16, 4.2, 0.4)
 
 [node name="WellDepths" type="Node3D" groups=["interior_level", "combat_allowed"]]
 
@@ -303,14 +346,14 @@ light_energy = 2.2
 omni_range = 18
 
 [node name="Slime1" type="CharacterBody3D" parent="Enemies"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6.6, -97)
 script = ExtResource("enemy")
 enemy_id = &"well_slime_1"
 type = 0
 wander_radius = 2.5
 
 [node name="Slime2" type="CharacterBody3D" parent="Enemies"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.6, -27)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 6.6, -102)
 script = ExtResource("enemy")
 enemy_id = &"well_slime_2"
 type = 0
@@ -435,15 +478,15 @@ light_energy = 2.4
 omni_range = 20
 
 [node name="ChamberB" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -61)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -53.75)
 collision_layer = 129
 
 [node name="Mesh" type="MeshInstance3D" parent="ChamberB"]
-mesh = SubResource("BoxMesh_30")
+mesh = SubResource("TH_FrontSlab_M")
 material_override = SubResource("MatFloor")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ChamberB"]
-shape = SubResource("BoxShape3D_31")
+shape = SubResource("TH_FrontSlab_S")
 
 [node name="ChbWallW" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 6.8, -61)
@@ -757,3 +800,115 @@ shape = SubResource("BoxShape3D_8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 mesh = SubResource("BoxMesh_9")
 material_override = SubResource("MatDoor")
+
+[node name="TunnelCeiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -12)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="TunnelCeiling"]
+mesh = SubResource("TH_TunnelCeiling_M")
+material_override = SubResource("MatPlat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TunnelCeiling"]
+shape = SubResource("TH_TunnelCeiling_S")
+
+[node name="PoundLedge" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, -26)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="PoundLedge"]
+mesh = SubResource("TH_PoundLedge_M")
+material_override = SubResource("MatPlat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PoundLedge"]
+shape = SubResource("TH_PoundLedge_S")
+
+[node name="ChamberBFar" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -66.75)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="ChamberBFar"]
+mesh = SubResource("TH_ChamberBFar_M")
+material_override = SubResource("MatFloor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ChamberBFar"]
+shape = SubResource("TH_ChamberBFar_S")
+
+[node name="GapPitFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.2, -59.5)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="GapPitFloor"]
+mesh = SubResource("TH_GapPitFloor_M")
+material_override = SubResource("MatFloor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GapPitFloor"]
+shape = SubResource("TH_GapPitFloor_S")
+
+[node name="GapClimbWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.1, -55.3)
+collision_layer = 257
+
+[node name="Mesh" type="MeshInstance3D" parent="GapClimbWall"]
+mesh = SubResource("TH_GapClimbWall_M")
+material_override = SubResource("MatPlat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GapClimbWall"]
+shape = SubResource("TH_GapClimbWall_S")
+
+[node name="GapFarWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.1, -63.7)
+collision_layer = 129
+
+[node name="Mesh" type="MeshInstance3D" parent="GapFarWall"]
+mesh = SubResource("TH_GapFarWall_M")
+material_override = SubResource("MatWall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GapFarWall"]
+shape = SubResource("TH_GapFarWall_S")
+
+[node name="LampGapPit" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -59.5)
+light_color = Color(0.55, 0.8, 1, 1)
+light_energy = 2.0
+omni_range = 12
+
+[node name="Hint_crouch" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.8)
+script = ExtResource("hint")
+hint_id = &"crouch"
+actions = Array[StringName]([&"crouch_pound"])
+done_states = Array[StringName]([&"Crouch", &"Roll"])
+size = Vector3(5, 3, 2.6)
+
+[node name="Hint_pound_jump" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -19.5)
+script = ExtResource("hint")
+hint_id = &"pound_jump"
+actions = Array[StringName]([&"jump", &"crouch_pound", &"jump"])
+done_states = Array[StringName]([&"PoundLand"])
+size = Vector3(5, 3, 3)
+
+[node name="Hint_jump" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -32.5)
+script = ExtResource("hint")
+hint_id = &"jump"
+actions = Array[StringName]([&"jump"])
+done_states = Array[StringName]([&"Air"])
+size = Vector3(8, 3, 2.5)
+
+[node name="Hint_long_jump" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -53.75)
+script = ExtResource("hint")
+hint_id = &"long_jump"
+actions = Array[StringName]([&"roll_dive", &"jump"])
+done_states = Array[StringName]([&"LongJump"])
+size = Vector3(10, 3, 3.5)
+
+[node name="Hint_wall_climb" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.0, -58)
+script = ExtResource("hint")
+hint_id = &"wall_climb"
+actions = Array[StringName]([&"jump"])
+done_states = Array[StringName]([&"WallClimb"])
+size = Vector3(10, 3, 3)

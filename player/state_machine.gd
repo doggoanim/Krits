@@ -1,6 +1,10 @@
 class_name StateMachine
 extends Node
 
+## Fired after every state change — lets world scripts (TutorialHint) react to
+## the player performing a move without polling.
+signal state_changed(prev: StringName, next: StringName)
+
 var current: PlayerState
 var current_name: StringName = &""
 
@@ -25,6 +29,7 @@ func transition_to(state: StringName, msg: Dictionary = {}) -> void:
 	current = next
 	current_name = state
 	current.enter(prev, msg)
+	state_changed.emit(prev, state)
 
 func physics_update(delta: float) -> void:
 	if current:

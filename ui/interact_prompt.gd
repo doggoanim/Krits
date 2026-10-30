@@ -15,6 +15,7 @@ static var instance: InteractPrompt
 
 const ACTION := &"interact"
 const POP_TIME := 0.16
+const CYCLE_TIME := 0.9   ## seconds each key shows when a prompt lists several actions
 
 ## The three plate looks to pick between — StyleBoxTextures of button_1/2/3,
 ## nine-sliced (see interact_prompt.tscn) so the plate can grow around the key.
@@ -28,6 +29,9 @@ const POP_TIME := 0.16
 var _owner: Object
 var _world_pos := Vector3.ZERO
 var _pop: Tween
+var _actions: Array[StringName] = [ACTION]   ## input actions shown; several = cycled in order
+var _cycle_t := 0.0
+var _cycle_i := 0
 
 func _ready() -> void:
 	instance = self
@@ -40,26 +44,34 @@ func _exit_tree() -> void:
 
 ## Called every frame by an Interactable the player can currently use.
 ## `verb` is the action word shown beside the key ("" = key only).
-static func request(for_owner: Object, world_pos: Vector3, verb: String) -> void:
+## `actions` overrides which input action's key is shown (default: interact);
+## give several and they cycle in order — a wordless "press A, then B" hint
+## (see TutorialHint).
+static func request(for_owner: Object, world_pos: Vector3, verb: String,
+		actions: Array[StringName] = []) -> void:
 	if instance != null:
-		instance._request(for_owner, world_pos, verb)
+		instance._request(for_owner, world_pos, verb, actions)
 
 ## Called by an Interactable when it stops being usable.
 static func release(for_owner: Object) -> void:
 	if instance != null and instance._owner == for_owner:
 		instance._owner = null
 
-func _request(for_owner: Object, world_pos: Vector3, verb: String) -> void:
+func _request(for_owner: Object, world_pos: Vector3, verb: String,
+		actions: Array[StringName]) -> void:
 	_world_pos = world_pos
 	if _owner == for_owner:
 		return
 	_owner = for_owner
+	_actions = actions if not actions.is_empty() else [ACTION]
+	_cycle_i = 0
+	_cycle_t = 0.0
 	_show(verb)
 
 func _show(verb: String) -> void:
 	if not plate_styles.is_empty():
 		_plate.add_theme_stylebox_override(&"panel", plate_styles.pick_random())
-	_key.text = InputSetup.key_label(Settings.get_binding(ACTION))
+	_key.text = _key_for(_actions[0])
 	_verb.text = verb
 	_verb.visible = verb != ""
 	_box.reset_size()
@@ -70,7 +82,17 @@ func _show(verb: String) -> void:
 	_pop = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_pop.tween_property(_box, "scale", Vector2.ONE, POP_TIME)
 
-func _process(_delta: float) -> void:
+func _key_for(action: StringName) -> String:
+	return InputSetup.key_label(Settings.get_binding(action))
+
+func _process(delta: float) -> void:
+	if _actions.size() > 1 and _owner != null:
+		_cycle_t += delta
+		if _cycle_t >= CYCLE_TIME:
+			_cycle_t = 0.0
+			_cycle_i = (_cycle_i + 1) % _actions.size()
+			_key.text = _key_for(_actions[_cycle_i])
+			_box.reset_size()
 	var cam := get_viewport().get_camera_3d()
 	var active := _owner != null and is_instance_valid(_owner) and not get_tree().paused \
 			and cam != null and not cam.is_position_behind(_world_pos)
