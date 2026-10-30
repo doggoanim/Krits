@@ -58,6 +58,10 @@ func _collect(n: Node, mat: ShaderMaterial) -> void:
 		dup.visible = false
 		mi.get_parent().add_child(dup)
 		_copies.append(dup)
+		# The copy sits beside its source, not under it — so when the source
+		# goes (gear unequipped/swapped), take the copy with it. Otherwise a
+		# model whose root IS the mesh leaves its halftone silhouette behind.
+		mi.tree_exited.connect(dup.queue_free)
 	for c in n.get_children():
 		_collect(c, mat)
 
