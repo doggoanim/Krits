@@ -25,7 +25,8 @@ extends RefCounted
 ##
 ## Several lines in a section play one after another. Choices must come last in
 ## a section, after its final line; `-> end` (or no arrow) ends the conversation.
-## Line text keeps the dialogue box's BBCode ([shake], [pause=0.5], ...).
+## Directive and tag words (@speaker, [set ...]) ignore case; names (flags, items,
+## sections, speakers) do not. Line text keeps the dialogue box's BBCode ([shake], [pause=0.5], ...).
 ## Mistakes are reported as `file:line: message` and skipped, never fatal.
 ## Remember: Godot only exports .dlg files if Export > Resources > "Filters to
 ## export non-resource files" includes `*.dlg`.
@@ -134,7 +135,7 @@ func _run(text: String) -> DialogueScript:
 
 func _directive(t: String, n: int) -> void:
 	var parts := t.substr(1).split(" ", false, 1)
-	var directive := parts[0]
+	var directive := parts[0].to_lower()
 	var rest := parts[1].strip_edges() if parts.size() > 1 else ""
 	match directive:
 		"speaker":
@@ -208,11 +209,11 @@ func _tail(section: Section, target: String, n: int) -> void:
 ## tags like [shake] or [pause=0.5] don't match and stay in the text.
 func _strip_mods(t: String) -> Mods:
 	if _mod_regex == null:
-		_mod_regex = RegEx.create_from_string("\\s*\\[(set|if|item|give)\\s+(\\w+)(?:\\s+(\\d+))?\\]")
+		_mod_regex = RegEx.create_from_string("(?i)\\s*\\[(set|if|item|give)\\s+(\\w+)(?:\\s+(\\d+))?\\]")
 	var mods := Mods.new()
 	for m in _mod_regex.search_all(t):
 		var value := m.get_string(2)
-		match m.get_string(1):
+		match m.get_string(1).to_lower():
 			"set":
 				mods.set_flag = value
 			"if":
