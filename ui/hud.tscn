@@ -111,6 +111,7 @@ script = ExtResource("6")
 texture = ExtResource("3")
 
 [node name="StaminaTrack" type="Control" parent="." unique_id=662885565]
+unique_name_in_owner = true
 anchors_preset = 0
 offset_left = 164.0
 offset_top = 86.0

@@ -32,6 +32,7 @@ const HP_SHAKE_STEP_TIME := 0.04
 @onready var _shield_outline: TexturedSlantedBar = %ShieldOutline
 @onready var _rock_fill: TexturedSlantedBar = %RockShieldFill   ## the rock armor's shield: a solid earth-brown fill covering the whole HP bar
 @onready var _stamina_fill: TexturedSlantedBar = %StaminaFill
+@onready var _stamina_track: TexturedSlantedBar = %StaminaTrack
 @onready var _portrait_group: Control = %PortraitGroup   ## wraps the portrait frame art + live render — bounced/flashed as one unit
 @onready var _level: Label = %LevelLabel
 @onready var _xp: ProgressBar = %XpBar
@@ -56,12 +57,15 @@ var _hp_rest_pos: Vector2   ## _hp_group's resting position, read from the scene
 							## always springs back to wherever it's actually placed
 var _portrait_tween: Tween
 var _hp_shake_tween: Tween
+var _stamina_tween: Tween
+var _stamina_rest_x := 0.0   ## the stamina bar's resting x, read from the scene (see _flash_stamina_bar)
 
 var _last_hp := 0.0
 var _last_shield := 0.0
 
 func _ready() -> void:
 	_hp_rest_pos = _hp_group.position
+	_stamina_rest_x = _stamina_fill.position.x
 
 	_last_hp = Game.stats.hp
 	_last_shield = Game.stats.shield
@@ -73,6 +77,7 @@ func _ready() -> void:
 	Events.arrows_changed.connect(_on_arrows)
 	Events.item_gained.connect(_on_item_gained)
 	Events.notice.connect(_toast)
+	Events.stamina_denied.connect(_flash_stamina_bar)
 	Events.inventory_full.connect(_on_inventory_full)
 	_combo_plate.resized.connect(func() -> void: _combo_plate.pivot_offset = _combo_plate.size * 0.5)
 	_refresh()
@@ -253,3 +258,23 @@ func _shake_hp_bar() -> void:
 		_hp_shake_tween.tween_property(_hp_group, "position", _hp_rest_pos + offset, HP_SHAKE_STEP_TIME)
 		magnitude *= 0.6
 	_hp_shake_tween.tween_property(_hp_group, "position", _hp_rest_pos, HP_SHAKE_STEP_TIME)
+
+const STAMINA_DENIED_COLOR := Color(1.0, 0.3, 0.3)
+
+## An ability was refused for lack of stamina: the bar blinks red twice and
+## jolts sideways (the jolt follows the screen-shake accessibility setting).
+func _flash_stamina_bar() -> void:
+	if _stamina_tween and _stamina_tween.is_valid():
+		_stamina_tween.kill()
+	_stamina_tween = create_tween().set_parallel(true)
+	for bar: TexturedSlantedBar in [_stamina_fill, _stamina_track]:
+		bar.position.x = _stamina_rest_x
+		bar.modulate = STAMINA_DENIED_COLOR
+		_stamina_tween.tween_property(bar, "modulate", Color.WHITE, 0.18)
+		_stamina_tween.tween_property(bar, "modulate", STAMINA_DENIED_COLOR, 0.0).set_delay(0.18)
+		_stamina_tween.tween_property(bar, "modulate", Color.WHITE, 0.25).set_delay(0.19)
+		if Settings.get_value(&"accessibility/screen_shake"):
+			var seq := create_tween()
+			seq.tween_property(bar, "position:x", _stamina_rest_x + 8.0, 0.04)
+			seq.tween_property(bar, "position:x", _stamina_rest_x - 6.0, 0.06)
+			seq.tween_property(bar, "position:x", _stamina_rest_x, 0.06)

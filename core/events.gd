@@ -25,6 +25,7 @@ signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frame
 signal player_died
 signal player_landed
 signal stats_changed
+signal stamina_denied   ## an ability was refused for lack of stamina — the HUD flashes the stamina bar
 signal game_saved   ## a save was just written to disk — the SaveIndicator badge shows
 
 # World

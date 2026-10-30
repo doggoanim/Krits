@@ -89,6 +89,7 @@ func use_slot(index: int, player: Player) -> bool:
 			return false
 		if not Game.stats.can_afford(ability.stamina_cost):
 			Events.notice.emit("Not enough stamina.")
+			Events.stamina_denied.emit()
 			return false
 		var problem := AbilityRunner.activate(ability, player, Engine.get_main_loop() as SceneTree)
 		if problem != "":
