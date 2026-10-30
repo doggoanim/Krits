@@ -36,8 +36,9 @@ func _process(delta: float) -> void:
 func _on_touched(enemy: WorldEnemy) -> void:
 	if busy or _grace > 0.0 or player.dead:
 		return
-	if world_root != null and world_root.is_in_group(&"interior_level"):
-		return   # no fights indoors
+	if world_root != null and world_root.is_in_group(&"interior_level") \
+			and not world_root.is_in_group(&"combat_allowed"):
+		return   # no fights indoors, unless the level opts in (a dungeon like the Well Depths)
 	var group: Array[WorldEnemy] = [enemy]
 	for n in get_tree().get_nodes_in_group(&"world_enemies"):
 		var other := n as WorldEnemy
