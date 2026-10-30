@@ -344,10 +344,16 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.6)
 theme_override_font_sizes/font_size = 34
 
-[node name="DetailText" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
-unique_name_in_owner = true
+[node name="DetailScroll" type="ScrollContainer" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
 layout_mode = 2
 size_flags_vertical = 3
+follow_focus = false
+horizontal_scroll_mode = 0
+
+[node name="DetailText" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column/DetailScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 38
 autowrap_mode = 3

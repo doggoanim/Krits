@@ -33,6 +33,7 @@ enum Page { ITEMS, GEAR, ABILITIES, QUESTS }
 @onready var _detail_name: Label = %DetailName
 @onready var _detail_kind: Label = %DetailKind
 @onready var _detail_text: Label = %DetailText
+@onready var _detail_scroll: ScrollContainer = %DetailScroll
 @onready var _message: Label = %Message
 @onready var _use_button: Button = %UseButton
 @onready var _drop_button: Button = %DropButton
@@ -57,6 +58,11 @@ func _ready() -> void:
 	Events.quests_changed.connect(_on_quests_changed)
 	_use_button.pressed.connect(_on_use_pressed)
 	_drop_button.pressed.connect(_drop_selected)
+
+## Sets the details text and scrolls it back to the top (long quest text scrolls).
+func _set_detail_text(text: String) -> void:
+	_detail_text.text = text
+	_detail_scroll.scroll_vertical = 0
 
 func _on_quests_changed() -> void:
 	if visible:
@@ -166,7 +172,7 @@ func _on_key_focused(item: ItemData) -> void:
 	_clear_assign()
 	_detail_name.text = item.display_name
 	_detail_kind.text = item.category_name()
-	_detail_text.text = item.description
+	_set_detail_text(item.description)
 
 func _new_slot(parent: Control) -> InventorySlot:
 	var slot := slot_scene.instantiate() as InventorySlot
@@ -202,7 +208,7 @@ func _update_item_details() -> void:
 	if _selected >= stacks.size():
 		_detail_name.text = "Empty slot"
 		_detail_kind.text = ""
-		_detail_text.text = ""
+		_set_detail_text("")
 		return
 	var item := ItemLibrary.by_id(stacks[_selected]["id"])
 	_detail_name.text = item.display_name
@@ -210,7 +216,7 @@ func _update_item_details() -> void:
 	var text := item.description
 	if item.sell_price > 0:
 		text += "\n\nSells for %dg." % item.sell_price
-	_detail_text.text = text
+	_set_detail_text(text)
 	_use_button.text = "Use"
 	_use_button.disabled = false
 	_use_button.visible = item.is_usable()
@@ -328,12 +334,12 @@ func _update_ability_details() -> void:
 	if _selected_ability >= known.size():
 		_detail_name.text = "No abilities yet"
 		_detail_kind.text = ""
-		_detail_text.text = "Learn abilities from shops."
+		_set_detail_text("Learn abilities from shops.")
 		return
 	var a := AbilityLibrary.by_id(known[_selected_ability])
 	_detail_name.text = a.display_name
 	_detail_kind.text = "Ability   Cooldown %ds   Stamina %d" % [int(a.cooldown), int(a.stamina_cost)]
-	_detail_text.text = a.description
+	_set_detail_text(a.description)
 	_set_assign(a.id, [0, 1, 2])
 
 # ---------------------------------------------------------------- quests
@@ -374,7 +380,7 @@ func _show_no_quests() -> void:
 	_clear_assign()
 	_detail_name.text = "No quests"
 	_detail_kind.text = ""
-	_detail_text.text = "Nothing to do yet. Talk to people."
+	_set_detail_text("Nothing to do yet. Talk to people.")
 
 func _on_quest_focused(q: QuestData) -> void:
 	_selected_quest = q.id
@@ -399,7 +405,7 @@ func _on_quest_focused(q: QuestData) -> void:
 		for item_id: StringName in q.reward_items:
 			var item := ItemLibrary.by_id(item_id)
 			text += "  %s x%d" % [item.display_name if item else String(item_id), int(q.reward_items[item_id])]
-	_detail_text.text = text
+	_set_detail_text(text)
 
 # ---------------------------------------------------------------- gear
 
@@ -454,7 +460,7 @@ func _on_gear_focused(item: EquipmentData) -> void:
 		else (Game.stats.equipped_shield if item is ShieldData else Game.stats.equipped_weapon)
 	var worn := equipped != null and equipped.id == item.id
 	_detail_kind.text = "Equipped" if worn else "Not equipped"
-	_detail_text.text = _gear_text(item)
+	_set_detail_text(_gear_text(item))
 	# Equipping is a button, not a click on the list entry. Worn armor/shield
 	# can be taken off; a worn weapon has nothing to do.
 	_use_button.visible = true
