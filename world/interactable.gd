@@ -19,6 +19,11 @@ extends StaticBody3D
 @export var prompt_text := "Press E"
 @export var prompt_height := 2.0   ## how far above this node's origin the prompt sits
 
+## Every Interactable the player can use right now (in range + _can_interact()).
+## When several overlap only the nearest one shows its prompt and answers the
+## interact key, so two neighbouring prompts never fight over one press.
+static var _usable: Array[Interactable] = []
+
 var player: Player
 var _in_range := false
 var _area: Area3D
@@ -41,6 +46,7 @@ func _ready() -> void:
 	_verb = _verb_from(prompt_text)
 
 func _exit_tree() -> void:
+	_usable.erase(self)
 	InteractPrompt.release(self)
 
 ## "Press E to enter" -> "Enter"; "Press E" -> "".
@@ -60,7 +66,12 @@ func _on_body_exited(body: Node3D) -> void:
 		player = null
 
 func _process(_delta: float) -> void:
-	var usable := _in_range and _can_interact()
+	var can_use := _in_range and _can_interact()
+	if can_use and not _usable.has(self):
+		_usable.append(self)
+	elif not can_use:
+		_usable.erase(self)
+	var usable := can_use and _nearest_usable() == self
 	if usable:
 		InteractPrompt.request(self, global_position + Vector3.UP * prompt_height, _verb)
 	elif _prompting:
@@ -68,6 +79,19 @@ func _process(_delta: float) -> void:
 	_prompting = usable
 	if usable and Input.is_action_just_pressed(&"interact"):
 		_interact()
+
+## The closest usable Interactable to the player (ties: whichever registered first).
+func _nearest_usable() -> Interactable:
+	var best: Interactable = null
+	var best_d := INF
+	for other in _usable:
+		if not is_instance_valid(other) or other.player == null:
+			continue
+		var d := other.global_position.distance_squared_to(other.player.global_position)
+		if d < best_d:
+			best_d = d
+			best = other
+	return best
 
 ## Overridden by subclasses to add their own gating (NPC: grounded, alive,
 ## no dialogue already open; ShopKeeper: no menu already open). True here
