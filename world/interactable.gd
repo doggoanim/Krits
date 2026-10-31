@@ -26,6 +26,10 @@ static var _usable: Array[Interactable] = []
 ## The one the player scrolled to (mouse wheel) when several overlap; while
 ## null or no longer usable, the nearest is used.
 static var _choice: Interactable
+## Scroll steps closer together than this are ignored, so one flick of a
+## free-spinning wheel (which fires several events) moves the choice once.
+const SCROLL_COOLDOWN_MSEC := 150
+static var _last_scroll_msec := -100000
 
 var player: Player
 var _in_range := false
@@ -120,6 +124,11 @@ func _input(event: InputEvent) -> void:
 	var step := _scroll_step(event)
 	if step == 0:
 		return
+	var now := Time.get_ticks_msec()
+	if now - _last_scroll_msec < SCROLL_COOLDOWN_MSEC:
+		get_viewport().set_input_as_handled()
+		return
+	_last_scroll_msec = now
 	var list := _sorted_usable()
 	if list.size() < 2:
 		return
