@@ -111,22 +111,38 @@ static func _chosen() -> Interactable:
 	var list := _sorted_usable()
 	return list[0] if not list.is_empty() else null
 
-## Mouse wheel cycles between overlapping prompts. Only the first usable
-## Interactable listens, so one scroll step moves the choice exactly once.
+## Mouse wheel or the Up/Down arrow keys cycle between overlapping prompts.
+## Only the first usable Interactable listens, so one press moves the choice
+## exactly once. (Arrow keys, not W/S: those are movement.)
 func _input(event: InputEvent) -> void:
-	if _usable.size() < 2 or _usable[0] != self or not event is InputEventMouseButton:
+	if _usable.size() < 2 or _usable[0] != self:
 		return
-	var mb := event as InputEventMouseButton
-	if not mb.pressed or (mb.button_index != MOUSE_BUTTON_WHEEL_UP and mb.button_index != MOUSE_BUTTON_WHEEL_DOWN):
+	var step := _scroll_step(event)
+	if step == 0:
 		return
 	var list := _sorted_usable()
 	if list.size() < 2:
 		return
-	var step := 1 if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1
 	var i := list.find(_chosen())
 	_choice = list[posmod(i + step, list.size())]
 	InteractPrompt.pulse_scroll(step)
 	get_viewport().set_input_as_handled()
+
+## +1 = next (wheel down / Down arrow), -1 = previous (wheel up / Up arrow), 0 = not a scroll input.
+static func _scroll_step(event: InputEvent) -> int:
+	var mb := event as InputEventMouseButton
+	if mb != null and mb.pressed:
+		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			return 1
+		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			return -1
+	var key := event as InputEventKey
+	if key != null and key.pressed and not key.echo:
+		if key.keycode == KEY_DOWN:
+			return 1
+		if key.keycode == KEY_UP:
+			return -1
+	return 0
 
 ## Overridden by subclasses to add their own gating (NPC: grounded, alive,
 ## no dialogue already open; ShopKeeper: no menu already open). True here
