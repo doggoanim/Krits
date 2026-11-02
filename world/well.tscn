@@ -1,9 +1,138 @@
 [gd_scene format=3 uid="uid://ohysk81aypln"]
 
 [ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
+[ext_resource type="Script" uid="uid://u2kq7fluf2tu" path="res://addons/cyclops_level_builder/nodes/cyclops_blocks.gd" id="1_dxlgf"]
+[ext_resource type="Script" uid="uid://c5jpx1aoa7iso" path="res://addons/cyclops_level_builder/resources/data_vector_byte.gd" id="3_yugcs"]
+[ext_resource type="Script" uid="uid://dekcd1o0m0k3r" path="res://addons/cyclops_level_builder/resources/data_vector_float.gd" id="4_8grio"]
+[ext_resource type="Script" uid="uid://dfd47cc554yqi" path="res://addons/cyclops_level_builder/resources/data_vector_int.gd" id="5_yicfs"]
+[ext_resource type="Script" uid="uid://dmot4k5n7k0w6" path="res://addons/cyclops_level_builder/resources/mesh_vector_data.gd" id="6_ld685"]
+[ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="7_yugcs"]
+
+[sub_resource type="Resource" id="Resource_8grio"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_yicfs"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_ld685"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(0, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_iq1hg"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(1, 1, 1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_uva6n"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(0, 0, 1, 1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, -1, -1, 0, 0)
+data_type = 6
+stride = 3
+
+[sub_resource type="Resource" id="Resource_h21mm"]
+script = ExtResource("5_yicfs")
+data = PackedInt32Array(-1, -1, -1, -1, -1, -1)
+data_type = 1
+
+[sub_resource type="Resource" id="Resource_lmxyf"]
+script = ExtResource("5_yicfs")
+data = PackedInt32Array(0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5)
+data_type = 1
+
+[sub_resource type="Resource" id="Resource_5xx8t"]
+script = ExtResource("5_yicfs")
+data = PackedInt32Array(0, 1, 2, 3, 4, 5, 3, 2, 6, 4, 2, 1, 7, 0, 3, 5, 7, 5, 4, 6, 7, 6, 1, 0)
+data_type = 1
+
+[sub_resource type="Resource" id="Resource_n1n2w"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0)
+data_type = 6
+stride = 3
+
+[sub_resource type="Resource" id="Resource_sf8an"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_xxj0x"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+data_type = 4
+stride = 4
+
+[sub_resource type="Resource" id="Resource_kgdh7"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(8, 0, 8, 0, -9, 0, -9, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 8, -9, 8, -9, 8, 8, 8, 8, 8, 8, 8, -9, 8, -9, 8, 8, 0, -9, 0, -9, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0)
+data_type = 5
+stride = 2
+
+[sub_resource type="Resource" id="Resource_66osh"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(5, 9, 11, 5, 13, 11, 11, 13, 11, 11, 9, 11, 11, 13, 5, 11, 9, 5, 5, 13, 5, 5, 9, 5)
+data_type = 6
+stride = 3
+
+[sub_resource type="Resource" id="Resource_sm61l"]
+script = ExtResource("4_8grio")
+data = PackedFloat32Array(-0.48507124, -0.7276069, 0.48507124, -0.48507124, 0.7276069, 0.48507124, 0.48507124, 0.7276069, 0.48507124, 0.48507124, -0.7276069, 0.48507124, 0.48507124, 0.7276069, -0.48507124, 0.48507124, -0.7276069, -0.48507124, -0.48507124, 0.7276069, -0.48507124, -0.48507124, -0.7276069, -0.48507124)
+data_type = 6
+stride = 3
+
+[sub_resource type="Resource" id="Resource_244o2"]
+script = ExtResource("3_yugcs")
+data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_6mgso"]
+script = ExtResource("6_ld685")
+num_vertices = 8
+num_edges = 12
+num_faces = 6
+num_face_vertices = 24
+active_vertex = -1
+active_edge = -1
+active_face = -1
+active_face_vertex = -1
+edge_vertex_indices = PackedInt32Array(0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 3, 2, 4, 6, 4, 1, 6, 7, 0, 5, 7, 6, 7)
+edge_face_indices = PackedInt32Array(0, 5, 0, 2, 0, 1, 0, 3, 1, 4, 1, 3, 1, 2, 2, 4, 2, 5, 3, 5, 3, 4, 4, 5)
+face_vertex_count = PackedInt32Array(4, 4, 4, 4, 4, 4)
+face_vertex_indices = PackedInt32Array(0, 1, 2, 3, 4, 5, 3, 2, 6, 4, 2, 1, 7, 0, 3, 5, 7, 5, 4, 6, 7, 6, 1, 0)
+vertex_data = {
+"normal": SubResource("Resource_sm61l"),
+"position": SubResource("Resource_66osh"),
+"selected": SubResource("Resource_244o2")
+}
+edge_data = {
+"selected": SubResource("Resource_8grio"),
+"uv_seam": SubResource("Resource_yicfs")
+}
+face_data = {
+"material_index": SubResource("Resource_h21mm"),
+"normal": SubResource("Resource_uva6n"),
+"selected": SubResource("Resource_ld685"),
+"visible": SubResource("Resource_iq1hg")
+}
+face_vertex_data = {
+"color": SubResource("Resource_xxj0x"),
+"face_index": SubResource("Resource_lmxyf"),
+"normal": SubResource("Resource_n1n2w"),
+"selected": SubResource("Resource_sf8an"),
+"uv0": SubResource("Resource_kgdh7"),
+"vertex_index": SubResource("Resource_5xx8t")
+}
 
 [node name="Well" type="Node3D" unique_id=427418772]
 
-[node name="CyclopsBlock" type="Node3D" parent="." unique_id=1823252601]
+[node name="CyclopsBlocks" type="Node3D" parent="." unique_id=2050784714]
+script = ExtResource("1_dxlgf")
+metadata/_custom_type_script = "uid://u2kq7fluf2tu"
+
+[node name="Block_0" type="Node3D" parent="CyclopsBlocks" unique_id=909195811]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -13, -8)
 script = ExtResource("1_3nxol")
-metadata/_custom_type_script = "uid://bchix0jpv46lx"
+mesh_vector_data = SubResource("Resource_6mgso")
+
+[node name="DropSpawn" type="Node3D" parent="." unique_id=1082495656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("7_yugcs")
+spawn_id = &"well_drop"
