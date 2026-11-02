@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://ohysk81aypln"]
+
+[ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
+
+[node name="Well" type="Node3D" unique_id=427418772]
+
+[node name="CyclopsBlock" type="Node3D" parent="." unique_id=1823252601]
+script = ExtResource("1_3nxol")
+metadata/_custom_type_script = "uid://bchix0jpv46lx"
