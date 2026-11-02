@@ -583,6 +583,15 @@ func get_tool_by_id(tool_id:String)->CyclopsTool:
 			return tool
 	return null
 
+## Missing from this plugin version although several actions/tools call it
+## (Add block, duplicate, tool tags): look the tool up by id and switch to it.
+func switch_to_tool_id(tool_id:String):
+	var found:CyclopsTool = get_tool_by_id(tool_id)
+	if found:
+		switch_to_tool(found)
+	else:
+		push_warning("Cyclops: no tool with id '%s'" % tool_id)
+
 func switch_to_tool(_tool:CyclopsTool):
 	
 	if active_tool:
