@@ -6,7 +6,7 @@ extends CharacterBody3D
 @export var config: PlayerConfig = PlayerConfig.new()
 
 const STAND_HEIGHT := 1.8
-const CROUCH_HEIGHT := 1.0
+const CROUCH_HEIGHT := 0.9   ## capsule radius is 0.4, so 0.8 is the smallest this can be
 const RADIUS := 0.4
 const HIT_INVULN := 0.8
 const HIT_KNOCK_SPEED := 6.0    ## horizontal shove away from whatever hit you
