@@ -391,6 +391,8 @@ func draw_material_underlay():
 		return
 	
 	var mvd:MeshVectorData = block_nodes[0].mesh_vector_data
+	if mvd == null:   # a block with no mesh data yet (e.g. a bare CyclopsBlock node)
+		return
 	if mvd.active_face != -1:
 		var vec:DataVectorInt = mvd.get_face_data(MeshVectorData.F_MATERIAL_INDEX)
 		var mat_idx:int = vec.get_value(mvd.active_face)
