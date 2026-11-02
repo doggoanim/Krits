@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cntvsp5g1dxuv"]
+
+[ext_resource type="Texture2D" uid="uid://dyfhhbkh5d1nc" path="res://assets/textures/mossy_tiles.jpg" id="1_swemg"]
+
+[resource]
+albedo_texture = ExtResource("1_swemg")
