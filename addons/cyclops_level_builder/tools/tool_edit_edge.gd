@@ -106,8 +106,9 @@ func draw_gizmo(viewport_camera:Camera3D):
 #		gizmo_translate.global_transform.origin = origin
 		var active_block:Node3D = builder.get_active_block()
 		
-		gizmo_translate.global_basis = calc_gizmo_basis(average_normal, active_block, viewport_camera, settings.transform_space)
-		gizmo_translate.global_position = origin
+		if gizmo_translate.is_inside_tree():   # not attached yet = Godot errors on every read
+			gizmo_translate.global_basis = calc_gizmo_basis(average_normal, active_block, viewport_camera, settings.transform_space)
+			gizmo_translate.global_position = origin
 
 func _draw_tool(viewport_camera:Camera3D):
 	var global_scene:CyclopsGlobalScene = builder.get_global_scene()
