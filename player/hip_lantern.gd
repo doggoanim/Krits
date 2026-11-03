@@ -151,8 +151,12 @@ func _process(delta: float) -> void:
 	var swing := _pendulum.step(global_basis.inverse() * velocity, delta)
 	_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
 
-## Light and flame follow `_lit`.
+## Switched off, the whole lantern disappears (model, flame and light). The
+## x-ray silhouette copies follow their source meshes' visibility (see
+## PlayerXray), so they vanish with it.
 func _apply_lit() -> void:
+	if _pivot != null:
+		_pivot.visible = _lit
 	if _light != null:
 		_light.visible = _lit
 	if _glow != null:
