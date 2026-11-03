@@ -35,10 +35,13 @@ var _shield_model: Node3D
 var _weapon_model: Node3D
 var _shield_id: StringName = &"?"
 var _weapon_id: StringName = &"?"
-var _swing := Vector2.ZERO        ## (pitch, roll) offset of the weapon
-var _swing_vel := Vector2.ZERO
+var _pendulum := PendulumSwing.new()   ## the weapon's swing (see PendulumSwing)
 
 func _ready() -> void:
+	_pendulum.strength = swing_strength
+	_pendulum.max_angle = swing_max
+	_pendulum.follow = swing_follow
+	_pendulum.damping = swing_spring
 	_player = get_parent() as Player   # created by Player, which must already have its visual
 	_anchor = FloatingAnchor.new()
 	_anchor.name = "ShieldAnchor"
@@ -76,15 +79,8 @@ func _target_position() -> Vector3:
 ## pulls it off-centre, so it trails when you run, kicks when you stop, and
 ## settles back.
 func _update_swing(world_vel: Vector3, delta: float) -> void:
-	var local := _anchor.global_basis.inverse() * world_vel
-	# forward/back speed pitches the weapon, sideways speed rolls it
-	var target := Vector2(
-		clampf(local.z * swing_strength, -swing_max, swing_max),
-		clampf(-local.x * swing_strength, -swing_max, swing_max))
-	var accel := (target - _swing) * swing_follow * swing_follow - _swing_vel * 2.0 * swing_spring
-	_swing_vel += accel * delta
-	_swing += _swing_vel * delta
-	_weapon_pivot.rotation = Vector3(_swing.x, 0.0, _swing.y)
+	var swing := _pendulum.step(_anchor.global_basis.inverse() * world_vel, delta)
+	_weapon_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
 
 # ---------------------------------------------------------------- equipment
 

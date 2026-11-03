@@ -40,8 +40,15 @@ static func water_spirits() -> ItemData:
 	i.max_stack = 1
 	return i
 
+## Hangs on the player's left hip and lights their way (see HipLantern).
+static func lantern() -> ItemData:
+	var i := _make(&"lantern", ItemData.Category.KEY,
+		Color(0.95, 0.93, 0.79))
+	i.max_stack = 1
+	return i
+
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits()]
+	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():
