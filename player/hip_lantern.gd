@@ -13,7 +13,9 @@ const ACTION := &"lantern_toggle"   ## rebindable in Settings > Controls (InputS
 
 const HINT_ID := &"lantern"   ## the key plate shown until the first toggle (see KeyHints)
 
-var _lit := true   ## switched on: the light and flame show
+const LIT_FLAG := &"lantern_lit"   ## remembered in the save; absent = switched off, as when first picked up
+
+var _lit := false   ## switched on: the light and flame show
 
 ## Where the handle sits when standing, relative to the player's facing (-X is
 ## the left, +Z is behind) — the lantern keeps this spot relative to the hip
@@ -62,6 +64,7 @@ func _ready() -> void:
 	_light.shadow_enabled = false
 	_light.position = Vector3(0.0, -model_height * 0.5, 0.0)   # inside the lantern
 	_pivot.add_child(_light)
+	_lit = bool(Game.flag(LIT_FLAG, false))
 	_apply_lit()
 	visible = false
 
@@ -134,6 +137,7 @@ func _process(delta: float) -> void:
 			and not (DialogueBox.instance != null and DialogueBox.instance.is_active()) \
 			and not get_tree().paused:
 		_lit = not _lit
+		Game.set_flag(LIT_FLAG, _lit)
 		_apply_lit()
 		Events.key_hint_dismissed.emit(HINT_ID)
 	var yaw := _player.visual.global_rotation.y
