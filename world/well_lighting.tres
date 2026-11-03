@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://va83yaa50p61"]
+
+[ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="2_2k528"]
+
+[resource]
+script = ExtResource("2_2k528")
+sun_energy = 1.2
+sun_shadow_blur = 0.0
+sky_top_color = Color(0.15294118, 0.26666668, 0.25490198, 1)
+volumetric_fog_enabled = true
+brightness = 0.83
+contrast = 1.15
+saturation = 1.0
