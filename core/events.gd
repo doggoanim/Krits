@@ -25,7 +25,9 @@ signal player_hurt(from: Vector3)   ## the player just took a hit (after i-frame
 signal player_died
 signal player_landed
 signal stats_changed
-signal lantern_toggled(lit: bool)   ## the hip lantern was switched on/off — the LanternHint shows its switch
+signal player_state_changed(state: StringName)   ## the player's state machine entered `state` (Ground, Air, Roll, ...)
+signal key_hint_requested(id: StringName, action: StringName, done_states: Array[StringName])   ## show a key plate (top centre) until the player enters one of done_states (or key_hint_dismissed) — see KeyHints
+signal key_hint_dismissed(id: StringName)
 signal stamina_denied   ## an ability was refused for lack of stamina — the HUD flashes the stamina bar
 signal game_saved   ## a save was just written to disk — the SaveIndicator badge shows
 

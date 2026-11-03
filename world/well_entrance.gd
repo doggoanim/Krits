@@ -21,4 +21,7 @@ func _can_interact() -> bool:
 		and not Game.in_combat
 
 func _interact() -> void:
+	# Going down for the first time: show the roll/dive key (Shift) until they use it.
+	var roll_states: Array[StringName] = [&"Roll", &"Dive", &"LongJump"]
+	Events.key_hint_requested.emit(&"roll", &"roll_dive", roll_states)
 	Events.level_travel_requested.emit(load(target_level) as PackedScene, target_spawn_id)

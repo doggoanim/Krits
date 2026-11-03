@@ -11,9 +11,9 @@ const MODEL: PackedScene = preload("res://assets/equipments/lantern.glb")
 const ITEM_ID := &"lantern"
 const ACTION := &"lantern_toggle"   ## rebindable in Settings > Controls (InputSetup.BINDINGS)
 
-## Whether the lantern is switched on (the light and flame show). Static so the
-## LanternHint UI can read it without a reference.
-static var lit := true
+const HINT_ID := &"lantern"   ## the key plate shown until the first toggle (see KeyHints)
+
+var _lit := true   ## switched on: the light and flame show
 
 ## Where the handle sits when standing, relative to the player's facing (-X is
 ## the left, +Z is behind) — the lantern keeps this spot relative to the hip
@@ -125,14 +125,17 @@ func _process(delta: float) -> void:
 	if visible != owned:
 		visible = owned
 		_last_pos = Vector3.ZERO   # no swing kick from the jump back into place
+		if owned:   # KeyHints skips it if they already know the key
+			var none: Array[StringName] = []
+			Events.key_hint_requested.emit(HINT_ID, ACTION, none)
 	if not owned:
 		return
 	if Input.is_action_just_pressed(ACTION) and not Game.input_locked \
 			and not (DialogueBox.instance != null and DialogueBox.instance.is_active()) \
 			and not get_tree().paused:
-		lit = not lit
+		_lit = not _lit
 		_apply_lit()
-		Events.lantern_toggled.emit(lit)
+		Events.key_hint_dismissed.emit(HINT_ID)
 	var yaw := _player.visual.global_rotation.y
 	var target := _hook_position(yaw)
 	var velocity := Vector3.ZERO
@@ -144,9 +147,9 @@ func _process(delta: float) -> void:
 	var swing := _pendulum.step(global_basis.inverse() * velocity, delta)
 	_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
 
-## Light and flame follow `lit`.
+## Light and flame follow `_lit`.
 func _apply_lit() -> void:
 	if _light != null:
-		_light.visible = lit
+		_light.visible = _lit
 	if _glow != null:
-		_glow.visible = lit
+		_glow.visible = _lit

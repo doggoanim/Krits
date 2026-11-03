@@ -30,6 +30,7 @@ func transition_to(state: StringName, msg: Dictionary = {}) -> void:
 	current_name = state
 	current.enter(prev, msg)
 	state_changed.emit(prev, state)
+	Events.player_state_changed.emit(state)
 
 func physics_update(delta: float) -> void:
 	if current:
