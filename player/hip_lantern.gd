@@ -13,7 +13,7 @@ const ITEM_ID := &"lantern"
 ## Where the handle sits when standing, relative to the player's facing (-X is
 ## the left, +Z is behind) — the lantern keeps this spot relative to the hip
 ## bone, so it rides the animation (rolls, crouches, jumps) from there.
-@export var hip_offset := Vector3(-0.42, 0.9, 0.05)
+@export var hip_offset := Vector3(-0.34, 0.82, 0.05)
 ## The skeleton bone it is hooked to: the first whose name contains this
 ## (lower-cased). The hips, so it follows the body, not a swinging leg.
 @export var bone_hint := "lowertorso"
