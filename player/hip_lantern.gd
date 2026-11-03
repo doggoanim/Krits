@@ -9,6 +9,11 @@ extends Node3D
 
 const MODEL: PackedScene = preload("res://assets/equipments/lantern.glb")
 const ITEM_ID := &"lantern"
+const ACTION := &"lantern_toggle"   ## rebindable in Settings > Controls (InputSetup.BINDINGS)
+
+## Whether the lantern is switched on (the light and flame show). Static so the
+## LanternHint UI can read it without a reference.
+static var lit := true
 
 ## Where the handle sits when standing, relative to the player's facing (-X is
 ## the left, +Z is behind) — the lantern keeps this spot relative to the hip
@@ -31,6 +36,7 @@ const ITEM_ID := &"lantern"
 
 var _player: Player
 var _pivot: Node3D          ## the handle's top — swings
+var _glow: MeshInstance3D   ## the flame mesh, hidden while switched off
 var _light: OmniLight3D
 var _pendulum := PendulumSwing.new()
 var _last_pos := Vector3.ZERO
@@ -56,6 +62,7 @@ func _ready() -> void:
 	_light.shadow_enabled = false
 	_light.position = Vector3(0.0, -model_height * 0.5, 0.0)   # inside the lantern
 	_pivot.add_child(_light)
+	_apply_lit()
 	visible = false
 
 ## Instances the glb hanging from the pivot: scaled to `model_height`, cel
@@ -72,6 +79,7 @@ func _build_model() -> void:
 	node.position.y -= model_height            # so the top (handle) is at the pivot
 	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark"))
 	if glow != null:
+		_glow = glow
 		node.add_child(glow)
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -119,6 +127,12 @@ func _process(delta: float) -> void:
 		_last_pos = Vector3.ZERO   # no swing kick from the jump back into place
 	if not owned:
 		return
+	if Input.is_action_just_pressed(ACTION) and not Game.input_locked \
+			and not (DialogueBox.instance != null and DialogueBox.instance.is_active()) \
+			and not get_tree().paused:
+		lit = not lit
+		_apply_lit()
+		Events.lantern_toggled.emit(lit)
 	var yaw := _player.visual.global_rotation.y
 	var target := _hook_position(yaw)
 	var velocity := Vector3.ZERO
@@ -129,3 +143,10 @@ func _process(delta: float) -> void:
 	global_rotation = Vector3(0.0, yaw, 0.0)
 	var swing := _pendulum.step(global_basis.inverse() * velocity, delta)
 	_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
+
+## Light and flame follow `lit`.
+func _apply_lit() -> void:
+	if _light != null:
+		_light.visible = lit
+	if _glow != null:
+		_glow.visible = lit
