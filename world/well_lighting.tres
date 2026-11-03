@@ -4,10 +4,14 @@
 
 [resource]
 script = ExtResource("2_2k528")
-sun_energy = 1.2
+sun_energy = 0.0
+sun_shadows = false
 sun_shadow_blur = 0.0
 sky_top_color = Color(0.15294118, 0.26666668, 0.25490198, 1)
+sky_horizon_color = Color(0.07450981, 0.19607843, 0.18431373, 1)
+ground_bottom_color = Color(0.050980393, 0.12156863, 0.12156863, 1)
+ambient_color = Color(0.4994561, 0.71381736, 0.6901161, 1)
 volumetric_fog_enabled = true
-brightness = 0.83
+brightness = 1.04
 contrast = 1.15
 saturation = 1.0
