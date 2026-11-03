@@ -10,13 +10,13 @@ extends Node3D
 const MODEL: PackedScene = preload("res://assets/equipments/lantern.glb")
 const ITEM_ID := &"lantern"
 
-## The lantern's hook follows this bone of the player's skeleton, so it moves
-## with the animation (rolls, crouches, jumps). Matched loosely: the first bone
-## whose name contains "upperleg" and ends in ".L"/"_L".
-@export var bone_hint := "upperleg"
-@export var side_push := 0.16      ## metres outward from the body's centre, so it hangs beside the hip, not inside it
-@export var hang_drop := 0.12      ## metres below the hip joint where the handle sits — raise to hang higher
-@export var hip_offset := Vector3(-0.42, 0.7, 0.05)   ## fallback if the skeleton/bone can't be found: relative to the player's facing; -X is the left, +Z is behind
+## Where the handle sits when standing, relative to the player's facing (-X is
+## the left, +Z is behind) — the lantern keeps this spot relative to the hip
+## bone, so it rides the animation (rolls, crouches, jumps) from there.
+@export var hip_offset := Vector3(-0.42, 0.9, 0.05)
+## The skeleton bone it is hooked to: the first whose name contains this
+## (lower-cased). The hips, so it follows the body, not a swinging leg.
+@export var bone_hint := "lowertorso"
 @export var model_height := 0.34            ## metres, handle top to base
 @export var glow_color := Color("F3EECA")
 @export var light_energy := 0.8
@@ -36,6 +36,7 @@ var _pendulum := PendulumSwing.new()
 var _last_pos := Vector3.ZERO
 var _skeleton: Skeleton3D
 var _bone := -1
+var _bone_local := Vector3.ZERO   ## the handle's position in the hip bone's own space
 
 func _ready() -> void:
 	top_level = true   # world-space: placed by script each physics frame
@@ -82,30 +83,30 @@ func _register_xray(model: Node3D) -> void:
 	if is_instance_valid(model) and _player and _player.xray:
 		_player.xray.attach(model)
 
-## The world position of the handle: the left hip bone (animated), pushed out
-## to the side and dropped a little; the fixed `hip_offset` if there's no bone.
+## The world position of the handle: `hip_offset` fixed to the hip bone (so it
+## follows the animation), or just `hip_offset` if there is no bone.
 func _hook_position(yaw: float) -> Vector3:
+	var rest_world := _player.visual.global_position + Basis(Vector3.UP, yaw) * hip_offset
 	if _skeleton == null:
-		_find_bone()
+		_find_bone(rest_world)
 	if _skeleton != null and _bone >= 0:
-		var joint := (_skeleton.global_transform * _skeleton.get_bone_global_pose(_bone)).origin
-		var outward := joint - _player.visual.global_position
-		outward.y = 0.0
-		outward = outward.normalized() if outward.length() > 0.01 else Vector3.ZERO
-		return joint + outward * side_push + Vector3.DOWN * hang_drop
-	return _player.visual.global_position + Basis(Vector3.UP, yaw) * hip_offset
+		return (_skeleton.global_transform * _skeleton.get_bone_global_pose(_bone)) * _bone_local
+	return rest_world
 
-func _find_bone() -> void:
+## Finds the hip bone and records where the handle sits in its local space
+## (measured from the rest pose, right now, at the standing offset).
+func _find_bone(rest_world: Vector3) -> void:
 	var model := _player.visual.get_model()
 	if model == null:
 		return
 	for n in model.find_children("*", "Skeleton3D", true, false):
 		var skel := n as Skeleton3D
 		for i in skel.get_bone_count():
-			var bone_name := skel.get_bone_name(i).to_lower()
-			if bone_hint in bone_name and (bone_name.ends_with(".l") or bone_name.ends_with("_l")):
+			if bone_hint in skel.get_bone_name(i).to_lower():
 				_skeleton = skel
 				_bone = i
+				var rest := skel.global_transform * skel.get_bone_global_rest(i)
+				_bone_local = rest.affine_inverse() * rest_world
 				return
 
 func _process(delta: float) -> void:
