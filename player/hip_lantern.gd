@@ -2,14 +2,21 @@ class_name HipLantern
 extends Node3D
 ## The lantern hanging off the player's left hip once they own one (the
 ## "lantern" key item). It swings with the same PendulumSwing physics as the
-## sword, but hangs straight off the body — no floating lag — and glows
+## sword, but its hook rides the player's left hip bone — so it follows the
+## animation, no floating lag — and glows
 ## `glow_color`, lighting up the dark around the player with a small OmniLight3D.
 ## Created by Player (after `visual` and `gear`).
 
 const MODEL: PackedScene = preload("res://assets/equipments/lantern.glb")
 const ITEM_ID := &"lantern"
 
-@export var hip_offset := Vector3(-0.42, 0.9, 0.05)   ## relative to the player's facing; -X is the left, +Z is behind
+## The lantern's hook follows this bone of the player's skeleton, so it moves
+## with the animation (rolls, crouches, jumps). Matched loosely: the first bone
+## whose name contains "upperleg" and ends in ".L"/"_L".
+@export var bone_hint := "upperleg"
+@export var side_push := 0.16      ## metres outward from the body's centre, so it hangs beside the hip, not inside it
+@export var hang_drop := 0.12      ## metres below the hip joint where the handle sits — raise to hang higher
+@export var hip_offset := Vector3(-0.42, 0.7, 0.05)   ## fallback if the skeleton/bone can't be found: relative to the player's facing; -X is the left, +Z is behind
 @export var model_height := 0.34            ## metres, handle top to base
 @export var glow_color := Color("F3EECA")
 @export var light_energy := 1.6
@@ -27,6 +34,8 @@ var _pivot: Node3D          ## the handle's top — swings
 var _light: OmniLight3D
 var _pendulum := PendulumSwing.new()
 var _last_pos := Vector3.ZERO
+var _skeleton: Skeleton3D
+var _bone := -1
 
 func _ready() -> void:
 	top_level = true   # world-space: placed by script each physics frame
@@ -73,9 +82,36 @@ func _register_xray(model: Node3D) -> void:
 	if is_instance_valid(model) and _player and _player.xray:
 		_player.xray.attach(model)
 
-func _physics_process(delta: float) -> void:
+## The world position of the handle: the left hip bone (animated), pushed out
+## to the side and dropped a little; the fixed `hip_offset` if there's no bone.
+func _hook_position(yaw: float) -> Vector3:
+	if _skeleton == null:
+		_find_bone()
+	if _skeleton != null and _bone >= 0:
+		var joint := (_skeleton.global_transform * _skeleton.get_bone_global_pose(_bone)).origin
+		var outward := joint - _player.visual.global_position
+		outward.y = 0.0
+		outward = outward.normalized() if outward.length() > 0.01 else Vector3.ZERO
+		return joint + outward * side_push + Vector3.DOWN * hang_drop
+	return _player.visual.global_position + Basis(Vector3.UP, yaw) * hip_offset
+
+func _find_bone() -> void:
+	var model := _player.visual.get_model()
+	if model == null:
+		return
+	for n in model.find_children("*", "Skeleton3D", true, false):
+		var skel := n as Skeleton3D
+		for i in skel.get_bone_count():
+			var bone_name := skel.get_bone_name(i).to_lower()
+			if bone_hint in bone_name and (bone_name.ends_with(".l") or bone_name.ends_with("_l")):
+				_skeleton = skel
+				_bone = i
+				return
+
+func _process(delta: float) -> void:
 	if _player == null or _player.visual == null:
 		return
+	delta = minf(delta, 1.0 / 30.0)   # keep the spring stable on a frame hitch
 	var owned := Game.inventory != null and Game.inventory.has(ITEM_ID)
 	if visible != owned:
 		visible = owned
@@ -83,9 +119,10 @@ func _physics_process(delta: float) -> void:
 	if not owned:
 		return
 	var yaw := _player.visual.global_rotation.y
-	var facing := Basis(Vector3.UP, yaw)
-	var target := _player.visual.global_position + facing * hip_offset
-	var velocity := (target - _last_pos) / maxf(delta, 0.0001) if _last_pos != Vector3.ZERO else Vector3.ZERO
+	var target := _hook_position(yaw)
+	var velocity := Vector3.ZERO
+	if _last_pos != Vector3.ZERO:
+		velocity = (target - _last_pos) / maxf(delta, 0.0001)
 	_last_pos = target
 	global_position = target
 	global_rotation = Vector3(0.0, yaw, 0.0)
