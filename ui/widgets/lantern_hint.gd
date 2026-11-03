@@ -36,13 +36,12 @@ func _show_if_unlearned() -> void:
 		_present(true)
 
 func _on_toggled(_lit: bool) -> void:
-	var first := not Game.flag(&"tutorial_lantern")
-	Game.set_flag(&"tutorial_lantern")
-	_present(false, first)
+	Game.set_flag(&"tutorial_lantern")   # learned the first time they switch it
+	_present(false)
 
 ## Shows the hint. `hold` keeps it up until the first toggle; otherwise it
 ## fades out after HOLD_TIME.
-func _present(hold: bool, _first := false) -> void:
+func _present(hold: bool) -> void:
 	_key.text = InputSetup.key_label(Settings.get_binding(HipLantern.ACTION))
 	_switch.texture = switch_on if HipLantern.lit else switch_off
 	if _tween:
