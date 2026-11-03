@@ -341,6 +341,11 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 func _apply_level_lighting(lvl: Node) -> void:
 	var indoor := lvl.is_in_group(INTERIOR_GROUP)
 	var cfg := interior_env_config if indoor and interior_env_config else env_config
+	# A level's own LevelEnvironment node (its own color grade) beats both.
+	for child in lvl.get_children():
+		if child is LevelEnvironment and (child as LevelEnvironment).config != null:
+			cfg = (child as LevelEnvironment).config
+			break
 	_apply_environment_config(cfg if cfg else EnvironmentConfig.new())
 	if indoor:
 		_env.background_mode = Environment.BG_COLOR

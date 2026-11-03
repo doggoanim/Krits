@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://ohysk81aypln"]
 
+[ext_resource type="Script" path="res://world/level_environment.gd" id="lvlenv_script"]
+[ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
 [ext_resource type="Script" uid="uid://u2kq7fluf2tu" path="res://addons/cyclops_level_builder/nodes/cyclops_blocks.gd" id="1_dxlgf"]
 [ext_resource type="Script" uid="uid://c5jpx1aoa7iso" path="res://addons/cyclops_level_builder/resources/data_vector_byte.gd" id="3_yugcs"]
@@ -1476,6 +1478,10 @@ face_vertex_data = {
 }
 
 [node name="Well" type="Node3D" unique_id=427418772]
+
+[node name="LevelEnvironment" type="Node" parent="."]
+script = ExtResource("lvlenv_script")
+config = ExtResource("lvlenv_cfg")
 
 [node name="CyclopsBlocks" type="Node3D" parent="." unique_id=2050784714]
 script = ExtResource("1_dxlgf")
