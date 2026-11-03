@@ -68,6 +68,7 @@ var level: Node3D   ## the currently active level root — see _swap_level()
 ## See _build_environment()/_apply_environment_config()/_apply_level_lighting().
 var _sun: DirectionalLight3D
 var _env: Environment
+var _reverb: LevelReverb
 
 ## Where a brand-new game starts: the player's own house (a level path, loaded
 ## lazily like a Door's target), arriving at its DoorSpawn `start_spawn_id`
@@ -78,6 +79,8 @@ var _env: Environment
 func _ready() -> void:
 	Game.load_game()
 	_build_environment()
+	_reverb = LevelReverb.new()
+	add_child(_reverb)   # a level's LevelEnvironment can switch an echo on — see _apply_level_lighting()
 
 	# A brand-new game (no spawnpoint reached yet) begins inside the player's own
 	# house instead of out in the town.
@@ -341,11 +344,15 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 func _apply_level_lighting(lvl: Node) -> void:
 	var indoor := lvl.is_in_group(INTERIOR_GROUP)
 	var cfg := interior_env_config if indoor and interior_env_config else env_config
-	# A level's own LevelEnvironment node (its own color grade) beats both.
+	# A level's own LevelEnvironment node (its own color grade, reverb) beats both.
+	var level_env: LevelEnvironment = null
 	for child in lvl.get_children():
-		if child is LevelEnvironment and (child as LevelEnvironment).config != null:
-			cfg = (child as LevelEnvironment).config
+		if child is LevelEnvironment:
+			level_env = child as LevelEnvironment
 			break
+	if level_env != null and level_env.config != null:
+		cfg = level_env.config
+	_reverb.apply(level_env)
 	_apply_environment_config(cfg if cfg else EnvironmentConfig.new())
 	if indoor:
 		_env.background_mode = Environment.BG_COLOR
