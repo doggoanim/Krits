@@ -33,6 +33,7 @@ const DEFAULTS := {
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
 	&"display/pixelation": 3,           ## PixelateEffect block size in screen pixels (1 = off)
+	&"display/watercolor": 0,           ## WatercolorEffect strength, percent (0 = off)
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,
@@ -145,7 +146,7 @@ func _apply(key: StringName) -> void:
 		&"controls/bindings":
 			for action in InputSetup.BINDINGS:
 				InputSetup.bind_key(action, get_binding(action))
-		# display/pixelation is read by PixelateEffect, display/render_distance, controls/camera_sens, controls/invert_y and
+		# display/pixelation is read by PixelateEffect, display/watercolor by WatercolorEffect, display/render_distance, controls/camera_sens, controls/invert_y and
 		# accessibility/screen_shake are read by the camera / HUD themselves.
 
 func _apply_volumes() -> void:

@@ -114,6 +114,9 @@ func _ready() -> void:
 	# (see PixelateEffect's header comment). Purely cosmetic; doesn't need
 	# anything set up before it. The block size comes from the player's
 	# Settings ("display/pixelation", Options > Display).
+	# Watercolor goes in first (same canvas layer, drawn underneath) so any
+	# pixelation mosaics over the painted look — see WatercolorEffect.
+	add_child(WatercolorEffect.new())
 	add_child(PixelateEffect.new())
 
 	var low_hp_vignette := LowHpVignette.new()
