@@ -3394,6 +3394,24 @@ drift_speed = 0.35
 [node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal3" unique_id=920000130]
 script = ExtResource("well_crystal")
 
+[node name="CyanCrystal4" type="OmniLight3D" parent="AccentLights" unique_id=545153772]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -3, -58.148182)
+light_color = Color(0.4, 0.9, 1, 1)
+light_energy = 0.9
+omni_range = 4.0
+
+[node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal4" unique_id=1221681203]
+script = ExtResource("well_motes")
+area_size = Vector3(5, 3, 5)
+mote_count = 14
+color = Color(0.5, 0.95, 1, 0.9)
+glow_energy = 2.0
+mote_size = 0.04
+drift_speed = 0.35
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal4" unique_id=2005961326]
+script = ExtResource("well_crystal")
+
 [node name="WarmTorch2" type="OmniLight3D" parent="AccentLights" unique_id=910000020]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -4.5, -25)
 light_color = Color(1, 0.7, 0.35, 1)
