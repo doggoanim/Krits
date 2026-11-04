@@ -21,11 +21,11 @@ extends CanvasLayer
 ## masked" — bigger than 1.0, since a widescreen window's corners sit
 ## further from center than its edges once the shader corrects for aspect.
 const MAX_RADIUS := 1.3
-const IRIS_TIME := 0.45   ## one direction of the wipe (closing or opening)
+const IRIS_TIME := 0.3   ## one direction of the wipe (closing or opening)
 ## Minimum time spent fully closed before/after the swap itself runs, so a
 ## near-instant swap never reads as a single-frame flicker — there's always
 ## at least a beat of "yep, that's a transition" on either side of it.
-const HOLD_TIME := 0.15
+const HOLD_TIME := 0.08
 
 static var instance: LoadingScreen
 
