@@ -720,6 +720,8 @@ script = ExtResource("40_foliage_wind")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
 script = ExtResource("44_cloud_shadows")
 height = 43.0
+drift_area = Vector2(120, 120)
+blob_count = 16
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
