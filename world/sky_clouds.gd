@@ -29,7 +29,11 @@ extends GPUParticles3D
 @export var cluster_lobes := 4                      ## soft circles stacked per cluster — higher = lumpier/fluffier
 @export var cluster_spread := 6.0                   ## how far a cluster's lobes scatter from its own center
 @export var cloud_size := Vector2(16.0, 16.0)
-@export var cloud_color := Color(1.0, 1.0, 1.0, 0.85)
+@export var cloud_color := Color(1.0, 1.0, 1.0, 1.0)
+## Wind Waker-style puffs: crisp round edges and a pale blue-grey underside,
+## instead of soft fuzzy blobs. Overlapping lobes then read as one cartoon cloud.
+@export var toon_style := true
+@export var cloud_shade := Color(0.78, 0.86, 0.98)   ## underside colour of each puff
 @export var drift_speed := 0.6          ## world units/sec along +X — same travel direction WindGusts uses
 @export var react_to_gusts := true      ## clouds visibly speed up while a gust is sweeping through
 
@@ -75,7 +79,7 @@ func _build() -> void:
 	surf.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	surf.vertex_color_use_as_albedo = true
-	surf.albedo_texture = SoftCircleTexture.make(48)
+	surf.albedo_texture = _make_toon_puff(128) if toon_style else SoftCircleTexture.make(48)
 	quad.material = surf
 
 	amount = cloud_count * cluster_lobes
@@ -131,6 +135,20 @@ func _make_point_texture(points: PackedVector3Array) -> ImageTexture:
 	var img := Image.create(maxi(points.size(), 1), 1, false, Image.FORMAT_RGBF)
 	for i in points.size():
 		img.set_pixel(i, 0, Color(points[i].x, points[i].y, points[i].z))
+	return ImageTexture.create_from_image(img)
+
+## One opaque round puff with a sharp (but anti-aliased) edge, white on top
+## fading to `cloud_shade` toward the bottom.
+func _make_toon_puff(size: int) -> ImageTexture:
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var half := size * 0.5
+	for y in size:
+		for x in size:
+			var r := Vector2(x + 0.5 - half, y + 0.5 - half).length() / half
+			var a := clampf((1.0 - r) / 0.04, 0.0, 1.0)
+			var shade := smoothstep(0.35, 1.0, (y + 0.5) / size)
+			var c := Color.WHITE.lerp(cloud_shade, shade)
+			img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
 	return ImageTexture.create_from_image(img)
 
 static func _make_fade_ramp(c: Color) -> GradientTexture1D:
