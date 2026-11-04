@@ -32,7 +32,7 @@ const DEFAULTS := {
 	&"display/resolution": 900,         ## windowed-mode size, as the window HEIGHT (16:9 — see _windowed_size())
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
-	&"display/pixelation": 3,           ## PixelateEffect block size in screen pixels (1 = off)
+	&"display/pixelation": 1,           ## unused: PixelateEffect is no longer added in Main (1 = off)
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,

@@ -30,6 +30,8 @@ const STRENGTH := 0.4      ## 0 = none, 1 = full painting (the old "Light" prese
 	&"edge_strength": 0.4,
 	&"highlight_lift": 0.12,   # was bleaching white paths to bare paper
 	&"highlight_start": 0.85,
+	&"green_warm": 0.22,      # neon green -> softer yellow-green
+	&"green_desat": 0.2,
 }
 
 func _ready() -> void:

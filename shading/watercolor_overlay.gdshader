@@ -42,6 +42,13 @@ uniform float edge_width : hint_range(0.5, 4.0) = 1.4;         // edge detection
 uniform float edge_threshold : hint_range(0.0, 1.0) = 0.06;    // how contrasty an edge must be to pool pigment
 uniform vec3 edge_tint : source_color = vec3(0.50, 0.46, 0.58);
 
+group_uniforms grade;
+// Screen-space nudge for strongly-green pixels (grass, leaves): turns neon
+// green toward a softer storybook yellow-green. Applied at full strength,
+// independent of `strength`, since it is a color grade, not a paint effect.
+uniform float green_warm : hint_range(0.0, 0.5) = 0.0;    // blends greens toward yellow-green
+uniform float green_desat : hint_range(0.0, 0.8) = 0.0;   // drains saturation from greens
+
 group_uniforms paper;
 uniform vec3 paper_color : source_color = vec3(0.97, 0.95, 0.90);
 uniform float paper_strength : hint_range(0.0, 1.0) = 0.45;    // visible paper texture
@@ -137,5 +144,10 @@ void fragment() {
 	float bright = smoothstep(highlight_start, 1.0, luma(c));
 	c = mix(c, paper_color * (0.92 + 0.12 * paper), bright * highlight_lift);
 
-	COLOR = vec4(mix(original, clamp(c, 0.0, 1.0), strength), 1.0);
+	vec3 outc = mix(original, clamp(c, 0.0, 1.0), strength);
+	float green = smoothstep(0.04, 0.35, outc.g - max(outc.r, outc.b));
+	outc.r += green * green_warm * outc.g;
+	outc.b -= green * green_warm * 0.25 * outc.g;
+	outc = mix(outc, vec3(luma(outc)), green * green_desat);
+	COLOR = vec4(clamp(outc, 0.0, 1.0), 1.0);
 }

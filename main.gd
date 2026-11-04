@@ -110,14 +110,10 @@ func _ready() -> void:
 	add_child(outlines)
 	outlines.follow(cam.get_camera())
 
-	# Retro pixelation overlay — sits above the outline pass, below the HUD
-	# (see PixelateEffect's header comment). Purely cosmetic; doesn't need
-	# anything set up before it. The block size comes from the player's
-	# Settings ("display/pixelation", Options > Display).
-	# Watercolor goes in first (same canvas layer, drawn underneath) so any
-	# pixelation mosaics over the painted look — see WatercolorEffect.
+	# Painted look (see WatercolorEffect). The old retro PixelateEffect is
+	# deliberately NOT added any more — it made the picture noisy; the class
+	# is still in core/ if it's ever wanted back (add it right after this).
 	add_child(WatercolorEffect.new())
-	add_child(PixelateEffect.new())
 
 	var low_hp_vignette := LowHpVignette.new()
 	low_hp_vignette.low_hp_threshold = low_hp_vignette_threshold
