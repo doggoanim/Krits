@@ -77,17 +77,23 @@ render_priority = 0
 shader = ExtResource("18_water2_shader")
 shader_parameter/albedo_texture = ExtResource("30_lcfa2")
 shader_parameter/uv_scroll_speed = Vector2(0, 0)
-shader_parameter/shallow_color = Color(1, 1, 1, 1)
-shader_parameter/deep_color = Color(1, 1, 1, 0.9019608)
+shader_parameter/shallow_color = Color(0.3, 0.82, 0.93, 0.78)
+shader_parameter/deep_color = Color(0.08, 0.47, 0.84, 0.92)
 shader_parameter/wave_height = 0.08
 shader_parameter/wave_scale = 1.3
 shader_parameter/wave_speed = 0.1
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
-shader_parameter/sparkle_strength = 0.8
 shader_parameter/sparkle_density = 40.0
 shader_parameter/sparkle_speed = 2.5
 shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
+shader_parameter/texture_strength = 0.2
+shader_parameter/foam_width = 0.5
+shader_parameter/foam_wobble = 0.35
+shader_parameter/line_strength = 0.55
+shader_parameter/line_scale = 1.6
+shader_parameter/line_speed = 0.35
+shader_parameter/sparkle_strength = 0.3
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_o8fgi"]
 top_radius = 10.0

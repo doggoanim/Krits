@@ -22,6 +22,17 @@ uniform float wave_speed = 0.6;
 uniform float fresnel_power = 3.0;
 uniform float color_bands = 3.0;    // flat color steps instead of a smooth gradient, for the toon look
 
+group_uniforms toon_water;
+uniform float texture_strength : hint_range(0.0, 1.0) = 1.0;   // how much albedo_texture tints the flat colours (0 = pure flat toon colour)
+uniform sampler2D depth_tex : hint_depth_texture, repeat_disable, filter_nearest;
+uniform vec4 foam_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform float foam_width : hint_range(0.0, 3.0) = 0.0;        // shoreline foam band in world units of water depth; 0 = off
+uniform float foam_wobble : hint_range(0.0, 1.0) = 0.35;      // how much that band's edge undulates
+uniform float line_strength : hint_range(0.0, 1.0) = 0.0;     // drifting white wave lines on the surface; 0 = off
+uniform float line_scale = 1.6;                               // lines per world unit-ish (higher = finer, more numerous)
+uniform float line_speed = 0.35;
+group_uniforms;
+
 uniform float sparkle_strength : hint_range(0.0, 2.0) = 0.0;   // 0 disables sparkle entirely
 uniform float sparkle_density = 40.0;    // sparkle cells per world unit — higher = finer, more numerous glints
 uniform float sparkle_speed = 2.5;       // how often each cell's on/off state re-rolls
@@ -79,8 +90,39 @@ void fragment() {
 	// until you actually assign one.
 	vec2 scrolled_uv = UV + (TIME - time_offset) * uv_scroll_speed;
 	vec4 tex = texture(albedo_texture, scrolled_uv);
-	color *= tex.rgb;
-	alpha *= tex.a;
+	color *= mix(vec3(1.0), tex.rgb, texture_strength);
+	alpha *= mix(1.0, tex.a, texture_strength);
+
+	float clk = TIME - time_offset;
+
+	// --- Wind Waker shoreline foam: where the water is shallow (the opaque
+	// scene is close behind the surface) paint a hard-edged white band.
+	// Thickness is the depth gap between the water surface and whatever is
+	// behind it; the band edge wobbles with a couple of sines so the shore
+	// line undulates instead of tracing the geometry exactly.
+	float foam = 0.0;
+	if (foam_width > 0.0) {
+		float depth = texture(depth_tex, SCREEN_UV).x;
+		vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
+		view.xyz /= view.w;
+		float thickness = -view.z + VERTEX.z;
+		float wob = sin(world_xz.x * 2.3 + clk * 0.9) * sin(world_xz.y * 1.9 - clk * 0.7);
+		float edge = foam_width * (1.0 + foam_wobble * wob);
+		foam = step(thickness, edge);                                   // solid band at the shore
+		foam = max(foam, step(abs(thickness - edge * 1.7), edge * 0.12)); // thin second ring just outside it
+	}
+
+	// --- Drifting white wave lines: thin curves from warped sines.
+	float lines = 0.0;
+	if (line_strength > 0.0) {
+		vec2 q = world_xz * line_scale;
+		float a = sin(q.x + sin(q.y * 0.8 + clk * line_speed) * 1.7 + clk * line_speed);
+		float b = sin(q.y * 1.1 - sin(q.x * 0.7 - clk * line_speed * 0.8) * 1.5 - clk * line_speed * 0.7);
+		lines = max(smoothstep(0.95, 0.985, a), smoothstep(0.96, 0.99, b)) * line_strength;
+	}
+	float white = max(foam, lines);
+	color = mix(color, foam_color.rgb, white);
+	alpha = max(alpha, white);
 
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), fresnel_power);
 	ALBEDO = color;

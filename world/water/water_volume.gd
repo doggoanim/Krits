@@ -32,7 +32,7 @@ extends Area3D
 ## match whatever shallow_color/deep_color this body's own water.gdshader
 ## material is using, so looking up through the surface reads as the same
 ## water rather than a generic default.
-@export var tint_color := Color(0.08, 0.32, 0.42, 0.55)
+@export var tint_color := Color(0.08, 0.38, 0.62, 0.55)
 ## Entering while falling at least this fast (velocity.y, so a fall from
 ## height or a ground pound diving straight in — PoundState's own dive
 ## speed is nowhere near a gentle walk-in's) plays the bigger splash
