@@ -18,7 +18,6 @@
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
-[ext_resource type="Script" uid="uid://dc2o4kji103ja" path="res://world/puddle.gd" id="well_puddle"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -3454,23 +3453,3 @@ material = SubResource("FogMaterial_mist")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -6, -30)
 size = Vector3(16, 6, 60)
 material = SubResource("FogMaterial_mist")
-
-[node name="Puddles" type="Node3D" parent="." unique_id=920000230]
-
-[node name="Puddle1" type="MeshInstance3D" parent="Puddles" unique_id=920000231]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2.5, 2)
-script = ExtResource("well_puddle")
-
-[node name="Puddle2" type="MeshInstance3D" parent="Puddles" unique_id=920000232]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -2.5, -19.2)
-script = ExtResource("well_puddle")
-puddle_size = Vector2(2, 1.4)
-
-[node name="Puddle3" type="MeshInstance3D" parent="Puddles" unique_id=920000233]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -5.5, -29.2)
-script = ExtResource("well_puddle")
-
-[node name="Puddle4" type="MeshInstance3D" parent="Puddles" unique_id=920000234]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, -2.5, -39.2)
-script = ExtResource("well_puddle")
-puddle_size = Vector2(1.2, 1)

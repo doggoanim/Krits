@@ -77,10 +77,10 @@ func _splash(pos: Vector3) -> void:
 	add_child(ring)
 	ring.global_position = pos + Vector3.UP * 0.02
 	ring.rotation_degrees.x = -90.0   # flat on the floor
-	ring.scale = Vector3.ONE * 0.1
+	ring.scale = Vector3.ONE * 0.05
 	var tw := create_tween().set_parallel(true)
-	tw.tween_property(ring, "scale", Vector3.ONE * 0.9, 0.9).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(ring, "transparency", 1.0, 0.9)
+	tw.tween_property(ring, "scale", Vector3.ONE * 0.45, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(ring, "transparency", 1.0, 0.3)
 	tw.chain().tween_callback(ring.queue_free)
 	if sound != null:
 		var p := AudioStreamPlayer3D.new()
