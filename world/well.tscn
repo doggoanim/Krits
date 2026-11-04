@@ -19,6 +19,7 @@
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
+[ext_resource type="Script" path="res://world/editor_preview_light.gd" id="well_editor_light"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -3357,3 +3358,7 @@ material = SubResource("FogMaterial_mist")
 [node name="DeathPit" type="Area3D" parent="." unique_id=920000300]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -26, -30)
 script = ExtResource("well_pit")
+
+[node name="EditorPreviewLight" type="Node" parent="." unique_id=920000400]
+script = ExtResource("well_editor_light")
+
