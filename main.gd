@@ -294,11 +294,7 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_sun.directional_shadow_max_distance = 70.0
 	_sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 
-	var sky_mat := _env.sky.sky_material as ProceduralSkyMaterial
-	sky_mat.sky_top_color = cfg.sky_top_color
-	sky_mat.sky_horizon_color = cfg.sky_horizon_color
-	sky_mat.ground_bottom_color = cfg.ground_bottom_color
-	sky_mat.ground_horizon_color = cfg.ground_horizon_color
+	_apply_sky(cfg)
 
 	_env.background_mode = Environment.BG_SKY
 	_env.ambient_light_color = cfg.ambient_color
@@ -343,6 +339,28 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	# Set unconditionally (not just "if present") so going back to a config
 	# with no LUT of its own actually clears one a previous config set.
 	_env.adjustment_color_correction = cfg.color_correction_lut
+
+## Sky material: the config's custom sky shader if it has one, otherwise the
+## plain procedural gradient. The material object is swapped only when the
+## kind changes (not every level load).
+func _apply_sky(cfg: EnvironmentConfig) -> void:
+	if cfg.sky_shader:
+		var mat := _env.sky.sky_material as ShaderMaterial
+		if mat == null:
+			mat = ShaderMaterial.new()
+			_env.sky.sky_material = mat
+		mat.shader = cfg.sky_shader
+		for uniform_name: StringName in cfg.sky_shader_params:
+			mat.set_shader_parameter(uniform_name, cfg.sky_shader_params[uniform_name])
+		return
+	var sky_mat := _env.sky.sky_material as ProceduralSkyMaterial
+	if sky_mat == null:
+		sky_mat = ProceduralSkyMaterial.new()
+		_env.sky.sky_material = sky_mat
+	sky_mat.sky_top_color = cfg.sky_top_color
+	sky_mat.sky_horizon_color = cfg.sky_horizon_color
+	sky_mat.ground_bottom_color = cfg.ground_bottom_color
+	sky_mat.ground_horizon_color = cfg.ground_horizon_color
 
 ## Re-grades the whole scene for whichever side of a door you're now on, and
 ## additionally force the sky/sun off for a plain black void whenever the

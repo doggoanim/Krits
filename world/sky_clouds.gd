@@ -25,6 +25,7 @@ extends Node3D
 @export var cloud_shade := Color(0.70, 0.79, 0.95) ## underside colour
 @export var drift_speed := 0.6                    ## world units/sec along +X (same direction as WindGusts)
 @export var react_to_gusts := true                ## clouds visibly speed up while a gust sweeps through
+@export var show_sprites := true                  ## false = shadows only (the sky shader paints the visible clouds)
 @export var cast_shadows := true                  ## ground shadows that follow each cloud
 ## Distance (along the drift's X travel) from each end of area_size a cloud
 ## spends fading, so it never pops in or out.
@@ -85,6 +86,7 @@ func _make_cloud() -> Cloud:
 	c.sprite = MeshInstance3D.new()
 	c.sprite.mesh = quad
 	c.sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	c.sprite.visible = show_sprites
 	c.root.add_child(c.sprite)
 
 	if cast_shadows:

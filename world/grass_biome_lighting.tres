@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://cxq5uev4mffcc"]
 
 [ext_resource type="CompressedTexture3D" uid="uid://dhupkpgmtg20t" path="res://assets/luts/pastry_wonderland_lut.png" id="1_q3pbs"]
+[ext_resource type="Shader" path="res://shading/sky_painted.gdshader" id="2_sky"]
 [ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="1_v032n"]
 
 [resource]
 script = ExtResource("1_v032n")
 sun_energy = 1.2
-sky_top_color = Color(0.2, 0.46, 0.95, 1)
-sky_horizon_color = Color(0.78, 0.92, 1, 1)
+sky_shader = ExtResource("2_sky")
 sun_shadow_blur = 0.8
 volumetric_fog_enabled = true
 brightness = 0.83

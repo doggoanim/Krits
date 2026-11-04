@@ -717,6 +717,7 @@ area_size = Vector2(250, 250)
 height = 60.0
 cloud_size = Vector2(27, 27)
 cloud_count = 14
+show_sprites = false
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
