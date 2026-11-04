@@ -46,7 +46,7 @@
 [ext_resource type="Script" uid="uid://bv377biwti3hs" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
 [ext_resource type="PackedScene" uid="uid://c0yeh1bs8b8gt" path="res://assets/world/nature/red_flower.glb" id="43_qssed"]
 [ext_resource type="PackedScene" uid="uid://kni1e3ga44vm" path="res://assets/world/nature/yellow_flower.glb" id="44_36x1p"]
-[ext_resource type="Script" uid="uid://corr3uvd0biec" path="res://world/sky_clouds.gd" id="45_sky_clouds"]
+[ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
@@ -710,14 +710,10 @@ transform = Transform3D(0.8660254, 0, 0.5, 0, 1.3, 0, -0.5, 0, 0.8660254, 20, 0,
 [node name="Wind" type="Node" parent="Props/eyecandies/yellow_flower2" unique_id=472261053]
 script = ExtResource("40_foliage_wind")
 
-[node name="SkyClouds" type="Node3D" parent="." unique_id=454784756]
+[node name="CloudShadows" type="Node3D" parent="." unique_id=2069795992]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -5)
-script = ExtResource("45_sky_clouds")
-area_size = Vector2(250, 250)
-height = 60.0
-cloud_count = 14
-cloud_size = Vector2(27, 27)
-show_sprites = false
+script = ExtResource("44_cloud_shadows")
+height = 43.0
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
