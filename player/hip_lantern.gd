@@ -27,7 +27,7 @@ var _lit := false   ## switched on: the light and flame show
 @export var model_height := 0.34            ## metres, handle top to base
 @export var glow_color := Color("F3EECA")
 @export var light_energy := 0.8
-@export var light_range := 3.5
+@export var light_range := 7.0
 @export var glow_mesh_name := "Lantern_glow"   ## the glb's inner flame mesh, drawn unshaded in glow_color
 
 @export_group("Swing")
