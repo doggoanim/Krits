@@ -12,10 +12,10 @@ extends Node
 ## reshuffle the others.
 
 ## Baseline for every tree: a deeper, cooler green than the raw model.
-@export var base_tint := Color(0.72, 0.88, 0.80)
+@export var base_tint := Color(0.55, 0.78, 0.66)
 ## How far each tree may stray from the baseline, per channel
 ## (red = yellower/bluer, green = lighter/darker, blue = cooler/warmer).
-@export var variation := Vector3(0.14, 0.08, 0.10)
+@export var variation := Vector3(0.22, 0.14, 0.16)
 ## Nodes in the parent whose name contains one of these get tinted
 ## (everything else — rocks, stumps, particle nodes — is left alone).
 @export var name_filter: PackedStringArray = ["tree"]
