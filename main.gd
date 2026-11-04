@@ -318,6 +318,13 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_env.ssao_intensity = cfg.ssao_intensity
 	_env.ssao_radius = cfg.ssao_radius
 
+	# Distance haze (cheap depth fog) — see EnvironmentConfig's Distance Haze group.
+	_env.fog_enabled = cfg.haze_enabled
+	_env.fog_light_color = cfg.haze_color
+	_env.fog_density = cfg.haze_density
+	_env.fog_aerial_perspective = cfg.haze_aerial_perspective
+	_env.fog_sky_affect = 0.0   # keep the sky's own colors, haze only affects geometry
+
 	# Volumetric fog is what actually produces visible sun shafts/god rays
 	# through trees and gaps (see EnvironmentConfig's header comment on the
 	# group) — it's the sun's light_volumetric_fog_energy above, set on the

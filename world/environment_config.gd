@@ -44,6 +44,16 @@ extends Resource
 @export var ssao_intensity := 0.8                    ## light touch — heavy AO reads as gritty/realistic, not cartoony
 @export var ssao_radius := 0.8
 
+@export_group("Distance Haze")
+## Cheap depth fog (not volumetric): distant objects blend toward the haze
+## color, which is what gives a Wind Waker-style sense of depth — far hills
+## go soft and pale instead of staying as sharp and saturated as the
+## foreground. Aerial perspective also tints it by the sky's own colors.
+@export var haze_enabled := false   ## per-environment: outdoor levels turn it on, interiors/caves keep it off
+@export var haze_color := Color(0.78, 0.88, 0.96)
+@export var haze_density := 0.006
+@export var haze_aerial_perspective := 0.5
+
 @export_group("Volumetric Fog")
 ## Godot's native volumetric fog — turned on, this is what actually produces
 ## visible sun shafts/god rays through trees and gaps: the fog scatters the

@@ -16,7 +16,21 @@ const CANVAS_LAYER := -9   ## same layer as PixelateEffect; tree order puts this
 const STRENGTH := 0.4      ## 0 = none, 1 = full painting (the old "Light" preset)
 
 ## Overrides for shader uniforms, e.g. {&"paper_strength": 0.6}. See the shader.
-@export var look: Dictionary = {}
+## Defaults aim at a clean Wind Waker-style storybook look: soft flat color
+## washes with thin painted edges, and almost no grain, wobble or paper — the
+## filter should read as "hand-painted", never as camera noise.
+@export var look: Dictionary = {
+	&"wobble_pixels": 1.2,
+	&"boil_amount": 0.05,
+	&"blur_radius": 1.0,
+	&"flatten": 0.3,
+	&"saturation": 1.0,
+	&"granulation": 0.05,
+	&"paper_strength": 0.1,
+	&"edge_strength": 0.4,
+	&"highlight_lift": 0.12,   # was bleaching white paths to bare paper
+	&"highlight_start": 0.85,
+}
 
 func _ready() -> void:
 	var canvas := CanvasLayer.new()
