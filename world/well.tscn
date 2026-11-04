@@ -3453,3 +3453,8 @@ material = SubResource("FogMaterial_mist")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -6, -30)
 size = Vector3(16, 6, 60)
 material = SubResource("FogMaterial_mist")
+
+[node name="DeathPit" type="Area3D" parent="." unique_id=920000300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -26, -30)
+script = ExtResource("well_pit")
+

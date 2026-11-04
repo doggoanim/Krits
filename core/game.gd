@@ -20,6 +20,7 @@ var quests := QuestLog.new()   ## which quests are done; progress is derived fro
 var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
 var god_mode := false
+var arrival_velocity := Vector3.ZERO   ## one-shot: Main gives the player this velocity right after a level swap (see EjectPit)
 var input_locked := false   ## true during encounter transitions
 var in_combat := false      ## true for the whole of an encounter (set by EncounterManager) — doors refuse while it is
 
