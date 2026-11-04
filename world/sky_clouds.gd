@@ -22,7 +22,7 @@ extends Node3D
 @export var cloud_count := 10
 @export var cloud_size := Vector2(16.0, 16.0)     ## base size; a cloud is 1.6x this wide and 0.8x tall
 @export var size_variation := 0.3                 ## each cloud is scaled by 1 +/- this
-@export var cloud_shade := Color(0.78, 0.86, 0.98) ## underside colour
+@export var cloud_shade := Color(0.70, 0.79, 0.95) ## underside colour
 @export var drift_speed := 0.6                    ## world units/sec along +X (same direction as WindGusts)
 @export var react_to_gusts := true                ## clouds visibly speed up while a gust sweeps through
 @export var cast_shadows := true                  ## ground shadows that follow each cloud
@@ -30,13 +30,19 @@ extends Node3D
 ## spends fading, so it never pops in or out.
 @export var edge_fade_distance := 30.0
 
-## The cloud's silhouette: (centre x, centre y, radius) in "height units" — the
-## sprite is 2.0 wide and 1.0 tall, with a flat base at FLAT_BOTTOM. The shadow
-## pieces are placed from these same numbers so shadow and sprite match.
+## The cloud's silhouette, in "height units" (the sprite is 2.0 wide, 1.0 tall):
+## a wide rounded BASE (a capsule from BASE_FROM to BASE_TO at BASE_Y, radius
+## BASE_R, with its bottom cut flat at FLAT_BOTTOM) topped by round BUMPS
+## (centre x, centre y, radius) that overlap it and each other, so it reads as
+## one cumulus instead of a row of separate balls. The shadow pieces are built
+## from these same numbers so the shadow matches the sprite.
 const BUMPS: Array[Vector3] = [
-	Vector3(0.38, 0.62, 0.20), Vector3(0.75, 0.46, 0.28), Vector3(1.20, 0.40, 0.31),
-	Vector3(1.62, 0.60, 0.21), Vector3(1.00, 0.62, 0.30),
+	Vector3(0.56, 0.56, 0.20), Vector3(0.88, 0.42, 0.27),
+	Vector3(1.22, 0.40, 0.29), Vector3(1.52, 0.57, 0.20),
 ]
+const BASE_FROM := Vector2(0.34, 0.70)
+const BASE_TO := Vector2(1.66, 0.70)
+const BASE_R := 0.14
 const FLAT_BOTTOM := 0.84
 const SPRITE_ASPECT := Vector2(1.6, 0.8)   ## quad size multiplier applied to cloud_size
 
@@ -71,7 +77,7 @@ func _make_cloud() -> Cloud:
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y   # stays upright, flat base stays flat
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_texture = _texture
-	mat.no_depth_test = false
+	mat.disable_fog = true   # haze would wash the sprite into the sky
 	if randf() < 0.5:   # mirrored: same silhouette reads as a different cloud
 		mat.uv1_scale = Vector3(-1.0, 1.0, 1.0)
 		mat.uv1_offset = Vector3(1.0, 0.0, 0.0)
@@ -86,6 +92,13 @@ func _make_cloud() -> Cloud:
 		c.root.add_child(c.shadow_root)
 		var width := cloud_size.x * SPRITE_ASPECT.x * c.scale_factor   # world width of the sprite
 		var unit := width * 0.5                                        # one "height unit" in world metres
+		var base := BoxMesh.new()
+		base.size = Vector3((BASE_TO.x - BASE_FROM.x + BASE_R * 2.0) * unit, BASE_R * 2.0 * unit, BASE_R * 4.0 * unit)
+		var base_mi := MeshInstance3D.new()
+		base_mi.mesh = base
+		base_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		base_mi.position = Vector3(((BASE_FROM.x + BASE_TO.x) * 0.5 - 1.0) * unit, 0.0, 0.0)
+		c.shadow_root.add_child(base_mi)
 		for b in BUMPS:
 			var cyl := CylinderMesh.new()
 			cyl.top_radius = b.z * unit
@@ -122,7 +135,7 @@ func _make_texture(w: int, h: int) -> ImageTexture:
 	for y in h:
 		for x in w:
 			var p := Vector2((x + 0.5) / h, (y + 0.5) / h)
-			var sdf := -1.0
+			var sdf := BASE_R - _dist_to_segment(p, BASE_FROM, BASE_TO)
 			for b in BUMPS:
 				sdf = maxf(sdf, b.z - p.distance_to(Vector2(b.x, b.y)))
 			sdf = minf(sdf, FLAT_BOTTOM - p.y)
@@ -131,3 +144,8 @@ func _make_texture(w: int, h: int) -> ImageTexture:
 			var col := Color.WHITE.lerp(cloud_shade, shade)
 			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
 	return ImageTexture.create_from_image(img)
+
+static func _dist_to_segment(p: Vector2, a: Vector2, b: Vector2) -> float:
+	var ab := b - a
+	var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+	return p.distance_to(a + ab * t)
