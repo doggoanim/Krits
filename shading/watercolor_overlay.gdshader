@@ -11,7 +11,7 @@ shader_type canvas_item;
 //   3. GRANULATION — fine noise lightens/darkens the pigment unevenly, like
 //                 paint settling into paper grain.
 //   4. EDGE POOLING — pigment gathers at the borders of a shape, so edges get a
-//                 darker, slightly tinted rim (found with a Sobel filter).
+//                 darker, slightly tinted rim (a 4-tap gradient filter).
 //   5. PAPER    — a fibrous paper texture multiplies over everything, and the
 //                 brightest highlights fade to bare paper (watercolor has no
 //                 white paint; white is the paper showing through).
@@ -66,15 +66,12 @@ float value_noise(vec2 p) {
 	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
+// Two octaves are plenty for a screen-space paint look and half the cost of
+// four — this runs for every pixel, several times over.
 float fbm(vec2 p) {
-	float v = 0.0;
-	float a = 0.5;
-	for (int i = 0; i < 4; i++) {
-		v += a * value_noise(p);
-		p = p * 2.03 + 17.1;
-		a *= 0.5;
-	}
-	return v;   // roughly 0..0.94
+	float v = 0.5 * value_noise(p);
+	v += 0.25 * value_noise(p * 2.03 + 17.1);
+	return v / 0.75 * 0.94;   // keeps the old roughly-0..0.94 range
 }
 
 float luma(vec3 c) {
@@ -103,16 +100,14 @@ void fragment() {
 	vec2 uv = SCREEN_UV + offset * wobble_pixels * 2.0 * px;
 
 	// --- 2. wash: soft blur + gentle posterize ---------------------------------
-	vec3 sum = texture(screen_tex, uv).rgb * 2.0;
-	float weight = 2.0;
-	for (int i = 0; i < 8; i++) {
-		float a = float(i) * 0.785398;
-		vec2 dir = vec2(cos(a), sin(a));
-		sum += texture(screen_tex, uv + dir * blur_radius * px).rgb;
-		sum += texture(screen_tex, uv + dir * blur_radius * 0.5 * px).rgb;
-		weight += 2.0;
-	}
-	vec3 c = sum / weight;
+	// Centre + 4 diagonal taps (the bilinear filter already softens between
+	// them) — a fraction of the old 17-tap ring blur.
+	vec2 r = blur_radius * 0.8 * px;
+	vec3 c = texture(screen_tex, uv).rgb * 0.4;
+	c += texture(screen_tex, uv + vec2(r.x, r.y)).rgb * 0.15;
+	c += texture(screen_tex, uv + vec2(-r.x, r.y)).rgb * 0.15;
+	c += texture(screen_tex, uv + vec2(r.x, -r.y)).rgb * 0.15;
+	c += texture(screen_tex, uv + vec2(-r.x, -r.y)).rgb * 0.15;
 	c = mix(c, soft_bands(c, color_bands), flatten);
 	float l = luma(c);
 	c = mix(vec3(l), c, saturation);
@@ -121,25 +116,21 @@ void fragment() {
 	float grain = fbm(frag / granulation_scale);
 	c *= 1.0 + (grain - 0.47) * granulation * 1.6;
 
-	// --- 4. edge pooling (Sobel on the wobbled image) -------------------------
+	// --- 4. edge pooling (gradient on the wobbled image) -------------------------
 	vec2 e = edge_width * px;
-	float tl = luma(texture(screen_tex, uv + vec2(-e.x, -e.y)).rgb);
-	float tc = luma(texture(screen_tex, uv + vec2(0.0, -e.y)).rgb);
-	float tr = luma(texture(screen_tex, uv + vec2(e.x, -e.y)).rgb);
 	float ml = luma(texture(screen_tex, uv + vec2(-e.x, 0.0)).rgb);
 	float mr = luma(texture(screen_tex, uv + vec2(e.x, 0.0)).rgb);
-	float bl = luma(texture(screen_tex, uv + vec2(-e.x, e.y)).rgb);
+	float tc = luma(texture(screen_tex, uv + vec2(0.0, -e.y)).rgb);
 	float bc = luma(texture(screen_tex, uv + vec2(0.0, e.y)).rgb);
-	float br = luma(texture(screen_tex, uv + vec2(e.x, e.y)).rgb);
-	float gx = (tr + 2.0 * mr + br) - (tl + 2.0 * ml + bl);
-	float gy = (bl + 2.0 * bc + br) - (tl + 2.0 * tc + tr);
+	float gx = (mr - ml) * 2.0;
+	float gy = (bc - tc) * 2.0;
 	float edge = smoothstep(edge_threshold, edge_threshold + 0.25, length(vec2(gx, gy)));
 	// uneven pooling: the rim is darker in some stretches than others
-	edge *= 0.6 + 0.8 * fbm(frag / 7.0);
+	edge *= 0.6 + 0.8 * value_noise(frag / 7.0);
 	c = mix(c, c * edge_tint * 1.6, clamp(edge * edge_strength, 0.0, 1.0));
 
 	// --- 5. paper -------------------------------------------------------------
-	float fibers = fbm(vec2(frag.x / (paper_scale * 0.5), frag.y / (paper_scale * 3.0)));
+	float fibers = value_noise(vec2(frag.x / (paper_scale * 0.5), frag.y / (paper_scale * 3.0)));
 	float tooth = fbm(frag / paper_scale);
 	float paper = fibers * 0.45 + tooth * 0.55;
 	c *= mix(1.0, 0.78 + 0.5 * paper, paper_strength);
