@@ -23,31 +23,25 @@ uniform vec3 cloud_shadow : source_color = vec3(0.50, 0.64, 0.90);
 uniform float light_reach : hint_range(0.0, 0.5) = 0.12;     // how far toward the sun the shading samples
 uniform float shading_contrast : hint_range(0.5, 8.0) = 3.5;
 
-// Classic sin-based hash: the earlier fract-product hash showed blocky seams
-// (visible as rectangular glitches in the clouds) once coordinates got large.
-float hash21(vec2 p) {
-	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
+// Cloud shapes come from a tileable noise TEXTURE (a NoiseTexture2D, set on the
+// material) rather than hash-based value noise computed here: hashed noise
+// showed up as blocky, straight-edged patches on some GPUs, whereas sampling a
+// filtered texture is always smooth.
+uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
+uniform float noise_tile : hint_range(0.01, 1.0) = 0.3;   // how many noise-texture repeats per unit of sky plane
 
 float vnoise(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);   // quintic: no visible grid
-	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
-			mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
+	return texture(noise_tex, p * noise_tile).r;
 }
 
-// 4 octaves; a coarse warp first makes the shapes billow instead of look like plain noise.
+// Three layers of the noise texture at growing frequency, after a gentle warp
+// so shapes billow instead of looking like plain noise.
 float density(vec2 p) {
-	p += vec2(vnoise(p * 0.7 + 3.1), vnoise(p * 0.7 + 8.7)) * 0.5;
-	float v = 0.0;
-	float a = 0.5;
-	for (int i = 0; i < 4; i++) {
-		v += a * vnoise(p);
-		p = p * 2.07 + 11.3;
-		a *= 0.5;
-	}
-	return v;   // ~0..0.94
+	p += vec2(vnoise(p * 0.6 + 0.31), vnoise(p * 0.6 + 0.77) ) * 0.9 - 0.45;
+	float v = 0.55 * vnoise(p);
+	v += 0.30 * vnoise(p * 2.1 + 0.19);
+	v += 0.15 * vnoise(p * 4.3 + 0.53);
+	return v;   // ~0..1, centred near 0.5
 }
 
 void sky() {
