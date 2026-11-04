@@ -39,6 +39,10 @@ extends GPUParticles3D
 
 var _mat: ParticleProcessMaterial
 
+## Toon clouds are one whole bumpy cloud per sprite, so there is nothing to stack.
+func _lobes() -> int:
+	return 1 if toon_style else cluster_lobes
+
 func _ready() -> void:
 	_build()
 	set_process(react_to_gusts)
@@ -73,16 +77,17 @@ func _build() -> void:
 	mat.color_ramp = _make_fade_ramp(cloud_color)
 
 	var quad := QuadMesh.new()
-	quad.size = cloud_size
+	# Toon clouds are wide and low (a 2:1 sprite) rather than square.
+	quad.size = cloud_size * Vector2(1.6, 0.8) if toon_style else cloud_size
 	var surf := StandardMaterial3D.new()
 	surf.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	surf.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	surf.vertex_color_use_as_albedo = true
-	surf.albedo_texture = _make_toon_puff(128) if toon_style else SoftCircleTexture.make(48)
+	surf.albedo_texture = _make_toon_cloud(256, 128) if toon_style else SoftCircleTexture.make(48)
 	quad.material = surf
 
-	amount = cloud_count * cluster_lobes
+	amount = cloud_count * _lobes()
 	lifetime = area_size.x / maxf(drift_speed, 0.05)   # ~ time to drift across area_size once
 	preprocess = lifetime   # pre-roll so the sky is already full of clouds on load, not empty at first
 	randomness = 1.0
@@ -118,7 +123,7 @@ func _make_cluster_points() -> PackedVector3Array:
 			height,
 			randf_range(-area_size.y * 0.5, area_size.y * 0.5),
 		)
-		for j in cluster_lobes:
+		for j in _lobes():
 			points.append(center + Vector3(
 				randf_range(-cluster_spread, cluster_spread),
 				randf_range(-cluster_spread * 0.3, cluster_spread * 0.3),
@@ -137,16 +142,27 @@ func _make_point_texture(points: PackedVector3Array) -> ImageTexture:
 		img.set_pixel(i, 0, Color(points[i].x, points[i].y, points[i].z))
 	return ImageTexture.create_from_image(img)
 
-## One opaque round puff with a sharp (but anti-aliased) edge, white on top
-## fading to `cloud_shade` toward the bottom.
-func _make_toon_puff(size: int) -> ImageTexture:
-	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
-	var half := size * 0.5
-	for y in size:
-		for x in size:
-			var r := Vector2(x + 0.5 - half, y + 0.5 - half).length() / half
-			var a := clampf((1.0 - r) / 0.04, 0.0, 1.0)
-			var shade := smoothstep(0.35, 1.0, (y + 0.5) / size)
+## One whole cartoon cloud: a row of overlapping round bumps merged into a single
+## silhouette with a FLAT bottom (so it reads as a cloud, not a floating
+## circle), sharp anti-aliased edges, white on top fading to `cloud_shade`
+## underneath. Drawn per pixel as the union of a few circles.
+func _make_toon_cloud(w: int, h: int) -> ImageTexture:
+	# (centre x, centre y, radius) in "height units": the texture is 2.0 wide, 1.0 tall.
+	var bumps := [
+		Vector3(0.38, 0.62, 0.20), Vector3(0.75, 0.46, 0.28), Vector3(1.20, 0.40, 0.31),
+		Vector3(1.62, 0.60, 0.21), Vector3(1.00, 0.62, 0.30),
+	]
+	const FLAT_BOTTOM := 0.84
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		for x in w:
+			var p := Vector2((x + 0.5) / h, (y + 0.5) / h)
+			var sdf := -1.0
+			for b: Vector3 in bumps:
+				sdf = maxf(sdf, b.z - p.distance_to(Vector2(b.x, b.y)))
+			sdf = minf(sdf, FLAT_BOTTOM - p.y)   # cut everything below the flat base
+			var a := clampf(sdf * h / 1.5, 0.0, 1.0)
+			var shade := smoothstep(0.42, FLAT_BOTTOM, p.y)
 			var c := Color.WHITE.lerp(cloud_shade, shade)
 			img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
 	return ImageTexture.create_from_image(img)
