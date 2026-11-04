@@ -326,6 +326,9 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	# DirectionalLight itself, that makes this fog volume actually light up
 	# instead of just sitting there as flat haze.
 	_env.volumetric_fog_enabled = cfg.volumetric_fog_enabled
+	# The fog volume is a coarse 3D grid; drawn over the sky it shows up as big
+	# blocky patches in the clouds. Keep it on geometry only.
+	_env.volumetric_fog_sky_affect = 0.0
 	_env.volumetric_fog_density = cfg.volumetric_fog_density
 	_env.volumetric_fog_albedo = cfg.volumetric_fog_albedo
 	_env.volumetric_fog_anisotropy = cfg.volumetric_fog_anisotropy
