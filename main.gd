@@ -295,6 +295,8 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 
 	_apply_sky(cfg)
+	RenderingServer.global_shader_parameter_set(&"level_tint", cfg.character_tint)
+	RenderingServer.global_shader_parameter_set(&"level_tint_amount", cfg.character_tint_amount)
 
 	_env.background_mode = Environment.BG_SKY
 	_env.ambient_light_color = cfg.ambient_color

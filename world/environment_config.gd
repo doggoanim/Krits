@@ -78,6 +78,13 @@ extends Resource
 @export var sun_volumetric_fog_energy := 1.0        ## how strongly the sun itself lights up the fog — separate
 													  ## from sun_energy (which only affects regular surface lighting)
 
+@export_group("Character Tint")
+## Colour the toon-shaded characters/props are nudged toward in this environment
+## (see shading/toon.gdshader): lets them pick up the mood — cool teal in a cave —
+## instead of keeping the same bright flat colours everywhere. Amount 0 = off.
+@export var character_tint := Color.WHITE
+@export_range(0.0, 1.0, 0.01) var character_tint_amount := 0.0
+
 @export_group("Color Grading")
 @export var adjustment_enabled := true
 @export var brightness := 0.85

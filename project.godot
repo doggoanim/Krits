@@ -73,3 +73,11 @@ time_offset={
 "type": "float",
 "value": 0.0
 }
+level_tint={
+"type": "color",
+"value": Color(1, 1, 1, 1)
+}
+level_tint_amount={
+"type": "float",
+"value": 0.0
+}

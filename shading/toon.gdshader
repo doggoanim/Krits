@@ -55,13 +55,20 @@ uniform float specular_strength : hint_range(0.0, 1.0) = 0.0;   // 0 disables th
 uniform float specular_threshold : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 specular_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
+// Per-level tint (set by Main from the level's EnvironmentConfig): characters and
+// props pick up a bit of the surrounding colour — e.g. cool teal inside the
+// well — so they sit in the scene instead of looking pasted on. Amount 0 (the
+// default, outdoors) changes nothing.
+global uniform vec4 level_tint : source_color;
+global uniform float level_tint_amount;
+
 void fragment() {
 	vec4 tex = texture(albedo_texture, UV);
 	vec3 color = albedo_color.rgb;
 	if (use_vertex_color) {
 		color *= COLOR.rgb;
 	}
-	ALBEDO = tex.rgb * color;
+	ALBEDO = tex.rgb * color * mix(vec3(1.0), level_tint.rgb, level_tint_amount);
 	ALPHA = tex.a * albedo_color.a;
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
 
