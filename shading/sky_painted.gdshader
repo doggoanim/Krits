@@ -56,14 +56,9 @@ void sky() {
 
 	// Gradient: deep at the zenith, pale cyan toward the horizon.
 	vec3 col = mix(horizon_color, top_color, pow(up, gradient_power));
-	if (dir.y < 0.0) {
-		// below the horizon: just continue the horizon colour, slightly darker
-		COLOR = horizon_color * mix(1.0, 0.8, clamp(-dir.y * 3.0, 0.0, 1.0));
-		return;
-	}
 
 	// Project onto a flat layer: dir.xz / height. The +0.12 stops it exploding at the horizon.
-	vec2 uv = dir.xz / (dir.y + 0.12) * cloud_scale + vec2(TIME * wind_speed, TIME * wind_speed * 0.4);
+	vec2 uv = dir.xz / (max(dir.y, 0.0) + 0.12) * cloud_scale + vec2(TIME * wind_speed, TIME * wind_speed * 0.4);
 	float d = density(uv);
 	float lo = 1.0 - coverage * 0.75 - 0.15;
 	float cover = smoothstep(lo, lo + softness, d);
@@ -76,7 +71,12 @@ void sky() {
 	float core = smoothstep(lo + softness, lo + softness + 0.25, d);
 	vec3 cloud_col = mix(cloud_shadow, cloud_light, clamp(lit * (1.0 - core * 0.45) + (1.0 - core) * 0.35, 0.0, 1.0));
 
-	// Clouds fade into the haze right at the horizon.
-	float horizon_fade = smoothstep(0.0, 0.22, up);
-	COLOR = mix(col, cloud_col, cover * horizon_fade);
+	// Clouds fade into the haze right at the horizon, and there are none below it
+	// (sky() can't `return` early, so this is a mask instead of a branch).
+	float horizon_fade = smoothstep(0.0, 0.22, dir.y);
+	vec3 sky_col = mix(col, cloud_col, cover * horizon_fade);
+
+	// Below the horizon: just continue the horizon colour, slightly darker.
+	float below = clamp(-dir.y * 3.0, 0.0, 1.0);
+	COLOR = mix(sky_col, horizon_color * 0.8, below);
 }
