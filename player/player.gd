@@ -180,6 +180,7 @@ func _ready() -> void:
 	gear = GearDisplay.new()
 	add_child(gear)
 	add_child(HipLantern.new())   # the lantern on the left hip, once owned
+	add_child(CharacterFillLight.new())   # keeps the side facing the camera evenly lit
 
 	visual.add_child(RockArmorFx.new())   # the Earth spell's cube armor, follows the model
 
