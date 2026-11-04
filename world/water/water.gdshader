@@ -106,7 +106,8 @@ void fragment() {
 		vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
 		view.xyz /= view.w;
 		float thickness = -view.z + VERTEX.z;
-		float wob = sin(world_xz.x * 2.3 + clk * 0.9) * sin(world_xz.y * 1.9 - clk * 0.7);
+		float wob = sin(world_xz.x * 2.3 + clk * 0.9) * sin(world_xz.y * 1.9 - clk * 0.7)
+				+ 0.6 * sin(world_xz.x * 5.1 - world_xz.y * 3.7 + clk * 1.3);
 		float edge = foam_width * (1.0 + foam_wobble * wob);
 		foam = step(thickness, edge);                                   // solid band at the shore
 		foam = max(foam, step(abs(thickness - edge * 1.7), edge * 0.12)); // thin second ring just outside it
@@ -116,9 +117,14 @@ void fragment() {
 	float lines = 0.0;
 	if (line_strength > 0.0) {
 		vec2 q = world_xz * line_scale;
-		float a = sin(q.x + sin(q.y * 0.8 + clk * line_speed) * 1.7 + clk * line_speed);
-		float b = sin(q.y * 1.1 - sin(q.x * 0.7 - clk * line_speed * 0.8) * 1.5 - clk * line_speed * 0.7);
-		lines = max(smoothstep(0.95, 0.985, a), smoothstep(0.96, 0.99, b)) * line_strength;
+		// Two stacked warps (a big slow one and a smaller faster one) bend the
+		// lines into curvy, uneven shapes instead of near-straight stripes.
+		float a = sin(q.x + sin(q.y * 0.8 + clk * line_speed) * 3.2 + sin(q.y * 2.3 - clk * line_speed * 0.7) * 0.9 + clk * line_speed);
+		float b = sin(q.y * 1.1 - sin(q.x * 0.7 - clk * line_speed * 0.8) * 2.8 - sin(q.x * 1.9 + clk * line_speed * 0.6) * 0.8 - clk * line_speed * 0.7);
+		lines = max(smoothstep(0.95, 0.985, a), smoothstep(0.96, 0.99, b));
+		// Break the lines into separate dashes that fade in and out, so no stripe runs on forever.
+		lines *= smoothstep(-0.15, 0.5, sin(q.x * 0.55 + q.y * 0.75 + clk * line_speed * 0.4) + sin(q.y * 1.3 - q.x * 0.4 - clk * line_speed * 0.3) * 0.6);
+		lines *= line_strength;
 	}
 	float white = max(foam, lines);
 	color = mix(color, foam_color.rgb, white);
