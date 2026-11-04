@@ -46,7 +46,7 @@
 [ext_resource type="Script" uid="uid://bv377biwti3hs" path="res://world/falling_leaves.gd" id="43_falling_leaves"]
 [ext_resource type="PackedScene" uid="uid://c0yeh1bs8b8gt" path="res://assets/world/nature/red_flower.glb" id="43_qssed"]
 [ext_resource type="PackedScene" uid="uid://kni1e3ga44vm" path="res://assets/world/nature/yellow_flower.glb" id="44_36x1p"]
-[ext_resource type="Script" uid="uid://bka0jokgvuf2x" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
+[ext_resource type="Script" uid="uid://cwd06ei2kknct" path="res://world/cloud_shadows.gd" id="44_cloud_shadows"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="46_water_volume"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
@@ -84,16 +84,17 @@ shader_parameter/wave_scale = 1.3
 shader_parameter/wave_speed = 0.1
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
+shader_parameter/sparkle_strength = 0.3
 shader_parameter/sparkle_density = 40.0
 shader_parameter/sparkle_speed = 2.5
 shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
 shader_parameter/texture_strength = 0.2
+shader_parameter/foam_color = Color(1, 1, 1, 1)
 shader_parameter/foam_width = 0.5
 shader_parameter/foam_wobble = 0.55
 shader_parameter/line_strength = 0.55
 shader_parameter/line_scale = 1.6
 shader_parameter/line_speed = 0.35
-shader_parameter/sparkle_strength = 0.3
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_o8fgi"]
 top_radius = 10.0
