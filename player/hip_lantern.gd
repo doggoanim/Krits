@@ -139,6 +139,8 @@ func _process(delta: float) -> void:
 		_lit = not _lit
 		Game.set_flag(LIT_FLAG, _lit)
 		_apply_lit()
+		if _player.audio != null:
+			_player.audio.play_lantern(_lit)
 		Events.key_hint_dismissed.emit(HINT_ID)
 	var yaw := _player.visual.global_rotation.y
 	var target := _hook_position(yaw)

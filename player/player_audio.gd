@@ -33,6 +33,8 @@ const HURT_SFX: Array[AudioStream] = [
 	preload(SFX_DIR + "player_hurt_3.wav"),
 ]
 const SIDE_FLIP_SFX: AudioStream = preload(SFX_DIR + "side_flip.wav")
+const LANTERN_EQUIP_SFX: AudioStream = preload(SFX_DIR + "lantern_equip.wav")      ## lantern switched on
+const LANTERN_UNEQUIP_SFX: AudioStream = preload(SFX_DIR + "lantern_unequip.wav")  ## lantern switched off
 const SKID_SFX: AudioStream = preload(SFX_DIR + "skid.wav")
 const CLIMB_SFX: AudioStream = preload(SFX_DIR + "climb.wav")
 const ROLL_START_SFX: AudioStream = preload(SFX_DIR + "roll_start.wav")
@@ -186,6 +188,10 @@ func _ready() -> void:
 			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 			stream.loop_begin = 0
 			stream.loop_end = int(round(stream.get_length() * stream.mix_rate))
+
+## The hip lantern switched on (`on`) or off. Fixed pitch.
+func play_lantern(on: bool) -> void:
+	_play(LANTERN_EQUIP_SFX if on else LANTERN_UNEQUIP_SFX, 0.0)
 
 func play_jump() -> void:
 	_play(JUMP_SFX, PITCH_VARIANCE)
