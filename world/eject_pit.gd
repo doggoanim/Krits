@@ -13,10 +13,10 @@ extends Area3D
 ## node (below the lowest floor) and size it to cover the whole level.
 
 @export_file("*.tscn") var target_level := "res://world/chesburg.tscn"
-@export var target_spawn_id: StringName = &"well_exit"
+@export var target_spawn_id: StringName = &"well_eject"   ## the mouth of the well itself (a normal exit would be &"well_exit", just beside it)
 @export var damage := 10.0
-## World-space velocity the player arrives with (up, and away from the well mouth).
-@export var launch_velocity := Vector3(0.0, 12.0, 5.0)
+## World-space velocity the player arrives with.
+@export var launch_velocity := Vector3(0.0, 38.0, 1.5)   ## straight up out of the well mouth, a long way (gravity is 32, so ~22 m)
 @export var size := Vector3(120.0, 4.0, 140.0)
 
 var _busy := false

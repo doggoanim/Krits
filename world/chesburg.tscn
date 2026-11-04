@@ -350,6 +350,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.05, -2.4)
 script = ExtResource("47_door_spawn")
 spawn_id = &"well_exit"
 
+[node name="WellEjectSpawn" type="Node3D" parent="Props" unique_id=499902441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 1.2, -5.3904057)
+script = ExtResource("47_door_spawn")
+spawn_id = &"well_eject"
+
 [node name="Trees" type="Node3D" parent="Props" unique_id=1738221840]
 
 [node name="tree_chesburg_1" parent="Props/Trees" unique_id=1584612525 instance=ExtResource("10_qjukg")]
