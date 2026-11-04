@@ -58,6 +58,10 @@ uniform float wind_scale = 0.3;       // world-space frequency of the sway — l
 // idea what time of day or weather it is, FoliageWind just hands it a number.
 uniform float gust = 1.0;
 
+// Per-instance tint applied ONLY to strongly-green texels (leaves), so a tree's
+// trunk keeps its own colour. White = no change. See world/tree_variation.gd.
+uniform vec3 green_tint : source_color = vec3(1.0);
+
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float height = max(VERTEX.y - base_y, 0.0);
@@ -77,7 +81,10 @@ void fragment() {
 	if (use_vertex_color) {
 		color *= COLOR.rgb;
 	}
-	ALBEDO = tex.rgb * color;
+	vec3 albedo = tex.rgb * color;
+	float leafness = smoothstep(0.03, 0.25, albedo.g - max(albedo.r, albedo.b));
+	albedo = mix(albedo, albedo * green_tint, leafness);
+	ALBEDO = albedo;
 	ALPHA = tex.a * albedo_color.a;
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
 	ROUGHNESS = roughness;

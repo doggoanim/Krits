@@ -36,6 +36,9 @@ const SHADER := preload("res://shading/foliage_wind.gdshader")
 @export var wind_speed := 1.5
 @export var wind_scale := 0.3
 @export var react_to_gusts := true
+## Multiplied into this prop's green texels only (leaves/grass — the trunk is
+## untouched). White = no change. TreeVariation sets this per tree.
+@export var green_tint := Color.WHITE
 
 var _materials: Array[ShaderMaterial] = []
 var _anchor: Node3D   ## whatever _ready() finds itself attached to, for gust position sampling
@@ -104,5 +107,6 @@ func _wind_ify(mi: MeshInstance3D) -> void:
 		wind_mat.set_shader_parameter(&"wind_speed", wind_speed)
 		wind_mat.set_shader_parameter(&"wind_scale", wind_scale)
 		wind_mat.set_shader_parameter(&"base_y", base_y)
+		wind_mat.set_shader_parameter(&"green_tint", green_tint)
 		mi.set_surface_override_material(i, wind_mat)
 		_materials.append(wind_mat)
