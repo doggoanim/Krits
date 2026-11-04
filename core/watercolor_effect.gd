@@ -20,7 +20,7 @@ const STRENGTH := 0.75     ## 0 = none, 1 = full painting (the old "Light" prese
 ## washes with thin painted edges, and almost no grain, wobble or paper — the
 ## filter should read as "hand-painted", never as camera noise.
 @export var look: Dictionary = {
-	&"wobble_pixels": 2.8,        # edges wander like brush lines
+	&"wobble_pixels": 1.4,        # edges wander like brush lines
 	&"boil_amount": 0.1,
 	&"blur_radius": 1.8,          # soft wash
 	&"flatten": 0.55,             # colours snap to flat pigment steps
