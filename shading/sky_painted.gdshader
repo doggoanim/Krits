@@ -35,12 +35,22 @@ float vnoise(vec2 p) {
 }
 
 // Three layers of the noise texture at growing frequency, after a gentle warp
-// so shapes billow instead of looking like plain noise.
+// so shapes billow instead of looking like plain noise. Each layer drifts at
+// its OWN speed and a slightly different direction, so the big masses, the
+// lumps on them and the wisps slide against each other instead of the whole
+// sky moving as one rigid picture (they also slowly reshape as they go).
+uniform float speed_variation : hint_range(0.0, 3.0) = 1.0;   // 0 = every layer moves together
+
 float density(vec2 p) {
-	p += vec2(vnoise(p * 0.6 + 0.31), vnoise(p * 0.6 + 0.77) ) * 0.9 - 0.45;
-	float v = 0.55 * vnoise(p);
-	v += 0.30 * vnoise(p * 2.1 + 0.19);
-	v += 0.15 * vnoise(p * 4.3 + 0.53);
+	vec2 wind = vec2(wind_speed, wind_speed * 0.4) * TIME;
+	float m = speed_variation;
+	vec2 w0 = wind;                                         // big masses: slowest
+	vec2 w1 = wind * (1.0 + 0.9 * m) * vec2(1.0, -0.6);     // lumps: faster, drifting a bit sideways
+	vec2 w2 = wind * (1.0 + 2.0 * m) * vec2(1.0, 0.9);      // wisps: fastest
+	vec2 q = p + vec2(vnoise(p * 0.6 + 0.31 + w0 * 0.5), vnoise(p * 0.6 + 0.77 + w0 * 0.5)) * 0.9 - 0.45;
+	float v = 0.55 * vnoise(q + w0);
+	v += 0.30 * vnoise(q * 2.1 + 0.19 + w1);
+	v += 0.15 * vnoise(q * 4.3 + 0.53 + w2);
 	return v;   // ~0..1, centred near 0.5
 }
 
@@ -52,7 +62,7 @@ void sky() {
 	vec3 col = mix(horizon_color, top_color, pow(up, gradient_power));
 
 	// Project onto a flat layer: dir.xz / height. The +0.4 limits how much clouds stretch out at the horizon.
-	vec2 uv = dir.xz / (max(dir.y, 0.0) + 0.4) * cloud_scale + vec2(TIME * wind_speed, TIME * wind_speed * 0.4);
+	vec2 uv = dir.xz / (max(dir.y, 0.0) + 0.4) * cloud_scale;
 	float d = density(uv);
 	float lo = 1.0 - coverage * 0.75 - 0.15;
 	float cover = smoothstep(lo, lo + softness, d);
