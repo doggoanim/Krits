@@ -289,6 +289,9 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_sun.light_energy = cfg.sun_energy
 	_sun.shadow_enabled = cfg.sun_shadows
 	_sun.shadow_blur = cfg.sun_shadow_blur
+	# Shadow map only covers what's near the player: the same texture budget over
+	# a shorter range = much sharper, less jagged edges (and cheaper to render).
+	_sun.directional_shadow_max_distance = 70.0
 	_sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 
 	var sky_mat := _env.sky.sky_material as ProceduralSkyMaterial
