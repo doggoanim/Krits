@@ -150,10 +150,6 @@ func _ready() -> void:
 		var start_pos: Variant = _find_spawn_in(level, start_spawn_id)
 		player.teleport(start_pos if start_pos != null else level.global_position)
 		cam.global_position = player.global_position
-	if Game.arrival_velocity != Vector3.ZERO:   # thrown out of the previous level (see EjectPit)
-		player.velocity = Game.arrival_velocity
-		Game.arrival_velocity = Vector3.ZERO
-		player.machine.transition_to(&"Air")
 	else:
 		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 
@@ -205,6 +201,10 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 	var pos: Variant = _find_spawn_in(level, spawn_id)
 	player.teleport(pos if pos != null else level.global_position)
 	cam.global_position = player.global_position
+	if Game.arrival_velocity != Vector3.ZERO:   # thrown out of the previous level (see EjectPit)
+		player.velocity = Game.arrival_velocity
+		Game.arrival_velocity = Vector3.ZERO
+		player.machine.transition_to(&"Air")
 
 ## Scoped to `root` (the level that was just instantiated) rather than a
 ## global group lookup like _travel_to() above uses — right after a swap the
