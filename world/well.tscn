@@ -17,8 +17,8 @@
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
-[ext_resource type="Script" path="res://world/eject_pit.gd" id="well_pit"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
+[ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -2728,119 +2728,6 @@ face_vertex_data = {
 "vertex_index": SubResource("Resource_0ns6t")
 }
 
-[sub_resource type="Resource" id="Resource_c1ewf"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="Resource" id="Resource_elwva"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="Resource" id="Resource_xqpg5"]
-script = ExtResource("5_yicfs")
-data = PackedInt32Array(-1, -1, -1, -1, -1, -1)
-data_type = 1
-
-[sub_resource type="Resource" id="Resource_35xpn"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 1, 1, 0, 0, 0, -1, 0)
-data_type = 6
-stride = 3
-
-[sub_resource type="Resource" id="Resource_ttrch"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(0, 0, 0, 0, 0, 0)
-
-[sub_resource type="Resource" id="Resource_u4j47"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(1, 1, 1, 1, 1, 1)
-
-[sub_resource type="Resource" id="Resource_ba1lb"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-data_type = 4
-stride = 4
-
-[sub_resource type="Resource" id="Resource_83r8j"]
-script = ExtResource("5_yicfs")
-data = PackedInt32Array(0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5)
-data_type = 1
-
-[sub_resource type="Resource" id="Resource_3uobt"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0)
-data_type = 6
-stride = 3
-
-[sub_resource type="Resource" id="Resource_p2fvs"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="Resource" id="Resource_4wydi"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(45.796032, 5, 49.796032, 5, 49.796032, 5, 45.796032, 5, 0, 49.796032, 0, 45.796032, 5, 45.796032, 5, 49.796032, 0, 5, 0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 0, 5, 45.796032, 5, 45.796032, 5, 49.796032, 5, 49.796032, 5, 0, 45.796032, 0, 49.796032, 5, 49.796032, 5, 45.796032)
-data_type = 5
-stride = 2
-
-[sub_resource type="Resource" id="Resource_38yk0"]
-script = ExtResource("5_yicfs")
-data = PackedInt32Array(0, 1, 2, 3, 4, 5, 3, 2, 6, 4, 2, 1, 7, 0, 3, 5, 7, 5, 4, 6, 7, 6, 1, 0)
-data_type = 1
-
-[sub_resource type="Resource" id="Resource_clltd"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(-0.1904762, -0.95238096, 0.23809524, -0.1904762, -0.95238096, -0.23809524, -0.1904762, 0.95238096, -0.23809524, -0.1904762, 0.95238096, 0.23809524, 0.1904762, 0.95238096, -0.23809524, 0.1904762, 0.95238096, 0.23809524, 0.1904762, -0.95238096, -0.23809524, 0.1904762, -0.95238096, 0.23809524)
-data_type = 6
-stride = 3
-
-[sub_resource type="Resource" id="Resource_y1k68"]
-script = ExtResource("4_8grio")
-data = PackedFloat32Array(0, 4, 4, 0, 4, 0, 0, 5, 0, 0, 5, 4, 5, 5, 0, 5, 5, 4, 5, 4, 0, 5, 4, 4)
-data_type = 6
-stride = 3
-
-[sub_resource type="Resource" id="Resource_fwnvm"]
-script = ExtResource("3_yugcs")
-data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="Resource" id="Resource_173rh"]
-script = ExtResource("6_ld685")
-num_vertices = 8
-num_edges = 12
-num_faces = 6
-num_face_vertices = 24
-active_vertex = -1
-active_edge = -1
-active_face = -1
-active_face_vertex = -1
-edge_vertex_indices = PackedInt32Array(0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 3, 2, 4, 6, 4, 1, 6, 7, 0, 5, 7, 6, 7)
-edge_face_indices = PackedInt32Array(0, 5, 0, 2, 0, 1, 0, 3, 1, 4, 1, 3, 1, 2, 2, 4, 2, 5, 3, 5, 3, 4, 4, 5)
-face_vertex_count = PackedInt32Array(4, 4, 4, 4, 4, 4)
-face_vertex_indices = PackedInt32Array(0, 1, 2, 3, 4, 5, 3, 2, 6, 4, 2, 1, 7, 0, 3, 5, 7, 5, 4, 6, 7, 6, 1, 0)
-vertex_data = {
-"normal": SubResource("Resource_clltd"),
-"position": SubResource("Resource_y1k68"),
-"selected": SubResource("Resource_fwnvm")
-}
-edge_data = {
-"selected": SubResource("Resource_c1ewf"),
-"uv_seam": SubResource("Resource_elwva")
-}
-face_data = {
-"material_index": SubResource("Resource_xqpg5"),
-"normal": SubResource("Resource_35xpn"),
-"selected": SubResource("Resource_ttrch"),
-"visible": SubResource("Resource_u4j47")
-}
-face_vertex_data = {
-"color": SubResource("Resource_ba1lb"),
-"face_index": SubResource("Resource_83r8j"),
-"normal": SubResource("Resource_3uobt"),
-"selected": SubResource("Resource_p2fvs"),
-"uv0": SubResource("Resource_4wydi"),
-"vertex_index": SubResource("Resource_38yk0")
-}
-
 [sub_resource type="Resource" id="Resource_24au7"]
 script = ExtResource("3_yugcs")
 data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -3275,12 +3162,6 @@ materials = Array[Material]([ExtResource("7_8grio")])
 collision_layer = 129
 collision_mask = 129
 
-[node name="Block_24" type="Node3D" parent="CyclopsBlocks" unique_id=620223993]
-script = ExtResource("1_3nxol")
-mesh_vector_data = SubResource("Resource_173rh")
-collision_layer = 129
-collision_mask = 129
-
 [node name="Block_25" type="Node3D" parent="CyclopsBlocks" unique_id=341224565]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, -10, -59)
 script = ExtResource("1_3nxol")
@@ -3336,13 +3217,13 @@ spot_angle_attenuation = 0.6
 [node name="AccentLights" type="Node3D" parent="." unique_id=910000002]
 
 [node name="WarmTorch" type="OmniLight3D" parent="AccentLights" unique_id=910000003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.5, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25298738, 5.490712, 1.5)
 light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.9
 omni_range = 4.0
 
 [node name="CyanCrystal1" type="OmniLight3D" parent="AccentLights" unique_id=910000004]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -3, -20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -6.628918, -21.189594)
 light_color = Color(0.4, 0.9, 1, 1)
 light_energy = 0.9
 omni_range = 4.0
@@ -3476,4 +3357,3 @@ material = SubResource("FogMaterial_mist")
 [node name="DeathPit" type="Area3D" parent="." unique_id=920000300]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -26, -30)
 script = ExtResource("well_pit")
-
