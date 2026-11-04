@@ -28,6 +28,8 @@ var _lit := false   ## switched on: the light and flame show
 @export var glow_color := Color("F3EECA")
 @export var light_energy := 1.2
 @export var light_range := 7.0
+@export var flicker_amount := 0.08          ## fraction of light_energy the flame wavers by (0 = steady)
+@export var flicker_speed := 7.0
 @export var glow_mesh_name := "Lantern_glow"   ## the glb's inner flame mesh, drawn unshaded in glow_color
 
 @export_group("Swing")
@@ -152,6 +154,10 @@ func _process(delta: float) -> void:
 	global_rotation = Vector3(0.0, yaw, 0.0)
 	var swing := _pendulum.step(global_basis.inverse() * velocity, delta)
 	_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
+	if _lit and flicker_amount > 0.0:   # a flame wavers a little; two sines so it never settles into a pattern
+		var t := Time.get_ticks_msec() / 1000.0 * flicker_speed
+		var f := sin(t) * 0.6 + sin(t * 2.3 + 1.7) * 0.4
+		_light.light_energy = light_energy * (1.0 + f * flicker_amount)
 
 ## Switched off, the whole lantern disappears (model, flame and light). The
 ## x-ray silhouette copies follow their source meshes' visibility (see
