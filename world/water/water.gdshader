@@ -26,6 +26,7 @@ group_uniforms toon_water;
 uniform float texture_strength : hint_range(0.0, 1.0) = 1.0;   // how much albedo_texture tints the flat colours (0 = pure flat toon colour)
 uniform sampler2D depth_tex : hint_depth_texture, repeat_disable, filter_nearest;
 uniform vec4 foam_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform float depth_color_range : hint_range(0.1, 20.0) = 3.0;   // water depth (world units) at which the colour reaches fully "deep"
 uniform float foam_width : hint_range(0.0, 3.0) = 0.0;        // shoreline foam band in world units of water depth; 0 = off
 uniform float foam_wobble : hint_range(0.0, 1.0) = 0.35;      // how much that band's edge undulates
 uniform float line_strength : hint_range(0.0, 1.0) = 0.0;     // drifting white wave lines on the surface; 0 = off
@@ -78,10 +79,19 @@ void vertex() {
 }
 
 void fragment() {
-	// Driven by the wave height itself rather than real depth, just to get
-	// some visible variation across the surface without a depth-buffer pass.
-	float t = smoothstep(-1.0, 1.0, wave_offset);
-	t = floor(t * color_bands) / max(color_bands - 1.0, 1.0);
+	// How deep the water is at this pixel: the gap between the surface and the
+	// opaque scene behind it (read from the depth buffer).
+	float depth = texture(depth_tex, SCREEN_UV).x;
+	vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
+	view.xyz /= view.w;
+	float thickness = -view.z + VERTEX.z;
+
+	// Colour follows depth, not the moving waves: light shallows grading to deep
+	// blue in flat steps. It is fixed in the world, so nothing scrolls across the
+	// surface (the old version stepped the colour by wave height, which made
+	// bands slide around as the waves moved).
+	float t = smoothstep(0.0, depth_color_range, thickness);
+	t = floor(t * color_bands + 0.5) / max(color_bands, 1.0);
 	vec3 color = mix(shallow_color.rgb, deep_color.rgb, t);
 	float alpha = mix(shallow_color.a, deep_color.a, t);
 
@@ -102,10 +112,6 @@ void fragment() {
 	// line undulates instead of tracing the geometry exactly.
 	float foam = 0.0;
 	if (foam_width > 0.0) {
-		float depth = texture(depth_tex, SCREEN_UV).x;
-		vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-		view.xyz /= view.w;
-		float thickness = -view.z + VERTEX.z;
 		float wob = sin(world_xz.x * 2.3 + clk * 0.9) * sin(world_xz.y * 1.9 - clk * 0.7)
 				+ 0.6 * sin(world_xz.x * 5.1 - world_xz.y * 3.7 + clk * 1.3);
 		float edge = foam_width * (1.0 + foam_wobble * wob);
