@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
+[ext_resource type="Script" path="res://world/eject_pit.gd" id="well_pit"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
