@@ -1,180 +1,133 @@
 class_name SkyClouds
-extends GPUParticles3D
-## A layer of big, soft white puffs drifting slowly across the sky — the
-## visible counterpart to world/cloud_shadows.gd's invisible shadow-only
-## blobs (that file casts the shadows on the ground; this one is purely what
-## you SEE overhead, the two aren't currently position-linked). Same bolt-on
-## idiom as AmbientMotes/FallingLeaves: drop one of these in a level and it
-## drifts on its own, no setup() call needed.
+extends Node3D
+## Wind Waker-style clouds: what you SEE overhead and the shadows they cast on
+## the ground are the SAME objects, so they always move, wrap and fade
+## together. (This replaces the old SkyClouds particle layer + the separate,
+## unlinked CloudShadows node.)
 ##
-## Deliberately simple rather than a true volumetric/chunked multi-mesh
-## system — a wide, sparse field of big soft sprites at a fixed altitude,
-## looping the same spawn-drift-fade-respawn way AmbientMotes' dust does.
-## Good enough to read as "there are clouds up there"; swap for something
-## heavier later if the game ever needs clouds the camera can fly through or
-## that drive actual weather.
+## Each cloud is one Node3D holding
+##   - a visible sprite: a single crisp, flat-bottomed, bumpy cartoon cloud
+##     texture on a Y-axis billboard (unshaded, casts no shadow itself), and
+##   - a few shadow-only primitives laid out along the same row of bumps as the
+##     sprite, so the shadow on the ground has the cloud's own outline
+##     (SHADOWS_ONLY: rendered into the sun's shadow map, never into the colour
+##     pass — the sun needs shadows on, see EnvironmentConfig.sun_shadows).
 ##
-## Each cloud is the same soft round sprite AmbientMotes/FallingLeaves
-## already use (proven to look fine, unlike an earlier hand-baked lumpy-
-## shape attempt here that didn't). "Varied, can-stack" shapes come from
-## cluster_lobes: several of these soft circles spawn stacked tightly
-## together per cloud, each with its own randomized size, so the overlap
-## itself is what reads as one bigger lumpy cluster instead of a single
-## perfectly round blob — real overlapping sprites, not a baked texture
-## trick.
+## Usage: add one node anywhere in a level; it manages cloud_count clouds
+## drifting along +X across area_size and wrapping round, shrinking/fading near
+## the wrap edges so nothing pops. Tune the look from the Inspector.
 
-@export var area_size := Vector2(150.0, 150.0)   ## how wide a patch of sky this covers, centered on this node
-@export var height := 35.0                        ## how high above this node's own Y the layer sits
-@export var cloud_count := 10                      ## number of CLUSTERS — actual sprite count is this * cluster_lobes
-@export var cluster_lobes := 4                      ## soft circles stacked per cluster — higher = lumpier/fluffier
-@export var cluster_spread := 6.0                   ## how far a cluster's lobes scatter from its own center
-@export var cloud_size := Vector2(16.0, 16.0)
-@export var cloud_color := Color(1.0, 1.0, 1.0, 1.0)
-## Wind Waker-style puffs: crisp round edges and a pale blue-grey underside,
-## instead of soft fuzzy blobs. Overlapping lobes then read as one cartoon cloud.
-@export var toon_style := true
-@export var cloud_shade := Color(0.78, 0.86, 0.98)   ## underside colour of each puff
-@export var drift_speed := 0.6          ## world units/sec along +X — same travel direction WindGusts uses
-@export var react_to_gusts := true      ## clouds visibly speed up while a gust is sweeping through
+@export var area_size := Vector2(150.0, 150.0)   ## patch of sky covered, centred on this node
+@export var height := 35.0                        ## altitude above this node's own Y
+@export var cloud_count := 10
+@export var cloud_size := Vector2(16.0, 16.0)     ## base size; a cloud is 1.6x this wide and 0.8x tall
+@export var size_variation := 0.3                 ## each cloud is scaled by 1 +/- this
+@export var cloud_shade := Color(0.78, 0.86, 0.98) ## underside colour
+@export var drift_speed := 0.6                    ## world units/sec along +X (same direction as WindGusts)
+@export var react_to_gusts := true                ## clouds visibly speed up while a gust sweeps through
+@export var cast_shadows := true                  ## ground shadows that follow each cloud
+## Distance (along the drift's X travel) from each end of area_size a cloud
+## spends fading, so it never pops in or out.
+@export var edge_fade_distance := 30.0
 
-var _mat: ParticleProcessMaterial
+## The cloud's silhouette: (centre x, centre y, radius) in "height units" — the
+## sprite is 2.0 wide and 1.0 tall, with a flat base at FLAT_BOTTOM. The shadow
+## pieces are placed from these same numbers so shadow and sprite match.
+const BUMPS: Array[Vector3] = [
+	Vector3(0.38, 0.62, 0.20), Vector3(0.75, 0.46, 0.28), Vector3(1.20, 0.40, 0.31),
+	Vector3(1.62, 0.60, 0.21), Vector3(1.00, 0.62, 0.30),
+]
+const FLAT_BOTTOM := 0.84
+const SPRITE_ASPECT := Vector2(1.6, 0.8)   ## quad size multiplier applied to cloud_size
 
-## Toon clouds are one whole bumpy cloud per sprite, so there is nothing to stack.
-func _lobes() -> int:
-	return 1 if toon_style else cluster_lobes
+class Cloud:
+	var root: Node3D
+	var sprite: MeshInstance3D
+	var shadow_root: Node3D
+	var scale_factor := 1.0
+
+var _clouds: Array[Cloud] = []
+var _texture: ImageTexture
 
 func _ready() -> void:
-	_build()
-	set_process(react_to_gusts)
+	_texture = _make_texture(256, 128)
+	for i in cloud_count:
+		_clouds.append(_make_cloud())
 
-func _process(_delta: float) -> void:
-	var pos := global_position
-	var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
-	_mat.initial_velocity_min = drift_speed * 0.8 * gust
-	_mat.initial_velocity_max = drift_speed * gust
-
-func _build() -> void:
-	var mat := ParticleProcessMaterial.new()
-	mat.direction = Vector3.RIGHT
-	mat.spread = 5.0   # a narrow cone, not scattering every which way — clouds all drift one direction
-	mat.initial_velocity_min = drift_speed * 0.8
-	mat.initial_velocity_max = drift_speed
-	mat.gravity = Vector3.ZERO
-	# Explicit jittered points rather than one big box: every lobe's spawn
-	# point is baked close to its own cluster's siblings (see
-	# _make_cluster_points/_make_point_texture), which is what makes several
-	# overlapping soft circles actually overlap instead of scattering
-	# independently and rarely landing near each other. ParticleProcessMaterial
-	# has no plain settable emission_points array from script — point-cloud
-	# emission only works through a texture encoding each point's position
-	# (emission_point_texture), hence the extra bake step.
-	var points := _make_cluster_points()
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_POINTS
-	mat.emission_point_count = points.size()
-	mat.emission_point_texture = _make_point_texture(points)
-	mat.scale_min = 0.6
-	mat.scale_max = 1.2
-	mat.color_ramp = _make_fade_ramp(cloud_color)
+func _make_cloud() -> Cloud:
+	var c := Cloud.new()
+	c.scale_factor = 1.0 + randf_range(-size_variation, size_variation)
+	c.root = Node3D.new()
+	c.root.position = Vector3(
+		randf_range(-area_size.x * 0.5, area_size.x * 0.5),
+		height,
+		randf_range(-area_size.y * 0.5, area_size.y * 0.5))
+	add_child(c.root)
 
 	var quad := QuadMesh.new()
-	# Toon clouds are wide and low (a 2:1 sprite) rather than square.
-	quad.size = cloud_size * Vector2(1.6, 0.8) if toon_style else cloud_size
-	var surf := StandardMaterial3D.new()
-	surf.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	surf.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	surf.vertex_color_use_as_albedo = true
-	surf.albedo_texture = _make_toon_cloud(256, 128) if toon_style else SoftCircleTexture.make(48)
-	quad.material = surf
+	quad.size = cloud_size * SPRITE_ASPECT * c.scale_factor
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y   # stays upright, flat base stays flat
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_texture = _texture
+	mat.no_depth_test = false
+	if randf() < 0.5:   # mirrored: same silhouette reads as a different cloud
+		mat.uv1_scale = Vector3(-1.0, 1.0, 1.0)
+		mat.uv1_offset = Vector3(1.0, 0.0, 0.0)
+	quad.material = mat
+	c.sprite = MeshInstance3D.new()
+	c.sprite.mesh = quad
+	c.sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	c.root.add_child(c.sprite)
 
-	amount = cloud_count * _lobes()
-	lifetime = area_size.x / maxf(drift_speed, 0.05)   # ~ time to drift across area_size once
-	preprocess = lifetime   # pre-roll so the sky is already full of clouds on load, not empty at first
-	randomness = 1.0
-	local_coords = false
-	draw_pass_1 = quad
-	process_material = mat
-	emitting = true
-	_mat = mat
+	if cast_shadows:
+		c.shadow_root = Node3D.new()
+		c.root.add_child(c.shadow_root)
+		var width := cloud_size.x * SPRITE_ASPECT.x * c.scale_factor   # world width of the sprite
+		var unit := width * 0.5                                        # one "height unit" in world metres
+		for b in BUMPS:
+			var cyl := CylinderMesh.new()
+			cyl.top_radius = b.z * unit
+			cyl.bottom_radius = b.z * unit
+			cyl.height = b.z * unit
+			cyl.radial_segments = 12
+			var mi := MeshInstance3D.new()
+			mi.mesh = cyl
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+			mi.position = Vector3((b.x - 1.0) * unit, 0.0, 0.0)   # sprite centre = cloud centre
+			c.shadow_root.add_child(mi)
+	return c
 
-	# GPUParticles3D auto-computes a visibility bounding box from a short
-	# initial sample of particle motion, which badly undershoots how far
-	# these actually drift across a wide area_size — once that box falls
-	# outside the camera's frustum (easy to trigger just by looking at a
-	# certain angle), Godot culls the ENTIRE system even though individual
-	# particles are still clearly on screen. Setting this explicitly, sized
-	# to the real drift area plus a margin for each cloud's own size, is
-	# what actually fixes the "clouds disappear at some angles" symptom.
-	var margin: float = maxf(cloud_size.x, cloud_size.y) * 1.5 + cluster_spread
-	visibility_aabb = AABB(
-		Vector3(-area_size.x * 0.5 - margin, height - margin, -area_size.y * 0.5 - margin),
-		Vector3(area_size.x + margin * 2.0, margin * 2.0, area_size.y + margin * 2.0)
-	)
+func _process(delta: float) -> void:
+	var speed := drift_speed
+	if react_to_gusts:
+		var pos := global_position
+		speed *= WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
+	var half := area_size.x * 0.5
+	for c in _clouds:
+		c.root.position.x += speed * delta
+		if c.root.position.x > half:
+			c.root.position.x -= area_size.x
+		var edge := minf(c.root.position.x + half, half - c.root.position.x)
+		var fade := clampf(edge / maxf(edge_fade_distance, 0.001), 0.0, 1.0)
+		c.sprite.transparency = 1.0 - fade           # sprite melts away…
+		if c.shadow_root:                             # …and the shadow shrinks away with it
+			c.shadow_root.scale = Vector3.ONE * maxf(fade, 0.001)
 
-## cloud_count cluster centers scattered across area_size at `height`, each
-## with cluster_lobes points jittered within cluster_spread of it — see this
-## file's header comment for why clustered points (not one big random box)
-## is what makes clouds read as lumpy stacked clusters.
-func _make_cluster_points() -> PackedVector3Array:
-	var points := PackedVector3Array()
-	for i in cloud_count:
-		var center := Vector3(
-			randf_range(-area_size.x * 0.5, area_size.x * 0.5),
-			height,
-			randf_range(-area_size.y * 0.5, area_size.y * 0.5),
-		)
-		for j in _lobes():
-			points.append(center + Vector3(
-				randf_range(-cluster_spread, cluster_spread),
-				randf_range(-cluster_spread * 0.3, cluster_spread * 0.3),
-				randf_range(-cluster_spread, cluster_spread),
-			))
-	return points
-
-## Bakes `points` into a 1-pixel-tall RGBF image — ParticleProcessMaterial's
-## emission_point_texture reads each pixel's RGB as one point's raw XYZ
-## position, so FORMAT_RGBF (unclamped float channels) is required here:
-## the regular 0..1-per-channel formats couldn't hold real world-space
-## coordinates like this node's own height.
-func _make_point_texture(points: PackedVector3Array) -> ImageTexture:
-	var img := Image.create(maxi(points.size(), 1), 1, false, Image.FORMAT_RGBF)
-	for i in points.size():
-		img.set_pixel(i, 0, Color(points[i].x, points[i].y, points[i].z))
-	return ImageTexture.create_from_image(img)
-
-## One whole cartoon cloud: a row of overlapping round bumps merged into a single
-## silhouette with a FLAT bottom (so it reads as a cloud, not a floating
-## circle), sharp anti-aliased edges, white on top fading to `cloud_shade`
-## underneath. Drawn per pixel as the union of a few circles.
-func _make_toon_cloud(w: int, h: int) -> ImageTexture:
-	# (centre x, centre y, radius) in "height units": the texture is 2.0 wide, 1.0 tall.
-	var bumps := [
-		Vector3(0.38, 0.62, 0.20), Vector3(0.75, 0.46, 0.28), Vector3(1.20, 0.40, 0.31),
-		Vector3(1.62, 0.60, 0.21), Vector3(1.00, 0.62, 0.30),
-	]
-	const FLAT_BOTTOM := 0.84
+## One whole cartoon cloud: the union of BUMPS as a single silhouette with a flat
+## bottom, sharp anti-aliased edges, white on top fading to `cloud_shade` below.
+func _make_texture(w: int, h: int) -> ImageTexture:
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	for y in h:
 		for x in w:
 			var p := Vector2((x + 0.5) / h, (y + 0.5) / h)
 			var sdf := -1.0
-			for b: Vector3 in bumps:
+			for b in BUMPS:
 				sdf = maxf(sdf, b.z - p.distance_to(Vector2(b.x, b.y)))
-			sdf = minf(sdf, FLAT_BOTTOM - p.y)   # cut everything below the flat base
+			sdf = minf(sdf, FLAT_BOTTOM - p.y)
 			var a := clampf(sdf * h / 1.5, 0.0, 1.0)
 			var shade := smoothstep(0.42, FLAT_BOTTOM, p.y)
-			var c := Color.WHITE.lerp(cloud_shade, shade)
-			img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
+			var col := Color.WHITE.lerp(cloud_shade, shade)
+			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
 	return ImageTexture.create_from_image(img)
-
-static func _make_fade_ramp(c: Color) -> GradientTexture1D:
-	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	g.colors = PackedColorArray([
-		Color(c.r, c.g, c.b, 0.0),
-		c,
-		Color(c.r, c.g, c.b, 0.0),
-	])
-	var t := GradientTexture1D.new()
-	t.gradient = g
-	return t
