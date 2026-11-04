@@ -39,10 +39,6 @@
 [ext_resource type="PackedScene" uid="uid://cdviygxdsjeil" path="res://assets/world/fence.glb" id="35_0005w"]
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
 [ext_resource type="Script" uid="uid://mgy577jf1cdb" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
-<<<<<<< HEAD
-=======
-[ext_resource type="Script" path="res://world/butterflies.gd" id="91_butterflies"]
->>>>>>> 899edff0cdbfed4e2c45e15d7fe6e37fd69fac06
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
 [ext_resource type="PackedScene" uid="uid://dnytx8tbjvl2g" path="res://assets/world/nature/blue_flower.glb" id="41_qie8l"]
 [ext_resource type="PackedScene" uid="uid://dvi68k8hrbjdt" path="res://assets/world/nature/green_flower.glb" id="42_186l7"]
@@ -55,7 +51,6 @@
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
-[ext_resource type="Script" uid="uid://b1eh3lf7e4een" path="res://world/prop_scatter.gd" id="90_prop_scatter"]
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 
@@ -770,23 +765,6 @@ metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
 [node name="Scatter" type="Node3D" parent="." unique_id=920000001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -10)
 
-<<<<<<< HEAD
-[node name="GrassTufts" type="Node3D" parent="Scatter" unique_id=920000002]
-script = ExtResource("90_prop_scatter")
-scenes = Array[PackedScene]([ExtResource("26_muepx"), ExtResource("27_yu71x")])
-count = 220
-area_size = Vector2(70, 56)
-seed_value = 11
-
-[node name="Flowers" type="Node3D" parent="Scatter" unique_id=920000003]
-script = ExtResource("90_prop_scatter")
-scenes = Array[PackedScene]([ExtResource("43_qssed"), ExtResource("44_36x1p"), ExtResource("41_qie8l"), ExtResource("42_186l7")])
-count = 70
-area_size = Vector2(70, 56)
-seed_value = 23
-
-=======
->>>>>>> 899edff0cdbfed4e2c45e15d7fe6e37fd69fac06
 [node name="Butterflies1" type="Node3D" parent="Scatter" unique_id=920000004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -4)
 script = ExtResource("91_butterflies")
