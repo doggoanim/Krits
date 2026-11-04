@@ -17,6 +17,10 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 
+[ext_resource type="Script" path="res://world/cave_drips.gd" id="well_drips"]
+[ext_resource type="Script" path="res://world/glow_crystal.gd" id="well_crystal"]
+[ext_resource type="Script" path="res://world/puddle.gd" id="well_puddle"]
+
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
 data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -3064,6 +3068,11 @@ face_vertex_data = {
 "vertex_index": SubResource("Resource_wjui1")
 }
 
+[sub_resource type="FogMaterial" id="FogMaterial_mist"]
+density = 0.04
+albedo = Color(0.55, 0.82, 0.9, 1)
+height_falloff = 1.4
+
 [node name="Well" type="Node3D" unique_id=427418772]
 
 [node name="LevelEnvironment" type="Node" parent="." unique_id=305052992]
@@ -3396,3 +3405,82 @@ light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.8
 light_volumetric_fog_energy = 1.0
 omni_range = 3.5
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal1" unique_id=920000110]
+script = ExtResource("well_crystal")
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal2" unique_id=920000120]
+script = ExtResource("well_crystal")
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal3" unique_id=920000130]
+script = ExtResource("well_crystal")
+
+[node name="Drips" type="Node3D" parent="." unique_id=920000200]
+
+[node name="DripsStart" type="Node3D" parent="Drips" unique_id=920000201]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+script = ExtResource("well_drips")
+area_size = Vector2(5, 5)
+search_height = 0.0
+spot_count = 3
+
+[node name="DripsPath1" type="Node3D" parent="Drips" unique_id=920000202]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -1, -22)
+script = ExtResource("well_drips")
+area_size = Vector2(6, 10)
+search_height = 0.0
+
+[node name="DripsPath2" type="Node3D" parent="Drips" unique_id=920000203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -32)
+script = ExtResource("well_drips")
+area_size = Vector2(6, 10)
+search_height = 0.0
+
+[node name="DripsPath3" type="Node3D" parent="Drips" unique_id=920000204]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1, -40)
+script = ExtResource("well_drips")
+area_size = Vector2(6, 6)
+search_height = 0.0
+spot_count = 3
+
+[node name="ShaftDust" type="GPUParticles3D" parent="." unique_id=920000210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 5, -0.3)
+script = ExtResource("well_motes")
+area_size = Vector3(1.6, 8, 1.6)
+mote_count = 30
+color = Color(1, 0.95, 0.8, 0.7)
+glow_energy = 1.0
+mote_size = 0.035
+drift_speed = 0.08
+
+[node name="FloorMistStart" type="FogVolume" parent="." unique_id=920000220]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+size = Vector3(14, 2.5, 14)
+shape = 3
+material = SubResource("FogMaterial_mist")
+
+[node name="FloorMistPath" type="FogVolume" parent="." unique_id=920000221]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -6, -30)
+size = Vector3(16, 6, 60)
+shape = 3
+material = SubResource("FogMaterial_mist")
+
+[node name="Puddles" type="Node3D" parent="." unique_id=920000230]
+
+[node name="Puddle1" type="MeshInstance3D" parent="Puddles" unique_id=920000231]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2.5, 2)
+script = ExtResource("well_puddle")
+
+[node name="Puddle2" type="MeshInstance3D" parent="Puddles" unique_id=920000232]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -2.5, -19.2)
+script = ExtResource("well_puddle")
+puddle_size = Vector2(2, 1.4)
+
+[node name="Puddle3" type="MeshInstance3D" parent="Puddles" unique_id=920000233]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -5.5, -29.2)
+script = ExtResource("well_puddle")
+
+[node name="Puddle4" type="MeshInstance3D" parent="Puddles" unique_id=920000234]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, -2.5, -39.2)
+script = ExtResource("well_puddle")
+puddle_size = Vector2(1.2, 1.0)
