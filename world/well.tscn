@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://ohysk81aypln"]
 
-[ext_resource type="Script" path="res://world/ambient_motes.gd" id="well_motes"]
 [ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
 [ext_resource type="Script" uid="uid://u2kq7fluf2tu" path="res://addons/cyclops_level_builder/nodes/cyclops_blocks.gd" id="1_dxlgf"]
 [ext_resource type="Script" uid="uid://c5jpx1aoa7iso" path="res://addons/cyclops_level_builder/resources/data_vector_byte.gd" id="3_yugcs"]
@@ -16,10 +15,10 @@
 [ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
-
-[ext_resource type="Script" path="res://world/cave_drips.gd" id="well_drips"]
-[ext_resource type="Script" path="res://world/glow_crystal.gd" id="well_crystal"]
-[ext_resource type="Script" path="res://world/puddle.gd" id="well_puddle"]
+[ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
+[ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
+[ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
+[ext_resource type="Script" uid="uid://dc2o4kji103ja" path="res://world/puddle.gd" id="well_puddle"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -3340,30 +3339,13 @@ spot_angle_attenuation = 0.6
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.5, 1.5)
 light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.9
-light_volumetric_fog_energy = 1.0
 omni_range = 4.0
 
 [node name="CyanCrystal1" type="OmniLight3D" parent="AccentLights" unique_id=910000004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -3, -20)
 light_color = Color(0.4, 0.9, 1, 1)
 light_energy = 0.9
-light_volumetric_fog_energy = 1.0
 omni_range = 4.0
-
-[node name="CyanCrystal2" type="OmniLight3D" parent="AccentLights" unique_id=910000005]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -30)
-light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-light_volumetric_fog_energy = 1.0
-omni_range = 4.0
-
-[node name="CyanCrystal3" type="OmniLight3D" parent="AccentLights" unique_id=910000006]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -3, -40)
-light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-light_volumetric_fog_energy = 1.0
-omni_range = 4.0
-
 
 [node name="Wisps1" type="GPUParticles3D" parent="AccentLights/CyanCrystal1" unique_id=910000101]
 script = ExtResource("well_motes")
@@ -3374,6 +3356,15 @@ glow_energy = 2.0
 mote_size = 0.04
 drift_speed = 0.35
 
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal1" unique_id=920000110]
+script = ExtResource("well_crystal")
+
+[node name="CyanCrystal2" type="OmniLight3D" parent="AccentLights" unique_id=910000005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -30)
+light_color = Color(0.4, 0.9, 1, 1)
+light_energy = 0.9
+omni_range = 4.0
+
 [node name="Wisps2" type="GPUParticles3D" parent="AccentLights/CyanCrystal2" unique_id=910000102]
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
@@ -3382,6 +3373,15 @@ color = Color(0.5, 0.95, 1, 0.9)
 glow_energy = 2.0
 mote_size = 0.04
 drift_speed = 0.35
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal2" unique_id=920000120]
+script = ExtResource("well_crystal")
+
+[node name="CyanCrystal3" type="OmniLight3D" parent="AccentLights" unique_id=910000006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -3, -40)
+light_color = Color(0.4, 0.9, 1, 1)
+light_energy = 0.9
+omni_range = 4.0
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal3" unique_id=910000103]
 script = ExtResource("well_motes")
@@ -3392,28 +3392,20 @@ glow_energy = 2.0
 mote_size = 0.04
 drift_speed = 0.35
 
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal3" unique_id=920000130]
+script = ExtResource("well_crystal")
+
 [node name="WarmTorch2" type="OmniLight3D" parent="AccentLights" unique_id=910000020]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -4.5, -25)
 light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.8
-light_volumetric_fog_energy = 1.0
 omni_range = 3.5
 
 [node name="WarmTorch3" type="OmniLight3D" parent="AccentLights" unique_id=910000021]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -4.5, -36)
 light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.8
-light_volumetric_fog_energy = 1.0
 omni_range = 3.5
-
-[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal1" unique_id=920000110]
-script = ExtResource("well_crystal")
-
-[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal2" unique_id=920000120]
-script = ExtResource("well_crystal")
-
-[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal3" unique_id=920000130]
-script = ExtResource("well_crystal")
 
 [node name="Drips" type="Node3D" parent="." unique_id=920000200]
 
@@ -3456,13 +3448,11 @@ drift_speed = 0.08
 [node name="FloorMistStart" type="FogVolume" parent="." unique_id=920000220]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 size = Vector3(14, 2.5, 14)
-shape = 3
 material = SubResource("FogMaterial_mist")
 
 [node name="FloorMistPath" type="FogVolume" parent="." unique_id=920000221]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -6, -30)
 size = Vector3(16, 6, 60)
-shape = 3
 material = SubResource("FogMaterial_mist")
 
 [node name="Puddles" type="Node3D" parent="." unique_id=920000230]
@@ -3483,4 +3473,4 @@ script = ExtResource("well_puddle")
 [node name="Puddle4" type="MeshInstance3D" parent="Puddles" unique_id=920000234]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, -2.5, -39.2)
 script = ExtResource("well_puddle")
-puddle_size = Vector2(1.2, 1.0)
+puddle_size = Vector2(1.2, 1)
