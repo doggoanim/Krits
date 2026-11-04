@@ -8,7 +8,7 @@ extends Node
 ## shortcut, which intercepts the keypress before the running game ever sees
 ## it and kicks you straight back to the editor. +100 Gold lives on F12 instead.
 
-const HELP := "F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save  F12 +100 Gold"
+const HELP := "F8 Hide help  F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save  F12 +100 Gold"
 const DEBUG_GOLD := 100
 
 var player: Player
@@ -27,6 +27,7 @@ func _ready() -> void:
 	add_child(layer)
 	_label = Label.new()
 	_label.position = Vector2(20, 640)
+	_label.visible = false   # hidden by default so the game view stays clean; F8 shows it
 	layer.add_child(_label)
 	_update_label()
 
@@ -40,6 +41,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F4: _fight([EnemyLibrary.green_slime(), EnemyLibrary.spinner(), EnemyLibrary.piercer()])
 		KEY_F5: _fight([EnemyLibrary.green_slime(), EnemyLibrary.green_slime(), EnemyLibrary.spinner(),
 				EnemyLibrary.spinner(), EnemyLibrary.piercer(), EnemyLibrary.piercer()])
+		KEY_F8: _label.visible = not _label.visible
 		KEY_F6: _cancel()
 		KEY_F7:
 			Game.god_mode = not Game.god_mode
