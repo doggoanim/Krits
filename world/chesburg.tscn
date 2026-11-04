@@ -39,7 +39,6 @@
 [ext_resource type="PackedScene" uid="uid://cdviygxdsjeil" path="res://assets/world/fence.glb" id="35_0005w"]
 [ext_resource type="PackedScene" uid="uid://b12jush2gg6x7" path="res://assets/world/nature/blueberry_bush.glb" id="37_emeer"]
 [ext_resource type="Script" uid="uid://mgy577jf1cdb" path="res://world/foliage_wind.gd" id="40_foliage_wind"]
-[ext_resource type="Script" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="41_ambient_motes"]
 [ext_resource type="PackedScene" uid="uid://dnytx8tbjvl2g" path="res://assets/world/nature/blue_flower.glb" id="41_qie8l"]
 [ext_resource type="PackedScene" uid="uid://dvi68k8hrbjdt" path="res://assets/world/nature/green_flower.glb" id="42_186l7"]
@@ -52,6 +51,7 @@
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="47_door"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
+[ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -472,6 +472,9 @@ script = ExtResource("43_falling_leaves")
 leaf_count = 8
 leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 
+[node name="TreeVariation" type="Node" parent="Props/Trees" unique_id=2052945354]
+script = ExtResource("99_tree_variation")
+
 [node name="DustMotes" type="GPUParticles3D" parent="Props" unique_id=1266064599]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2, -10)
 script = ExtResource("41_ambient_motes")
@@ -750,6 +753,3 @@ display_name = "Hilltop"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.540747, 0.6118926, 31.145279)
 script = ExtResource("53_4t2cb")
 metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
-
-[node name="TreeVariation" type="Node" parent="Props/Trees"]
-script = ExtResource("99_tree_variation")
