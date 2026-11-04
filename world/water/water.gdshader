@@ -34,7 +34,7 @@ uniform float line_scale = 1.6;                               // lines per world
 uniform float line_speed = 0.35;
 group_uniforms;
 
-uniform float sparkle_strength : hint_range(0.0, 2.0) = 0.0;   // 0 disables sparkle entirely
+uniform float sparkle_strength : hint_range(0.0, 2.0) = 2.0;   // 0 disables sparkle entirely
 uniform float sparkle_density = 40.0;    // sparkle cells per world unit — higher = finer, more numerous glints
 uniform float sparkle_speed = 2.5;       // how often each cell's on/off state re-rolls
 uniform vec4 sparkle_color : source_color = vec4(1.0, 1.0, 0.95, 1.0);
