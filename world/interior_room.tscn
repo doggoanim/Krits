@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://world/door.gd" id="1"]
 [ext_resource type="Script" path="res://world/door_spawn.gd" id="2"]
@@ -9,6 +9,10 @@ size = Vector3(14, 0.2, 14)
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
 size = Vector3(14, 0.2, 14)
+
+[sub_resource type="BoxMesh" id="CeilingMesh"]
+size = Vector3(14, 0.2, 14)
+flip_faces = true
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
 albedo_color = Color(0.78, 0.7, 0.58, 1)
@@ -21,12 +25,14 @@ cull_mode = 1
 size = Vector3(14, 5, 0.2)
 
 [sub_resource type="BoxMesh" id="NSWallMesh"]
+flip_faces = true
 size = Vector3(14, 5, 0.2)
 
 [sub_resource type="BoxShape3D" id="EWWallShape"]
 size = Vector3(0.2, 5, 14)
 
 [sub_resource type="BoxMesh" id="EWWallMesh"]
+flip_faces = true
 size = Vector3(0.2, 5, 14)
 
 [sub_resource type="BoxShape3D" id="DoorShape"]
@@ -61,7 +67,7 @@ normal_axis = Vector3(0, 1, 0)
 shape = SubResource("FloorShape")
 
 [node name="Mesh" type="MeshInstance3D" parent="Ceiling"]
-mesh = SubResource("FloorMesh")
+mesh = SubResource("CeilingMesh")
 material_override = SubResource("InnerMat")
 
 [node name="WallNorth" type="StaticBody3D" parent="."]
