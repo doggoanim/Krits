@@ -9,7 +9,7 @@ extends Node
 ## for input-language switching): plain Ctrl+F1..F10 does the same, in the same order.
 const FKEYS: Dictionary = {
 	KEY_F1: KEY_1, KEY_F2: KEY_2, KEY_F3: KEY_3, KEY_F4: KEY_4, KEY_F5: KEY_5,
-	KEY_F6: KEY_6, KEY_F7: KEY_7, KEY_F8: KEY_8, KEY_F9: KEY_9, KEY_F10: KEY_0,
+	KEY_F6: KEY_6, KEY_F7: KEY_7, KEY_BACKSLASH: KEY_8, KEY_F9: KEY_9, KEY_F10: KEY_0,
 	KEY_F11: KEY_MINUS, KEY_F12: KEY_EQUAL,
 }
 
@@ -154,7 +154,7 @@ func _toggle_toon(on: bool) -> void:
 func _refresh_label() -> void:
 	if _label == null:
 		return
-	var lines := PackedStringArray(["Ctrl+/ hides this.  Ctrl+F1..F12 (or Ctrl+Shift+1..0, -, =):",
+	var lines := PackedStringArray(["Ctrl+/ hides this.  Ctrl+F1-F7,F9-F12 + Ctrl+\\ for haze (F8 closes Godot):",
 			"1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
 			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world",
 			"11 sun light  12 particles"])
