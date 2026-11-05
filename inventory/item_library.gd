@@ -45,6 +45,8 @@ static func lantern() -> ItemData:
 	var i := _make(&"lantern", ItemData.Category.KEY,
 		Color(0.95, 0.93, 0.79))
 	i.max_stack = 1
+	i.important = true
+	i.model = preload("res://assets/equipments/lantern.glb")
 	return i
 
 static func all_items() -> Array[ItemData]:

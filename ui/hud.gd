@@ -160,7 +160,7 @@ func _on_combo_landed(damage: float, _hits: int, pound_bonus: bool) -> void:
 ## -- Pickup toasts ---------------------------------------------------------
 func _on_item_gained(id: StringName, count: int) -> void:
 	var item := ItemLibrary.by_id(id)
-	if item:
+	if item and not item.important:   # important items get the ItemGet fanfare instead
 		_toast("+%d %s" % [count, item.display_name])
 
 func _on_inventory_full(id: StringName) -> void:

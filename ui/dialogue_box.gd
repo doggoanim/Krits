@@ -170,7 +170,7 @@ func _show_node(node: DialogueNode) -> void:
 	if node.sets_flag != &"":
 		Game.set_flag(node.sets_flag)
 	if node.gives_item != &"":
-		Game.inventory.add(node.gives_item, node.gives_count)
+		ItemGet.give(node.gives_item, node.gives_count)   # important items wait for the end of the talk
 	_line_done = false
 	_locked_until_msec = Time.get_ticks_msec() + int(SKIP_DELAY * 1000.0)
 	_clear_choices()

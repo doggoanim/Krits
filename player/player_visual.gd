@@ -18,6 +18,7 @@ const ANIM_JUMP_START_VARIANTS: Array[StringName] = [&"jump_start1", &"jump_star
 ## Three interchangeable orb-hit attack poses, picked at random each hit (see
 ## play_random_attack()).
 const ANIM_ATTACK_VARIANTS: Array[StringName] = [&"attack1", &"attack2", &"attack3"]
+const ANIM_GET_ITEM := &"Getting_Item"   ## arms raised, holding a new treasure up — see ItemGet
 const ANIM_FALLING := &"falling"
 const ANIM_ROLL := &"roll"
 const ANIM_DIVE := &"air_dive"

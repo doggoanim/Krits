@@ -15,6 +15,8 @@ enum Category { CONSUMABLE, MATERIAL, KEY }
 @export var sell_price := 0               ## 0 = can't be sold
 @export var icon: Texture2D               ## optional; slots fall back to a coloured initial
 @export var color := Color(0.8, 0.8, 0.8) ## tint for the fallback icon
+@export var important := false            ## story-level item: getting it plays the held-up "item get" fanfare (see ItemGet)
+@export var model: PackedScene            ## what the player holds up in that fanfare; falls back to the icon, then a glowing orb
 
 @export_group("Consumable effect")
 @export var heal_hp := 0.0

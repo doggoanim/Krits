@@ -27,6 +27,10 @@ const OPEN_CUTOFF_HZ := 20500.0   ## lowpass fully open = no audible effect
 
 var _player: AudioStreamPlayer
 var _lowpass: AudioEffectLowPassFilter
+var duck := false   ## set by anything that wants the music pushed way down for a moment (the item-get jingle)
+@export_range(0.0, 1.0) var duck_volume_mult := 0.12
+@export var duck_blend_speed := 5.0
+var _duck_blend := 0.0
 var force_muffle := false   ## set by anything that wants the muffled mix without a menu (e.g. the death sequence)
 var _blend := 0.0   ## 0 = normal, 1 = fully muffled (menu open)
 
@@ -49,7 +53,8 @@ func _process(delta: float) -> void:
 	if _lowpass:
 		# Interpolate in log space so the sweep sounds even.
 		_lowpass.cutoff_hz = exp(lerpf(log(OPEN_CUTOFF_HZ), log(menu_cutoff_hz), _blend))
-	_player.volume_db = linear_to_db(volume_scale * lerpf(1.0, menu_volume_mult, _blend))
+	_duck_blend = move_toward(_duck_blend, 1.0 if duck else 0.0, duck_blend_speed * delta)
+	_player.volume_db = linear_to_db(volume_scale * lerpf(1.0, menu_volume_mult, _blend) * lerpf(1.0, duck_volume_mult, _duck_blend))
 
 ## Starts `stream` looping from the top. A no-op if it's already the track
 ## playing, so callers can call this every frame/level-load without

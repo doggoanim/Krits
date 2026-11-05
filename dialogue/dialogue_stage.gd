@@ -22,7 +22,8 @@ func begin(speaker: Node3D, tree: SceneTree) -> void:
 	_speaker = speaker
 	if player == null:
 		return
-	player.enter_cinematic()
+	if player.machine.current_name != &"Frozen":   # already held by a cutscene (ItemGet): keep its pose
+		player.enter_cinematic()
 	if _speaker == null:
 		return
 	player.face(_speaker.global_position - player.global_position)

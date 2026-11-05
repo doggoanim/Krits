@@ -15,6 +15,7 @@ extends RefCounted
 ##   Desert Mayor: Who's there?       a line by another declared speaker
 ##     and it carries on here         indented = continues the line above
 ##   Take this.  [give lantern 1]     [set flag]  [give item] / [give item N]
+##                                    (an `important` item plays the item-get fanfare once the talk ends — see core/item_get.gd)
 ##   > Accept. -> accepted [set water_quest_accepted]    a choice, then where it leads
 ##   > Show it. -> thanks [item water_spirits] [if met_mayor]   [item x] [if flag]
 ##   > Never mind.                    no `->` ends the conversation
