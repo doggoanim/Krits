@@ -9,6 +9,8 @@ render_mode unshaded, depth_test_disabled, cull_back;
 uniform vec4 tint : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float dot_scale = 90.0;   // dots across the screen's shorter axis
 uniform float dot_size = 0.32;    // 0..0.5, how much of each cell the dot fills
+uniform bool halftone = false;    // false = flat translucent silhouette, true = dot screen
+uniform float fill_alpha = 0.6;   // opacity of the flat silhouette
 
 void fragment() {
 	vec2 aspect_fix = vec2(VIEWPORT_SIZE.x / VIEWPORT_SIZE.y, 1.0);
@@ -17,5 +19,5 @@ void fragment() {
 	float dist = length(cell_center);
 	float dot_mask = 1.0 - smoothstep(dot_size - 0.06, dot_size + 0.06, dist);
 	ALBEDO = tint.rgb;
-	ALPHA = dot_mask * tint.a;
+	ALPHA = (halftone ? dot_mask : fill_alpha) * tint.a;
 }

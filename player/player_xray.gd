@@ -24,9 +24,11 @@ const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
 const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
 
-## Master switch for the see-through-walls silhouette. Off for now; set true (or
-## flip it on the Player's `xray` node at runtime) to bring it back.
-@export var enabled := false
+## Master switch for the see-through-walls silhouette.
+@export var enabled := true
+## Dot-screen look for the silhouette. Off for now: it's a flat translucent
+## fill instead. Flip on (before gear/model copies are built) to restore dots.
+@export var halftone := false
 
 var player: Player
 var _copies: Array[MeshInstance3D] = []
@@ -41,9 +43,7 @@ func setup(p: Player) -> void:
 ## Gives an extra model (worn gear) its own halftone copy, so it's part of
 ## the silhouette too. The copies live under the model and are freed with it.
 func attach(model: Node3D) -> void:
-	var mat := ShaderMaterial.new()
-	mat.shader = SHADER
-	mat.render_priority = 10
+	var mat := _make_material()
 	if model.is_queued_for_deletion():
 		return
 	var before := _copies.size()
@@ -52,10 +52,14 @@ func attach(model: Node3D) -> void:
 		_copies[i].visible = _occluded and _sources[i].is_visible_in_tree()
 
 func _build_copies(model: Node3D) -> void:
+	_collect(model, _make_material())
+
+func _make_material() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = SHADER
 	mat.render_priority = 10
-	_collect(model, mat)
+	mat.set_shader_parameter(&"halftone", halftone)
+	return mat
 
 func _collect(n: Node, mat: ShaderMaterial) -> void:
 	if n is MeshInstance3D and (n as MeshInstance3D).mesh:
