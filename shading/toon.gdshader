@@ -47,7 +47,7 @@ uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.12;   // width of that edge; 0 = razor-sharp
 uniform vec4 shadow_tint : source_color = vec4(0.58, 0.58, 0.78, 1.0);   // multiplies ALBEDO in the shadow band
 
-uniform float rim_strength : hint_range(0.0, 1.0) = 0.3;   // 0 disables the rim light entirely
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.2;   // 0 disables the rim light entirely
 uniform float rim_power : hint_range(0.5, 16.0) = 3.5;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.97, 0.9, 1.0);
 
