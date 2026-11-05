@@ -159,6 +159,13 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	# out well above the top edge first (and, combined with the top-edge/
 	# corner normal bug, let the player climb right onto the roof). Tune
 	# the clearance in PlayerConfig if the stop point feels too low/high.
+	# Going down, the head check below isn't enough on its own: the head is
+	# 1.4 m up, so you could keep descending until it left the wall, with the
+	# legs already well past the bottom edge. Also require wall near the feet.
+	if climb < 0.0:
+		var foot_point := tentative + Vector3.UP * c.wall_climb_foot_clearance
+		if p.probe_wall_near(foot_point, _normal, strafe).is_empty():
+			return
 	var probe_point := tentative + Vector3.UP * c.wall_climb_head_clearance
 	var found := {}
 	# Turning an inside corner takes priority over staying on this wall, so a wall
