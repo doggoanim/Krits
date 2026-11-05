@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
+[ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="20_66osh"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
@@ -3863,6 +3864,28 @@ density = 0.04
 albedo = Color(0.55, 0.82, 0.9, 1)
 height_falloff = 1.4
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sm61l"]
+albedo_color = Color(0.30980393, 0.72156864, 0.05882353, 1)
+albedo_texture = ExtResource("20_66osh")
+
+[sub_resource type="BoxMesh" id="BoxMesh_244o2"]
+size = Vector3(4, 18.6, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6mgso"]
+size = Vector3(4, 18.6, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_66osh"]
+size = Vector3(6, 3, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sm61l"]
+size = Vector3(6, 3, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6mgso"]
+size = Vector3(10.1, 2, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jgx4q"]
+size = Vector3(10.1, 2, 0.1)
+
 [node name="Well" type="Node3D" unique_id=427418772]
 
 [node name="LevelEnvironment" type="Node" parent="." unique_id=305052992]
@@ -4327,3 +4350,45 @@ script = ExtResource("well_pit")
 
 [node name="EditorPreviewLight" type="Node" parent="." unique_id=920000400]
 script = ExtResource("well_editor_light")
+
+[node name="climbable_wall" type="StaticBody3D" parent="." unique_id=1976483730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.952555, -10.022911, -51.806732)
+collision_layer = 257
+collision_mask = 257
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="climbable_wall" unique_id=1867039044]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 0.6999998, 0.8225002)
+material_override = SubResource("StandardMaterial3D_sm61l")
+mesh = SubResource("BoxMesh_244o2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall" unique_id=1909320565]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 0.6999998, 0.8225002)
+shape = SubResource("BoxShape3D_6mgso")
+
+[node name="climbable_wall2" type="StaticBody3D" parent="." unique_id=1776443143]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.952555, -10.022911, -56.806732)
+collision_layer = 257
+collision_mask = 257
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="climbable_wall2" unique_id=1036058527]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10.5, 0.82250214)
+material_override = SubResource("StandardMaterial3D_sm61l")
+mesh = SubResource("BoxMesh_66osh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall2" unique_id=117987707]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10.5, 0.82250214)
+shape = SubResource("BoxShape3D_sm61l")
+
+[node name="climbable_wall3" type="StaticBody3D" parent="." unique_id=1527005406]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -9.952555, -9.022911, -58.806732)
+collision_layer = 257
+collision_mask = 257
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="climbable_wall3" unique_id=268313785]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10, -1.1274977)
+material_override = SubResource("StandardMaterial3D_sm61l")
+mesh = SubResource("BoxMesh_6mgso")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall3" unique_id=1919700576]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10, -1.1274977)
+shape = SubResource("BoxShape3D_jgx4q")
