@@ -32,6 +32,7 @@ var _lit := false   ## switched on: the light and flame show
 @export var glow_color := Color("F3EECA")
 @export var light_energy := 0.45
 @export var light_range := 8.0
+@export var fog_energy := 0.25             ## how strongly the light shows up in volumetric fog (1 = like any light; lower = less hazy glow around you)
 @export var flicker_amount := 0.08          ## fraction of light_energy the flame wavers by (0 = steady)
 @export var flicker_speed := 7.0
 @export var glow_mesh_name := "Lantern_glow"   ## the glb's inner flame mesh, drawn unshaded in glow_color
@@ -68,6 +69,7 @@ func _ready() -> void:
 	_light.light_energy = light_energy * level_boost
 	_light.omni_range = light_range
 	_light.shadow_enabled = false
+	_light.light_volumetric_fog_energy = fog_energy
 	_light.light_specular = 0.0   # no shiny hotspot on the ground in daylight
 	_light.position = Vector3(0.0, -model_height * 0.5, 0.0)   # inside the lantern
 	_pivot.add_child(_light)
