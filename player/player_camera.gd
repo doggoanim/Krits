@@ -135,11 +135,13 @@ func shake(amount: float) -> void:
 ## Ordinary walls only push the camera in when the x-ray silhouette is off:
 ## the silhouette is what keeps the player visible when the camera clips
 ## through them, so without it the camera would sit inside a wall (e.g. beside
-## a wall you are climbing) and the player would vanish from view.
+## a wall you are climbing) and the player would vanish from view. Climbable
+## walls (their own layer) count too, so the camera can't slip behind the very
+## wall being climbed when it swings above or below the player.
 func _update_collision_mask() -> void:
 	var p := target as Player
 	var xray_on := p != null and p.xray != null and p.xray.enabled
-	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if xray_on else WORLD_LAYER)
+	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if xray_on else (WORLD_LAYER | Player.CLIMBABLE_MASK))
 
 func _process(delta: float) -> void:
 	_update_collision_mask()
