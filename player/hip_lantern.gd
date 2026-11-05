@@ -30,7 +30,7 @@ var _lit := false   ## switched on: the light and flame show
 @export var bone_hint := "lowertorso"
 @export var model_height := 0.34            ## metres, handle top to base
 @export var glow_color := Color("F3EECA")
-@export var light_energy := 0.45
+@export var light_energy := 1.35
 @export var light_range := 8.0
 @export var fog_energy := 0.25             ## how strongly the light shows up in volumetric fog (1 = like any light; lower = less hazy glow around you)
 @export var flicker_amount := 0.08          ## fraction of light_energy the flame wavers by (0 = steady)
