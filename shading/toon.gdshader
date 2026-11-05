@@ -44,12 +44,12 @@ uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex co
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opaque, never discards; raise it only for an actual cutout texture
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
-uniform float shadow_softness : hint_range(0.0, 0.5) = 0.05;   // width of that edge; 0 = razor-sharp
-uniform vec4 shadow_tint : source_color = vec4(0.42, 0.42, 0.55, 1.0);   // multiplies ALBEDO in the shadow band
+uniform float shadow_softness : hint_range(0.0, 0.5) = 0.12;   // width of that edge; 0 = razor-sharp
+uniform vec4 shadow_tint : source_color = vec4(0.58, 0.58, 0.78, 1.0);   // multiplies ALBEDO in the shadow band
 
-uniform float rim_strength : hint_range(0.0, 1.0) = 0.0;   // 0 disables the rim light entirely
-uniform float rim_power : hint_range(0.5, 16.0) = 4.0;
-uniform vec4 rim_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.3;   // 0 disables the rim light entirely
+uniform float rim_power : hint_range(0.5, 16.0) = 3.5;
+uniform vec4 rim_color : source_color = vec4(1.0, 0.97, 0.9, 1.0);
 
 uniform float specular_strength : hint_range(0.0, 1.0) = 0.0;   // 0 disables the specular highlight band
 uniform float specular_threshold : hint_range(0.0, 1.0) = 0.9;
@@ -74,7 +74,11 @@ void fragment() {
 
 	if (rim_strength > 0.0) {
 		float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), max(rim_power, 0.001));
-		EMISSION += rim_color.rgb * rim * rim_strength;
+		// Dimmer and tinted toward the level's colour in dark/tinted levels, so a cave
+		// doesn't get a bright white outline glow on everything.
+		vec3 rim_col = mix(rim_color.rgb, level_tint.rgb, level_tint_amount);
+		float rim_scale = 1.0 - level_tint_amount * 0.8;
+		EMISSION += rim_col * rim * rim_strength * rim_scale;
 	}
 }
 
