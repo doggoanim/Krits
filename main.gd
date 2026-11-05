@@ -273,6 +273,7 @@ func _build_environment() -> void:
 	add_child(we)
 
 	_sun = sun
+	_sun.add_to_group(&"sun")   # CharacterFillLight places itself opposite this
 	_env = env
 	_apply_environment_config(env_config if env_config else EnvironmentConfig.new())
 

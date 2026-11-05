@@ -20,6 +20,7 @@ extends OmniLight3D
 @export var fill_color := Color(0.85, 0.92, 1.0)   ## slightly cool white
 
 var _player: Player
+var _sun: Node3D   ## the level sun (group "sun", set up by Main)
 
 func _ready() -> void:
 	top_level = true   # world-space: placed by script each frame
@@ -31,13 +32,15 @@ func _ready() -> void:
 	light_specular = 0.0
 
 func _process(_delta: float) -> void:
-	if _player == null or _player.camera_rig == null:
+	if _player == null:
 		return
-	var cam := _player.camera_rig.get_camera()
-	if cam == null:
-		return
-	var from := _player.global_position + Vector3.UP * height
-	var to_cam := cam.global_position - from
-	to_cam.y = 0.0
-	var dir := to_cam.normalized() if to_cam.length() > 0.01 else Vector3.BACK
-	global_position = from + dir * distance + Vector3.UP * 0.3
+	if _sun == null or not is_instance_valid(_sun):
+		_sun = get_tree().get_first_node_in_group(&"sun") as Node3D
+	# Fixed in the world, on the side the sun's shadows fall to: the shadowed side
+	# of the character gets a soft cool fill that never changes with the camera.
+	# (It used to sit toward the camera, so the character's lighting shifted
+	# whenever the camera orbited.)
+	var away := -_sun.global_basis.z if _sun != null else Vector3.BACK
+	away.y = 0.0
+	away = away.normalized() if away.length() > 0.01 else Vector3.BACK
+	global_position = _player.global_position + Vector3.UP * (height + 0.3) + away * distance
