@@ -10,6 +10,7 @@ extends Node
 const FKEYS: Dictionary = {
 	KEY_F1: KEY_1, KEY_F2: KEY_2, KEY_F3: KEY_3, KEY_F4: KEY_4, KEY_F5: KEY_5,
 	KEY_F6: KEY_6, KEY_F7: KEY_7, KEY_F8: KEY_8, KEY_F9: KEY_9, KEY_F10: KEY_0,
+	KEY_F11: KEY_MINUS, KEY_F12: KEY_EQUAL,
 }
 
 const KEYS: Dictionary = {
@@ -23,11 +24,14 @@ const KEYS: Dictionary = {
 	KEY_8: &"distance haze",
 	KEY_9: &"color grading",
 	KEY_0: &"world toon shading",
+	KEY_MINUS: &"sun light",
+	KEY_EQUAL: &"particles",
 }
 
 var env: Environment
 var sun: DirectionalLight3D
 var _main: Node
+var _sun_energy := 1.0   ## remembered when "sun light" is switched off
 var _off: Dictionary = {}   # effect name -> true while switched off
 var _label: Label
 
@@ -66,6 +70,8 @@ func _input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 	var effect: StringName = KEYS[code]
 	var turn_off := not _off.has(effect)
+	if effect == &"sun light" and turn_off:
+		_sun_energy = sun.light_energy
 	if turn_off:
 		_off[effect] = true
 	else:
@@ -92,6 +98,10 @@ func _apply(effect: StringName, on: bool) -> void:
 		&"watercolor overlay": _set_layers(&"WatercolorEffect", on)
 		&"outlines": _set_layers(&"OutlineSystem", on)
 		&"world toon shading": _toggle_toon(on)
+		&"sun light": sun.light_energy = _sun_energy if on else 0.0
+		&"particles":
+			for p in get_tree().root.find_children("*", "GPUParticles3D", true, false):
+				(p as GPUParticles3D).visible = on
 
 func _set_layers(script_class: StringName, on: bool) -> void:
 	for n in _main.get_children():
@@ -122,7 +132,8 @@ func _refresh_label() -> void:
 		return
 	var lines := PackedStringArray(["Ctrl+F1..F10 (or Ctrl+Shift+1..0):",
 			"1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
-			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world"])
+			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world",
+			"11 sun light  12 particles"])
 	if not _off.is_empty():
 		lines.append("OFF: " + ", ".join(PackedStringArray(_off.keys().map(func(x: Variant) -> String: return String(x)))))
 	_label.text = "\n".join(lines)
