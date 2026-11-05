@@ -99,6 +99,16 @@ void light() {
 	// edge gets quantized exactly like the light/dark terminator does,
 	// instead of staying a smooth blur next to a hard band.
 	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
+
+	// Point and spot lights (torches, crystals, the lantern, the well shaft) fall
+	// off SMOOTHLY instead of being banded. Banding turns a round light pool into
+	// a hard-edged, stair-stepped disc — most visible when it lands on a character
+	// right in front of the camera. Only the sun (directional) gets the cel bands.
+	if (!LIGHT_IS_DIRECTIONAL) {
+		DIFFUSE_LIGHT += ALBEDO * (LIGHT_COLOR / PI) * lit;
+		return;
+	}
+
 	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
 
 	// LIGHT_COLOR already includes the light's energy times PI (Godot's physical
