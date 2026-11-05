@@ -5,9 +5,9 @@ extends RefCounted
 ## a simple round sprite — dust/smoke particles (PlayerEffects), the ground
 ## depth-perception marker (GroundShadow), etc.
 ##
-## 32px by default (it was briefly 128 while chasing a blocky-disc glitch — it turned out not to be the cause, so it is small again): a particle drifting right in front of the camera fills the
-## screen, and at 32px its pixels showed as a big blocky stair-stepped disc.
-## See also fade_near_camera() for the other half of that fix.
+## 32px by default: small and cheap, plenty for tiny particles. A particle
+## passing right in front of the lens can still show its pixels, which is why
+## materials can call fade_near_camera() below to vanish before that happens.
 
 ## Makes a billboard particle material fade out as it gets close to the camera
 ## instead of popping into a giant blob right in front of the lens.
