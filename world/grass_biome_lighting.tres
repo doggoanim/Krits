@@ -18,7 +18,10 @@ noise = SubResource("Noise_clouds")
 
 [resource]
 script = ExtResource("1_v032n")
+sun_color = Color(1, 0.93, 0.78, 1)
 sun_energy = 1.2
+ambient_color = Color(0.76, 0.84, 1, 1)
+ambient_energy = 0.7
 sky_shader = ExtResource("2_sky")
 sky_shader_params = {
 &"noise_tex": SubResource("NoiseTex_clouds")
