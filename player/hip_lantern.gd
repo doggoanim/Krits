@@ -26,8 +26,8 @@ var _lit := false   ## switched on: the light and flame show
 @export var bone_hint := "lowertorso"
 @export var model_height := 0.34            ## metres, handle top to base
 @export var glow_color := Color("F3EECA")
-@export var light_energy := 1.2
-@export var light_range := 7.0
+@export var light_energy := 0.55
+@export var light_range := 5.5
 @export var flicker_amount := 0.08          ## fraction of light_energy the flame wavers by (0 = steady)
 @export var flicker_speed := 7.0
 @export var glow_mesh_name := "Lantern_glow"   ## the glb's inner flame mesh, drawn unshaded in glow_color
@@ -64,6 +64,7 @@ func _ready() -> void:
 	_light.light_energy = light_energy
 	_light.omni_range = light_range
 	_light.shadow_enabled = false
+	_light.light_specular = 0.0   # no shiny hotspot on the ground in daylight
 	_light.position = Vector3(0.0, -model_height * 0.5, 0.0)   # inside the lantern
 	_pivot.add_child(_light)
 	_lit = bool(Game.flag(LIT_FLAG, false))
