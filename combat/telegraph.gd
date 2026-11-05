@@ -16,7 +16,7 @@ var _fill: MeshInstance3D
 var _parts: Array[MeshInstance3D] = []
 var _tween: Tween
 
-## Settings > Accessibility > Attack Warnings. Off hides the ground indicators
+## Settings > Accessibility > Attack Telegraph. Off hides the ground indicators
 ## (circle, aim line) only — the attack itself and its timing are unchanged, and
 ## exclaim() below is never affected: the "!" is always shown.
 static func _warnings_enabled() -> bool:
