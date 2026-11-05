@@ -131,7 +131,7 @@ func _process(delta: float) -> void:
 
 func _face_camera() -> void:
 	var rig := _player.camera_rig
-	var cam := rig.get_camera() if rig != null else null
+	var cam: Camera3D = rig.get_camera() if rig != null else null
 	if cam == null:
 		return
 	_player.face(cam.global_position - _player.global_position)
