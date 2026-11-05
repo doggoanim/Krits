@@ -24,6 +24,10 @@ const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
 const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
 
+## Master switch for the see-through-walls silhouette. Off for now; set true (or
+## flip it on the Player's `xray` node at runtime) to bring it back.
+@export var enabled := false
+
 var player: Player
 var _copies: Array[MeshInstance3D] = []
 var _sources: Array[MeshInstance3D] = []   ## _sources[i] is the mesh _copies[i] mirrors
@@ -87,6 +91,8 @@ func _process(delta: float) -> void:
 			_copies[i].visible = _occluded and src.is_visible_in_tree()
 
 func _is_occluded() -> bool:
+	if not enabled:
+		return false
 	if player == null or player.camera_rig == null:
 		return false
 	var cam := player.camera_rig.get_camera()
