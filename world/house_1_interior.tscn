@@ -11,17 +11,21 @@ albedo_color = Color(0.82, 0.74, 0.6, 1)
 [sub_resource type="BoxMesh" id="FloorMesh"]
 size = Vector3(8, 0.2, 8)
 
+[sub_resource type="BoxMesh" id="CeilingMesh"]
+size = Vector3(8, 0.2, 8)
+flip_faces = true
+
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ysumd"]
 points = PackedVector3Array(-4, -0.1, -4, -4, 0.1, -4, 4, -0.1, -4, -4, -0.1, 4, -4, 0.1, 4, 4, 0.1, -4, 4, -0.1, 4, 4, 0.1, 4)
 
 [sub_resource type="StandardMaterial3D" id="InnerMat"]
-cull_mode = 1
 albedo_color = Color(0.82, 0.74, 0.6, 1)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_4q5kq"]
 points = PackedVector3Array(-4, -0.1, -4, -4, 0.1, -4, 4, -0.1, -4, -4, -0.1, 4, -4, 0.1, 4, 4, 0.1, -4, 4, -0.1, 4, 4, 0.1, 4)
 
 [sub_resource type="BoxMesh" id="NSWallMesh"]
+flip_faces = true
 size = Vector3(8, 5, 0.2)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fasv0"]
@@ -31,6 +35,7 @@ points = PackedVector3Array(4, 2.5, 0.1, 4, 2.5, -0.1, -4, 2.5, 0.1, 4, -2.5, 0.
 points = PackedVector3Array(4, 2.5, 0.1, 4, 2.5, -0.1, -4, 2.5, 0.1, 4, -2.5, 0.1, 4, -2.5, -0.1, -4, 2.5, -0.1, -4, -2.5, 0.1, -4, -2.5, -0.1)
 
 [sub_resource type="BoxMesh" id="EWWallMesh"]
+flip_faces = true
 size = Vector3(0.2, 5, 8)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_wumov"]
@@ -71,7 +76,7 @@ normal_axis = Vector3(0, 1, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Ceiling" unique_id=473521490]
 material_override = SubResource("InnerMat")
-mesh = SubResource("FloorMesh")
+mesh = SubResource("CeilingMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=195700002]
 shape = SubResource("ConvexPolygonShape3D_4q5kq")

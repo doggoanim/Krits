@@ -42,6 +42,7 @@
 uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex colors, matching BaseMaterial3D.vertex_color_use_as_albedo
+uniform float texture_flatten : hint_range(0.0, 1.0) = 0.0;   // evens out brightness baked into the texture (painted-in highlights/shading) so the toon lighting does the shading instead; 0 = off
 uniform vec2 uv_scale = vec2(1.0);   // StandardMaterial3D uv1_scale/offset, carried over for world props (see world/world_toon.gd)
 uniform vec2 uv_offset = vec2(0.0);
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opaque, never discards; raise it only for an actual cutout texture
@@ -50,7 +51,7 @@ uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.12;   // width of that edge; 0 = razor-sharp
 uniform vec4 shadow_tint : source_color = vec4(0.58, 0.58, 0.78, 1.0);   // multiplies ALBEDO in the shadow band
 
-uniform float rim_strength : hint_range(0.0, 1.0) = 0.2;   // 0 disables the rim light entirely
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.1;   // 0 disables the rim light entirely
 uniform float rim_power : hint_range(0.5, 16.0) = 3.5;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.97, 0.9, 1.0);
 
@@ -67,6 +68,10 @@ global uniform float level_tint_amount;
 
 void fragment() {
 	vec4 tex = texture(albedo_texture, UV * uv_scale + uv_offset);
+	// Flatten: pull each texel's brightness toward mid-grey while keeping its hue,
+	// so baked-in highlights stop reading as glossy plastic under the banded light.
+	float tex_lum = max(dot(tex.rgb, vec3(0.299, 0.587, 0.114)), 0.04);
+	tex.rgb *= mix(1.0, clamp(0.5 / tex_lum, 0.65, 1.5), texture_flatten);
 	vec3 color = albedo_color.rgb;
 	if (use_vertex_color) {
 		color *= COLOR.rgb;
