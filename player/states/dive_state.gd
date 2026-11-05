@@ -47,7 +47,11 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
-	if p.try_wall_bounce(prev_h, false, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time, false, true):
+	# allow_grounded = true: a dive that reaches the wall on the very frame it also
+	# touches the floor (the "just right" distance — close enough to arrive on the
+	# way down, far enough not to hit it on the way up) used to fail the bounce's
+	# "must be airborne" check, then fall through to the landing below and just stop.
+	if p.try_wall_bounce(prev_h, false, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time, true, true):
 		return
 	if p.is_on_floor():
 		p.set_hvel(Vector3.ZERO)
