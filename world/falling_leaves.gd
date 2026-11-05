@@ -82,6 +82,7 @@ func _build() -> void:
 	surf.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	surf.vertex_color_use_as_albedo = true
 	surf.albedo_texture = SoftCircleTexture.make()
+	SoftCircleTexture.fade_near_camera(surf)
 	quad.material = surf
 
 	amount = leaf_count
