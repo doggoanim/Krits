@@ -41,6 +41,8 @@ shader_type spatial;
 uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex colors, matching BaseMaterial3D.vertex_color_use_as_albedo
+uniform vec2 uv_scale = vec2(1.0);   // StandardMaterial3D uv1_scale/offset, carried over for world props (see world/world_toon.gd)
+uniform vec2 uv_offset = vec2(0.0);
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opaque, never discards; raise it only for an actual cutout texture
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
@@ -63,7 +65,7 @@ global uniform vec4 level_tint : source_color;
 global uniform float level_tint_amount;
 
 void fragment() {
-	vec4 tex = texture(albedo_texture, UV);
+	vec4 tex = texture(albedo_texture, UV * uv_scale + uv_offset);
 	vec3 color = albedo_color.rgb;
 	if (use_vertex_color) {
 		color *= COLOR.rgb;

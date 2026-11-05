@@ -78,6 +78,11 @@ extends Resource
 @export var sun_volumetric_fog_energy := 1.0        ## how strongly the sun itself lights up the fog — separate
 													  ## from sun_energy (which only affects regular surface lighting)
 
+@export_group("Toon Shading")
+## Swap this level's plain props for the banded toon material (world/world_toon.gd),
+## so houses, terrain and rocks get the same soft cel shadows as characters.
+@export var toon_world := true
+
 @export_group("Character Tint")
 ## Colour the toon-shaded characters/props are nudged toward in this environment
 ## (see shading/toon.gdshader): lets them pick up the mood — cool teal in a cave —
