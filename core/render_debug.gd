@@ -34,6 +34,17 @@ var _main: Node
 var _sun_energy := 1.0   ## remembered when "sun light" is switched off
 var _off: Dictionary = {}   # effect name -> true while switched off
 var _label: Label
+var _view := 0   ## index into VIEWS, Ctrl+` cycles it
+const VIEWS: Array = [
+	["normal", Viewport.DEBUG_DRAW_DISABLED],
+	["UNSHADED (no lighting at all)", Viewport.DEBUG_DRAW_UNSHADED],
+	["LIGHTING only", Viewport.DEBUG_DRAW_LIGHTING],
+	["OVERDRAW", Viewport.DEBUG_DRAW_OVERDRAW],
+	["NORMAL buffer", Viewport.DEBUG_DRAW_NORMAL_BUFFER],
+	["SSAO buffer", Viewport.DEBUG_DRAW_SSAO],
+	["SUN shadow map", Viewport.DEBUG_DRAW_DIRECTIONAL_SHADOW_ATLAS],
+	["SPOT/OMNI shadow atlas", Viewport.DEBUG_DRAW_SHADOW_ATLAS],
+]
 
 func setup(main: Node, e: Environment, s: DirectionalLight3D) -> void:
 	_main = main
@@ -61,6 +72,13 @@ func _input(event: InputEvent) -> void:
 	if k == null or not k.pressed or k.echo or not k.ctrl_pressed:
 		return
 	var code: int = k.keycode
+	if code == KEY_QUOTELEFT:   # Ctrl+` — cycle the viewport debug view
+		get_viewport().set_input_as_handled()
+		_view = (_view + 1) % VIEWS.size()
+		get_viewport().debug_draw = VIEWS[_view][1] as Viewport.DebugDraw
+		print("RenderDebug view: ", VIEWS[_view][0])
+		_refresh_label()
+		return
 	if FKEYS.has(code) and not k.shift_pressed:
 		code = FKEYS[code]
 	elif not k.shift_pressed:
@@ -134,6 +152,7 @@ func _refresh_label() -> void:
 			"1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
 			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world",
 			"11 sun light  12 particles"])
+	lines.append("Ctrl+` cycles view: " + String(VIEWS[_view][0]))
 	if not _off.is_empty():
 		lines.append("OFF: " + ", ".join(PackedStringArray(_off.keys().map(func(x: Variant) -> String: return String(x)))))
 	_label.text = "\n".join(lines)
