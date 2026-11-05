@@ -83,6 +83,11 @@ extends Resource
 ## so houses, terrain and rocks get the same soft cel shadows as characters.
 @export var toon_world := true
 
+@export_group("Lantern")
+## Multiplies the player's hip-lantern brightness in this level: 1 = daylight
+## level, 3+ for dark places where the lantern should be the main light.
+@export_range(0.5, 8.0, 0.1) var lantern_boost := 1.0
+
 @export_group("Character Tint")
 ## Colour the toon-shaded characters/props are nudged toward in this environment
 ## (see shading/toon.gdshader): lets them pick up the mood — cool teal in a cave —

@@ -391,6 +391,7 @@ func _apply_level_lighting(lvl: Node) -> void:
 	_reverb.apply(level_env)
 	var applied := cfg if cfg else EnvironmentConfig.new()
 	_apply_environment_config(applied)
+	HipLantern.level_boost = applied.lantern_boost
 	if applied.toon_world:
 		WorldToon.apply(lvl)
 	if indoor:
