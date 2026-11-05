@@ -88,7 +88,13 @@ func physics_update(delta: float) -> void:
 	var moving := move.length() > 0.05
 
 	if moving:
-		_attempt_move(p, c, move, strafe, climb, delta)
+		var moved := _attempt_move(p, c, move, strafe, climb, delta)
+		# A diagonal (e.g. W+D at a wall's edge, or against a solid wall that
+		# blocks the sideways half) must not stop dead just because ONE part of it
+		# is blocked: slide along whichever axis is still free.
+		if not moved and absf(strafe) > 0.01 and absf(climb) > 0.01:
+			if not _attempt_move(p, c, Vector3.UP * signf(climb), 0.0, climb, delta):
+				_attempt_move(p, c, _wall_right(_normal) * signf(strafe), strafe, 0.0, delta)
 
 	_ease_t = minf(1.0, _ease_t + delta / maxf(c.wall_wrap_time, 0.001))
 	var shown_normal := _normal if _ease_t >= 1.0 else _ease_from_normal.slerp(_normal, _ease_t).normalized()
@@ -111,7 +117,7 @@ func physics_update(delta: float) -> void:
 ## against whatever's actually still climbable there (the same wall, a
 ## wrapped corner, or nothing — genuinely running out of wall is the only
 ## thing that counts as reaching the top; there's no height limit).
-func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, climb: float, delta: float) -> void:
+func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, climb: float, delta: float) -> bool:
 	var tentative := _attach_point + move * c.wall_climb_speed * delta
 
 	# Don't let climbing down sink the player through the floor at the base
@@ -151,7 +157,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	var chest := Vector3.UP * (Player.STAND_HEIGHT * 0.5)
 	var tentative_body_pos := tentative + _normal * c.wall_hug_distance
 	if not p.is_path_clear(p.global_position + chest, tentative_body_pos + chest, _wall_body):
-		return
+		return false
 
 	# Checked wall_climb_head_clearance above `tentative`, not at the
 	# player's own origin/feet height — _attach_point tracks the feet, but
@@ -165,7 +171,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	if climb < 0.0:
 		var foot_point := tentative + Vector3.UP * c.wall_climb_foot_clearance
 		if p.probe_wall_near(foot_point, _normal, strafe).is_empty():
-			return
+			return false
 	var probe_point := tentative + Vector3.UP * c.wall_climb_head_clearance
 	var found := {}
 	# Turning an inside corner takes priority over staying on this wall, so a wall
@@ -185,7 +191,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 		# movement finding nothing says nothing about what's above.
 		if climb > 0.0:
 			_at_top = true
-		return
+		return false
 
 	if found.normal.dot(_normal) < 0.99:
 		# A meaningfully different normal — a real corner, not floating-
@@ -204,6 +210,7 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	_wall_body = found.get("body", null)
 	if climb > 0.0:
 		_at_top = false
+	return true
 
 func _let_go(p: Player, c: PlayerConfig) -> void:
 	# A real push away from the wall, not just zero velocity — and the same
