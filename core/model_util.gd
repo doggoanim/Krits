@@ -10,6 +10,10 @@ extends RefCounted
 ## itself is a separate, optional step (see apply_cel_shading's outline_hook
 ## param and OutlineSystem) so it can vary independently of shading.
 
+## How much of the brightness painted into character textures is evened out
+## (shading/toon_core.gdshaderinc, texture_flatten) — higher = flatter, less glossy.
+const CHARACTER_TEXTURE_FLATTEN := 0.4
+
 const CEL_SHADER := preload("res://shading/toon.gdshader")
 
 ## Some character materials (krits.glb's among them) are authored with
@@ -145,6 +149,7 @@ static func _shade_recursive(n: Node, out_materials: Array, out_face_materials: 
 				cel.set_shader_parameter(&"albedo_texture", color_tex)
 				cel.set_shader_parameter(&"albedo_color", tint)
 				cel.set_shader_parameter(&"use_vertex_color", use_vertex_color)
+				cel.set_shader_parameter(&"texture_flatten", CHARACTER_TEXTURE_FLATTEN)
 				mi.set_surface_override_material(i, cel)
 				out_materials.append(cel)
 				if base.resource_name.to_lower().begins_with("face"):
