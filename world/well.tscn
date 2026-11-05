@@ -4100,13 +4100,13 @@ albedo_texture = ExtResource("20_66osh")
 size = Vector3(3, 20.6, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6mgso"]
-size = Vector3(3, 20.6, 0.1)
+size = Vector3(3, 20, 0.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_66osh"]
 size = Vector3(6, 3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sm61l"]
-size = Vector3(6, 3, 1)
+size = Vector3(6, 2.4, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_sm61l"]
 size = Vector3(14, 3, 0.1)
@@ -4124,7 +4124,7 @@ size = Vector3(3.2, 12, 2.1000001)
 size = Vector3(10.2, 2, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_66osh"]
-size = Vector3(10.2, 2, 0.1)
+size = Vector3(10.2, 1.6, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_244o2"]
 size = Vector3(1.2, 2, 0.3)
@@ -4655,7 +4655,7 @@ material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_244o2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall" unique_id=1909320565]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 1.6999998, 0.32250214)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 1.3999996, 0.32250214)
 shape = SubResource("BoxShape3D_6mgso")
 
 [node name="climbable_wall2" type="StaticBody3D" parent="." unique_id=1776443143]
@@ -4669,7 +4669,7 @@ material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_66osh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall2" unique_id=117987707]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.47399807, 10.5, 0.82250214)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.47399807, 10.2, 0.82250214)
 shape = SubResource("BoxShape3D_sm61l")
 
 [node name="climbable_wall4" type="StaticBody3D" parent="." unique_id=1392233785]
@@ -4711,7 +4711,7 @@ material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_6mgso")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall3" unique_id=2065529272]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.07600021, 10, -1.0774975)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.07600021, 9.8, -1.0774975)
 shape = SubResource("BoxShape3D_66osh")
 
 [node name="ClimbOutLadder" type="StaticBody3D" parent="." unique_id=1062519059]
