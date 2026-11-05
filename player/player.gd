@@ -77,7 +77,7 @@ var invuln := 0.0
 var pound_landed_frame := -1   ## physics frame a ground pound last touched down (the sword's pound bonus checks it)
 var roll_cd := 0.0
 ## Prints why wall-climb moves get refused (Output panel). Flip off when done.
-var debug_wall_climb := true
+var debug_wall_climb := false
 
 var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per-frame
 						   ## find_climbable_wall() check can't instantly re-grab it
