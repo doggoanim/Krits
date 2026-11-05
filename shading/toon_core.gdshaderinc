@@ -99,20 +99,29 @@ void light() {
 	// edge gets quantized exactly like the light/dark terminator does,
 	// instead of staying a smooth blur next to a hard band.
 	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
-	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
 
-	// LIGHT_COLOR already includes the light's energy times PI (Godot's physical
-	// light units); the built-in diffuse divides it back out, so we must too —
-	// otherwise everything lights ~3x too bright and washes out to neon.
-	vec3 light_rgb = LIGHT_COLOR / PI;
-	vec3 lit_color = ALBEDO * light_rgb;
-	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * light_rgb;
-	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
+	// Point and spot lights (torches, crystals, the lantern, the well shaft) fall
+	// off SMOOTHLY instead of being banded. Banding turns a round light pool into
+	// a hard-edged, stair-stepped disc — most visible when it lands on a character
+	// right in front of the camera. Only the sun (directional) gets the cel bands.
+	if (!LIGHT_IS_DIRECTIONAL) {
+		DIFFUSE_LIGHT += ALBEDO * (LIGHT_COLOR / PI) * lit;
+	} else {
+		float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
 
-	if (specular_strength > 0.0) {
-		vec3 half_vec = normalize(LIGHT + VIEW);
-		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
-		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
-		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
+		// LIGHT_COLOR already includes the light's energy times PI (Godot's physical
+		// light units); the built-in diffuse divides it back out, so we must too —
+		// otherwise everything lights ~3x too bright and washes out to neon.
+		vec3 light_rgb = LIGHT_COLOR / PI;
+		vec3 lit_color = ALBEDO * light_rgb;
+		vec3 shadowed_color = ALBEDO * shadow_tint.rgb * light_rgb;
+		DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
+
+		if (specular_strength > 0.0) {
+			vec3 half_vec = normalize(LIGHT + VIEW);
+			float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
+			float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
+			SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
+		}
 	}
 }
