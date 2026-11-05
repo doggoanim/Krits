@@ -83,7 +83,7 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											## a touch off from where the probe expected it still registers,
 											## but kept small so the grab doesn't trigger from well off to
 											## the side or well short of the actual wall
-@export var wall_min_width := 1.0          ## a climbable surface must still be climbable this far to
+@export var wall_min_width := 0.4          ## a climbable surface must still be climbable this far to
 											## EITHER side of wherever the probe actually hit (not just at
 											## that one point) — rejects grabbing/wrapping onto something
 											## technically tagged climbable but too narrow to read as a
