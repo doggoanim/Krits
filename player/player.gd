@@ -793,6 +793,32 @@ func probe_outside_corner(surface_point: Vector3, along: Vector3, current_normal
 		return {}
 	return {"point": hit_point, "normal": normal, "body": _wall_cast.get_collider(0)}
 
+## Can the body sweep from `from` to `to` while turning a corner, without going
+## through anything but the walls being turned around (`ignore`: the old and new
+## wall bodies)? Unlike is_path_clear() there is no exemption for climbable
+## walls: a third climbable wall standing in the way of the turn blocks it too,
+## otherwise the player is carried straight through it. Hits that don't face
+## against the direction of travel (already touching beside/behind) don't count.
+func is_wrap_clear(from: Vector3, to: Vector3, ignore: Array) -> bool:
+	var added: Array[CollisionObject3D] = []
+	for b in ignore:
+		if b is CollisionObject3D and b not in added:
+			_obstruction_cast.add_exception(b)
+			added.append(b)
+	_obstruction_cast.global_position = from
+	_obstruction_cast.target_position = to - from
+	_obstruction_cast.force_shapecast_update()
+	var blocked := _obstruction_cast.is_colliding()
+	if blocked:
+		var travel := to - from
+		if travel.length() > 0.001 and _obstruction_cast.get_collision_normal(0).dot(travel.normalized()) > -0.3:
+			blocked = false
+		if blocked and debug_wall_climb:
+			print("WallClimb: corner turn blocked by ", _obstruction_cast.get_collider(0))
+	for b in added:
+		_obstruction_cast.remove_exception(b)
+	return not blocked
+
 ## True if a climbable surface is still there `wall_min_width * 0.5` to
 ## EITHER side of `point` along the wall's own tangent (perpendicular to
 ## `probe_dir`, the direction a probe just swept IN TO reach the wall at

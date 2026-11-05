@@ -200,6 +200,11 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 		return false
 
 	if found.normal.dot(_normal) < 0.99:
+		# Turning a corner moves the body to a new spot; refuse the turn if anything
+		# but the walls being turned around is in the way (it would clip through).
+		var new_body := Vector3(found.point.x, tentative.y, found.point.z) + found.normal * c.wall_hug_distance
+		if not p.is_wrap_clear(p.global_position + chest, new_body + chest, [_wall_body, found.get("body", null)]):
+			return false
 		# A meaningfully different normal — a real corner, not floating-
 		# point noise on a flat wall. Restart the ease from wherever we're
 		# actually currently displayed, not the old target, so a second
