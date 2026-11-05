@@ -80,6 +80,7 @@ func _play(item: ItemData) -> void:
 	_player.enter_cinematic()
 	_face_camera()
 	_player.visual.play_hold(PlayerVisual.ANIM_GET_ITEM, 600.0, 1.0, true, 0.1)
+	_player.visual.hold_expression(&"happy")
 	_spawn_prop(item)
 	_play_jingle()
 	Music.duck = true
@@ -113,6 +114,7 @@ func _restore() -> void:
 	Music.duck = false
 	if is_instance_valid(_player):
 		_player.visual.cancel_hold()
+		_player.visual.release_expression()
 	if is_instance_valid(_prop):
 		_prop.queue_free()
 	_prop = null

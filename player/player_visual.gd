@@ -64,6 +64,7 @@ const FACE_EXPRESSIONS: Dictionary[StringName, Texture2D] = {
 	&"idle": preload("res://assets/player/krits_Face_Idle.png"),
 	&"blink": preload("res://assets/player/krits_Face_Blink.png"),
 	&"hurt": preload("res://assets/player/krits_Face_Hurt.png"),
+	&"happy": preload("res://assets/player/krits_Face_Happy.png"),
 }
 const DEFAULT_EXPRESSION := &"idle"
 
@@ -85,6 +86,7 @@ var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named s
 var _expression: StringName = DEFAULT_EXPRESSION
 var _blink_cd := 0.0        ## seconds until the next scheduled blink (see _update_face)
 var _blink_hold_t := 0.0    ## >0 while the blink texture is currently showing
+var _locked_expression: StringName = &""   ## see hold_expression(): while set, blinking and hurt don't touch the face
 var _hurt_hold_t := 0.0     ## >0 while the hurt face is protected from blinking (see show_hurt)
 var _base_colors: Dictionary = {}   # ShaderMaterial -> Color, the non-flash color (see ModelUtil.get/set_tint)
 var _flash_t := 0.0
@@ -258,9 +260,24 @@ func expression() -> StringName:
 ## and suppresses blinking until it's done; _update_face() resumes the
 ## normal blink cycle (with a fresh randomized interval) once this expires.
 func show_hurt() -> void:
+	if _locked_expression != &"":
+		return
 	_hurt_hold_t = HURT_EXPRESSION_DURATION
 	_blink_hold_t = 0.0
 	set_expression(&"hurt")
+
+## Shows `name` and keeps it (no blinking, no hurt flash) until
+## release_expression() — e.g. the happy face for the whole item-get pose.
+func hold_expression(name: StringName) -> void:
+	_locked_expression = name
+	_blink_hold_t = 0.0
+	_hurt_hold_t = 0.0
+	set_expression(name)
+
+func release_expression() -> void:
+	_locked_expression = &""
+	set_expression(DEFAULT_EXPRESSION)
+	_reset_blink_timer()
 
 func _reset_blink_timer() -> void:
 	_blink_cd = randf_range(BLINK_INTERVAL_MIN, BLINK_INTERVAL_MAX)
@@ -273,7 +290,7 @@ func _reset_blink_timer() -> void:
 ## would simply override whichever of these last touched the texture, same
 ## as any other set_expression() call.
 func _update_face(delta: float) -> void:
-	if _face_material == null:
+	if _face_material == null or _locked_expression != &"":
 		return
 	if _hurt_hold_t > 0.0:
 		_hurt_hold_t -= delta
