@@ -3878,19 +3878,13 @@ size = Vector3(4, 20.6, 0.1)
 size = Vector3(6, 3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sm61l"]
-size = Vector3(6, 3, 0.1)
+size = Vector3(6, 3, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_6mgso"]
-size = Vector3(10.2, 2, 0.1)
+size = Vector3(10.2, 2, 0.3)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_jgx4q"]
-size = Vector3(10.2, 2, 0.1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_climb_link"]
-size = Vector3(5.2, 2, 0.1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_climb_link"]
-size = Vector3(5.2, 2, 0.1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_66osh"]
+size = Vector3(10.2, 2, 0.3)
 
 [node name="Well" type="Node3D" unique_id=427418772]
 
@@ -4377,12 +4371,12 @@ collision_layer = 257
 collision_mask = 257
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="climbable_wall2" unique_id=1036058527]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10.5, 0.82250214)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.024997331, 10.5, 0.82250214)
 material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_66osh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall2" unique_id=117987707]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10.5, 0.82250214)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.47399807, 10.5, 0.82250214)
 shape = SubResource("BoxShape3D_sm61l")
 
 [node name="climbable_wall3" type="StaticBody3D" parent="." unique_id=1527005406]
@@ -4395,18 +4389,6 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.0
 material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_6mgso")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall3" unique_id=1919700576]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall3" unique_id=2065529272]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 10, -1.0774975)
-shape = SubResource("BoxShape3D_jgx4q")
-
-[node name="climbable_wall_link" type="StaticBody3D" parent="." unique_id=1976483799]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.4, 0.98, -58.98)
-collision_layer = 257
-collision_mask = 257
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="climbable_wall_link" unique_id=1976483800]
-material_override = SubResource("StandardMaterial3D_sm61l")
-mesh = SubResource("BoxMesh_climb_link")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall_link" unique_id=1976483801]
-shape = SubResource("BoxShape3D_climb_link")
+shape = SubResource("BoxShape3D_66osh")
