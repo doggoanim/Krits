@@ -160,7 +160,15 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	# corner normal bug, let the player climb right onto the roof). Tune
 	# the clearance in PlayerConfig if the stop point feels too low/high.
 	var probe_point := tentative + Vector3.UP * c.wall_climb_head_clearance
-	var found := p.probe_wall_near(probe_point, _normal, strafe)
+	var found := {}
+	# Turning an inside corner takes priority over staying on this wall, so a wall
+	# that runs on past the corner can't trap you against the one you are meeting.
+	if absf(strafe) > 0.01:
+		var along := _wall_right(_normal) * signf(strafe)
+		var body_at_chest: Vector3 = tentative + _normal * c.wall_hug_distance + chest
+		found = p.probe_inside_corner(body_at_chest, along, _normal)
+	if found.is_empty():
+		found = p.probe_wall_near(probe_point, _normal, strafe)
 	if found.is_empty():
 		if p.debug_wall_climb:
 			print("WallClimb: no climbable wall at probe point ", probe_point, " (normal ", _normal, ", strafe ", strafe, ", climb ", climb, ")")

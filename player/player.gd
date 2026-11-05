@@ -724,6 +724,32 @@ func probe_wall_near(point: Vector3, old_normal: Vector3, bias_sign := 1.0) -> D
 				"body": _wall_cast.get_collider(0)}
 	return {}
 
+## Inside (concave) corner check: is a climbable wall directly AHEAD of the body,
+## facing back against the direction of travel? Used by WallClimbState before it
+## falls back on "stay on the current wall". Without it, a wall that runs on past
+## the corner (it sticks out beyond the perpendicular wall it meets) always wins
+## the stay-on-this-wall probe, so the player walks into the other wall instead of
+## turning onto it. Returns {point, normal, body} or {} when there is none.
+func probe_inside_corner(body_pos: Vector3, dir: Vector3, current_normal: Vector3) -> Dictionary:
+	_wall_cast.global_position = body_pos
+	_wall_cast.target_position = dir * (config.wall_hug_distance + 0.25)
+	_wall_cast.force_shapecast_update()
+	if not _wall_cast.is_colliding():
+		return {}
+	var normal: Vector3 = _wall_cast.get_collision_normal(0)
+	if not _is_wall_normal(normal):
+		return {}
+	normal.y = 0.0
+	if normal.length() < 0.1:
+		return {}
+	normal = normal.normalized()
+	if normal.dot(dir) > -0.5 or normal.dot(current_normal) > 0.5:
+		return {}   # not facing us, or it's just the wall we are already on
+	var hit_point: Vector3 = _wall_cast.get_collision_point(0)
+	if not _wall_wide_enough(hit_point, -normal, config.wall_probe_reach):
+		return {}
+	return {"point": hit_point, "normal": normal, "body": _wall_cast.get_collider(0)}
+
 ## True if a climbable surface is still there `wall_min_width * 0.5` to
 ## EITHER side of `point` along the wall's own tangent (perpendicular to
 ## `probe_dir`, the direction a probe just swept IN TO reach the wall at
