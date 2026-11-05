@@ -93,8 +93,12 @@ void light() {
 	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
 	float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
 
-	vec3 lit_color = ALBEDO * LIGHT_COLOR;
-	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * LIGHT_COLOR;
+	// LIGHT_COLOR already includes the light's energy times PI (Godot's physical
+	// light units); the built-in diffuse divides it back out, so we must too —
+	// otherwise everything lights ~3x too bright and washes out to neon.
+	vec3 light_rgb = LIGHT_COLOR / PI;
+	vec3 lit_color = ALBEDO * light_rgb;
+	vec3 shadowed_color = ALBEDO * shadow_tint.rgb * light_rgb;
 	DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
 
 	if (specular_strength > 0.0) {
