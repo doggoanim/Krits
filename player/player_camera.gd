@@ -14,6 +14,8 @@ extends Node3D
 ## this layer alongside whatever layer it's already on (still keep layer 1
 ## too, so normal raycasts/physics still see it as world geometry).
 const GROUND_LAYER := 1 << 7
+const ANCHOR_HEIGHT := 1.4   ## metres above the player's feet the camera pivots around
+const CEILING_CLEARANCE := 0.35   ## how far below a ceiling the pivot is kept
 const WORLD_LAYER := 1   ## ordinary walls/props — see _update_collision_mask()
 
 ## Base look speed; the player's Settings > Controls sensitivity multiplies it.
@@ -143,11 +145,29 @@ func _update_collision_mask() -> void:
 	var xray_on := p != null and p.xray != null and p.xray.enabled
 	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if xray_on else (WORLD_LAYER | Player.CLIMBABLE_MASK))
 
+## The pivot sits ANCHOR_HEIGHT above the feet. Under a low ceiling (climbing up
+## to an overhang, say) that point is inside the ceiling, and a spring arm that
+## starts inside geometry reports no hit — so the camera clipped through it. If
+## something solid is overhead, pull the pivot down to just under it.
+func _anchor_height() -> float:
+	var p := target as Player
+	if p == null or (p.xray != null and p.xray.enabled):
+		return ANCHOR_HEIGHT
+	var from := target.global_position + Vector3.UP * 0.2
+	var to := target.global_position + Vector3.UP * (ANCHOR_HEIGHT + CEILING_CLEARANCE)
+	var query := PhysicsRayQueryParameters3D.create(from, to, WORLD_LAYER | Player.CLIMBABLE_MASK)
+	query.exclude = [p.get_rid()]
+	var hit := target.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return ANCHOR_HEIGHT
+	var hit_pos: Vector3 = hit.position
+	return clampf(hit_pos.y - target.global_position.y - CEILING_CLEARANCE, 0.5, ANCHOR_HEIGHT)
+
 func _process(delta: float) -> void:
 	_update_collision_mask()
 	var focus := _update_focus(delta)
 	if target:
-		var anchor := target.global_position + Vector3.UP * 1.4
+		var anchor := target.global_position + Vector3.UP * _anchor_height()
 		if focus > 0.0 and is_instance_valid(_focus_node):
 			anchor = anchor.lerp((target.global_position + _focus_point) * 0.5, focus * 0.6)
 		global_position = global_position.lerp(anchor, 1.0 - exp(-follow_speed * delta))
