@@ -14,6 +14,10 @@ extends RefCounted
 ## (shading/toon_core.gdshaderinc, texture_flatten) — higher = flatter, less glossy.
 const CHARACTER_TEXTURE_FLATTEN := 0.4
 
+## Render layer (bit value) that every cel-shaded character model is also on, so
+## CharacterFillLight can light characters without lighting the world.
+const CHARACTER_LIGHT_LAYER := 4   # layer value 2 belongs to OutlineSystem
+
 const CEL_SHADER := preload("res://shading/toon.gdshader")
 
 ## Some character materials (krits.glb's among them) are authored with
@@ -108,6 +112,7 @@ static func _shade_recursive(n: Node, out_materials: Array, out_face_materials: 
 		outline_hook: Callable) -> void:
 	if n is MeshInstance3D:
 		var mi := n as MeshInstance3D
+		mi.layers |= CHARACTER_LIGHT_LAYER   # stays on layer 1 too, so everything still renders
 		for i in mi.mesh.get_surface_count() if mi.mesh else 0:
 			var mat := mi.get_active_material(i)
 			if mat is BaseMaterial3D:
