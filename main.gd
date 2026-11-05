@@ -389,7 +389,10 @@ func _apply_level_lighting(lvl: Node) -> void:
 	if level_env != null and level_env.config != null:
 		cfg = level_env.config
 	_reverb.apply(level_env)
-	_apply_environment_config(cfg if cfg else EnvironmentConfig.new())
+	var applied := cfg if cfg else EnvironmentConfig.new()
+	_apply_environment_config(applied)
+	if applied.toon_world:
+		WorldToon.apply(lvl)
 	if indoor:
 		_env.background_mode = Environment.BG_COLOR
 		_env.background_color = Color.BLACK
