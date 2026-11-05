@@ -65,6 +65,7 @@ func _ready() -> void:
 	_label.add_theme_color_override(&"font_outline_color", Color.BLACK)
 	_label.add_theme_constant_override(&"outline_size", 4)
 	layer.add_child(_label)
+	_label.visible = false   # Ctrl+/ shows the key list; the switches work either way
 	_refresh_label()
 
 func _input(event: InputEvent) -> void:
@@ -72,6 +73,11 @@ func _input(event: InputEvent) -> void:
 	if k == null or not k.pressed or k.echo or not k.ctrl_pressed:
 		return
 	var code: int = k.keycode
+	if code == KEY_SLASH and not k.shift_pressed:   # Ctrl+/ — show/hide the key list
+		get_viewport().set_input_as_handled()
+		if _label != null:
+			_label.visible = not _label.visible
+		return
 	if code == KEY_QUOTELEFT:   # Ctrl+` — cycle the viewport debug view
 		get_viewport().set_input_as_handled()
 		_view = (_view + 1) % VIEWS.size()
@@ -148,7 +154,7 @@ func _toggle_toon(on: bool) -> void:
 func _refresh_label() -> void:
 	if _label == null:
 		return
-	var lines := PackedStringArray(["Ctrl+F1..F10 (or Ctrl+Shift+1..0):",
+	var lines := PackedStringArray(["Ctrl+/ hides this.  Ctrl+F1..F12 (or Ctrl+Shift+1..0, -, =):",
 			"1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
 			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world",
 			"11 sun light  12 particles"])
