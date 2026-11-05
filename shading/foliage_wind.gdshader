@@ -5,16 +5,13 @@ render_mode cull_disabled;
 // and we subtract that — animation freezes with the pause menu. (Unset, e.g.
 // in the editor's own viewport, it's 0 and this is plain TIME.)
 global uniform float time_offset;
-// Wind-swaying foliage material. Not the project's toon shader
-// (shading/toon.gdshader) — world foliage props (grass, trees; see
-// world/chesburg.tscn's Props/Trees and Props/eyecandies) are unmodified
-// imported .glb materials rendered with Godot's ordinary PBR lighting, so
-// this is a drop-in replacement for THAT look (same albedo/roughness/
-// metallic, default diffuse+specular lighting via light() left untouched),
-// not a different style. See world/foliage_wind.gd for how a prop gets
-// wired up to this — per-instance wind tunables live there, exported on
-// that node, since that's the actual node in the saved scene; this shader
-// only knows about the numbers it's handed.
+// Wind-swaying foliage material. Same albedo/colour handling as imported .glb
+// materials, but lit with the project's toon lighting (shading/toon_light.gdshaderinc:
+// banded sun shadows, smooth point lights) so trees and grass match the toon-shaded
+// houses and characters. See world/foliage_wind.gd for how a prop gets wired up to
+// this — per-instance wind tunables live there, exported on that node, since that's
+// the actual node in the saved scene; this shader only knows about the numbers it's
+// handed.
 //
 // cull_disabled: grass blades and leaf cards in this project are typically
 // thin, single-sided planes that still need to be visible from both sides
@@ -38,6 +35,8 @@ global uniform float time_offset;
 // visibly bigger sway on a tall tree's crown; tune per-instance via
 // FoliageWind's exports if a particular prop needs to look calmer or wilder
 // than that default scaling.
+#include "res://shading/toon_light.gdshaderinc"
+
 uniform float base_y = 0.0;   // this mesh's own local AABB min Y — see world/foliage_wind.gd
 
 uniform sampler2D albedo_texture : source_color;
@@ -89,4 +88,12 @@ void fragment() {
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
 	ROUGHNESS = roughness;
 	METALLIC = metallic;
+	SPECULAR = 0.0;   // toon look: no shiny sheen on leaves
+}
+
+// Same banded sun / smooth point-light lighting as the rest of the world
+// (shading/toon_light.gdshaderinc), so trees and grass match the houses.
+void light() {
+	float band;
+	DIFFUSE_LIGHT += toon_diffuse(ALBEDO, NORMAL, LIGHT, LIGHT_COLOR, ATTENUATION, LIGHT_IS_DIRECTIONAL, band);
 }

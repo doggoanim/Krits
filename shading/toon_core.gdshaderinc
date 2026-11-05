@@ -43,13 +43,12 @@ uniform sampler2D albedo_texture : source_color;
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform bool use_vertex_color = false;   // multiply in the mesh's own vertex colors, matching BaseMaterial3D.vertex_color_use_as_albedo
 uniform float texture_flatten : hint_range(0.0, 1.0) = 0.0;   // evens out brightness baked into the texture (painted-in highlights/shading) so the toon lighting does the shading instead; 0 = off
+#include "res://shading/toon_light.gdshaderinc"
+
 uniform vec2 uv_scale = vec2(1.0);   // StandardMaterial3D uv1_scale/offset, carried over for world props (see world/world_toon.gd)
 uniform vec2 uv_offset = vec2(0.0);
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0) = 0.0;   // 0 = opaque, never discards; raise it only for an actual cutout texture
 
-uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
-uniform float shadow_softness : hint_range(0.0, 0.5) = 0.12;   // width of that edge; 0 = razor-sharp
-uniform vec4 shadow_tint : source_color = vec4(0.58, 0.58, 0.78, 1.0);   // multiplies ALBEDO in the shadow band
 
 uniform float rim_strength : hint_range(0.0, 1.0) = 0.1;   // 0 disables the rim light entirely
 uniform float rim_power : hint_range(0.5, 16.0) = 3.5;
@@ -93,35 +92,13 @@ void fragment() {
 }
 
 void light() {
-	// ATTENUATION already carries Godot's shadow factor (0 = fully shadowed,
-	// 1 = fully lit, with a soft PCF-blurred gradient across the penumbra).
-	// Folding it into the same value we band below means the shadow's own
-	// edge gets quantized exactly like the light/dark terminator does,
-	// instead of staying a smooth blur next to a hard band.
-	float lit = clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * ATTENUATION;
+	float band;
+	DIFFUSE_LIGHT += toon_diffuse(ALBEDO, NORMAL, LIGHT, LIGHT_COLOR, ATTENUATION, LIGHT_IS_DIRECTIONAL, band);
 
-	// Point and spot lights (torches, crystals, the lantern, the well shaft) fall
-	// off SMOOTHLY instead of being banded. Banding turns a round light pool into
-	// a hard-edged, stair-stepped disc — most visible when it lands on a character
-	// right in front of the camera. Only the sun (directional) gets the cel bands.
-	if (!LIGHT_IS_DIRECTIONAL) {
-		DIFFUSE_LIGHT += ALBEDO * (LIGHT_COLOR / PI) * lit;
-	} else {
-		float band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
-
-		// LIGHT_COLOR already includes the light's energy times PI (Godot's physical
-		// light units); the built-in diffuse divides it back out, so we must too —
-		// otherwise everything lights ~3x too bright and washes out to neon.
-		vec3 light_rgb = LIGHT_COLOR / PI;
-		vec3 lit_color = ALBEDO * light_rgb;
-		vec3 shadowed_color = ALBEDO * shadow_tint.rgb * light_rgb;
-		DIFFUSE_LIGHT += mix(shadowed_color, lit_color, band);
-
-		if (specular_strength > 0.0) {
-			vec3 half_vec = normalize(LIGHT + VIEW);
-			float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
-			float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
-			SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
-		}
+	if (specular_strength > 0.0 && LIGHT_IS_DIRECTIONAL) {
+		vec3 half_vec = normalize(LIGHT + VIEW);
+		float ndoth = clamp(dot(NORMAL, half_vec), 0.0, 1.0);
+		float spec_band = smoothstep(specular_threshold - 0.02, specular_threshold + 0.02, ndoth) * band;
+		SPECULAR_LIGHT += specular_color.rgb * spec_band * specular_strength;
 	}
 }
