@@ -4,6 +4,7 @@
 
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;   // where the lit/shadow band flips
 uniform float shadow_softness : hint_range(0.0, 0.5) = 0.12;   // width of that edge; 0 = razor-sharp
+uniform vec4 lit_tint : source_color = vec4(1.0, 0.96, 0.86, 1.0);   // extra warmth on the sunlit band (the banded sun otherwise lights surfaces flat and a bit bright, which washes the sun colour out)
 uniform vec4 shadow_tint : source_color = vec4(0.58, 0.58, 0.78, 1.0);   // multiplies ALBEDO in the shadow band
 
 // Returns this light's diffuse contribution and, through `band`, the 0..1
@@ -23,5 +24,5 @@ vec3 toon_diffuse(vec3 albedo, vec3 normal, vec3 light_dir, vec3 light_color, fl
 		return albedo * light_rgb * lit;
 	}
 	band = smoothstep(shadow_threshold - shadow_softness, shadow_threshold + shadow_softness, lit);
-	return mix(albedo * shadow_tint.rgb * light_rgb, albedo * light_rgb, band);
+	return mix(albedo * shadow_tint.rgb * light_rgb, albedo * light_rgb * lit_tint.rgb, band);
 }
