@@ -27,7 +27,7 @@ sky_shader_params = {
 &"noise_tex": SubResource("NoiseTex_clouds")
 }
 sun_shadow_blur = 0.8
-volumetric_fog_enabled = true
+volumetric_fog_enabled = false
 brightness = 0.83
 contrast = 1.15
 saturation = 1.0
