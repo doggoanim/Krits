@@ -76,6 +76,9 @@ var jump_buffer_t := 0.0
 var invuln := 0.0
 var pound_landed_frame := -1   ## physics frame a ground pound last touched down (the sword's pound bonus checks it)
 var roll_cd := 0.0
+## Prints why wall-climb moves get refused (Output panel). Flip off when done.
+var debug_wall_climb := true
+
 var wall_climb_cd := 0.0   ## >0 right after jumping off a wall, so the same per-frame
 						   ## find_climbable_wall() check can't instantly re-grab it
 var swim_exit_cd := 0.0   ## >0 right after jumping out of the water, so _update_water()
@@ -782,6 +785,17 @@ func is_path_clear(from: Vector3, to: Vector3, ignore_body: Variant) -> bool:
 		var collider := _obstruction_cast.get_collider(0)
 		if collider is CollisionObject3D and (collider.collision_layer & CLIMBABLE_MASK) != 0:
 			blocked = false
+		else:
+			# Only something actually IN THE WAY counts. A sweep that starts already
+			# touching geometry beside or behind it — e.g. just after turning an inside
+			# corner, when the body sits flush against the first wall and the rock
+			# behind it — hits that and used to read as "blocked", freezing the player.
+			# Such a hit's normal doesn't face against the direction of travel.
+			var travel := to - from
+			if travel.length() > 0.001 and _obstruction_cast.get_collision_normal(0).dot(travel.normalized()) > -0.3:
+				blocked = false
+		if blocked and debug_wall_climb:
+			print("WallClimb: path blocked by ", _obstruction_cast.get_collider(0))
 	if ignore_body is CollisionObject3D:
 		_obstruction_cast.remove_exception(ignore_body)
 	return not blocked

@@ -162,6 +162,8 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 	var probe_point := tentative + Vector3.UP * c.wall_climb_head_clearance
 	var found := p.probe_wall_near(probe_point, _normal, strafe)
 	if found.is_empty():
+		if p.debug_wall_climb:
+			print("WallClimb: no climbable wall at probe point ", probe_point, " (normal ", _normal, ", strafe ", strafe, ", climb ", climb, ")")
 		# Nothing climbable where we tried to go — same fallback as any
 		# other blocked movement: just don't move this frame. Only an
 		# upward attempt finding nothing actually means "the top"; sideways
