@@ -14,6 +14,7 @@ extends RefCounted
 ##  - meshes in the NO_TOON_GROUP, or with a surface override already set
 
 const TOON_SHADER: Shader = preload("res://shading/toon.gdshader")
+const TOON_SHADER_2SIDED: Shader = preload("res://shading/toon_double_sided.gdshader")
 const NO_TOON_GROUP := &"no_toon"   ## add a mesh (or a parent of meshes) to this group to opt out
 
 ## Shared per source material: a house with 40 identical planks gets one toon
@@ -49,12 +50,15 @@ static func _is_opted_out(n: Node) -> bool:
 static func _convertible(m: BaseMaterial3D) -> bool:
 	if m.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED or m.emission_enabled or m.uv1_triplanar:
 		return false
+	if m.cull_mode == BaseMaterial3D.CULL_FRONT:
+		return false
 	return m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED \
 			or m.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 
 static func _make_toon(src: BaseMaterial3D) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = TOON_SHADER
+	mat.shader = TOON_SHADER_2SIDED if src.cull_mode == BaseMaterial3D.CULL_DISABLED else TOON_SHADER
+	mat.set_shader_parameter(&"rim_strength", 0.0)   # the rim glow is for characters; on props it reads as plastic edges
 	mat.set_shader_parameter(&"albedo_texture", src.albedo_texture if src.albedo_texture else ModelUtil.white_texture())
 	mat.set_shader_parameter(&"albedo_color", src.albedo_color)
 	mat.set_shader_parameter(&"use_vertex_color", src.vertex_color_use_as_albedo)
