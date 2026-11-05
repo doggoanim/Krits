@@ -182,6 +182,12 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 		found = p.probe_inside_corner(body_at_chest, along, _normal)
 	if found.is_empty():
 		found = p.probe_wall_near(probe_point, _normal, strafe)
+		# Staying on this wall failed (we are at its edge): look for the next face
+		# of the same block before trusting whatever odd wrap the generic probe found.
+		if absf(strafe) > 0.01 and (found.is_empty() or found.normal.dot(_normal) < 0.99):
+			var around := p.probe_outside_corner(tentative + chest, _wall_right(_normal) * signf(strafe), _normal)
+			if not around.is_empty():
+				found = around
 	if found.is_empty():
 		if p.debug_wall_climb:
 			print("WallClimb: no climbable wall at probe point ", probe_point, " (normal ", _normal, ", strafe ", strafe, ", climb ", climb, ")")

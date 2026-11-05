@@ -750,6 +750,38 @@ func probe_inside_corner(body_pos: Vector3, dir: Vector3, current_normal: Vector
 		return {}
 	return {"point": hit_point, "normal": normal, "body": _wall_cast.get_collider(0)}
 
+## Outside (convex) corner check: the wall we are on ends beside us and a
+## climbable wall of the SAME block faces `along` (we're going round the block).
+## probe_wall_near() can't find that wall reliably: it lies behind the plane of
+## the one we're on, so a probe grazing along the current surface never touches
+## it. Instead cast back toward the block from a point out past the edge and
+## `depth` behind the current wall's plane (in the air beside the block), which
+## hits the side face square-on. `surface_point` is a point on the current wall;
+## `along` is the direction of travel along it. Returns {point, normal, body}
+## or {} when there is no such wall.
+const OUTSIDE_CORNER_REACH := 0.6   ## how far past the current spot, along the wall, probe_outside_corner() looks for the block's edge
+
+func probe_outside_corner(surface_point: Vector3, along: Vector3, current_normal: Vector3) -> Dictionary:
+	var depth := config.wall_min_width * 0.5 + 0.1   # deep enough that the side face passes the width check
+	_wall_cast.global_position = surface_point + along * OUTSIDE_CORNER_REACH - current_normal * depth
+	_wall_cast.target_position = -along * (OUTSIDE_CORNER_REACH + 0.1)
+	_wall_cast.force_shapecast_update()
+	if not _wall_cast.is_colliding():
+		return {}
+	var normal: Vector3 = _wall_cast.get_collision_normal(0)
+	if not _is_wall_normal(normal):
+		return {}
+	normal.y = 0.0
+	if normal.length() < 0.1:
+		return {}
+	normal = normal.normalized()
+	if normal.dot(along) < 0.5 or normal.dot(current_normal) > 0.5:
+		return {}   # not a face turned toward where we're heading, or just the wall we are on
+	var hit_point: Vector3 = _wall_cast.get_collision_point(0)
+	if not _wall_wide_enough(hit_point, -normal, config.wall_probe_reach):
+		return {}
+	return {"point": hit_point, "normal": normal, "body": _wall_cast.get_collider(0)}
+
 ## True if a climbable surface is still there `wall_min_width * 0.5` to
 ## EITHER side of `point` along the wall's own tangent (perpendicular to
 ## `probe_dir`, the direction a probe just swept IN TO reach the wall at
