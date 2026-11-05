@@ -16,6 +16,12 @@ var _fill: MeshInstance3D
 var _parts: Array[MeshInstance3D] = []
 var _tween: Tween
 
+## Settings > Accessibility > Attack Warnings. Off hides the ground indicators
+## (circle, aim line) only — the attack itself and its timing are unchanged, and
+## exclaim() below is never affected: the "!" is always shown.
+static func _warnings_enabled() -> bool:
+	return bool(Settings.get_value(&"accessibility/telegraphs"))
+
 ## A "!" that pops above `enemy` and frees itself.
 static func exclaim(enemy: Node3D, height: float) -> void:
 	var label := Label3D.new()
@@ -45,6 +51,7 @@ static func exclaim(enemy: Node3D, height: float) -> void:
 static func circle(parent: Node, radius: float) -> Telegraph:
 	var t := Telegraph.new()
 	parent.add_child(t)
+	t.visible = _warnings_enabled()
 	var disc := CylinderMesh.new()
 	disc.top_radius = radius
 	disc.bottom_radius = radius
@@ -73,6 +80,7 @@ static func circle(parent: Node, radius: float) -> Telegraph:
 static func line(parent: Node, width: float) -> Telegraph:
 	var t := Telegraph.new()
 	parent.add_child(t)
+	t.visible = _warnings_enabled()
 	var strip := BoxMesh.new()
 	strip.size = Vector3(width, 0.02, 1.0)   # z is stretched to the line's length
 	t._add_part(strip, Color(WARN_COLOR, 0.4), 0)
