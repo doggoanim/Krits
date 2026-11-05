@@ -5,9 +5,9 @@ extends RefCounted
 ## a simple round sprite — dust/smoke particles (PlayerEffects), the ground
 ## depth-perception marker (GroundShadow), etc.
 ##
-## 128px by default: a particle drifting right in front of the camera fills the
-## screen, and at 32px its pixels showed as a big blocky stair-stepped disc.
-## See also fade_near_camera() for the other half of that fix.
+## 32px by default: small and cheap, plenty for tiny particles. A particle
+## passing right in front of the lens can still show its pixels, which is why
+## materials can call fade_near_camera() below to vanish before that happens.
 
 ## Makes a billboard particle material fade out as it gets close to the camera
 ## instead of popping into a giant blob right in front of the lens.
@@ -17,7 +17,7 @@ static func fade_near_camera(mat: BaseMaterial3D, start := 0.4, end := 1.4) -> v
 	mat.distance_fade_max_distance = end     # fully opaque beyond this
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
-static func make(size := 128) -> GradientTexture2D:
+static func make(size := 32) -> GradientTexture2D:
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.0, 1.0])
 	g.colors = PackedColorArray([Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.0)])
@@ -33,7 +33,7 @@ static func make(size := 128) -> GradientTexture2D:
 ## A thin ring — transparent center, a soft white band near the edge,
 ## transparent again past it. Same radial-gradient trick as make(), just
 ## with extra stops carving out the hollow middle.
-static func make_ring(size := 128) -> GradientTexture2D:
+static func make_ring(size := 32) -> GradientTexture2D:
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.0, 0.55, 0.68, 0.8, 0.92, 1.0])
 	g.colors = PackedColorArray([
