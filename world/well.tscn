@@ -4192,8 +4192,8 @@ omni_range = 4.0
 [node name="CyanCrystal1" type="OmniLight3D" parent="AccentLights" unique_id=910000004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -6.628918, -21.189594)
 light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-omni_range = 4.0
+light_energy = 1.15
+omni_range = 5.5
 
 [node name="Wisps1" type="GPUParticles3D" parent="AccentLights/CyanCrystal1" unique_id=910000101]
 script = ExtResource("well_motes")
@@ -4210,8 +4210,8 @@ script = ExtResource("well_crystal")
 [node name="CyanCrystal2" type="OmniLight3D" parent="AccentLights" unique_id=910000005]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -30)
 light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-omni_range = 4.0
+light_energy = 1.15
+omni_range = 5.5
 
 [node name="Wisps2" type="GPUParticles3D" parent="AccentLights/CyanCrystal2" unique_id=910000102]
 script = ExtResource("well_motes")
@@ -4228,8 +4228,8 @@ script = ExtResource("well_crystal")
 [node name="CyanCrystal3" type="OmniLight3D" parent="AccentLights" unique_id=910000006]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -3, -40)
 light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-omni_range = 4.0
+light_energy = 1.15
+omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal3" unique_id=910000103]
 script = ExtResource("well_motes")
@@ -4246,8 +4246,8 @@ script = ExtResource("well_crystal")
 [node name="CyanCrystal4" type="OmniLight3D" parent="AccentLights" unique_id=545153772]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -3, -58.148182)
 light_color = Color(0.4, 0.9, 1, 1)
-light_energy = 0.9
-omni_range = 4.0
+light_energy = 1.15
+omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal4" unique_id=1221681203]
 script = ExtResource("well_motes")
