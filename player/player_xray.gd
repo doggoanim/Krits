@@ -24,8 +24,10 @@ const SHADER := preload("res://player/xray_halftone.gdshader")
 const CHECK_INTERVAL := 0.08   ## raycasts aren't free; a handful of checks a second is plenty
 const SAMPLE_HEIGHTS: PackedFloat32Array = [0.15, 0.5, 0.85]   ## fraction of STAND_HEIGHT, feet to head
 
-## Master switch for the see-through-walls silhouette.
-@export var enabled := true
+## Master switch for the see-through-walls silhouette. Off: the player already
+## has an outline, and the camera clips through walls on its own
+## (CameraRig.clip_through_walls).
+@export var enabled := false
 ## Dot-screen look for the silhouette. Off for now: it's a flat translucent
 ## fill instead. Flip on (before gear/model copies are built) to restore dots.
 @export var halftone := false

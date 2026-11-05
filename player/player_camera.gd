@@ -6,8 +6,7 @@ extends Node3D
 ## a real label instead of a blank checkbox in the Inspector's Collision
 ## section) — anything the camera's spring arm should actually be pushed out
 ## by, as opposed to generic world geometry (layer 1, "world") which the
-## camera is allowed to clip through, relying on the player's x-ray
-## silhouette to stay visible instead. Originally just walkable floors (see
+## camera is allowed to clip through (see clip_through_walls). Originally just walkable floors (see
 ## TestLevel._box()'s `is_floor` param) so the camera doesn't dip below the
 ## ground, but the same bit works for anything else that should shove the
 ## camera away rather than let it clip in — a tree or house trunk, say: tick
@@ -23,6 +22,10 @@ const WORLD_LAYER := 1   ## ordinary walls/props — see _update_collision_mask(
 @export var follow_speed := 14.0
 @export var base_distance := 6.0
 @export var pitch_limits := Vector2(-1.2, 0.5)
+## Ordinary walls/props don't push the camera in; it clips straight through
+## them (the player's outline keeps them readable). Ground and the arena wall
+## still do. Set false to make every wall shove the camera in instead.
+@export var clip_through_walls := true
 
 var target: Node3D
 var yaw := 0.0
@@ -66,8 +69,7 @@ func _ready() -> void:
 	# Only walkable ground and the arena's own circular wall push the camera
 	# in — everything else (ordinary walls, props, enemies, all sharing the
 	# generic "world" layer) the camera clips straight through, so it never
-	# gets shoved in close to the player (the x-ray silhouette keeps the
-	# player visible through that geometry instead). Colliding with the
+	# gets shoved in close to the player (see clip_through_walls). Colliding with the
 	# ground layer stops the camera dipping below the floor; colliding with
 	# the arena wall stops it peeking outside the fight's barrier.
 	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER
@@ -134,16 +136,11 @@ func shake(amount: float) -> void:
 		return
 	_shake = maxf(_shake, amount)
 
-## Ordinary walls only push the camera in when the x-ray silhouette is off:
-## the silhouette is what keeps the player visible when the camera clips
-## through them, so without it the camera would sit inside a wall (e.g. beside
-## a wall you are climbing) and the player would vanish from view. Climbable
-## walls (their own layer) count too, so the camera can't slip behind the very
-## wall being climbed when it swings above or below the player.
+## Ordinary walls only push the camera in when `clip_through_walls` is off.
+## Climbable walls (their own layer) count too in that case, so the camera
+## can't slip behind the very wall being climbed.
 func _update_collision_mask() -> void:
-	var p := target as Player
-	var xray_on := p != null and p.xray != null and p.xray.enabled
-	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if xray_on else (WORLD_LAYER | Player.CLIMBABLE_MASK))
+	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if clip_through_walls else (WORLD_LAYER | Player.CLIMBABLE_MASK))
 
 ## The pivot sits ANCHOR_HEIGHT above the feet. Under a low ceiling (climbing up
 ## to an overhang, say) that point is inside the ceiling, and a spring arm that
@@ -151,7 +148,7 @@ func _update_collision_mask() -> void:
 ## something solid is overhead, pull the pivot down to just under it.
 func _anchor_height() -> float:
 	var p := target as Player
-	if p == null or (p.xray != null and p.xray.enabled):
+	if p == null or clip_through_walls:
 		return ANCHOR_HEIGHT
 	var from := target.global_position + Vector3.UP * 0.2
 	var to := target.global_position + Vector3.UP * (ANCHOR_HEIGHT + CEILING_CLEARANCE)
