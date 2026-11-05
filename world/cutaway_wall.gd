@@ -68,7 +68,10 @@ func _process(_delta: float) -> void:
 	if cam == null:
 		return
 	var world_normal := (global_transform.basis * normal_axis).normalized()
-	var to_cam := cam.global_position - global_position
+	# Measured from the MESH, not this body: a wall resized/moved in the editor often
+	# leaves its mesh offset from the body's origin, which put the cutaway plane in
+	# the wrong place (wall still showing from outside, or vanishing from inside).
+	var to_cam := cam.global_position - _mesh.global_position
 	# Camera on (or past) the outward side -> render nothing (but keep
 	# casting a shadow), so it can see through to the room without the
 	# room's own lighting changing. Camera still on the inward side -> show,
