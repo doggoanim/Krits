@@ -15,6 +15,10 @@ const HINT_ID := &"lantern"   ## the key plate shown until the first toggle (see
 
 const LIT_FLAG := &"lantern_lit"   ## remembered in the save; absent = switched off, as when first picked up
 
+## Set by Main from the level's EnvironmentConfig.lantern_boost: 1 in daylight, higher
+## in dark places (the well) so the lantern actually matters there.
+static var level_boost := 1.0
+
 var _lit := false   ## switched on: the light and flame show
 
 ## Where the handle sits when standing, relative to the player's facing (-X is
@@ -61,7 +65,7 @@ func _ready() -> void:
 	_build_model()
 	_light = OmniLight3D.new()
 	_light.light_color = glow_color
-	_light.light_energy = light_energy
+	_light.light_energy = light_energy * level_boost
 	_light.omni_range = light_range
 	_light.shadow_enabled = false
 	_light.light_specular = 0.0   # no shiny hotspot on the ground in daylight
@@ -158,7 +162,9 @@ func _process(delta: float) -> void:
 	if _lit and flicker_amount > 0.0:   # a flame wavers a little; two sines so it never settles into a pattern
 		var t := Time.get_ticks_msec() / 1000.0 * flicker_speed
 		var f := sin(t) * 0.6 + sin(t * 2.3 + 1.7) * 0.4
-		_light.light_energy = light_energy * (1.0 + f * flicker_amount)
+		_light.light_energy = light_energy * level_boost * (1.0 + f * flicker_amount)
+	elif _light != null:
+		_light.light_energy = light_energy * level_boost
 
 ## Switched off, the whole lantern disappears (model, flame and light). The
 ## x-ray silhouette copies follow their source meshes' visibility (see
