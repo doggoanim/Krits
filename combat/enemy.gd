@@ -16,6 +16,8 @@ var target: Node3D
 var armed := false   ## only attacks once the arena starts the fight
 
 var _timers: Array[float] = []
+var _warned: Array[bool] = []   ## per pattern: the "!" for its next volley has already popped
+var _last_warn_t := -10.0       ## seconds (Time) of this enemy's last pattern "!" — see _shoot()
 var _steps: Array[int] = []
 var _dest := Vector3.ZERO
 var _mesh: MeshInstance3D   ## placeholder sphere, only built when data.model is unset
@@ -86,6 +88,7 @@ func setup(d: EnemyData, a: Arena, t: Node3D) -> void:
 	for p in d.patterns:
 		_timers.append(randf_range(0.5, p.interval))   # desync groups
 		_steps.append(0)
+		_warned.append(false)
 	if d.has_leap() or d.has_burst_shoot():
 		_special_t = randf_range(1.0, 2.0)   # brief delay after the intro before the first one
 
@@ -266,12 +269,25 @@ func _face_point_instant(point: Vector3) -> void:
 		return
 	rotation.y = atan2(-dir.x, -dir.z)
 
+const PATTERN_WARN_LEAD := 0.4       ## seconds before a pattern volley that its "!" appears
+const PATTERN_WARN_MIN_GAP := 1.0    ## minimum seconds between pattern "!"s from one enemy
+
 func _shoot(delta: float) -> void:
 	if not armed:
 		return
 	for i in data.patterns.size():
 		_timers[i] -= delta
+		# "!" shortly BEFORE each volley, so every attack is announced (the leap and
+		# burst-shoot specials do their own). Rapid-fire patterns would flash it
+		# constantly, so one enemy shows it at most about once a second.
+		if not _warned[i] and _timers[i] > 0.0 and _timers[i] <= PATTERN_WARN_LEAD:
+			_warned[i] = true
+			var now := Time.get_ticks_msec() / 1000.0
+			if now - _last_warn_t >= PATTERN_WARN_MIN_GAP:
+				_last_warn_t = now
+				Telegraph.exclaim(self, body_height(data) + 0.5)
 		if _timers[i] <= 0.0:
+			_warned[i] = false
 			var p := data.patterns[i]
 			_timers[i] = p.interval
 			p.speed_scale = _speed_mult   # slow slows the projectiles too
