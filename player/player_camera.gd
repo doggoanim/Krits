@@ -59,7 +59,7 @@ func _ready() -> void:
 	# the center line itself read clear. Shape-casting a sphere the rough
 	# size of the camera's near plane catches that.
 	var probe := SphereShape3D.new()
-	probe.radius = 0.35
+	probe.radius = 0.2   # keep this well under the player capsule (0.4) so the cast never STARTS inside a wall the player is touching — a shape cast that starts overlapping geometry reports no hit, and the camera clips through
 	_arm.shape = probe
 	# Only walkable ground and the arena's own circular wall push the camera
 	# in — everything else (ordinary walls, props, enemies, all sharing the
