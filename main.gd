@@ -137,6 +137,9 @@ func _ready() -> void:
 	var debug := DebugTools.new()
 	add_child(debug)
 	debug.setup(player, encounters)
+	var render_debug := RenderDebug.new()   # Ctrl+Shift+1..0: flip effects off to hunt glitches
+	add_child(render_debug)
+	render_debug.setup(self, _env, _sun)
 
 	var ui := UiRoot.new()
 	add_child(ui)
