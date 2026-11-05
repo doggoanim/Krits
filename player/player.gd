@@ -759,9 +759,20 @@ func probe_inside_corner(body_pos: Vector3, dir: Vector3, current_normal: Vector
 ## hits the side face square-on. `surface_point` is a point on the current wall;
 ## `along` is the direction of travel along it. Returns {point, normal, body}
 ## or {} when there is no such wall.
+const OUTSIDE_CORNER_EDGE_CHECKS: Array[float] = [0.25, 0.5]   ## spots along the wall that must be empty for it to count as an edge
 const OUTSIDE_CORNER_REACH := 0.6   ## how far past the current spot, along the wall, probe_outside_corner() looks for the block's edge
 
 func probe_outside_corner(surface_point: Vector3, along: Vector3, current_normal: Vector3) -> Dictionary:
+	# Only a REAL edge counts. If the wall we are on carries on a bit further along
+	# (a seam between two panels, a bump, a momentary miss of the stay probe), this is
+	# a straight wall: the cast below would start inside its thickness and report a
+	# garbage hit, wrapping the player into the wall.
+	for d: float in OUTSIDE_CORNER_EDGE_CHECKS:
+		_wall_cast.global_position = surface_point + along * d + current_normal * config.wall_probe_reach
+		_wall_cast.target_position = -current_normal * (config.wall_probe_reach + 0.1)
+		_wall_cast.force_shapecast_update()
+		if _wall_cast.is_colliding() and _wall_cast.get_collision_normal(0).dot(current_normal) > 0.9:
+			return {}
 	var depth := config.wall_min_width * 0.5 + 0.1   # deep enough that the side face passes the width check
 	_wall_cast.global_position = surface_point + along * OUTSIDE_CORNER_REACH - current_normal * depth
 	_wall_cast.target_position = -along * (OUTSIDE_CORNER_REACH + 0.1)
@@ -775,8 +786,8 @@ func probe_outside_corner(surface_point: Vector3, along: Vector3, current_normal
 	if normal.length() < 0.1:
 		return {}
 	normal = normal.normalized()
-	if normal.dot(along) < 0.5 or normal.dot(current_normal) > 0.5:
-		return {}   # not a face turned toward where we're heading, or just the wall we are on
+	if normal.dot(along) < 0.8 or absf(normal.dot(current_normal)) > 0.35:
+		return {}   # not a square-on side face turned toward where we're heading
 	var hit_point: Vector3 = _wall_cast.get_collision_point(0)
 	if not _wall_wide_enough(hit_point, -normal, config.wall_probe_reach):
 		return {}
