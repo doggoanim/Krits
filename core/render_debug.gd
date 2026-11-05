@@ -5,6 +5,13 @@ extends Node
 ## level change (Main re-applies the level's lighting), and does nothing in a
 ## release build. A small readout shows what is currently off.
 
+## Second set, for keyboards/OSes where Ctrl+Shift+digit is taken (Windows uses it
+## for input-language switching): plain Ctrl+F1..F10 does the same, in the same order.
+const FKEYS: Dictionary = {
+	KEY_F1: KEY_1, KEY_F2: KEY_2, KEY_F3: KEY_3, KEY_F4: KEY_4, KEY_F5: KEY_5,
+	KEY_F6: KEY_6, KEY_F7: KEY_7, KEY_F8: KEY_8, KEY_F9: KEY_9, KEY_F10: KEY_0,
+}
+
 const KEYS: Dictionary = {
 	KEY_1: &"ssao",
 	KEY_2: &"glow",
@@ -47,18 +54,24 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	var k := event as InputEventKey
-	if k == null or not k.pressed or k.echo or not (k.ctrl_pressed and k.shift_pressed):
+	if k == null or not k.pressed or k.echo or not k.ctrl_pressed:
 		return
-	if not KEYS.has(k.keycode):
+	var code: int = k.keycode
+	if FKEYS.has(code) and not k.shift_pressed:
+		code = FKEYS[code]
+	elif not k.shift_pressed:
+		return
+	if not KEYS.has(code):
 		return
 	get_viewport().set_input_as_handled()
-	var effect: StringName = KEYS[k.keycode]
+	var effect: StringName = KEYS[code]
 	var turn_off := not _off.has(effect)
 	if turn_off:
 		_off[effect] = true
 	else:
 		_off.erase(effect)
 	_apply(effect, not turn_off)
+	print("RenderDebug: %s %s" % [effect, "OFF" if turn_off else "on"])
 	_refresh_label()
 
 func _apply(effect: StringName, on: bool) -> void:
@@ -107,8 +120,9 @@ func _toggle_toon(on: bool) -> void:
 func _refresh_label() -> void:
 	if _label == null:
 		return
-	var lines := PackedStringArray(["Ctrl+Shift+ 1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
-			"6 watercolor  7 outlines  8 haze  9 grading  0 toon world"])
+	var lines := PackedStringArray(["Ctrl+F1..F10 (or Ctrl+Shift+1..0):",
+			"1 ssao  2 glow  3 vol.fog  4 sun shadow  5 spot shadow",
+			"6 watercolor  7 outlines  8 haze  9 grading  10 toon world"])
 	if not _off.is_empty():
 		lines.append("OFF: " + ", ".join(PackedStringArray(_off.keys().map(func(x: Variant) -> String: return String(x)))))
 	_label.text = "\n".join(lines)
