@@ -14,6 +14,7 @@ extends Node3D
 ## this layer alongside whatever layer it's already on (still keep layer 1
 ## too, so normal raycasts/physics still see it as world geometry).
 const GROUND_LAYER := 1 << 7
+const WORLD_LAYER := 1   ## ordinary walls/props — see _update_collision_mask()
 
 ## Base look speed; the player's Settings > Controls sensitivity multiplies it.
 @export var mouse_sensitivity := 0.003
@@ -131,7 +132,17 @@ func shake(amount: float) -> void:
 		return
 	_shake = maxf(_shake, amount)
 
+## Ordinary walls only push the camera in when the x-ray silhouette is off:
+## the silhouette is what keeps the player visible when the camera clips
+## through them, so without it the camera would sit inside a wall (e.g. beside
+## a wall you are climbing) and the player would vanish from view.
+func _update_collision_mask() -> void:
+	var p := target as Player
+	var xray_on := p != null and p.xray != null and p.xray.enabled
+	_arm.collision_mask = GROUND_LAYER | Arena.WALL_LAYER | (0 if xray_on else WORLD_LAYER)
+
 func _process(delta: float) -> void:
+	_update_collision_mask()
 	var focus := _update_focus(delta)
 	if target:
 		var anchor := target.global_position + Vector3.UP * 1.4
