@@ -13,8 +13,8 @@ extends RefCounted
 ## instead of popping into a giant blob right in front of the lens.
 static func fade_near_camera(mat: BaseMaterial3D, start := 0.4, end := 1.4) -> void:
 	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
-	mat.distance_fade_min_distance = end     # fully visible beyond this
-	mat.distance_fade_max_distance = start   # fully faded at/inside this
+	mat.distance_fade_min_distance = start   # invisible at/inside this distance
+	mat.distance_fade_max_distance = end     # fully opaque beyond this
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 static func make(size := 128) -> GradientTexture2D:
