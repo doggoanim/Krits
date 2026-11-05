@@ -295,7 +295,17 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_sun.shadow_blur = cfg.sun_shadow_blur
 	# Shadow map only covers what's near the player: the same texture budget over
 	# a shorter range = much sharper, less jagged edges (and cheaper to render).
-	_sun.directional_shadow_max_distance = 70.0
+	_sun.directional_shadow_max_distance = 50.0
+	# Blocky, camera-dependent shadows come from the cascades: each one is a
+	# separate shadow map and their edges show as blocks that shift as the camera
+	# turns. Blending the cascades hides the seams; the bias keeps surfaces from
+	# self-shadowing in stripes at the finer resolution.
+	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	_sun.directional_shadow_blend_splits = true
+	_sun.directional_shadow_split_1 = 0.08
+	_sun.directional_shadow_split_2 = 0.2
+	_sun.directional_shadow_split_3 = 0.45
+	_sun.shadow_normal_bias = 1.5
 	_sun.light_volumetric_fog_energy = cfg.sun_volumetric_fog_energy
 
 	_apply_sky(cfg)
