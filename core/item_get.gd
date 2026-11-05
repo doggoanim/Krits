@@ -19,7 +19,7 @@ extends Node
 
 static var instance: ItemGet
 
-const JINGLE_PATH := "res://sounds/SFX/item_get.wav"
+const JINGLE_PATH := "res://sounds/Music/item_jingle.ogg"
 const BOX_DELAY := 0.9            ## pose + jingle get this long to land before the text box opens
 const PROP_HEIGHT := 0.55         ## metres tall the held item is drawn
 const PROP_RAISE := 0.5           ## metres above the head it floats
