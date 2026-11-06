@@ -26,6 +26,8 @@ const ANIM_CLOSE_IDLE := &"Close_Idle"
 
 const BODY_SIZE := Vector3(1.1, 0.8, 0.7)   ## closed chest, for the collision box
 const FALLBACK_ANIM_TIME := 0.7             ## used when the model has no animations
+const SEAM_HEIGHT := 0.42                   ## where the lid meets the body, for the light leaking out (ChestGlow)
+const GLOW_FADE_OUT := 0.35
 
 enum State { CLOSED, OPENING, OPEN, CLOSING }
 
@@ -46,6 +48,7 @@ var _state := State.CLOSED
 var _anim: AnimationPlayer
 var _sfx_open: AudioStream
 var _sfx_close: AudioStream
+var _glow: ChestGlow
 
 func _init() -> void:
 	prompt_text = "Press E to open"
@@ -56,12 +59,17 @@ func _ready() -> void:
 	super()
 	_build_model()
 	_ensure_collision()
+	_build_glow()
 	if ResourceLoader.exists(SFX_OPEN_PATH):
 		_sfx_open = load(SFX_OPEN_PATH)
 	if ResourceLoader.exists(SFX_CLOSE_PATH):
 		_sfx_close = load(SFX_CLOSE_PATH)
 	if snap_to_ground:
 		_snap_to_ground()
+
+## Something still inside? (a loot_id set and not taken yet)
+func has_loot() -> bool:
+	return loot_id != &"" and not is_looted()
 
 func _flag() -> StringName:
 	return StringName("chest_" + String(chest_id))
@@ -91,6 +99,7 @@ func _player_is_far() -> bool:
 
 func _open() -> void:
 	_state = State.OPENING
+	_glow.fade_to(0.0, GLOW_FADE_OUT)
 	_play_sfx(_sfx_open)
 	await _play_and_wait(ANIM_OPENING)
 	_state = State.OPEN
@@ -134,6 +143,13 @@ func _build_model() -> void:
 			if _anim.has_animation(clip):
 				_anim.get_animation(clip).loop_mode = Animation.LOOP_NONE
 	_play(ANIM_CLOSE_IDLE)
+
+## Light rays leaking out of the seam while there is still something inside.
+func _build_glow() -> void:
+	_glow = ChestGlow.new()
+	_glow.position = Vector3(0.0, SEAM_HEIGHT, 0.0)
+	add_child(_glow)
+	_glow.fade_to(1.0 if has_loot() else 0.0, 0.0)
 
 ## A collision box so the player can't walk through it, unless the scene already
 ## provides a CollisionShape3D of its own.
