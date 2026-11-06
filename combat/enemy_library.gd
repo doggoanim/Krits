@@ -60,6 +60,7 @@ static func green_slime() -> EnemyData:
 	d.puddle_damage = 8.0
 	d.puddle_tick_interval = 0.9
 	d.puddle_landing_radius_mult = 1.6
+	d.chase_speed = 6.0
 	d.drops = Drops.for_enemy(d.id)   # data/drops.cfg
 	return d
 
@@ -70,6 +71,7 @@ static func spinner() -> EnemyData:
 	d.max_hp = 90.0
 	d.gold = 35
 	d.move_speed = 2.0
+	d.chase_speed = 3.5
 	d.color = Color(0.7, 0.3, 0.9)
 	var s := SpiralPattern.new()
 	s.interval = 0.25
@@ -86,6 +88,7 @@ static func piercer() -> EnemyData:
 	d.max_hp = 80.0
 	d.gold = 45
 	d.move_speed = 5.0
+	d.chase_speed = 7.2   # nearly the player's walking pace: hard to shake
 	d.color = Color(1.0, 0.2, 0.7)
 	var p := AimedPattern.new()
 	p.interval = 2.2

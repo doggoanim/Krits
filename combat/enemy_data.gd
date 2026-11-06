@@ -78,6 +78,22 @@ func has_leap() -> bool:
 func has_burst_shoot() -> bool:
 	return shoot_max_cooldown > 0.0
 
+## Overworld behaviour (WorldEnemy): notice the player, pause on a "!", then
+## chase until they get away. Touching still starts the fight as before — this
+## only decides whether an enemy lets itself be walked past. The player walks at
+## 8 m/s (PlayerConfig.walk_speed), so a chase_speed a little below that can be
+## outrun, but not casually: stop, get cornered or take a detour and it catches up.
+@export_group("Chase")
+@export var chase_enabled := true
+@export var detect_radius := 9.0        ## notices the player this close (needs a clear line of sight if line_of_sight)
+@export var line_of_sight := true       ## walls between them block noticing (and keep it from losing you only briefly)
+@export var alert_time := 0.6           ## stands on its "!" this long before running — the player's window to react
+@export var chase_speed := 6.5          ## m/s while chasing
+@export var give_up_radius := 18.0      ## player this far away: it gives up at once
+@export var lose_time := 2.5            ## seconds out of range / out of sight before it gives up
+@export var leash_radius := 24.0        ## never chases farther than this from its home
+@export var chain_alert_radius := 8.0   ## idle friends this close join in when it notices (0 = lone wolf)
+
 ## Leaves a damaging, slowing, jump-disabling puddle (see SlimePuddle)
 ## wherever this enemy walks, plus a bigger one wherever a leap lands.
 @export_group("Slime Trail")
