@@ -27,6 +27,7 @@ enum Mode { WANDER, ALERT, CHASE, RETURN }   ## RETURN = walking back home after
 
 const LOSE_RANGE_MULT := 1.4     ## farther than detect_radius * this counts as "out of range" for lose_time
 const HOME_ARRIVE_DIST := 1.0
+const CHASE_LEAD_MAX := 0.6      ## seconds of the player's motion a chaser aims ahead by
 const LEDGE_PROBE_DEPTH := 4.0   ## no ground within this far below the next step = a drop, so don't step
 
 var frozen := false:
@@ -39,6 +40,7 @@ var frozen := false:
 
 var _mode := Mode.WANDER
 var _mode_t := 0.0           ## ALERT: time left on the "!"; CHASE: time spent unable to see the player
+var _chase_t := 0.0          ## seconds spent chasing without losing the player (drives the speed ramp)
 var _awake := false
 var _solid := false          ## true once the pop-in finished; only then can it be touched
 var _home := Vector3.ZERO
@@ -97,10 +99,11 @@ func _ready() -> void:
 	_contact.collision_layer = 0
 	_contact.collision_mask = 1 << 1
 	var cc := CollisionShape3D.new()
-	var cshape := SphereShape3D.new()
+	var cshape := CylinderShape3D.new()   # tall, so a jump over the enemy still touches it
 	cshape.radius = 1.2 * data.size
+	cshape.height = maxf(data.contact_height, 1.4 * data.size)
 	cc.shape = cshape
-	cc.position.y = 0.7 * data.size
+	cc.position.y = cshape.height * 0.5
 	_contact.add_child(cc)
 	add_child(_contact)
 	_set_dormant_visuals()
@@ -190,9 +193,14 @@ func _can_notice(dist: float) -> bool:
 		return false
 	if Game.stats.equipped_weapon == null:
 		return false
-	if dist > data.detect_radius:
+	if dist > data.detect_radius or _out_of_reach():
 		return false
 	return not data.line_of_sight or _can_see_player()
+
+## The player is on a ledge higher than this enemy can get to, or far below it.
+func _out_of_reach() -> bool:
+	var dy := _player.global_position.y - global_position.y
+	return dy > data.max_climb or dy < -8.0
 
 func _alert_up() -> void:
 	if _mode == Mode.ALERT or _mode == Mode.CHASE or not data.chase_enabled or not _solid:
@@ -215,6 +223,7 @@ func _alert(delta: float, to_player: Vector3) -> void:
 	if _mode_t <= 0.0:
 		_mode = Mode.CHASE
 		_mode_t = 0.0
+		_chase_t = 0.0
 
 func _chase(delta: float, to_player: Vector3, dist: float) -> void:
 	var too_far_from_home := global_position.distance_to(_home) > data.leash_radius
@@ -223,13 +232,21 @@ func _chase(delta: float, to_player: Vector3, dist: float) -> void:
 		return
 	# Out of range or out of sight for a while = lost them.
 	var lost := dist > data.detect_radius * LOSE_RANGE_MULT \
-			or (data.line_of_sight and not _can_see_player())
+			or (data.line_of_sight and not _can_see_player()) or _out_of_reach()
 	_mode_t = _mode_t + delta if lost else 0.0
+	_chase_t = 0.0 if lost else _chase_t + delta
 	if _mode_t >= data.lose_time:
 		_give_up()
 		return
-	if to_player.length() > 0.01:
-		_move_toward(to_player.normalized(), data.chase_speed, delta)
+	# Persistence pays off: it speeds up the longer it keeps you in sight.
+	var speed := data.chase_speed * (1.0 + data.chase_ramp * clampf(_chase_t / maxf(data.chase_ramp_time, 0.01), 0.0, 1.0))
+	# Head for where the player is going, not where they were: a dash or a long
+	# jump would otherwise leave it running at an empty spot.
+	var lead := _player.get_hvel() * minf(dist / maxf(speed, 0.1), CHASE_LEAD_MAX)
+	var aim := to_player + lead
+	aim.y = 0.0
+	if aim.length() > 0.01:
+		_move_toward(aim.normalized(), speed, delta)
 
 func _give_up() -> void:
 	_mode = Mode.RETURN
