@@ -94,7 +94,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	Game.input_locked = true
 	var cancelled := arena.cancelled
 	if not cancelled:
-		await get_tree().create_timer(POST_FIGHT_PAUSE).timeout
+		await get_tree().create_timer(POST_FIGHT_PAUSE, false).timeout
 
 	await arena.play_outro()   # walls sink, ring dashes and posts pop out (see Arena)
 	arena.queue_free()

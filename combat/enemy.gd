@@ -354,7 +354,7 @@ func take_damage(amount: float) -> void:
 		if _visual:
 			var death_len := _visual.play_death()
 			if death_len > 0.0:
-				get_tree().create_timer(death_len).timeout.connect(queue_free)
+				get_tree().create_timer(death_len, false).timeout.connect(queue_free)
 				return
 		queue_free()
 
@@ -424,6 +424,15 @@ func _run_special_attack() -> void:
 ## standing when the leap committed (snapshotted once, not homed — it's
 ## meant to be dodgeable), tumbling the whole body as it travels, and lands
 ## in a damaging burst that also drops a (bigger) puddle.
+## Waits one physics frame, and keeps waiting while the game is paused. The
+## attack coroutines below run on SceneTree.physics_frame, which keeps firing
+## during a pause (unlike _physics_process), so without this a leap or a volley
+## wound up before opening the menu would carry on behind it.
+func _next_physics_frame() -> void:
+	await get_tree().physics_frame
+	while get_tree().paused:
+		await get_tree().physics_frame
+
 func _do_leap_attack() -> void:
 	if _visual:
 		_visual.play_leap_ready()
@@ -438,7 +447,7 @@ func _do_leap_attack() -> void:
 			return
 		_place_leap_zone(zone)
 		zone.set_fill(waited / data.leap_ready_time)
-		await get_tree().physics_frame
+		await _next_physics_frame()
 		waited += get_physics_process_delta_time() * _speed_mult   # slowed: the wind-up takes longer
 	if _dying:
 		zone.queue_free()
@@ -470,7 +479,7 @@ func _do_leap_attack() -> void:
 			if puddle_t <= 0.0:
 				puddle_t = data.puddle_interval
 				_spawn_puddle(global_position, data.puddle_radius)
-		await get_tree().physics_frame
+		await _next_physics_frame()
 		if _dying:
 			zone.queue_free()
 			return
@@ -549,7 +558,7 @@ func _wait_aiming(seconds: float, aim: Telegraph) -> bool:
 		var aim_at := _predicted_point()
 		aim.set_line(center_point(), aim_at)
 		_face_point_instant(aim_at)
-		await get_tree().physics_frame
+		await _next_physics_frame()
 		waited += get_physics_process_delta_time()
 	return true
 

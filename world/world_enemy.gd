@@ -115,7 +115,7 @@ func _respawn_later() -> void:
 	velocity = Vector3.ZERO
 	_dest = _home
 	_set_dormant_visuals()
-	await get_tree().create_timer(respawn_time).timeout
+	await get_tree().create_timer(respawn_time, false).timeout
 	collision_layer = 1 << 2
 	_dead = false
 

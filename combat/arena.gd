@@ -236,7 +236,7 @@ func play_outro() -> void:
 		tw.tween_callback(VFX.shatter.bind(self, post.global_position + Vector3.UP * POST_HEIGHT * 0.5, Color.WHITE, 0.7)) \
 				.set_delay(start_t + 0.15)
 	await tw.finished
-	await get_tree().create_timer(0.35).timeout   # let the last puffs play out
+	await get_tree().create_timer(0.35, false).timeout   # let the last puffs play out
 
 ## Grows every wall segment's mesh up from the ground together, `t` 0..1.
 ## Scaling just the mesh (not its StaticBody3D/collider, which stays full
@@ -253,7 +253,7 @@ func _set_wall_growth(t: float) -> void:
 
 ## Call once the barrier is solid; enemies start shooting after a short intro.
 func start_fight() -> void:
-	await get_tree().create_timer(INTRO_DELAY).timeout
+	await get_tree().create_timer(INTRO_DELAY, false).timeout
 	if _over:
 		return
 	for e in enemies:
@@ -735,7 +735,7 @@ func _respawn_orb_later(orb: Orb) -> void:
 		orbs.erase(orb)
 		orb.queue_free()
 		return
-	get_tree().create_timer(ORB_RESPAWN_DELAY).timeout.connect(func():
+	get_tree().create_timer(ORB_RESPAWN_DELAY, false).timeout.connect(func():
 		if is_instance_valid(orb) and not _over:
 			var taken: Array[Vector3] = []
 			for o in orbs:
