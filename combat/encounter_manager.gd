@@ -41,8 +41,10 @@ func _on_touched(enemy: WorldEnemy) -> void:
 			and not world_root.is_in_group(&"combat_allowed"):
 		return   # no fights indoors, unless the level opts in (a dungeon like the Well Depths)
 	if Game.stats.equipped_weapon == null:
+		# Can't start a fight bare-handed: the enemy just hurts you instead.
 		_warn_unarmed()
-		return   # can't start a fight bare-handed
+		enemy.strike_player(player)
+		return
 	var group: Array[WorldEnemy] = [enemy]
 	for n in get_tree().get_nodes_in_group(&"world_enemies"):
 		var other := n as WorldEnemy
@@ -57,8 +59,8 @@ func _on_touched(enemy: WorldEnemy) -> void:
 const UNARMED_NOTICE_COOLDOWN := 8.0
 var _unarmed_notice_left := 0.0
 
-## Touching an enemy with no weapon equipped just doesn't start anything; say
-## why now and then, so it doesn't look like the game is broken.
+## Touching an enemy with no weapon equipped doesn't start a fight (it hurts
+## instead, see WorldEnemy.strike_player()); say why now and then.
 func _warn_unarmed() -> void:
 	if _unarmed_notice_left > 0.0:
 		return

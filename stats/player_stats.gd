@@ -182,8 +182,9 @@ func give(item: EquipmentData) -> void:
 func is_owned(item: EquipmentData) -> bool:
 	return _owns(item)
 
-## Takes the armor or shield off (back to the base stat). Weapons can't be
-## removed. `slot_item` is any item of the slot to clear, e.g. the equipped one.
+## Takes the armor, shield or weapon off (back to the base stat; unarmed you
+## can't start fights, and enemies just hurt you on contact). `slot_item` is any
+## item of the slot to clear, e.g. the equipped one.
 func unequip(slot_item: EquipmentData) -> void:
 	if slot_item is ArmorData:
 		equipped_armor = null
@@ -191,6 +192,8 @@ func unequip(slot_item: EquipmentData) -> void:
 	elif slot_item is ShieldData:
 		equipped_shield = null
 		shield = minf(shield, max_shield())
+	elif slot_item is WeaponData:
+		equipped_weapon = null
 	else:
 		return
 	Events.stats_changed.emit()

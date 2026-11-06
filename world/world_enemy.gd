@@ -40,6 +40,7 @@ var frozen := false:
 
 var _mode := Mode.WANDER
 var _mode_t := 0.0           ## ALERT: time left on the "!"; CHASE: time spent unable to see the player
+var _recover_t := 0.0        ## after hurting an unarmed player: stands off until this runs out
 var _chase_t := 0.0          ## seconds spent chasing without losing the player (drives the speed ramp)
 var _awake := false
 var _solid := false          ## true once the pop-in finished; only then can it be touched
@@ -99,17 +100,27 @@ func _ready() -> void:
 	_contact.collision_layer = 0
 	_contact.collision_mask = 1 << 1
 	var cc := CollisionShape3D.new()
-	var cshape := CylinderShape3D.new()   # tall, so a jump over the enemy still touches it
+	var cshape := SphereShape3D.new()
 	cshape.radius = 1.2 * data.size
-	cshape.height = maxf(data.contact_height, 1.4 * data.size)
 	cc.shape = cshape
-	cc.position.y = cshape.height * 0.5
+	cc.position.y = 0.7 * data.size
 	_contact.add_child(cc)
 	add_child(_contact)
 	_set_dormant_visuals()
 
 func is_awake() -> bool:
 	return _awake
+
+## The player touched us with no weapon to fight with: hurt them (they're
+## knocked back and get the usual brief invincibility), then stand off for a
+## moment so one touch can't chain into a stunlock.
+func strike_player(p: Player) -> void:
+	if _recover_t > 0.0:
+		return
+	_recover_t = data.contact_recover
+	velocity.x = 0.0
+	velocity.z = 0.0
+	p.hit(data.contact_damage, false, global_position)
 
 ## Called when the player wins: persist and remove.
 func defeat() -> void:
@@ -142,6 +153,7 @@ func _cleared_key() -> StringName:
 func _physics_process(delta: float) -> void:
 	if frozen or _dead:
 		return
+	_recover_t = maxf(0.0, _recover_t - delta)
 	if _player == null:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
 		if _player == null:
@@ -166,7 +178,7 @@ func _physics_process(delta: float) -> void:
 		Mode.RETURN:
 			_return_home(delta)
 			_try_notice(dist)
-	if _solid and not _player.dead:
+	if _solid and not _player.dead and _recover_t <= 0.0:
 		for b in _contact.get_overlapping_bodies():
 			if b == _player:
 				touched.emit(self)
@@ -186,12 +198,10 @@ func _try_notice(dist: float) -> void:
 					and other.global_position.distance_to(global_position) <= data.chain_alert_radius:
 				other._alert_up()
 
-## Awake, idle, close enough, can see the player — and there is something to
-## fight with (an unarmed player can't start a fight, so don't harass them).
+## Awake, idle, close enough and able to see the player. (Armed or not: an
+## unarmed player isn't fought, just hurt on contact — see strike_player().)
 func _can_notice(dist: float) -> bool:
 	if not data.chase_enabled or not _solid or _player.dead or Game.in_combat or Game.input_locked:
-		return false
-	if Game.stats.equipped_weapon == null:
 		return false
 	if dist > data.detect_radius or _out_of_reach():
 		return false
@@ -226,6 +236,14 @@ func _alert(delta: float, to_player: Vector3) -> void:
 		_chase_t = 0.0
 
 func _chase(delta: float, to_player: Vector3, dist: float) -> void:
+	if _recover_t > 0.0:   # just hit the player: catches its breath instead of crowding them
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if _model_visual:
+			_model_visual.play_idle()
+		_apply_gravity(delta)
+		move_and_slide()
+		return
 	var too_far_from_home := global_position.distance_to(_home) > data.leash_radius
 	if _player.dead or Game.in_combat or too_far_from_home or dist > data.give_up_radius:
 		_give_up()

@@ -461,15 +461,11 @@ func _on_gear_focused(item: EquipmentData) -> void:
 	var worn := equipped != null and equipped.id == item.id
 	_detail_kind.text = "Equipped" if worn else "Not equipped"
 	_set_detail_text(_gear_text(item))
-	# Equipping is a button, not a click on the list entry. Worn armor/shield
-	# can be taken off; a worn weapon has nothing to do.
+	# Equipping is a button, not a click on the list entry. Anything worn
+	# (armor, shield or weapon) can be taken off again.
 	_use_button.visible = true
-	if worn and not (item is ArmorData or item is ShieldData):
-		_use_button.text = "Equipped"
-		_use_button.disabled = true
-	else:
-		_use_button.text = "Take off" if worn else "Equip"
-		_use_button.disabled = false
+	_use_button.text = "Take off" if worn else "Equip"
+	_use_button.disabled = false
 
 func _gear_text(item: EquipmentData) -> String:
 	var stat := EquipmentLibrary.stat_line(item)
@@ -478,7 +474,7 @@ func _gear_text(item: EquipmentData) -> String:
 
 ## The Equip button: worn armor/shield comes off; anything else equips.
 func _toggle_gear(item: EquipmentData, is_equipped: bool) -> void:
-	if is_equipped and (item is ArmorData or item is ShieldData):
+	if is_equipped:
 		Game.stats.unequip(item)   # emits stats_changed -> refresh()
 		_message.text = "Took off %s." % item.display_name
 	else:
