@@ -397,6 +397,20 @@ func set_hvel(v: Vector3) -> void:
 ## animation change" even though gameplay logic is still running fine. This
 ## is a safety net, not a substitute for fixing the actual collider — see the
 ## comment on safe_margin above for the real fix.
+## Offers every surface the last move_and_slide() touched to anything that
+## reacts to being hit by one of the player's moves (BreakableBlock): `kind` is
+## the move (&"pound" or &"dive"), `speed` how fast it was going. Returns true
+## if something broke, so the move can carry on through instead of stopping.
+func impact_breakables(kind: StringName, speed: float) -> bool:
+	var broke := false
+	for i in get_slide_collision_count():
+		var hit := get_slide_collision(i)
+		var body := hit.get_collider()
+		if body != null and body.has_method(&"on_player_impact") \
+				and body.call(&"on_player_impact", kind, self, hit.get_normal(), speed):
+			broke = true
+	return broke
+
 func safe_move_and_slide() -> void:
 	if not velocity.is_finite():
 		push_warning("Player velocity went non-finite (%s) — likely a degenerate collision shape nearby. Resetting to zero." % velocity)

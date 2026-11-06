@@ -47,6 +47,11 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta, 0.9)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
+	# Dived into a breakable wall with the right weapon: it shatters and the dive
+	# carries straight on through instead of bouncing off.
+	if p.impact_breakables(&"dive", prev_h.length()):
+		p.set_hvel(prev_h)
+		return
 	# allow_grounded = true: a dive that reaches the wall on the very frame it also
 	# touches the floor (the "just right" distance — close enough to arrive on the
 	# way down, far enough not to hit it on the way up) used to fail the bounce's

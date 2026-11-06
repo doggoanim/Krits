@@ -34,5 +34,10 @@ func physics_update(delta: float) -> void:
 		return
 	p.safe_move_and_slide()
 	if p.is_on_floor():
+		# Slammed onto a breakable floor with the right weapon: it shatters and the
+		# slam carries on down through it instead of landing.
+		if p.impact_breakables(&"pound", p.config.pound_speed):
+			p.velocity.y = -p.config.pound_speed
+			return
 		p.pound_landed_frame = Engine.get_physics_frames()
 		machine.transition_to(&"PoundLand", {"jump_queued": _jump_queued})
