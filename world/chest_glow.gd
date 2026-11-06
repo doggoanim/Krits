@@ -5,8 +5,8 @@ extends Node3D
 ## Pure decoration — Chest owns when it shows (an unlooted, closed chest) and
 ## just calls fade_to().
 ##
-## Place the node at the seam's height at the chest's centre; four tilted
-## streaky sheets (one per side, see chest_glow.gdshader) rise from the gap
+## Place the node at the seam's height at the chest's centre; three tilted
+## streaky sheets (front and both sides, see chest_glow.gdshader) rise from the gap
 ## and an OmniLight3D adds the spill.
 
 const SHADER: Shader = preload("res://world/chest_glow.gdshader")
@@ -32,9 +32,9 @@ func _ready() -> void:
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
 	_material.set_shader_parameter(&"glow_color", glow_color)
-	# +Z = front: sheets facing out of each of the four sides.
+	# +Z = front. Sheets face out of the front and both sides; nothing leaks at the
+	# back, where the hinges are.
 	_add_sheet(Vector3(0.0, 0.0, half_extents.y), 0.0, half_extents.x * 2.0)
-	_add_sheet(Vector3(0.0, 0.0, -half_extents.y), PI, half_extents.x * 2.0)
 	_add_sheet(Vector3(half_extents.x, 0.0, 0.0), PI * 0.5, half_extents.y * 2.0)
 	_add_sheet(Vector3(-half_extents.x, 0.0, 0.0), -PI * 0.5, half_extents.y * 2.0)
 	_light = OmniLight3D.new()
