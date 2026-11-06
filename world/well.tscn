@@ -4106,7 +4106,7 @@ size = Vector3(3, 20, 0.1)
 size = Vector3(6, 3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_sm61l"]
-size = Vector3(6, 2.4, 1)
+size = Vector3(6, 2, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_sm61l"]
 size = Vector3(14, 3, 0.1)
@@ -4669,7 +4669,7 @@ material_override = SubResource("StandardMaterial3D_sm61l")
 mesh = SubResource("BoxMesh_66osh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="climbable_wall2" unique_id=117987707]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.47399807, 10.2, 0.82250214)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.47399807, 10, 0.82250214)
 shape = SubResource("BoxShape3D_sm61l")
 
 [node name="climbable_wall4" type="StaticBody3D" parent="." unique_id=1392233785]
