@@ -11,19 +11,20 @@
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
+[ext_resource type="Texture2D" uid="uid://v12u13y33gam" path="res://assets/textures/stone_3.jpg" id="14_ma7sk"]
 [ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
 [ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="20_66osh"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="21_sm61l"]
 [ext_resource type="Texture2D" uid="uid://8t3skwq7l2js" path="res://assets/textures/ladder.png" id="22_244o2"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
+[ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
-[ext_resource type="Script" path="res://world/breakable_block.gd" id="well_breakable"]
-[ext_resource type="Script" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
 [ext_resource type="Script" uid="uid://tk2mnptseshf" path="res://world/editor_preview_light.gd" id="well_editor_light"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
+[ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
@@ -4090,6 +4091,26 @@ face_vertex_data = {
 "vertex_index": SubResource("Resource_ifw8j")
 }
 
+[sub_resource type="BoxMesh" id="CellWestMesh"]
+size = Vector3(1, 6, 5)
+
+[sub_resource type="BoxShape3D" id="CellWestShape"]
+size = Vector3(1, 6, 5)
+
+[sub_resource type="StandardMaterial3D" id="CellPlugMat"]
+albedo_color = Color(0.6452097, 0.6452098, 0.6452097, 1)
+albedo_texture = ExtResource("14_ma7sk")
+
+[sub_resource type="SphereShape3D" id="CellSpiritShape"]
+
+[sub_resource type="StandardMaterial3D" id="CellGlowMat"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.88, 1, 1)
+
+[sub_resource type="SphereMesh" id="CellSpiritMesh"]
+radius = 0.45
+height = 0.9
+
 [sub_resource type="FogMaterial" id="FogMaterial_mist"]
 density = 0.04
 albedo = Color(0.55, 0.82, 0.9, 1)
@@ -4141,26 +4162,6 @@ uv1_offset = Vector3(-0.665, -0.21, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_jgx4q"]
 size = Vector3(1.2, 10, 0.2)
-
-[sub_resource type="StandardMaterial3D" id="CellPlugMat"]
-albedo_color = Color(0.66, 0.52, 0.36, 1)
-roughness = 1.0
-
-[sub_resource type="BoxMesh" id="CellWestMesh"]
-size = Vector3(1, 6, 5)
-
-[sub_resource type="BoxShape3D" id="CellWestShape"]
-size = Vector3(1, 6, 5)
-
-[sub_resource type="StandardMaterial3D" id="CellGlowMat"]
-shading_mode = 0
-albedo_color = Color(0.55, 0.88, 1, 1)
-
-[sub_resource type="SphereShape3D" id="CellSpiritShape"]
-
-[sub_resource type="SphereMesh" id="CellSpiritMesh"]
-radius = 0.45
-height = 0.9
 
 [node name="Well" type="Node3D" unique_id=427418772]
 
@@ -4465,27 +4466,26 @@ transform = Transform3D(-8.742278e-08, 0, 1, 0, 1, 0, -1, 0, -8.742278e-08, -1.5
 chest_id = &"well_wooden_sword"
 loot_id = &"wooden_sword"
 
-[node name="SpiritCellWestWall" type="StaticBody3D" parent="."]
+[node name="SpiritCellWestWall" type="StaticBody3D" parent="." unique_id=1456342250]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -22, -56.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="SpiritCellWestWall"]
+[node name="Mesh" type="MeshInstance3D" parent="SpiritCellWestWall" unique_id=35919975]
 material_override = ExtResource("7_8grio")
 mesh = SubResource("CellWestMesh")
 
-[node name="Collision" type="CollisionShape3D" parent="SpiritCellWestWall"]
+[node name="Collision" type="CollisionShape3D" parent="SpiritCellWestWall" unique_id=1318936053]
 shape = SubResource("CellWestShape")
 
-[node name="SpiritCellPlug" type="StaticBody3D" parent="."]
+[node name="SpiritCellPlug" type="StaticBody3D" parent="." unique_id=692402559]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.75, -22, -54.5)
 script = ExtResource("well_breakable")
 block_id = &"well_spirit_cell"
 break_with = 1
-required_weapon = 0
 min_power = 0.5
 size = Vector3(3.5, 6, 1)
 material = SubResource("CellPlugMat")
 
-[node name="WaterSpirits" type="StaticBody3D" parent="."]
+[node name="WaterSpirits" type="StaticBody3D" parent="." unique_id=622921074]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.75, -24.9, -57)
 script = ExtResource("well_pickup")
 item_id = &"water_spirits"
@@ -4493,19 +4493,20 @@ pickup_id = &"well_water_spirits"
 prompt_text = "Press E to take"
 prompt_height = 2.2
 
-[node name="Collision" type="CollisionShape3D" parent="WaterSpirits"]
+[node name="Collision" type="CollisionShape3D" parent="WaterSpirits" unique_id=1612196786]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 shape = SubResource("CellSpiritShape")
 
-[node name="Mesh" type="MeshInstance3D" parent="WaterSpirits"]
+[node name="Mesh" type="MeshInstance3D" parent="WaterSpirits" unique_id=789575901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 material_override = SubResource("CellGlowMat")
 mesh = SubResource("CellSpiritMesh")
 
-[node name="Glow" type="OmniLight3D" parent="WaterSpirits"]
+[node name="Glow" type="OmniLight3D" parent="WaterSpirits" unique_id=440469914]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 light_color = Color(0.5, 0.9, 1, 1)
 light_energy = 3.0
+shadow_enabled = true
 omni_range = 9.0
 
 [node name="hint" type="Decal" parent="." unique_id=288895221]
