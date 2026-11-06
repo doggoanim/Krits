@@ -149,6 +149,7 @@ func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.fast_travel_requested.connect(_on_fast_travel_requested)
 	Events.level_travel_requested.connect(_on_level_travel_requested)
+	CombatWarmup.start(self, cam.get_camera())   # pre-draws the combat visuals so the first fight doesn't stall
 	if starting_indoors:
 		var start_pos: Variant = _find_spawn_in(level, start_spawn_id)
 		player.teleport(start_pos if start_pos != null else level.global_position)
