@@ -11,9 +11,11 @@ extends Node
 ## ordinary items are added to the bag at once, important ones play this
 ## fanfare (queued until any running conversation ends, so "after the mayor
 ## finishes talking" just works, and several in a row play one after another).
-## Future callers (a secret chest, a quest reward) only call
-##   ItemGet.give(&"item_id")            # or give(id, count)
-## and mark the ItemData `important` in ItemLibrary.
+## Callers (a chest, a quest reward) only call
+##   ItemGet.give(&"item_id")            # or give(id, count) — fanfare if the ItemData is `important`
+##   ItemGet.give_gear(weapon_or_armor)  # equipment always gets the fanfare
+## Both take an optional `done` Callable that runs once the item is in the
+## player's hands (after the box closes), e.g. Game.save.
 ##
 ## One instance lives under UiRoot (ItemGet.instance).
 
@@ -28,7 +30,9 @@ const PROP_BOB := 0.04            ## metres of up-and-down float
 const PROP_POP_TIME := 0.45
 const GLOW_COLOR := Color(1.0, 0.92, 0.6)
 
-var _queue: Array[Dictionary] = []   ## [{item: ItemData, count: int}], oldest first
+## Oldest first. Each entry: {name: String, model: PackedScene, icon: Texture2D,
+## color: Color, grant: Callable (puts it in the player's hands), done: Callable}.
+var _queue: Array[Dictionary] = []
 var _busy := false
 var _entry: Dictionary = {}
 var _player: Player
@@ -46,14 +50,33 @@ func _exit_tree() -> void:
 
 ## Gives the player `count` of `id`. Important items play the fanfare (see the
 ## class doc); everything else just goes in the bag.
-static func give(id: StringName, count := 1) -> void:
+static func give(id: StringName, count := 1, done := Callable()) -> void:
 	var item := ItemLibrary.by_id(id)
+	var grant := func() -> void: Game.inventory.add(id, count)
 	if instance == null or item == null or not item.important \
 			or not Game.inventory.can_fit(id, count):
-		Game.inventory.add(id, count)
+		grant.call()
+		if done.is_valid():
+			done.call()
 		return
-	instance._queue.append({"item": item, "count": count})
-	instance._pump()
+	instance._enqueue({"name": item.display_name, "model": item.model, "icon": item.icon,
+			"color": item.color, "grant": grant, "done": done})
+
+## Gives the player a piece of gear (owned, and worn if that slot was empty) with
+## the full fanfare.
+static func give_gear(gear: EquipmentData, done := Callable()) -> void:
+	var grant := func() -> void: Game.stats.give(gear)
+	if instance == null:
+		grant.call()
+		if done.is_valid():
+			done.call()
+		return
+	instance._enqueue({"name": gear.display_name, "model": gear.model, "icon": null,
+			"color": Color(0.8, 0.8, 0.8), "grant": grant, "done": done})
+
+func _enqueue(entry: Dictionary) -> void:
+	_queue.append(entry)
+	_pump()
 
 # --- Queue -------------------------------------------------------------------
 
@@ -67,11 +90,11 @@ func _pump() -> void:
 			Events.dialogue_ended.connect(_pump, CONNECT_ONE_SHOT)
 		return
 	_entry = _queue.pop_front()
-	_play(_entry["item"])
+	_play(_entry)
 
 # --- The moment --------------------------------------------------------------
 
-func _play(item: ItemData) -> void:
+func _play(entry: Dictionary) -> void:
 	_player = get_tree().get_first_node_in_group(&"player") as Player
 	if _player == null or DialogueBox.instance == null:
 		_finish()   # nobody to show it to (menus, tests): just hand it over
@@ -81,7 +104,7 @@ func _play(item: ItemData) -> void:
 	_face_camera()
 	_player.visual.play_hold(PlayerVisual.ANIM_GET_ITEM, 600.0, 1.0, true, 0.1)
 	_player.visual.hold_expression(&"happy")
-	_spawn_prop(item)
+	_spawn_prop(entry)
 	_play_jingle()
 	Music.duck = true
 	_age = 0.0
@@ -94,7 +117,7 @@ func _play(item: ItemData) -> void:
 		_finish()
 		return
 	Events.dialogue_ended.connect(_on_box_closed, CONNECT_ONE_SHOT)
-	box.start(DialogueNode.say("", "You got the [color=#ffd966]%s[/color]!" % item.display_name))
+	box.start(DialogueNode.say("", "You got the [color=#ffd966]%s[/color]!" % entry["name"]))
 
 func _on_box_closed() -> void:
 	_finish()
@@ -103,8 +126,11 @@ func _on_box_closed() -> void:
 func _finish() -> void:
 	_restore()
 	if not _entry.is_empty():
-		Game.inventory.add(_entry["item"].id, _entry["count"])
+		var entry := _entry
 		_entry = {}
+		entry["grant"].call()
+		if entry["done"].is_valid():
+			entry["done"].call()
 	await get_tree().create_timer(0.35).timeout
 	_pump()
 
@@ -151,11 +177,11 @@ func _play_jingle() -> void:
 
 ## The treasure floating over the player's head: the item's model if it has
 ## one, else its icon as a billboard, else a glowing orb in its colour.
-func _spawn_prop(item: ItemData) -> void:
+func _spawn_prop(entry: Dictionary) -> void:
 	_prop = Node3D.new()
 	_prop.position = Vector3(0.0, Player.STAND_HEIGHT + PROP_RAISE, 0.0)
 	_player.add_child(_prop)
-	var shape := _make_shape(item)
+	var shape := _make_shape(entry)
 	_prop.add_child(shape)
 	var light := OmniLight3D.new()
 	light.light_color = GLOW_COLOR
@@ -167,16 +193,19 @@ func _spawn_prop(item: ItemData) -> void:
 	create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT) \
 		.tween_property(_prop, "scale", Vector3.ONE, PROP_POP_TIME)
 
-func _make_shape(item: ItemData) -> Node3D:
-	if item.model != null:
-		var model := item.model.instantiate() as Node3D
+func _make_shape(entry: Dictionary) -> Node3D:
+	var model_scene: PackedScene = entry["model"]
+	var icon: Texture2D = entry["icon"]
+	var color: Color = entry["color"]
+	if model_scene != null:
+		var model := model_scene.instantiate() as Node3D
 		ModelUtil.fit_height(model, PROP_HEIGHT)
 		return model
-	if item.icon != null:
+	if icon != null:
 		var sprite := Sprite3D.new()
-		sprite.texture = item.icon
+		sprite.texture = icon
 		sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		sprite.pixel_size = PROP_HEIGHT / maxf(item.icon.get_height(), 1.0)
+		sprite.pixel_size = PROP_HEIGHT / maxf(icon.get_height(), 1.0)
 		sprite.shaded = false
 		return sprite
 	var orb := MeshInstance3D.new()
@@ -185,9 +214,9 @@ func _make_shape(item: ItemData) -> Node3D:
 	mesh.height = PROP_HEIGHT * 0.8
 	orb.mesh = mesh
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = item.color
+	mat.albedo_color = color
 	mat.emission_enabled = true
-	mat.emission = item.color
+	mat.emission = color
 	mat.emission_energy_multiplier = 1.5
 	orb.material_override = mat
 	return orb

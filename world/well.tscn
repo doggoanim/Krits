@@ -22,6 +22,7 @@
 [ext_resource type="Script" uid="uid://tk2mnptseshf" path="res://world/editor_preview_light.gd" id="well_editor_light"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
+[ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -4436,6 +4437,11 @@ collision_mask = 129
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 script = ExtResource("7_yugcs")
 spawn_id = &"well_drop"
+
+[node name="WoodenSwordChest" parent="." unique_id=730018401 instance=ExtResource("well_chest")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.55, 0, -0.8)
+chest_id = &"well_wooden_sword"
+loot_id = &"wooden_sword"
 
 [node name="hint" type="Decal" parent="." unique_id=288895221]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.55, -2.1940737)

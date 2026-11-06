@@ -167,6 +167,18 @@ func buy(item: EquipmentData) -> bool:
 	equip(item)
 	return true
 
+## Hands the player a piece of gear for free (a chest, a quest reward): owned from
+## now on, and worn right away if that slot was empty.
+func give(item: EquipmentData) -> void:
+	if not _owns(item):
+		_owned_list(item).append(item.id)
+	var worn: EquipmentData = equipped_armor if item is ArmorData \
+			else (equipped_shield if item is ShieldData else equipped_weapon)
+	if worn == null:
+		equip(item)
+	else:
+		Events.stats_changed.emit()
+
 func is_owned(item: EquipmentData) -> bool:
 	return _owns(item)
 
