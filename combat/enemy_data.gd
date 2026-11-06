@@ -95,7 +95,7 @@ func has_burst_shoot() -> bool:
 @export var chain_alert_radius := 8.0   ## idle friends this close join in when it notices (0 = lone wolf)
 ## The player is a jumpy, diving, long-jumping target, so a chaser is built to
 ## still be able to get them:
-@export var contact_damage := 15.0      ## what a touch costs an UNARMED player (an armed one starts a fight instead)
+@export var contact_damage := 45.0      ## what a touch costs an UNARMED player (an armed one starts a fight instead)
 @export var contact_recover := 1.2      ## after hitting, the enemy stands off for this long before it can hit again
 @export var max_climb := 2.5            ## player this much higher than the enemy (on a ledge it can't climb to) counts as out of reach
 @export var chase_ramp := 0.35          ## the longer it chases, the faster it gets: up to +35% ...
