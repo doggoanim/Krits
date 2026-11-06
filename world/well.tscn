@@ -17,12 +17,12 @@
 [ext_resource type="Texture2D" uid="uid://8t3skwq7l2js" path="res://assets/textures/ladder.png" id="22_244o2"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
+[ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
 [ext_resource type="Script" uid="uid://tk2mnptseshf" path="res://world/editor_preview_light.gd" id="well_editor_light"]
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
-[ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
