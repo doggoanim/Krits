@@ -18,6 +18,8 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
+[ext_resource type="Script" path="res://world/breakable_block.gd" id="well_breakable"]
+[ext_resource type="Script" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
 [ext_resource type="Script" uid="uid://doook4c5u7hol" path="res://world/cave_drips.gd" id="well_drips"]
 [ext_resource type="Script" uid="uid://tk2mnptseshf" path="res://world/editor_preview_light.gd" id="well_editor_light"]
@@ -4140,6 +4142,26 @@ uv1_offset = Vector3(-0.665, -0.21, 0)
 [sub_resource type="BoxMesh" id="BoxMesh_jgx4q"]
 size = Vector3(1.2, 10, 0.2)
 
+[sub_resource type="StandardMaterial3D" id="CellPlugMat"]
+albedo_color = Color(0.66, 0.52, 0.36, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="CellWestMesh"]
+size = Vector3(1, 6, 5)
+
+[sub_resource type="BoxShape3D" id="CellWestShape"]
+size = Vector3(1, 6, 5)
+
+[sub_resource type="StandardMaterial3D" id="CellGlowMat"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.88, 1, 1)
+
+[sub_resource type="SphereShape3D" id="CellSpiritShape"]
+
+[sub_resource type="SphereMesh" id="CellSpiritMesh"]
+radius = 0.45
+height = 0.9
+
 [node name="Well" type="Node3D" unique_id=427418772]
 
 [node name="LevelEnvironment" type="Node" parent="." unique_id=305052992]
@@ -4442,6 +4464,49 @@ spawn_id = &"well_drop"
 transform = Transform3D(-8.742278e-08, 0, 1, 0, 1, 0, -1, 0, -8.742278e-08, -1.55, 0, -0.8)
 chest_id = &"well_wooden_sword"
 loot_id = &"wooden_sword"
+
+[node name="SpiritCellWestWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -22, -56.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="SpiritCellWestWall"]
+material_override = ExtResource("7_8grio")
+mesh = SubResource("CellWestMesh")
+
+[node name="Collision" type="CollisionShape3D" parent="SpiritCellWestWall"]
+shape = SubResource("CellWestShape")
+
+[node name="SpiritCellPlug" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.75, -22, -54.5)
+script = ExtResource("well_breakable")
+block_id = &"well_spirit_cell"
+break_with = 1
+required_weapon = 0
+min_power = 0.5
+size = Vector3(3.5, 6, 1)
+material = SubResource("CellPlugMat")
+
+[node name="WaterSpirits" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.75, -24.9, -57)
+script = ExtResource("well_pickup")
+item_id = &"water_spirits"
+pickup_id = &"well_water_spirits"
+prompt_text = "Press E to take"
+prompt_height = 2.2
+
+[node name="Collision" type="CollisionShape3D" parent="WaterSpirits"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("CellSpiritShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="WaterSpirits"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+material_override = SubResource("CellGlowMat")
+mesh = SubResource("CellSpiritMesh")
+
+[node name="Glow" type="OmniLight3D" parent="WaterSpirits"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+light_color = Color(0.5, 0.9, 1, 1)
+light_energy = 3.0
+omni_range = 9.0
 
 [node name="hint" type="Decal" parent="." unique_id=288895221]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.55, -2.1940737)
