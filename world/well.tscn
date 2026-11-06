@@ -4439,7 +4439,7 @@ script = ExtResource("7_yugcs")
 spawn_id = &"well_drop"
 
 [node name="WoodenSwordChest" parent="." unique_id=730018401 instance=ExtResource("well_chest")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.55, 0, -0.8)
+transform = Transform3D(-8.742278e-08, 0, 1, 0, 1, 0, -1, 0, -8.742278e-08, -1.55, 0, -0.8)
 chest_id = &"well_wooden_sword"
 loot_id = &"wooden_sword"
 
