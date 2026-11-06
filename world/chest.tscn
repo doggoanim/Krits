@@ -1,6 +1,16 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://world/chest.gd" id="1_chest"]
+[ext_resource type="PackedScene" path="res://assets/world/chest.glb" id="2_model"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(1.1, 0.8, 0.7)
 
 [node name="Chest" type="StaticBody3D"]
 script = ExtResource("1_chest")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("BoxShape3D_body")

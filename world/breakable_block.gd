@@ -1,3 +1,4 @@
+@tool
 class_name BreakableBlock
 extends StaticBody3D
 ## A block that only gives way to one specific move, performed with the right
@@ -30,19 +31,31 @@ enum Method { GROUND_POUND, AIR_DIVE }
 ## The equipped weapon's damage_bonus must be at least this (wooden sword 0.5,
 ## steel sword 1.0).
 @export var min_power := 0.0
-@export var size := Vector3(2.0, 2.0, 2.0)          ## only used when it builds its own box
-@export var material: Material                       ## only used when it builds its own box
-@export var rubble_color := Color(0.66, 0.52, 0.36)
+@export var size := Vector3(2.0, 2.0, 2.0):          ## only used when it builds its own box
+	set(v):
+		size = v
+		_rebuild_body()
+@export var material: Material:                      ## only used when it builds its own box
+	set(v):
+		material = v
+		_rebuild_body()
+@export var rubble_color := Color(0.66, 0.52, 0.36):
+	set(v):
+		rubble_color = v
+		_rebuild_body()
 @export var break_sound: AudioStream
 
 const HINT_COOLDOWN_MSEC := 2500
 static var _last_hint_msec := -100000
 
+var _auto_nodes: Array[Node] = []   ## the box mesh/collision this script built itself
+
 func _ready() -> void:
-	if block_id != &"" and Game.flag(_flag()):
+	# @tool: the box is built in the editor too, so the block is visible there.
+	if not Engine.is_editor_hint() and block_id != &"" and Game.flag(_flag()):
 		queue_free()
 		return
-	_ensure_body()
+	_rebuild_body()
 
 func _flag() -> StringName:
 	return StringName("broken_" + String(block_id))
@@ -109,22 +122,34 @@ func _center() -> Vector3:
 			return mi.global_transform * mi.get_aabb().get_center()
 	return global_position
 
-## Builds a plain box (mesh + collision) unless the scene supplies its own shape.
-func _ensure_body() -> void:
+## (Re)builds the plain box (mesh + collision) unless the scene supplies its own
+## collision shape. Not saved into the scene file (the nodes have no owner).
+func _rebuild_body() -> void:
+	if not is_inside_tree():
+		return
+	var has_own_shape := false
 	for child in get_children():
-		if child is CollisionShape3D:
-			return
+		if child is CollisionShape3D and child not in _auto_nodes:
+			has_own_shape = true
+	for node in _auto_nodes:
+		if is_instance_valid(node):
+			node.queue_free()
+	_auto_nodes.clear()
+	if has_own_shape:
+		return
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = size
 	shape.shape = box
 	add_child(shape)
+	_auto_nodes.append(shape)
 	var mi := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	mi.mesh = mesh
 	mi.material_override = material if material != null else _default_material()
 	add_child(mi)
+	_auto_nodes.append(mi)
 
 func _default_material() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()

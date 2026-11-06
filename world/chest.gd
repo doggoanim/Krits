@@ -133,8 +133,12 @@ func _give_loot() -> void:
 # --- Pieces ------------------------------------------------------------------
 
 func _build_model() -> void:
-	var model := MODEL.instantiate() as Node3D
-	add_child(model)
+	# chest.tscn already contains the model (so it shows in the editor); only
+	# build it here for a scene that doesn't.
+	var model := get_node_or_null("Model") as Node3D
+	if model == null:
+		model = MODEL.instantiate() as Node3D
+		add_child(model)
 	var players := model.find_children("*", "AnimationPlayer", true, false)
 	if not players.is_empty():
 		_anim = players[0] as AnimationPlayer
