@@ -274,6 +274,16 @@ const FOAM_LIFT := 0.06         ## above the surface, so waves and the water mes
 const FOAM_FULL_BELOW := 0.9    ## fully submerged past this (head underwater) the ring is gone
 var _foam: MeshInstance3D
 var _foam_mat: ShaderMaterial
+var _foam_surface_y := 0.0
+
+## Positioned every rendered frame (not every physics tick) from the player's
+## interpolated transform, so the ring sits exactly under the character instead
+## of trailing a frame or two behind it.
+func _process(_delta: float) -> void:
+	if _foam == null or not _foam.visible:
+		return
+	var pos := (get_parent() as Node3D).get_global_transform_interpolated().origin
+	_foam.global_position = Vector3(pos.x, _foam_surface_y, pos.z)
 
 ## Called every frame with the water the player is standing/swimming in (or null)
 ## and how submerged they are (0..1). Draws a white toon foam ring on the surface
@@ -293,11 +303,11 @@ func update_water_foam(water: WaterVolume, submersion: float) -> void:
 		_foam.material_override = _foam_mat
 		_foam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_foam.top_level = true            # world-space: never inherits the player's turn
+		_foam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF   # moved by hand in _process()
 		_foam.rotation_degrees.x = -90.0  # lie flat
 		add_child(_foam)
 	_foam.visible = true
-	var pos := (get_parent() as Node3D).global_position
-	_foam.global_position = Vector3(pos.x, water.surface_world_y() + FOAM_LIFT, pos.z)
+	_foam_surface_y = water.surface_world_y() + FOAM_LIFT
 	var fade_in := smoothstep(0.0, 0.12, submersion)
 	var fade_out := 1.0 - smoothstep(FOAM_FULL_BELOW, 1.0, submersion)
 	_foam_mat.set_shader_parameter(&"opacity", fade_in * fade_out)
