@@ -24,10 +24,15 @@ func _can_interact() -> bool:
 	return player != null and not player.dead and not Game.input_locked
 
 func _interact() -> void:
-	if Game.inventory.add(item_id, count) > 0:
-		return   # didn't fit (never the case for key items; a normal item may need a free slot)
-	Game.set_flag(_flag())
 	var item := ItemLibrary.by_id(item_id)
-	Events.notice.emit("Got %s!" % (item.display_name if item else String(item_id)))
-	Game.save()
+	if not Game.inventory.can_fit(item_id, count):
+		return
+	Game.set_flag(_flag())
+	if item != null and item.important:
+		# The "You got the ...!" fanfare hands it over (and saves) when its box closes.
+		ItemGet.give(item_id, count, Game.save)
+	else:
+		Game.inventory.add(item_id, count)
+		Events.notice.emit("Got %s!" % (item.display_name if item else String(item_id)))
+		Game.save()
 	queue_free()

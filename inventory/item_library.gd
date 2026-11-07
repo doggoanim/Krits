@@ -38,6 +38,8 @@ static func water_spirits() -> ItemData:
 	var i := _make(&"water_spirits", ItemData.Category.KEY,
 		Color(0.5, 0.85, 1.0))
 	i.max_stack = 1
+	i.important = true   # collecting them plays the item-get fanfare (see ItemGet)
+	i.model = preload("res://world/water_spirit.tscn")
 	return i
 
 ## Hangs on the player's left hip and lights their way (see HipLantern).

@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="7_yugcs"]
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
+[ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="12_qcdpf"]
 [ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
@@ -11333,14 +11334,6 @@ albedo_texture = ExtResource("14_ma7sk")
 
 [sub_resource type="SphereShape3D" id="CellSpiritShape"]
 
-[sub_resource type="StandardMaterial3D" id="CellGlowMat"]
-shading_mode = 0
-albedo_color = Color(0.55, 0.88, 1, 1)
-
-[sub_resource type="SphereMesh" id="CellSpiritMesh"]
-radius = 0.45
-height = 0.9
-
 [sub_resource type="FogMaterial" id="FogMaterial_mist"]
 density = 0.04
 albedo = Color(0.55, 0.82, 0.9, 1)
@@ -12271,10 +12264,8 @@ prompt_height = 2.2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 shape = SubResource("CellSpiritShape")
 
-[node name="Mesh" type="MeshInstance3D" parent="WaterSpirits" unique_id=789575901]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
-material_override = SubResource("CellGlowMat")
-mesh = SubResource("CellSpiritMesh")
+[node name="Spirits" parent="WaterSpirits" unique_id=789575901 instance=ExtResource("water_spirit_scene")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 1.2, 0)
 
 [node name="Glow" type="OmniLight3D" parent="WaterSpirits" unique_id=440469914]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
