@@ -13,6 +13,14 @@ extends Node3D
 ## Spawnpoint, scoped to whichever level was just loaded.
 
 @export var spawn_id: StringName = &"start"
+## Mark the arrival spot of a dungeon (a level in the "dungeon" group): dying
+## anywhere inside it respawns the player here instead of at the last
+## checkpoint outside (see Main._respawn_after_death()).
+@export var is_dungeon_start := false
+
+func _ready() -> void:
+	if is_dungeon_start:
+		add_to_group(&"dungeon_start")
 
 func respawn_position() -> Vector3:
 	return global_position

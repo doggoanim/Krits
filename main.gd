@@ -31,6 +31,10 @@ extends Node3D
 ## walls to block the sun from shining straight through, so both would look
 ## broken regardless of which EnvironmentConfig is active.
 const INTERIOR_GROUP := &"interior_level"
+## Levels in this group are dungeons: dying inside respawns at the level's
+## DoorSpawn marked `is_dungeon_start`, not at the last checkpoint outside.
+const DUNGEON_GROUP := &"dungeon"
+const DUNGEON_START_GROUP := &"dungeon_start"
 
 ## Looping background music for every level OUTSIDE the INTERIOR_GROUP —
 ## right now that's always Chesburg, since it's the only outdoor level
@@ -248,12 +252,25 @@ func _respawn_after_death() -> void:
 	await LoadingScreen.instance.run(func():
 		_gold_lost = Game.stats.lose_gold(PlayerStats.DEATH_GOLD_LOSS)
 		Game.stats.full_heal()
-		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
+		if not _respawn_in_dungeon():
+			_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
 		Music.force_muffle = false)
 	Game.input_locked = false
 	_respawning = false
 	if _gold_lost > 0:
 		Events.notice.emit("Dropped %d gold." % _gold_lost)
+
+## Inside a dungeon, death sends the player back to the dungeon's own start.
+## Returns false when the current level isn't a dungeon (or has no marked start).
+func _respawn_in_dungeon() -> bool:
+	if level == null or not level.is_in_group(DUNGEON_GROUP):
+		return false
+	for n in get_tree().get_nodes_in_group(DUNGEON_START_GROUP):
+		if level.is_ancestor_of(n):
+			player.teleport((n as DoorSpawn).respawn_position())
+			cam.global_position = player.global_position
+			return true
+	return false
 
 ## Builds the one Sun/WorldEnvironment pair the whole game uses, as direct
 ## children of Main rather than part of the swappable `level` (see `level`'s

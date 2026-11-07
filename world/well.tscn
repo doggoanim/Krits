@@ -5740,7 +5740,7 @@ uv1_offset = Vector3(-0.665, -0.21, 0)
 [sub_resource type="BoxMesh" id="BoxMesh_jgx4q"]
 size = Vector3(1.2, 10, 0.2)
 
-[node name="Well" type="Node3D" unique_id=427418772]
+[node name="Well" type="Node3D" unique_id=427418772 groups=["dungeon"]]
 
 [node name="LevelEnvironment" type="Node" parent="." unique_id=305052992]
 script = ExtResource("lvlenv_script")
@@ -6148,6 +6148,7 @@ collision_mask = 129
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 script = ExtResource("7_yugcs")
 spawn_id = &"well_drop"
+is_dungeon_start = true
 
 [node name="WoodenSwordChest" parent="." unique_id=730018401 instance=ExtResource("well_chest")]
 transform = Transform3D(1.7484555e-07, 0, -1, 0, 1, 0, 1, 0, 1.7484555e-07, -10.150007, -25, -36.199997)
