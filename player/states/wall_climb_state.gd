@@ -188,6 +188,12 @@ func _attempt_move(p: Player, c: PlayerConfig, move: Vector3, strafe: float, cli
 			var around := p.probe_outside_corner(tentative + chest, _wall_right(_normal) * signf(strafe), _normal)
 			if not around.is_empty():
 				found = around
+	# Grabbed right at the top edge, the head-height probe point is already above
+	# the wall, so every move read "no wall here" and the player was stuck there.
+	# Sideways and downward moves only need wall at chest height; just climbing
+	# further up must still stop at the top.
+	if found.is_empty() and climb <= 0.0:
+		found = p.probe_wall_near(tentative + chest, _normal, strafe)
 	if found.is_empty():
 		if p.debug_wall_climb:
 			print("WallClimb: no climbable wall at probe point ", probe_point, " (normal ", _normal, ", strafe ", strafe, ", climb ", climb, ")")
