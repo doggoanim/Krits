@@ -30,6 +30,7 @@ const DEFAULTS := {
 	&"display/window_mode": EXCLUSIVE_FULLSCREEN,
 	&"display/vsync": true,
 	&"display/resolution": 900,         ## windowed-mode size, as the window HEIGHT (16:9 — see _windowed_size())
+	&"display/show_fps": false,         ## small FPS counter in the top-right corner (see ui/widgets/fps_counter.gd)
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
 	&"display/pixelation": 1,           ## unused: PixelateEffect is no longer added in Main (1 = off)

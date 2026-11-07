@@ -172,6 +172,27 @@ ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"display/vsync"
 
+[node name="ShowFpsRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/DisplayPage/ShowFpsRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Show FPS"
+
+[node name="ShowFps" type="TextureButton" parent="Content/Pages/DisplayPage/ShowFpsRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"display/show_fps"
+
 [node name="FpsCapRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
 layout_mode = 2
 theme_override_constants/separation = 40
