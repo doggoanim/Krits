@@ -175,7 +175,8 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 											  ## footstep sfx/puddle ripples instead (see
 											  ## GroundState._play_footstep()) rather than full swimming.
 @export var swim_speed := 5.0               ## horizontal swim speed
-@export var swim_accel := 10.0
+@export var swim_accel := 10.0             ## how fast you coast to a stop when you let go
+@export var swim_snap_accel := 80.0        ## acceleration while a direction is held: high = starts and changes direction instantly
 @export var swim_vertical_speed := 4.0      ## straight up/down speed while holding jump/crouch_pound
 @export var swim_vertical_accel := 12.0
 @export var swim_surface_jump_margin := 0.1   ## pressing jump (not holding) while this close to

@@ -27,6 +27,9 @@ var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — 
 const WAKE_INTERVAL := 0.3
 const MAX_SWIM_PITCH := deg_to_rad(55.0)   ## steepest body tilt while swimming diagonally
 var _wake_t := 0.0
+var _had_h := false         ## last frame's input state, to tell which axis was pressed most recently
+var _had_v := false
+var _axis_vertical := false  ## when both axes are held, true = vertical wins
 var _prev_motion_mode := CharacterBody3D.MOTION_MODE_GROUNDED
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
@@ -47,6 +50,8 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	p.effects.set_swim_bubbles(true)
 	_stroke_phase = -1.0
 	_wake_t = 0.0
+	_had_h = false
+	_had_v = false
 
 func exit(_next: StringName) -> void:
 	player.motion_mode = _prev_motion_mode
@@ -75,32 +80,44 @@ func physics_update(delta: float) -> void:
 		return
 
 	var input := p.input_dir()
-	var target_h := input.normalized() * c.swim_speed if input.length() > 0.1 else Vector3.ZERO
-	p.set_hvel(p.get_hvel().move_toward(target_h, c.swim_accel * delta))
-
 	var vertical := 0.0
 	if Input.is_action_pressed(&"jump"):
 		vertical += 1.0
 	if Input.is_action_pressed(&"crouch_pound"):
 		vertical -= 1.0
-	p.velocity.y = move_toward(p.velocity.y, vertical * c.swim_vertical_speed, c.swim_vertical_accel * delta)
+	# One axis at a time: swimming is either across or up/down, never a diagonal.
+	# If both are held, whichever was pressed most recently wins.
+	var has_h := input.length() > 0.1
+	var has_v := absf(vertical) > 0.1
+	if has_h and not _had_h:
+		_axis_vertical = false
+	if has_v and not _had_v:
+		_axis_vertical = true
+	_had_h = has_h
+	_had_v = has_v
+	if has_h and has_v:
+		if _axis_vertical:
+			has_h = false
+		else:
+			has_v = false
+			vertical = 0.0
+	elif not has_v:
+		vertical = 0.0
+
+	# Held input uses the snappy rate (instant starts and direction changes);
+	# letting go coasts to a stop at the gentler one.
+	var target_h := input.normalized() * c.swim_speed if has_h else Vector3.ZERO
+	p.set_hvel(p.get_hvel().move_toward(target_h, (c.swim_snap_accel if has_h else c.swim_accel) * delta))
+	var target_v := vertical * c.swim_vertical_speed
+	var v_accel := c.swim_snap_accel if has_v else c.swim_vertical_accel
+	p.velocity.y = move_toward(p.velocity.y, target_v, v_accel * delta)
 
 	var h := p.get_hvel()
-	# Vertical pose takes priority over the horizontal one whenever actively
-	# rising/diving — reads as "swimming up/down" rather than a flat paddle
-	# that merely happens to also be gaining height. Treading water (neither
-	# held) falls back to its own idle loop instead of the paddling one.
+	# Rising/diving uses the straight up/down clip (diving flips it upside-down);
+	# otherwise paddling across, or treading water when idle.
 	var active_anim := PlayerVisual.ANIM_SWIM_IDLE
 	p.swim_pitch = 0.0
-	if absf(vertical) > 0.1 and h.length() > 0.1:
-		# Moving sideways AND up/down: keep the horizontal paddle pose and just
-		# tip the whole body toward where it's heading, instead of flipping to
-		# the straight-up/down clip (which looked wrong while travelling
-		# forward). Nose-down is negative pitch — see Player._update_lean().
-		p.visual.set_upside_down(false)
-		active_anim = PlayerVisual.ANIM_SWIM
-		p.swim_pitch = clampf(atan2(vertical * c.swim_vertical_speed, c.swim_speed), -MAX_SWIM_PITCH, MAX_SWIM_PITCH)
-	elif absf(vertical) > 0.1:
+	if has_v:
 		p.visual.set_upside_down(vertical < 0.0)
 		active_anim = PlayerVisual.ANIM_SWIM_VERTICAL
 	elif h.length() > 0.1:
