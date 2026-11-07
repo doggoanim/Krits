@@ -230,31 +230,6 @@ popup/item_5/text = "Unlimited"
 popup/item_5/id = 0
 metadata/setting = &"display/fps_cap"
 
-[node name="RenderDistanceRow" type="HBoxContainer" parent="Content/Pages/DisplayPage"]
-layout_mode = 2
-theme_override_constants/separation = 40
-
-[node name="Label" type="Label" parent="Content/Pages/DisplayPage/RenderDistanceRow"]
-custom_minimum_size = Vector2(450, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 52
-text = "Render Distance"
-
-[node name="RenderDistance" type="OptionButton" parent="Content/Pages/DisplayPage/RenderDistanceRow"]
-custom_minimum_size = Vector2(520, 70)
-layout_mode = 2
-theme_override_font_sizes/font_size = 44
-item_count = 4
-popup/item_0/text = "Short"
-popup/item_0/id = 80
-popup/item_1/text = "Medium"
-popup/item_1/id = 200
-popup/item_2/text = "Long"
-popup/item_2/id = 500
-popup/item_3/text = "Max"
-popup/item_3/id = 4000
-metadata/setting = &"display/render_distance"
-
 [node name="GraphicsPage" type="VBoxContainer" parent="Content/Pages"]
 visible = false
 layout_mode = 1
@@ -287,6 +262,31 @@ texture_pressed = ExtResource("2_on")
 ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"graphics/water_foam"
+
+[node name="RenderDistanceRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/RenderDistanceRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Render Distance"
+
+[node name="RenderDistance" type="OptionButton" parent="Content/Pages/GraphicsPage/RenderDistanceRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 4
+popup/item_0/text = "Short"
+popup/item_0/id = 80
+popup/item_1/text = "Medium"
+popup/item_1/id = 200
+popup/item_2/text = "Long"
+popup/item_2/id = 500
+popup/item_3/text = "Max"
+popup/item_3/id = 4000
+metadata/setting = &"graphics/render_distance"
 
 [node name="AudioPage" type="VBoxContainer" parent="Content/Pages"]
 layout_mode = 1

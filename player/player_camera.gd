@@ -85,7 +85,7 @@ func _ready() -> void:
 func _read_settings() -> void:
 	_sens_scale = Settings.get_value(&"controls/camera_sens")
 	_pitch_dir = -1.0 if Settings.get_value(&"controls/invert_y") else 1.0
-	_cam.far = Settings.get_value(&"display/render_distance")
+	_cam.far = Settings.get_value(&"graphics/render_distance")
 
 func _on_setting_changed(_key: StringName) -> void:
 	_read_settings()

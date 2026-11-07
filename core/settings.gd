@@ -32,8 +32,8 @@ const DEFAULTS := {
 	&"display/resolution": 900,         ## windowed-mode size, as the window HEIGHT (16:9 — see _windowed_size())
 	&"display/show_fps": false,         ## small FPS counter in the top-right corner (see ui/widgets/fps_counter.gd)
 	&"display/fps_cap": 0,              ## 0 = unlimited
-	&"display/render_distance": 4000,   ## camera far plane, in metres
 	&"display/pixelation": 1,           ## unused: PixelateEffect is no longer added in Main (1 = off)
+	&"graphics/render_distance": 4000,  ## camera far plane, in metres
 	&"graphics/water_foam": true,       ## toon foam ring around the player at the waterline (see PlayerEffects.update_water_foam())
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
@@ -148,7 +148,7 @@ func _apply(key: StringName) -> void:
 		&"controls/bindings":
 			for action in InputSetup.BINDINGS:
 				InputSetup.bind_key(action, get_binding(action))
-		# display/pixelation is read by PixelateEffect, display/render_distance, controls/camera_sens, controls/invert_y and
+		# display/pixelation is read by PixelateEffect, graphics/render_distance, controls/camera_sens, controls/invert_y and
 		# accessibility/screen_shake are read by the camera / HUD themselves.
 
 func _apply_volumes() -> void:
@@ -202,6 +202,8 @@ func _load() -> void:
 		var parts := String(key).split("/")
 		var fallback: Variant = DEFAULTS[key]
 		var value: Variant = cfg.get_value(parts[0], parts[1], fallback)
+		if key == &"graphics/render_distance":   # used to live under [display]
+			value = cfg.get_value(parts[0], parts[1], cfg.get_value("display", "render_distance", fallback))
 		if typeof(value) == typeof(fallback):
 			_values[key] = value
 		elif typeof(fallback) == TYPE_FLOAT and typeof(value) == TYPE_INT:
