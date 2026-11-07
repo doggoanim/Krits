@@ -963,7 +963,7 @@ func _build_barrier() -> void:
 		ring_pos.y = local_ground_y + 0.03   # avoid z-fighting with the ground
 		# A dash (not a continuous strip) with a little hand-drawn wobble.
 		var dash_rot := rot_y + randf_range(-0.05, 0.05)
-		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len * DASH_FRACTION, 0.08, RING_WIDTH), glow_col, 0.6, dash_rot))
+		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len * DASH_FRACTION, 0.08, RING_WIDTH), glow_col, 0.45, dash_rot))
 		if seg.post:
 			var post_pos: Vector3 = seg.post_pos
 			post_pos.y = local_ground_y
@@ -1063,7 +1063,7 @@ func _build_post(pos: Vector3, warm: bool) -> Node3D:
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	mat.emission_enabled = true
 	mat.emission = mat.albedo_color
-	mat.emission_energy_multiplier = 0.35
+	mat.emission_energy_multiplier = 0.25
 	mesh.material_override = mat
 	root.add_child(mesh)
 	CelOutline.apply(mesh, POST_OUTLINE)

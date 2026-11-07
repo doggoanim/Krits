@@ -7,13 +7,13 @@ render_mode unshaded, cull_disabled, depth_draw_never, blend_mix;
 
 global uniform float time_offset;   // pausable shader clock — see ShaderClock
 
-uniform vec4 chalk : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 chalk : source_color = vec4(0.88, 0.88, 0.88, 1.0);
 uniform float wall_height = 90.0;   // total mesh height
 uniform float below_ground = 14.0;  // how much of it sits under the ground line
 uniform float band_height = 0.7;    // the solid chalk band at the base
 uniform float fade_height = 9.0;    // metres over which the wall fades to nothing
 uniform float hatch_scale = 1.1;    // stroke density
-uniform float base_alpha = 0.5;
+uniform float base_alpha = 0.4;
 
 varying vec3 wpos;
 varying float h;

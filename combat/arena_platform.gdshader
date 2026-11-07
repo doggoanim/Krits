@@ -8,10 +8,10 @@ render_mode unshaded, cull_disabled, blend_mix;
 
 global uniform float time_offset;   // pausable shader clock — see ShaderClock
 
-uniform vec4 chalk : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 chalk : source_color = vec4(0.88, 0.88, 0.88, 1.0);
 uniform float rim_width = 0.7;      // the solid chalk band around the edge
 uniform float hatch_scale = 1.1;    // stroke density — matches the wall's
-uniform float base_alpha = 0.5;
+uniform float base_alpha = 0.4;
 uniform float side_depth = 2.0;     // how far down the side edge fades out
 
 varying vec3 wpos;
