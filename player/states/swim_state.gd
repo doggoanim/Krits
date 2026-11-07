@@ -27,6 +27,7 @@ var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — 
 const WAKE_INTERVAL := 0.3
 const MAX_SWIM_PITCH := deg_to_rad(55.0)   ## steepest body tilt while swimming diagonally
 var _wake_t := 0.0
+var _prev_motion_mode := CharacterBody3D.MOTION_MODE_GROUNDED
 
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
@@ -36,6 +37,11 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	# via swim_accel/swim_vertical_accel — hitting the water is what stops
 	# you, not the water's own drag over the next several frames.
 	p.velocity = Vector3.ZERO
+	# Floating mode: the lake bed, a bank or any slope is just a wall to slide
+	# along, never a ramp to walk up. In the default grounded mode a swimmer
+	# pushing into sloped ground got carried up it (and out of the water).
+	_prev_motion_mode = p.motion_mode
+	p.motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 	p.visual.cancel_hold()
 	p.visual.play(PlayerVisual.ANIM_SWIM)
 	p.effects.set_swim_bubbles(true)
@@ -43,6 +49,7 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	_wake_t = 0.0
 
 func exit(_next: StringName) -> void:
+	player.motion_mode = _prev_motion_mode
 	player.swim_pitch = 0.0
 	player.visual.set_upside_down(false)
 	player.effects.set_swim_bubbles(false)
