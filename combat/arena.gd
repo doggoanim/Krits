@@ -30,6 +30,10 @@ const MIN_RADIUS := 5.5            ## smallest arena, however cramped the space 
 const FIT_RAYS := 24               ## horizontal probes used to measure the open space around the fight
 const FIT_HEIGHTS := [0.5, 1.4]    ## probe heights above the origin (knee and chest) so low and high walls both count
 const FIT_PERCENTILE := 0.25       ## which of the sorted wall distances sets the size: low = hugs the nearest walls, high = ignores alcoves
+const RECT_REACH := 1.5            ## a box-shaped room may extend this far (x the circle radius) from the centre and still be filled
+const RECT_MIN_HALF := 3.0         ## smallest half-width/half-depth of a box arena
+const RECT_TOLERANCE := 0.8        ## how far a wall may cut inside the box outline before the room no longer counts as a box
+const RECT_SEG_LEN := 3.0          ## target length of one wall segment along a box's sides
 const FIT_MARGIN := 1.0            ## kept between the barrier and the wall it fits against (the floor disc extends 1.5 past the ring)
 const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
                                  ## collides with it so the camera can't peek through the
@@ -113,7 +117,10 @@ const ORB_DROP_HEIGHT := 9.0    ## how far above its landing spot each orb start
 const ORB_DROP_TIME := 0.6
 const ORB_DROP_STAGGER := 0.05  ## added delay per orb so they don't all land in lockstep
 
-var radius := BASE_RADIUS
+var radius := BASE_RADIUS   ## circle radius; for a box arena, the radius of a circle with the same area
+var is_box := false          ## true when the room is box-shaped and the arena fills it (see _try_fit_box())
+var box_center := Vector3.ZERO   ## box arena only: centre of the box, relative to the arena origin (y = 0)
+var box_half := Vector2.ZERO     ## box arena only: half-width (x) and half-depth (z)
 var combo := 0
 var cancelled := false
 var player: Player
@@ -163,6 +170,77 @@ func fit_radius(wanted: float) -> float:
 	var d: float = dists[int(floor(FIT_PERCENTILE * (dists.size() - 1)))]
 	return clampf(d - FIT_MARGIN - 1.5, MIN_RADIUS, wanted)
 
+## One horizontal probe from the fight's centre; the shortest distance to world
+## geometry over the probe heights, or INF when nothing is within `reach`.
+func _probe(dir: Vector3, reach: float) -> float:
+	var space := get_world_3d().direct_space_state
+	var nearest := INF
+	for h in FIT_HEIGHTS:
+		var from: Vector3 = global_position + Vector3.UP * h
+		var q := PhysicsRayQueryParameters3D.create(from, from + dir * reach, 1)
+		if player != null:
+			q.exclude = [player.get_rid()]
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty():
+			nearest = minf(nearest, from.distance_to(hit.position))
+	return nearest
+
+## If the fight is in a closed box-shaped room (four walls found along the axes,
+## and nothing cutting the corners or sides), fills the whole room with a box
+## arena instead of a circle. Returns false for anything else (open ground,
+## round or irregular rooms), which keep the circle from fit_radius().
+func _try_fit_box(wanted: float) -> bool:
+	var reach := wanted * RECT_REACH + FIT_MARGIN
+	var ext := {}   # axis direction -> usable distance to that wall
+	for dir in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
+		var d := _probe(dir, reach)
+		if d == INF:
+			return false   # open on that side: not a closed room
+		ext[dir] = maxf(d - FIT_MARGIN, RECT_MIN_HALF)
+	var x0: float = -ext[Vector3.LEFT]
+	var x1: float = ext[Vector3.RIGHT]
+	var z0: float = -ext[Vector3.FORWARD]
+	var z1: float = ext[Vector3.BACK]
+	# Walk the outline (corners and quarter points of every side): a wall closer
+	# than the outline means a pillar, a round wall or an L-shape, not a box.
+	var corners := [Vector2(x0, z0), Vector2(x1, z0), Vector2(x1, z1), Vector2(x0, z1)]
+	for i in 4:
+		var a: Vector2 = corners[i]
+		var b: Vector2 = corners[(i + 1) % 4]
+		for t in [0.0, 0.25, 0.5, 0.75]:
+			var pt: Vector2 = a.lerp(b, t)
+			var dist := pt.length()
+			if dist < 0.5:
+				continue
+			var hit := _probe(Vector3(pt.x, 0.0, pt.y) / dist, dist + FIT_MARGIN + 0.5)
+			if hit < dist + FIT_MARGIN - RECT_TOLERANCE:
+				return false
+	is_box = true
+	box_center = Vector3((x0 + x1) * 0.5, 0.0, (z0 + z1) * 0.5)
+	box_half = Vector2((x1 - x0) * 0.5, (z1 - z0) * 0.5)
+	radius = sqrt(box_half.x * box_half.y)
+	return true
+
+## Sizes and shapes the arena: a box filling a closed box-shaped room, else a
+## circle shrunk to fit its surroundings.
+func _fit_shape(wanted: float) -> void:
+	is_box = false
+	box_center = Vector3.ZERO
+	if not _try_fit_box(wanted):
+		radius = fit_radius(wanted)
+
+## Pulls an arena-relative offset back inside the playable area, `factor` of the
+## way out toward the wall (used to keep leaps from landing against the barrier).
+func clamp_inside(flat: Vector3, factor := 1.0) -> Vector3:
+	flat.y = 0.0
+	if is_box:
+		var rel := flat - box_center
+		rel.x = clampf(rel.x, -box_half.x * factor, box_half.x * factor)
+		rel.z = clampf(rel.z, -box_half.y * factor, box_half.y * factor)
+		return box_center + rel
+	var limit := radius * factor
+	return flat.normalized() * limit if flat.length() > limit else flat
+
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
 
@@ -183,7 +261,7 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 	add_to_group(&"arena")   # abilities (Shockwave) look the live fight up by group
 	player = p
 	global_position = origin
-	radius = fit_radius(radius_for(roster.size()))
+	_fit_shape(radius_for(roster.size()))
 	_build_barrier()
 	_spawn_orbs(ORBS_BASE + ORBS_PER_ENEMY * roster.size())
 	for d in roster:
@@ -337,6 +415,10 @@ func is_spot_clear(pos: Vector3, radius: float, height: float) -> bool:
 	return get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 func _sample_disk(fraction: float) -> Vector3:
+	if is_box:
+		return global_position + box_center + Vector3(
+				randf_range(-1.0, 1.0) * box_half.x * fraction, 0.0,
+				randf_range(-1.0, 1.0) * box_half.y * fraction)
 	var r := radius * fraction * sqrt(randf())   # sqrt: uniform over the disk's area, not biased to the centre
 	var ang := randf_range(0.0, TAU)
 	return global_position + Vector3(cos(ang), 0.0, sin(ang)) * r
@@ -893,17 +975,18 @@ func _build_barrier() -> void:
 	_post_segment.clear()
 	var wall_col := Color(1.0, 1.0, 1.0, 1.0)   ## chalk colour for arena_wall.gdshader (it does its own fading)
 	var glow_col := Color(1.0, 1.0, 1.0)
-	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4   # slight overlap so segments don't gap
-	for i in WALL_SEGMENTS:
-		var ang := TAU * float(i) / float(WALL_SEGMENTS)
-		var dir := Vector3(cos(ang), 0.0, sin(ang))
-		var local_pos := dir * radius              # relative to the arena's own origin
+	var segments := _boundary_segments()
+	var post_count := 0
+	for i in segments.size():
+		var seg: Dictionary = segments[i]
+		var local_pos: Vector3 = seg.pos          # relative to the arena's own origin
+		var seg_len: float = seg.len
+		var rot_y: float = seg.rot                # faces tangent to the boundary here
 		var world_pos := global_position + local_pos   # only needed to aim the ground raycast
 		var ground_y := ground_height(world_pos)
 		if absf(ground_y - global_position.y) > MAX_GROUND_DEVIATION:
 			ground_y = global_position.y   # a disconnected platform/gap, not this fight's floor
 		var local_ground_y := ground_y - global_position.y   # back to arena-local height
-		var rot_y := PI * 0.5 - ang   # faces tangent to the circle at this angle
 
 		var wall_pos := local_pos
 		wall_pos.y = local_ground_y + WALL_HEIGHT * 0.5
@@ -922,11 +1005,45 @@ func _build_barrier() -> void:
 		# A dash (not a continuous strip) with a little hand-drawn wobble.
 		var dash_rot := rot_y + randf_range(-0.05, 0.05)
 		_ring_pieces.append(_decor(ring_pos, Vector3(seg_len * DASH_FRACTION, 0.08, RING_WIDTH), glow_col, 0.6, dash_rot))
-		if i % POST_EVERY == 0:
-			var post_pos := local_pos
+		if seg.post:
+			var post_pos: Vector3 = seg.post_pos
 			post_pos.y = local_ground_y
-			_posts.append(_build_post(post_pos, i % (POST_EVERY * 2) == 0))
+			_posts.append(_build_post(post_pos, post_count % 2 == 0))
 			_post_segment.append(i)
+			post_count += 1
+
+## The wall layout as a list of {pos, rot, len, post, post_pos} segments, in
+## order around the boundary (positions relative to the arena origin, y = 0):
+## a faceted circle, or the four sides of a box with posts at its corners.
+func _boundary_segments() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if is_box:
+		var x0 := box_center.x - box_half.x
+		var x1 := box_center.x + box_half.x
+		var z0 := box_center.z - box_half.y
+		var z1 := box_center.z + box_half.y
+		var corners := [Vector3(x0, 0.0, z0), Vector3(x1, 0.0, z0), Vector3(x1, 0.0, z1), Vector3(x0, 0.0, z1)]
+		for c in 4:
+			var a: Vector3 = corners[c]
+			var b: Vector3 = corners[(c + 1) % 4]
+			var side := b - a
+			var n := maxi(1, ceili(side.length() / RECT_SEG_LEN))
+			var tangent := side.normalized()
+			for k in n:
+				out.append({
+					"pos": a + side * ((k + 0.5) / n),
+					"rot": atan2(-tangent.z, tangent.x),
+					"len": side.length() / n + 0.4,   # slight overlap so segments don't gap
+					"post": k == 0,
+					"post_pos": a,
+				})
+		return out
+	var seg_len := TAU * radius / WALL_SEGMENTS + 0.4
+	for i in WALL_SEGMENTS:
+		var ang := TAU * float(i) / float(WALL_SEGMENTS)
+		var pos := Vector3(cos(ang), 0.0, sin(ang)) * radius
+		out.append({"pos": pos, "rot": PI * 0.5 - ang, "len": seg_len, "post": i % POST_EVERY == 0, "post_pos": pos})
+	return out
 
 ## A solid disc under the whole arena (world layer, so ground_height() and
 ## the player's floor all see it) so a fight over a gap, a cliff edge or the
@@ -938,24 +1055,38 @@ func _build_platform() -> void:
 	body.name = "Platform"
 	body.collision_layer = 1
 	var disc_radius := radius + 1.5
-	var shape := CylinderShape3D.new()
-	shape.radius = disc_radius
-	shape.height = 2.0
 	var cs := CollisionShape3D.new()
-	cs.shape = shape
-	cs.position.y = -1.02   # top just under the origin, so it never z-fights the ground
-	body.add_child(cs)
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = disc_radius
-	cyl.bottom_radius = disc_radius
-	cyl.height = 2.0
-	cyl.radial_segments = 48
+	var mesh: Mesh
 	_platform_mesh = MeshInstance3D.new()
-	_platform_mesh.mesh = cyl
-	_platform_mesh.position.y = -1.02
 	var mat := ShaderMaterial.new()   # same chalky hand-drawn look as the barrier wall
 	mat.shader = PLATFORM_SHADER
-	mat.set_shader_parameter(&"radius", disc_radius)
+	if is_box:
+		var size := Vector3((box_half.x + 1.5) * 2.0, 2.0, (box_half.y + 1.5) * 2.0)
+		var box_shape := BoxShape3D.new()
+		box_shape.size = size
+		cs.shape = box_shape
+		var box_mesh := BoxMesh.new()
+		box_mesh.size = size
+		mesh = box_mesh
+		body.position = Vector3(box_center.x, 0.0, box_center.z)
+		mat.set_shader_parameter(&"use_box", true)
+		mat.set_shader_parameter(&"box_half", Vector2(box_half.x + 1.5, box_half.y + 1.5))
+	else:
+		var shape := CylinderShape3D.new()
+		shape.radius = disc_radius
+		shape.height = 2.0
+		cs.shape = shape
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = disc_radius
+		cyl.bottom_radius = disc_radius
+		cyl.height = 2.0
+		cyl.radial_segments = 48
+		mesh = cyl
+		mat.set_shader_parameter(&"radius", disc_radius)
+	cs.position.y = -1.02   # top just under the origin, so it never z-fights the ground
+	body.add_child(cs)
+	_platform_mesh.mesh = mesh
+	_platform_mesh.position.y = -1.02
 	_platform_mesh.material_override = mat
 	_platform_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	body.add_child(_platform_mesh)

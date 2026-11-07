@@ -499,9 +499,7 @@ func _place_leap_zone(zone: Telegraph) -> void:
 func _clamped_landing_point(raw: Vector3) -> Vector3:
 	var flat := raw - arena.global_position
 	flat.y = 0.0
-	var limit := arena.radius * 0.85
-	if flat.length() > limit:
-		flat = flat.normalized() * limit
+	flat = arena.clamp_inside(flat, 0.85)
 	var land := arena.global_position + flat
 	land.y = arena.ground_height(land) + feet_offset(data)
 	return land
