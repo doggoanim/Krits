@@ -267,6 +267,41 @@ func burst_water_footstep(pos: Vector3, surface_y: float) -> void:
 	_burst(waterline, Vector3.UP, 50.0, _material(3.0, 5.0, 0.25, 0.5, _splash_ramp_tex), 5, 0.3, _smoke_quad)
 	_spawn_ripple(waterline, 2.0, 0.4)
 
+## --- Waterline foam -------------------------------------------------------
+const FOAM_SHADER := preload("res://player/water_foam.gdshader")
+const FOAM_SIZE := 2.6          ## quad edge length (m); the shader draws the ring inside it
+const FOAM_LIFT := 0.06         ## above the surface, so waves and the water mesh never hide it
+const FOAM_FULL_BELOW := 0.9    ## fully submerged past this (head underwater) the ring is gone
+var _foam: MeshInstance3D
+var _foam_mat: ShaderMaterial
+
+## Called every frame with the water the player is standing/swimming in (or null)
+## and how submerged they are (0..1). Draws a white toon foam ring on the surface
+## around them while they are in the water, like a character wading in Wind Waker.
+func update_water_foam(water: WaterVolume, submersion: float) -> void:
+	if water == null or submersion <= 0.0 or submersion >= 1.0:
+		if _foam != null:
+			_foam.visible = false
+		return
+	if _foam == null:
+		_foam = MeshInstance3D.new()
+		var quad := QuadMesh.new()
+		quad.size = Vector2(FOAM_SIZE, FOAM_SIZE)
+		_foam.mesh = quad
+		_foam_mat = ShaderMaterial.new()
+		_foam_mat.shader = FOAM_SHADER
+		_foam.material_override = _foam_mat
+		_foam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_foam.top_level = true            # world-space: never inherits the player's turn
+		_foam.rotation_degrees.x = -90.0  # lie flat
+		add_child(_foam)
+	_foam.visible = true
+	var pos := (get_parent() as Node3D).global_position
+	_foam.global_position = Vector3(pos.x, water.surface_world_y() + FOAM_LIFT, pos.z)
+	var fade_in := smoothstep(0.0, 0.12, submersion)
+	var fade_out := 1.0 - smoothstep(FOAM_FULL_BELOW, 1.0, submersion)
+	_foam_mat.set_shader_parameter(&"opacity", fade_in * fade_out)
+
 ## A small wake ripple left periodically while paddling at the surface (see
 ## SwimState's own timer — this isn't called every frame, just every so
 ## often, same spirit as a footstep). No particle burst at all, unlike the

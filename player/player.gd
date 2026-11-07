@@ -346,6 +346,7 @@ func _update_floor_snap() -> void:
 ## Frozen (a cutscene) and WallClimb (deliberately holding a wall) are the
 ## only states this won't interrupt, same exemptions _update_auto_unstick() uses.
 func _update_water() -> void:
+	effects.update_water_foam(current_water(), water_submersion())
 	var deep := water_submersion() >= config.water_swim_depth_ratio
 	var exempt := machine.current_name == &"Frozen" or machine.current_name == &"WallClimb"
 	if exempt:
