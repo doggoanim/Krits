@@ -443,7 +443,10 @@ const WEDGE_NUDGE_SPEED := 4.0
 var _wedge_t := 0.0
 
 func _resolve_wedge(pos_before: Vector3) -> void:
-	if is_on_floor() or velocity.length() < WEDGE_MIN_SPEED:
+	# Swimming into the lake bed or a bank is just pressing against it, not a
+	# wedge — "fixing" it nudged the swimmer upward along the surface normal,
+	# which read as rising on its own (worst when spamming dive on the bed).
+	if is_on_floor() or velocity.length() < WEDGE_MIN_SPEED or machine.current_name == &"Swim":
 		_wedge_t = 0.0
 		return
 	if global_position.distance_to(pos_before) > WEDGE_MOVE_EPSILON:
