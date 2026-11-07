@@ -39,7 +39,7 @@ func _on_touched(enemy: WorldEnemy) -> void:
 		return
 	if world_root != null and world_root.is_in_group(&"interior_level") \
 			and not world_root.is_in_group(&"combat_allowed"):
-		return   # no fights indoors, unless the level opts in (a dungeon like the Well Depths)
+		return   # no fights indoors, unless the level opts in (a dungeon)
 	if Game.stats.equipped_weapon == null:
 		# Can't start a fight bare-handed: the enemy just hurts you instead.
 		_warn_unarmed()
