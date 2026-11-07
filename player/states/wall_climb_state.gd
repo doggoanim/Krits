@@ -243,9 +243,8 @@ func _jump(p: Player, c: PlayerConfig) -> void:
 		# full air steering the instant they leave the wall, unlike the
 		# slope-jump's deliberate brief "tumbling" control lock.
 		p.can_dive = true
-		# Hop up AND over: drift into the wall's top so the landing is on it, and
-		# stay off the wall long enough that falling past its edge can't re-grab.
-		p.wall_climb_cd = c.wall_top_hop_regrab_time
+		# Hop up AND over: drift into the wall's top so the landing is on it.
+		p.wall_climb_cd = Player.WALL_CLIMB_REGRAB_COOLDOWN
 		p.start_jump(c.jump_velocity)
 		p.set_hvel(-_normal * c.wall_top_hop_speed)
 		p.visual.play_hold(PlayerVisual.ANIM_ROLL, c.slope_jump_roll_hold_time, 1.0, false)

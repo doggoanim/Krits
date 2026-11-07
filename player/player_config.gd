@@ -105,8 +105,6 @@ func slope_speed_for_angle(angle_rad: float) -> float:
 												## lower leaves more head/shoulders poking past it)
 @export var wall_top_hop_speed := 4.5      ## forward speed (over the wall's top) of the straight-up jump from the top of a climb,
 											## so you land ON TOP of the wall instead of dropping back onto its face
-@export var wall_top_hop_regrab_time := 1.2  ## no regrabbing the wall for this long after that jump (falling back past its edge
-											## used to re-grab it and trap you in a hop/regrab loop)
 @export var wall_jump_off_speed := 7.0     ## horizontal push away from the wall when jumping off
 @export var wall_jump_off_velocity := 10.0   ## vertical speed of a wall-jump
 @export var wall_release_push := 1.5       ## horizontal push away from the wall when letting go via crouch
