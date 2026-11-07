@@ -76,6 +76,7 @@ func delete_save(slot := -1) -> void:
 	hotbar = Hotbar.new()
 	story_flags.clear()
 	quests.completed.clear()
+	quests.reset_baseline()
 	unlocked_spawns.clear()
 	last_spawn = &""
 	player_name = "Krits"

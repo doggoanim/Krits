@@ -9,6 +9,8 @@ extends RefCounted
 var completed: Array[StringName] = []
 
 var _evaluating := false
+var _snapshot := ""      ## what the quest list looked like at the last evaluate()
+var _primed := false     ## false right after a load / new game: the first look is silent
 
 func connect_signals() -> void:
 	Events.story_flag_changed.connect(func(_f: StringName, _v: Variant) -> void: evaluate())
@@ -51,15 +53,41 @@ func evaluate() -> void:
 	if _evaluating:
 		return
 	_evaluating = true
+	var finished_any := false
 	var again := true
 	while again:
 		again = false
 		for q in active_quests():
 			if not q.objectives.is_empty() and q.all_done():
 				_complete(q)
+				finished_any = true
 				again = true
 	_evaluating = false
+	var now := _snapshot_now()
+	# A finished quest already announced itself ("Quest complete: ..."); anything
+	# else that changed the log (a quest unlocked, an objective advanced) gets the
+	# generic toast. Never right after a load or new game.
+	if _primed and now != _snapshot and not finished_any:
+		Events.notice.emit("Quest log updated")
+	_snapshot = now
+	_primed = true
 	Events.quests_changed.emit()
+
+## Forgets what was last seen, so the next evaluate() starts quietly (a freshly
+## loaded or reset save must not announce its existing quests as news).
+func reset_baseline() -> void:
+	_primed = false
+
+## A comparable summary of the log: every active quest with its objectives'
+## progress, plus how many are finished.
+func _snapshot_now() -> String:
+	var parts: PackedStringArray = [str(completed.size())]
+	for q in active_quests():
+		var bits: PackedStringArray = [String(q.id)]
+		for o in q.objectives:
+			bits.append(str(o.progress()["have"]))
+		parts.append(":".join(bits))
+	return "|".join(parts)
 
 func _complete(q: QuestData) -> void:
 	completed.append(q.id)
@@ -79,5 +107,6 @@ func to_dict() -> Dictionary:
 
 func from_dict(d: Dictionary) -> void:
 	completed.clear()
+	reset_baseline()
 	for raw in d.get("completed", []):
 		completed.append(StringName(raw))
