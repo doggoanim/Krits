@@ -25,6 +25,8 @@ var _dead := false          ## defeated, waiting to respawn (empty enemy_id only
 
 enum Mode { WANDER, ALERT, CHASE, RETURN }   ## RETURN = walking back home after giving up
 
+const BLOCKED_GIVE_UP := 0.7    ## seconds pressed against a wall (not getting anywhere) before a chaser drops the chase
+const BLOCKED_PROGRESS := 0.35  ## fraction of the intended speed it must actually achieve to count as moving
 const LOSE_RANGE_MULT := 1.4     ## farther than detect_radius * this counts as "out of range" for lose_time
 const HOME_ARRIVE_DIST := 1.0
 const CHASE_LEAD_MAX := 0.6      ## seconds of the player's motion a chaser aims ahead by
@@ -39,6 +41,7 @@ var frozen := false:
 			_visual.visible = _awake and not value
 
 var _mode := Mode.WANDER
+var _blocked_t := 0.0   ## how long the current chase has been stuck against a wall
 var _mode_t := 0.0           ## ALERT: time left on the "!"; CHASE: time spent unable to see the player
 var _recover_t := 0.0        ## after hurting an unarmed player: stands off until this runs out
 var _chase_t := 0.0          ## seconds spent chasing without losing the player (drives the speed ramp)
@@ -265,8 +268,21 @@ func _chase(delta: float, to_player: Vector3, dist: float) -> void:
 	aim.y = 0.0
 	if aim.length() > 0.01:
 		_move_toward(aim.normalized(), speed, delta)
+		_track_blocked(speed, delta)
+
+## A chaser jammed against a wall (the player is behind it, or above a ledge it
+## can't climb) gives up instead of pushing at it forever.
+func _track_blocked(speed: float, delta: float) -> void:
+	var achieved := Vector2(get_real_velocity().x, get_real_velocity().z).length()
+	if is_on_wall() and achieved < speed * BLOCKED_PROGRESS:
+		_blocked_t += delta
+		if _blocked_t >= BLOCKED_GIVE_UP:
+			_give_up()
+	else:
+		_blocked_t = 0.0
 
 func _give_up() -> void:
+	_blocked_t = 0.0
 	_mode = Mode.RETURN
 	_mode_t = 0.0
 
