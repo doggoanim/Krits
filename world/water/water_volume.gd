@@ -1,3 +1,4 @@
+@tool
 class_name WaterVolume
 extends Area3D
 ## Detects the player entering/exiting a body of water — triggers the splash
@@ -17,8 +18,15 @@ extends Area3D
 ## already "inside" a little before the splash fires, rather than right at
 ## the literal edge.
 
-@export var size := Vector3(10.0, 4.0, 10.0)
-@export var surface_y := 0.0   ## local Y of the water's top surface, relative to this node's own origin
+@export var size := Vector3(10.0, 4.0, 10.0):
+	set(v):
+		size = v
+		_refresh_preview()
+## local Y of the water's top surface, relative to this node's own origin
+@export var surface_y := 0.0:
+	set(v):
+		surface_y = v
+		_refresh_preview()
 ## >0 swaps the box footprint above for a circular one (a CylinderShape3D of
 ## this radius instead of a BoxShape3D sized from size.x/size.z) — set this
 ## for a round/cylindrical water mesh like the chesburg lake's: a box sized
@@ -26,13 +34,19 @@ extends Area3D
 ## corners, well past the mesh's actual round edge, so the collision read as
 ## "much bigger than the mesh." size.y still sets the collider's depth
 ## either way; size.x/size.z are simply unused once this is set.
-@export var radius := 0.0
+@export var radius := 0.0:
+	set(v):
+		radius = v
+		_refresh_preview()
 ## Tint used by the underwater screen overlay while the camera is below this
 ## volume's surface (see core/underwater_overlay.gd) — set this to roughly
 ## match whatever shallow_color/deep_color this body's own water.gdshader
 ## material is using, so looking up through the surface reads as the same
 ## water rather than a generic default.
-@export var tint_color := Color(0.08, 0.38, 0.62, 0.55)
+@export var tint_color := Color(0.08, 0.38, 0.62, 0.55):
+	set(v):
+		tint_color = v
+		_refresh_preview()
 ## Entering while falling at least this fast (velocity.y, so a fall from
 ## height or a ground pound diving straight in — PoundState's own dive
 ## speed is nowhere near a gentle walk-in's) plays the bigger splash
@@ -49,8 +63,62 @@ extends Area3D
 static var active: Array[WaterVolume] = []
 
 var _player_inside := false
+var _preview: Node3D   ## editor-only visualisation, see _refresh_preview()
+
+## Editor-only: a translucent block showing the volume (box or cylinder, from
+## the surface down by size.y) with a brighter slab marking the waterline, so
+## size / radius / surface_y can be tuned by eye. Never built in the running game.
+func _refresh_preview() -> void:
+	if not Engine.is_editor_hint() or not is_inside_tree():
+		return
+	if is_instance_valid(_preview):
+		_preview.queue_free()
+	var root := Node3D.new()
+	_preview = root
+	root.name = "EditorPreview"
+	var body_col := Color(tint_color.r, tint_color.g, tint_color.b, 0.22)
+	var top_col := Color(tint_color.r, tint_color.g, tint_color.b, 0.7).lightened(0.3)
+	var round_shape := radius > 0.0
+	var volume := MeshInstance3D.new()
+	var top := MeshInstance3D.new()
+	if round_shape:
+		var vol_mesh := CylinderMesh.new()
+		vol_mesh.top_radius = radius
+		vol_mesh.bottom_radius = radius
+		vol_mesh.height = size.y
+		volume.mesh = vol_mesh
+		var top_mesh := CylinderMesh.new()
+		top_mesh.top_radius = radius
+		top_mesh.bottom_radius = radius
+		top_mesh.height = 0.05
+		top.mesh = top_mesh
+	else:
+		var vol_mesh := BoxMesh.new()
+		vol_mesh.size = size
+		volume.mesh = vol_mesh
+		var top_mesh := BoxMesh.new()
+		top_mesh.size = Vector3(size.x, 0.05, size.z)
+		top.mesh = top_mesh
+	volume.position.y = surface_y - size.y * 0.5
+	top.position.y = surface_y
+	volume.material_override = _preview_material(body_col)
+	top.material_override = _preview_material(top_col)
+	root.add_child(volume)
+	root.add_child(top)
+	add_child(root, false, Node.INTERNAL_MODE_FRONT)   # internal + no owner: never saved into the scene
+
+func _preview_material(col: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.albedo_color = col
+	return m
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		_refresh_preview()
+		return   # no collider / registration in the editor
 	collision_layer = 0
 	collision_mask = 1 << 1   # layer 2: player — see Player.collision_layer
 	monitorable = false
