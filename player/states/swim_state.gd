@@ -25,7 +25,6 @@ var _stroke_phase := -1.0   ## last-seen phase, for edge-crossing detection — 
 ## stroke phase like the sfx above; a flat interval reads fine for a purely
 ## cosmetic trailing ring and is simpler than another phase-crossing check.
 const WAKE_INTERVAL := 0.3
-const MAX_SWIM_PITCH := deg_to_rad(55.0)   ## steepest body tilt while swimming diagonally
 var _wake_t := 0.0
 var _had_h := false         ## last frame's input state, to tell which axis was pressed most recently
 var _had_v := false
