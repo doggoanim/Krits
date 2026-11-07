@@ -106,10 +106,15 @@ func physics_update(delta: float) -> void:
 	# Held input uses the snappy rate (instant starts and direction changes);
 	# letting go coasts to a stop at the gentler one.
 	var target_h := input.normalized() * c.swim_speed if has_h else Vector3.ZERO
-	p.set_hvel(p.get_hvel().move_toward(target_h, (c.swim_snap_accel if has_h else c.swim_accel) * delta))
+	if has_h:
+		p.set_hvel(target_h)   # held input is instant: full speed in the new direction, no ramp
+	else:
+		p.set_hvel(p.get_hvel().move_toward(Vector3.ZERO, c.swim_accel * delta))
 	var target_v := vertical * c.swim_vertical_speed
-	var v_accel := c.swim_snap_accel if has_v else c.swim_vertical_accel
-	p.velocity.y = move_toward(p.velocity.y, target_v, v_accel * delta)
+	if has_v:
+		p.velocity.y = target_v
+	else:
+		p.velocity.y = move_toward(p.velocity.y, 0.0, c.swim_vertical_accel * delta)
 
 	var h := p.get_hvel()
 	# Rising/diving uses the straight up/down clip (diving flips it upside-down);
@@ -127,7 +132,7 @@ func physics_update(delta: float) -> void:
 	p.visual.play(active_anim)
 
 	if h.length() > 0.1:
-		p.face(h, delta)
+		p.face(h)   # no turning animation: snaps to the new heading
 
 	# No stroke sound while idle (active_anim stays ANIM_SWIM_IDLE) — treading
 	# water doesn't stroke. _update_stroke_sfx() resets cleanly either way.
