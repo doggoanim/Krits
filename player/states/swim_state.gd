@@ -129,7 +129,7 @@ func physics_update(delta: float) -> void:
 		active_anim = PlayerVisual.ANIM_SWIM
 	else:
 		p.visual.set_upside_down(false)
-	p.visual.play(active_anim)
+	p.visual.play(active_anim, 0.0)   # hard cut: a crossfade between the flat paddle pose and the flipped vertical pose swept through a backflip
 
 	if h.length() > 0.1:
 		p.face(h)   # no turning animation: snaps to the new heading
