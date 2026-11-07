@@ -12,7 +12,7 @@ extends Node
 ##      the key — the screen binds it automatically, no script change.
 ##
 ## Sections (the part before the "/") are the Settings screen's categories:
-## display, audio, controls, accessibility.
+## display, graphics, audio, controls, accessibility.
 
 signal changed(key: StringName)
 
@@ -34,6 +34,7 @@ const DEFAULTS := {
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/render_distance": 4000,   ## camera far plane, in metres
 	&"display/pixelation": 1,           ## unused: PixelateEffect is no longer added in Main (1 = off)
+	&"graphics/water_foam": true,       ## toon foam ring around the player at the waterline (see PlayerEffects.update_water_foam())
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,

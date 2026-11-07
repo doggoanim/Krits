@@ -318,7 +318,7 @@ func _warm_up_foam() -> void:
 ## and how submerged they are (0..1). Draws a white toon foam ring on the surface
 ## around them while they are in the water, like a character wading in Wind Waker.
 func update_water_foam(water: WaterVolume, submersion: float) -> void:
-	if water == null or submersion <= 0.0 or submersion >= 1.0:
+	if not Settings.get_value(&"graphics/water_foam") or water == null or submersion <= 0.0 or submersion >= 1.0:
 		if _foam != null:
 			_foam.visible = false
 		return

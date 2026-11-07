@@ -62,6 +62,14 @@ toggle_mode = true
 button_group = SubResource("TabGroup")
 text = "Display"
 
+[node name="GraphicsTabButton" type="Button" parent="Content/Tabs"]
+custom_minimum_size = Vector2(300, 90)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+toggle_mode = true
+button_group = SubResource("TabGroup")
+text = "Graphics"
+
 [node name="AudioTabButton" type="Button" parent="Content/Tabs"]
 custom_minimum_size = Vector2(300, 90)
 layout_mode = 2
@@ -246,6 +254,39 @@ popup/item_2/id = 500
 popup/item_3/text = "Max"
 popup/item_3/id = 4000
 metadata/setting = &"display/render_distance"
+
+[node name="GraphicsPage" type="VBoxContainer" parent="Content/Pages"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 28
+metadata/section = "graphics"
+
+[node name="WaterFoamRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/WaterFoamRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Player Water Foam"
+
+[node name="WaterFoam" type="TextureButton" parent="Content/Pages/GraphicsPage/WaterFoamRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"graphics/water_foam"
 
 [node name="AudioPage" type="VBoxContainer" parent="Content/Pages"]
 layout_mode = 1

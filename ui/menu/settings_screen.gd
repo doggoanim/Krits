@@ -1,6 +1,6 @@
 class_name SettingsScreen
 extends MenuScreen
-## Options page, split into four categories (Display / Audio / Controls /
+## Options page, split into five categories (Display / Graphics / Audio / Controls /
 ## Accessibility) shown one at a time via the tab buttons.
 ##
 ## Every option control in settings_screen.tscn carries `metadata/setting` =
