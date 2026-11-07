@@ -26,6 +26,11 @@ signal finished(victory: bool)
 const BASE_RADIUS := 11.0
 const RADIUS_PER_ENEMY := 1.6
 const MAX_RADIUS := 24.0
+const MIN_RADIUS := 5.5            ## smallest arena, however cramped the space is
+const FIT_RAYS := 24               ## horizontal probes used to measure the open space around the fight
+const FIT_HEIGHTS := [0.5, 1.4]    ## probe heights above the origin (knee and chest) so low and high walls both count
+const FIT_PERCENTILE := 0.25       ## which of the sorted wall distances sets the size: low = hugs the nearest walls, high = ignores alcoves
+const FIT_MARGIN := 1.0            ## kept between the barrier and the wall it fits against (the floor disc extends 1.5 past the ring)
 const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
                                  ## collides with it so the camera can't peek through the
                                  ## barrier during a fight
@@ -133,6 +138,31 @@ var _posts: Array[Node3D] = []                 ## chunky corner posts, one every
 var _post_segment: Array[int] = []             ## which ring segment each post stands at (same order as _posts)
                                                 ## as _wall_meshes
 
+## Shrinks `wanted` so the barrier fits inside a closed space (a corridor, a
+## cave chamber, a dungeon room) instead of cutting through its walls. Probes
+## outward from the fight's centre and sizes the ring by a low percentile of the
+## wall distances, so one doorway or alcove doesn't make the arena huge, and a
+## wide-open field (no hits) keeps the full size.
+func fit_radius(wanted: float) -> float:
+	var space := get_world_3d().direct_space_state
+	var dists: Array[float] = []
+	for i in FIT_RAYS:
+		var ang := TAU * float(i) / FIT_RAYS
+		var dir := Vector3(cos(ang), 0.0, sin(ang))
+		var nearest := INF
+		for h in FIT_HEIGHTS:
+			var from: Vector3 = global_position + Vector3.UP * h
+			var q := PhysicsRayQueryParameters3D.create(from, from + dir * (wanted + 2.0), 1)
+			if player != null:
+				q.exclude = [player.get_rid()]
+			var hit := space.intersect_ray(q)
+			if not hit.is_empty():
+				nearest = minf(nearest, from.distance_to(hit.position))
+		dists.append(nearest if nearest < INF else wanted + 2.0)
+	dists.sort()
+	var d: float = dists[int(floor(FIT_PERCENTILE * (dists.size() - 1)))]
+	return clampf(d - FIT_MARGIN - 1.5, MIN_RADIUS, wanted)
+
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
 
@@ -153,7 +183,7 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 	add_to_group(&"arena")   # abilities (Shockwave) look the live fight up by group
 	player = p
 	global_position = origin
-	radius = radius_for(roster.size())
+	radius = fit_radius(radius_for(roster.size()))
 	_build_barrier()
 	_spawn_orbs(ORBS_BASE + ORBS_PER_ENEMY * roster.size())
 	for d in roster:
