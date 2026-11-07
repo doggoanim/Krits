@@ -103,6 +103,7 @@ var _slime_drip: GPUParticles3D
 var _swim_bubbles: GPUParticles3D
 
 func _ready() -> void:
+	_warm_up_foam.call_deferred()
 	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
 	_bubble_quad = _make_quad_mesh(load(BUBBLE_TEXTURE_PATH))
 	_growth_curve = _make_growth_curve()
@@ -285,6 +286,34 @@ func _process(_delta: float) -> void:
 	var pos := (get_parent() as Node3D).get_global_transform_interpolated().origin
 	_foam.global_position = Vector3(pos.x, _foam_surface_y, pos.z)
 
+func _ensure_foam() -> void:
+	if _foam != null:
+		return
+	_foam = MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(FOAM_SIZE, FOAM_SIZE)
+	_foam.mesh = quad
+	_foam_mat = ShaderMaterial.new()
+	_foam_mat.shader = FOAM_SHADER
+	_foam.material_override = _foam_mat
+	_foam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_foam.top_level = true            # world-space: never inherits the player's turn
+	_foam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF   # moved by hand in _process()
+	_foam.rotation_degrees.x = -90.0  # lie flat
+	add_child(_foam)
+
+## Builds the ring and draws it once, fully transparent, under the player at load
+## so its shader is compiled up front. Otherwise the first time you step into water
+## the game stalls for a moment compiling it.
+func _warm_up_foam() -> void:
+	_ensure_foam()
+	_foam_mat.set_shader_parameter(&"opacity", 0.0)
+	_foam.visible = true
+	_foam_surface_y = (get_parent() as Node3D).global_position.y
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_foam.visible = false
+
 ## Called every frame with the water the player is standing/swimming in (or null)
 ## and how submerged they are (0..1). Draws a white toon foam ring on the surface
 ## around them while they are in the water, like a character wading in Wind Waker.
@@ -293,19 +322,7 @@ func update_water_foam(water: WaterVolume, submersion: float) -> void:
 		if _foam != null:
 			_foam.visible = false
 		return
-	if _foam == null:
-		_foam = MeshInstance3D.new()
-		var quad := QuadMesh.new()
-		quad.size = Vector2(FOAM_SIZE, FOAM_SIZE)
-		_foam.mesh = quad
-		_foam_mat = ShaderMaterial.new()
-		_foam_mat.shader = FOAM_SHADER
-		_foam.material_override = _foam_mat
-		_foam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_foam.top_level = true            # world-space: never inherits the player's turn
-		_foam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF   # moved by hand in _process()
-		_foam.rotation_degrees.x = -90.0  # lie flat
-		add_child(_foam)
+	_ensure_foam()
 	_foam.visible = true
 	_foam_surface_y = water.surface_world_y() + FOAM_LIFT
 	var fade_in := smoothstep(0.0, 0.12, submersion)
