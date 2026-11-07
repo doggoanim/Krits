@@ -31,7 +31,8 @@ const FIT_RAYS := 40               ## horizontal probes around the fight: also t
 const FIT_MIN_RAY := 2.5           ## closest the barrier may come to the centre along any probe
 const FLOOR_OVERHANG_OPEN := 1.5   ## how far the floor extends past the ring where the space is open
 const FLOOR_OVERHANG_WALL := 0.4   ## ...and where the ring stops at a wall or obstacle
-const FIT_HEIGHTS := [0.5, 1.4]    ## probe heights above the origin (knee and chest) so low and high walls both count
+const LOW_WALL_HEIGHT := 2.0       ## walls and obstacles lower than this don't limit the arena: it spreads over them and they become part of the fight
+const FIT_HEIGHTS := [LOW_WALL_HEIGHT + 0.2, LOW_WALL_HEIGHT + 1.2]   ## probe heights above the origin: just over a low wall, so only tall ones are hit
 const FIT_MARGIN := 1.0            ## kept between the barrier and the wall it fits against (the floor disc extends 1.5 past the ring)
 const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
                                  ## collides with it so the camera can't peek through the
