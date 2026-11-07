@@ -5,6 +5,7 @@ render_mode cull_disabled, diffuse_toon, specular_toon, blend_mix;
 // and we subtract that — animation freezes with the pause menu. (Unset, e.g.
 // in the editor's own viewport, it's 0 and this is plain TIME.)
 global uniform float time_offset;
+global uniform float water_detail;   // Graphics setting: 0 turns off sparkle and wave lines (see core/graphics_quality.gd)
 // Simple stylized water: a toon-stepped shallow/deep color blend plus a
 // couple of layered sine waves for gentle animated motion, and a fresnel
 // rim so it brightens at grazing angles like a real reflective surface.
@@ -121,7 +122,7 @@ void fragment() {
 
 	// --- Drifting white wave lines: thin curves from warped sines.
 	float lines = 0.0;
-	if (line_strength > 0.0) {
+	if (line_strength > 0.0 && water_detail > 0.5) {
 		vec2 q = world_xz * line_scale;
 		// Two stacked warps (a big slow one and a smaller faster one) bend the
 		// lines into curvy, uneven shapes instead of near-straight stripes.
@@ -142,7 +143,7 @@ void fragment() {
 	ROUGHNESS = 0.05;
 	METALLIC = 0.0;
 
-	if (sparkle_strength > 0.0) {
+	if (sparkle_strength > 0.0 && water_detail > 0.5) {
 		// Two glint layers at different densities and angles, each nudged by the
 		// wave height so they ride the surface motion rather than sitting in a
 		// fixed lattice.

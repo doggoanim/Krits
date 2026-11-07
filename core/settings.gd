@@ -34,6 +34,12 @@ const DEFAULTS := {
 	&"display/fps_cap": 0,              ## 0 = unlimited
 	&"display/pixelation": 1,           ## unused: PixelateEffect is no longer added in Main (1 = off)
 	&"graphics/render_distance": 4000,  ## camera far plane, in metres
+	&"graphics/resolution_scale": 100,  ## 3D render resolution, percent of the window (UI stays sharp) — see GraphicsQuality
+	&"graphics/msaa": 0,                ## anti-aliasing samples: 0 (off), 2 or 4
+	&"graphics/shadows": true,          ## sun and light shadows
+	&"graphics/ssao": true,             ## ambient occlusion
+	&"graphics/volumetric_fog": true,   ## fog and light shafts, where a level uses them (the well does)
+	&"graphics/water_detail": true,     ## water sparkle and wave lines
 	&"graphics/water_foam": true,       ## toon foam ring around the player at the waterline (see PlayerEffects.update_water_foam())
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,

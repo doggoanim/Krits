@@ -64,6 +64,7 @@ const DUNGEON_START_GROUP := &"dungeon_start"
 
 var player: Player
 var _respawning := false
+var _current_env_config: EnvironmentConfig   ## the look last applied, so Graphics options can re-apply it
 var _gold_lost := 0   ## filled in while the iris is closed, announced after it opens
 var cam: CameraRig
 var encounters: EncounterManager
@@ -297,6 +298,11 @@ func _build_environment() -> void:
 	_sun.add_to_group(&"sun")   # CharacterFillLight places itself opposite this
 	_env = env
 	_apply_environment_config(env_config if env_config else EnvironmentConfig.new())
+	Settings.changed.connect(_on_setting_changed)
+
+func _on_setting_changed(key: StringName) -> void:
+	if String(key).begins_with("graphics/") and _current_env_config != null:
+		_apply_environment_config(_current_env_config)
 
 ## Applies every look/grading value an EnvironmentConfig carries — sun,
 ## sky colors, ambient, tonemap, glow, SSAO, volumetric fog, color grading —
@@ -310,10 +316,11 @@ func _build_environment() -> void:
 ## _apply_level_lighting() layers on top afterward, not a style choice this
 ## config gets a say in (see INTERIOR_GROUP's doc comment).
 func _apply_environment_config(cfg: EnvironmentConfig) -> void:
+	_current_env_config = cfg   # re-applied when a Graphics option changes, see _on_setting_changed()
 	_sun.rotation_degrees = cfg.sun_rotation_degrees
 	_sun.light_color = cfg.sun_color
 	_sun.light_energy = cfg.sun_energy
-	_sun.shadow_enabled = cfg.sun_shadows
+	_sun.shadow_enabled = cfg.sun_shadows and Settings.get_value(&"graphics/shadows")
 	_sun.shadow_blur = cfg.sun_shadow_blur
 	# Shadow map only covers what's near the player: the same texture budget over
 	# a shorter range = much sharper, less jagged edges (and cheaper to render).
@@ -347,7 +354,7 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	_env.glow_bloom = cfg.glow_bloom
 	_env.glow_hdr_threshold = cfg.glow_hdr_threshold
 
-	_env.ssao_enabled = cfg.ssao_enabled
+	_env.ssao_enabled = cfg.ssao_enabled and Settings.get_value(&"graphics/ssao")
 	_env.ssao_intensity = cfg.ssao_intensity
 	_env.ssao_radius = cfg.ssao_radius
 
@@ -363,7 +370,7 @@ func _apply_environment_config(cfg: EnvironmentConfig) -> void:
 	# group) — it's the sun's light_volumetric_fog_energy above, set on the
 	# DirectionalLight itself, that makes this fog volume actually light up
 	# instead of just sitting there as flat haze.
-	_env.volumetric_fog_enabled = cfg.volumetric_fog_enabled
+	_env.volumetric_fog_enabled = cfg.volumetric_fog_enabled and Settings.get_value(&"graphics/volumetric_fog")
 	# The fog volume is a coarse 3D grid; drawn over the sky it shows up as big
 	# blocky patches in the clouds. Keep it on geometry only.
 	_env.volumetric_fog_sky_affect = 0.0

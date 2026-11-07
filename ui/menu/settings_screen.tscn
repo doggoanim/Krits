@@ -242,17 +242,27 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 28
 metadata/section = "graphics"
 
-[node name="WaterFoamRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage"]
+[node name="Scroll" type="ScrollContainer" parent="Content/Pages/GraphicsPage"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Content/Pages/GraphicsPage/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 28
+
+[node name="WaterFoamRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/WaterFoamRow"]
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/WaterFoamRow"]
 custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "Player Water Foam"
 
-[node name="WaterFoam" type="TextureButton" parent="Content/Pages/GraphicsPage/WaterFoamRow"]
+[node name="WaterFoam" type="TextureButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/WaterFoamRow"]
 custom_minimum_size = Vector2(273, 84)
 layout_mode = 2
 size_flags_vertical = 4
@@ -263,17 +273,147 @@ ignore_texture_size = true
 stretch_mode = 5
 metadata/setting = &"graphics/water_foam"
 
-[node name="RenderDistanceRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage"]
+[node name="ResolutionScaleRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/RenderDistanceRow"]
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/ResolutionScaleRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Resolution Scale"
+
+[node name="ResolutionScale" type="OptionButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/ResolutionScaleRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 3
+popup/item_0/text = "100%"
+popup/item_0/id = 100
+popup/item_1/text = "75%"
+popup/item_1/id = 75
+popup/item_2/text = "50%"
+popup/item_2/id = 50
+metadata/setting = &"graphics/resolution_scale"
+
+[node name="AntiAliasingRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/AntiAliasingRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Anti-Aliasing"
+
+[node name="AntiAliasing" type="OptionButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/AntiAliasingRow"]
+custom_minimum_size = Vector2(520, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+item_count = 3
+popup/item_0/text = "Off"
+popup/item_0/id = 0
+popup/item_1/text = "2x"
+popup/item_1/id = 2
+popup/item_2/text = "4x"
+popup/item_2/id = 4
+metadata/setting = &"graphics/msaa"
+
+[node name="ShadowsRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/ShadowsRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Shadows"
+
+[node name="Shadows" type="TextureButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/ShadowsRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"graphics/shadows"
+
+[node name="SsaoRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/SsaoRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Ambient Occlusion"
+
+[node name="Ssao" type="TextureButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/SsaoRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"graphics/ssao"
+
+[node name="VolumetricFogRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/VolumetricFogRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Volumetric Fog"
+
+[node name="VolumetricFog" type="TextureButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/VolumetricFogRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"graphics/volumetric_fog"
+
+[node name="WaterDetailRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/WaterDetailRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Water Detail"
+
+[node name="WaterDetail" type="TextureButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/WaterDetailRow"]
+custom_minimum_size = Vector2(273, 84)
+layout_mode = 2
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_off")
+texture_pressed = ExtResource("2_on")
+ignore_texture_size = true
+stretch_mode = 5
+metadata/setting = &"graphics/water_detail"
+
+[node name="RenderDistanceRow" type="HBoxContainer" parent="Content/Pages/GraphicsPage/Scroll/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/GraphicsPage/Scroll/Rows/RenderDistanceRow"]
 custom_minimum_size = Vector2(450, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 52
 text = "Render Distance"
 
-[node name="RenderDistance" type="OptionButton" parent="Content/Pages/GraphicsPage/RenderDistanceRow"]
+[node name="RenderDistance" type="OptionButton" parent="Content/Pages/GraphicsPage/Scroll/Rows/RenderDistanceRow"]
 custom_minimum_size = Vector2(520, 70)
 layout_mode = 2
 theme_override_font_sizes/font_size = 44

@@ -24,6 +24,7 @@ Game="*res://core/game.gd"
 Music="*res://core/music_player.gd"
 Settings="*res://core/settings.gd"
 ShaderClock="*res://core/shader_clock.gd"
+GraphicsQuality="*res://core/graphics_quality.gd"
 Iris="*res://ui/loading_screen.tscn"
 CyclopsAutoload="*uid://4siqre3jhe80"
 
@@ -71,6 +72,10 @@ anti_aliasing/quality/screen_space_aa=1
 
 [shader_globals]
 
+water_detail={
+"type": "float",
+"value": 1.0
+}
 time_offset={
 "type": "float",
 "value": 0.0
