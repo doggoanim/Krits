@@ -42,6 +42,11 @@ func physics_update(delta: float) -> void:
 	p.apply_gravity(delta, p.config.long_jump_gravity_mult)
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
+	# Same as a dive: a breakable wall hit with the right weapon shatters and the
+	# jump carries straight on through.
+	if p.impact_breakables(&"long_jump", prev_h.length()):
+		p.set_hvel(prev_h)
+		return
 	if p.try_wall_bounce(prev_h, true, PlayerVisual.ANIM_ROLL, p.config.wall_bounce_roll_time):
 		return
 	if p.is_on_floor():

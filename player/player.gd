@@ -400,7 +400,7 @@ func set_hvel(v: Vector3) -> void:
 ## comment on safe_margin above for the real fix.
 ## Offers every surface the last move_and_slide() touched to anything that
 ## reacts to being hit by one of the player's moves (BreakableBlock): `kind` is
-## the move (&"pound" or &"dive"), `speed` how fast it was going. Returns true
+## the move (&"pound", &"dive" or &"long_jump"), `speed` how fast it was going. Returns true
 ## if something broke, so the move can carry on through instead of stopping.
 func impact_breakables(kind: StringName, speed: float) -> bool:
 	var broke := false
