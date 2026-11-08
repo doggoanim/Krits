@@ -11,10 +11,7 @@
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="12_qcdpf"]
-[ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
-[ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://v12u13y33gam" path="res://assets/textures/stone_3.jpg" id="14_ma7sk"]
-[ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
 [ext_resource type="AudioStream" uid="uid://bm3pt86fb5qml" path="res://sounds/SFX/block_break.wav" id="15_qjpwx"]
 [ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="20_66osh"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="21_sm61l"]
@@ -23,6 +20,7 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
+[ext_resource type="Script" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
 [ext_resource type="Script" path="res://world/level_ambience.gd" id="well_ambience_script"]
 [ext_resource type="AudioStream" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
 [ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
@@ -12280,23 +12278,22 @@ light_energy = 3.0
 shadow_enabled = true
 omni_range = 9.0
 
-[node name="hint" type="Decal" parent="." unique_id=288895221]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.55, -2.1940737)
-layers = 2
-size = Vector3(2, 0.611853, 1.3000001)
-texture_albedo = ExtResource("13_lmxyf")
+[node name="TutorialCrouchPound" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -2.2)
+script = ExtResource("well_tut_trigger")
+popup_id = &"crouch_pound"
+action = &"crouch_pound"
+text = "to [color=#ffd966]crouch[/color] / [color=#ffd966]ground pound[/color]"
+size = Vector3(10, 8, 10)
 
-[node name="hint2" type="Decal" parent="." unique_id=1969695126]
-transform = Transform3D(-4.371139e-08, 1, 0, 4.371139e-08, 0, -1, -1, -4.371139e-08, -4.3711385e-08, -5.0499997, -5.449999, -31)
-layers = 2
-size = Vector3(2, 0.3, 1.3000001)
-texture_albedo = ExtResource("14_lmxyf")
-
-[node name="hint3" type="Decal" parent="." unique_id=1350610853]
-transform = Transform3D(-4.371139e-08, 1, 0, 4.371139e-08, 0, -1, -1, -4.371139e-08, -4.3711385e-08, -5.05, -2.446589, -42.7746)
-layers = 2
-size = Vector3(2, 0.3, 1.3000001)
-texture_albedo = ExtResource("15_5xx8t")
+[node name="TutorialRollDive" type="Node3D" parent="."]
+script = ExtResource("well_tut_trigger")
+popup_id = &"roll_dive"
+action = &"roll_dive"
+text = "to [color=#ffd966]roll[/color] / [color=#ffd966]air dive[/color] / [color=#ffd966]long jump[/color]"
+when_states = Array[StringName]([&"Crouch", &"Pound"])
+requires_flag = &"tutorial_crouch_pound"
+delay = 1.5
 
 [node name="WellShaft" type="SpotLight3D" parent="." unique_id=910000001]
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.5, 9.5, -0.3)
