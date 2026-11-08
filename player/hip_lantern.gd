@@ -11,7 +11,7 @@ const MODEL: PackedScene = preload("res://assets/equipments/lantern.glb")
 const ITEM_ID := &"lantern"
 const ACTION := &"lantern_toggle"   ## rebindable in Settings > Controls (InputSetup.BINDINGS)
 
-const HINT_ID := &"lantern"   ## the key plate shown until the first toggle (see KeyHints)
+const HINT_ID := &"lantern"   ## the tutorial card shown once, after getting it (see TutorialPopup)
 
 const LIT_FLAG := &"lantern_lit"   ## remembered in the save; absent = switched off, as when first picked up
 
@@ -137,9 +137,9 @@ func _process(delta: float) -> void:
 	if visible != owned:
 		visible = owned
 		_last_pos = Vector3.ZERO   # no swing kick from the jump back into place
-		if owned:   # KeyHints skips it if they already know the key
-			var none: Array[StringName] = []
-			Events.key_hint_requested.emit(HINT_ID, ACTION, none)
+		if owned:   # TutorialPopup skips it if they already know the key, and waits out the fanfare
+			Events.tutorial_popup_requested.emit(HINT_ID, ACTION,
+					"to toggle the [color=#ffd966]Lantern[/color]")
 	if not owned:
 		return
 	if Input.is_action_just_pressed(ACTION) and not Game.input_locked \
@@ -150,7 +150,6 @@ func _process(delta: float) -> void:
 		_apply_lit()
 		if _player.audio != null:
 			_player.audio.play_lantern(_lit)
-		Events.key_hint_dismissed.emit(HINT_ID)
 	var yaw := _player.visual.global_rotation.y
 	var target := _hook_position(yaw)
 	var velocity := Vector3.ZERO

@@ -74,6 +74,10 @@ static func give_gear(gear: EquipmentData, done := Callable()) -> void:
 	instance._enqueue({"name": gear.display_name, "model": gear.model, "icon": null,
 			"color": Color(0.8, 0.8, 0.8), "grant": grant, "done": done})
 
+## True while a fanfare is running or waiting its turn.
+func is_playing() -> bool:
+	return _busy or not _queue.is_empty()
+
 func _enqueue(entry: Dictionary) -> void:
 	_queue.append(entry)
 	_pump()

@@ -13,6 +13,7 @@ const INTERACT_PROMPT_SCENE := preload("res://ui/interact_prompt.tscn")
 const PAUSE_MENU_SCENE := preload("res://ui/pause_menu.tscn")
 const KEY_HINTS_SCENE := preload("res://ui/widgets/key_hints.tscn")
 const FPS_COUNTER_SCRIPT := preload("res://ui/widgets/fps_counter.gd")
+const TUTORIAL_POPUP_SCRIPT := preload("res://ui/widgets/tutorial_popup.gd")
 const SAVE_INDICATOR_SCENE := preload("res://ui/widgets/save_indicator.tscn")
 
 var travel_menu: TravelMenu
@@ -29,5 +30,6 @@ func _ready() -> void:
 	add_child(SAVE_INDICATOR_SCENE.instantiate())   # "Saving..." badge — see SaveIndicator
 	add_child(FPS_COUNTER_SCRIPT.new())   # optional small FPS readout, top-right — see FpsCounter
 	add_child(KEY_HINTS_SCENE.instantiate())   # wordless key plates at the top centre — see KeyHints
+	add_child(TUTORIAL_POPUP_SCRIPT.new())   # pausing "[key] to ..." cards — see TutorialPopup
 	add_child(ItemGet.new())   # the Zelda-style "You got the ..." fanfare for important items — see ItemGet
 	add_child(DialogueBox.create())   # the one shared conversation UI — see DialogueBox
