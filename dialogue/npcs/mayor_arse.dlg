@@ -6,24 +6,36 @@
 @when water_quest_accepted -> reminder
 
 == offer ==
-[wave]Oh dear[/wave]... [pause=0.8] you actually came!
-> I'll bring the spirits to the desert. -> accepted [set water_quest_accepted]
-> Why the well? -> info
-> Maybe later. -> later
+[wave]Oh dear[/wave]...[pause=0.8] [i]you[/i] actually came!
+> What did you call me here for? -> info
 
 == info ==
-The old stories say the spirits of water sleep beneath Chesburg. We never dared go after them. The tunnels are full of nasty things. But a young one with a good jump? That might work. Will you do it?
-> I'll bring the spirits to the desert. -> accepted [set water_quest_accepted]
-> Maybe later. -> later
+[sad][wave]My[/wave] old friend, [color=#c98600]Mayor Cox[/color][/sad], from the [wave][color=#c98600]Desert Village[/color][/wave] has told [wave]me[/wave] that his [whisper]little[/whisper] [color=#c98600]village[/color] has been suffering from a month-long drought.
+> So? -> info_2
+
+== info_2 ==
+It [shake]would[/shake] be great help [bounce]diplomatically[/bounce] if you can, deliver some of our [color=#1478d6eb]water spirits[/color] to their village to sell them.
+> Wait, what spirits? -> water_spirit_info
+> Why me specifically? -> why_me_info
+
+== why_me_info ==
+[wave]I[/wave] am giving [i]you[/i] something to do? Shouldn't [i]you[/i] be like[pause=0.8], [rainbow]happy[/rainbow] to get orders from [wave]me[/wave]?
+> Ughhhh, fine -> accepted [set water_quest_accepted]
+> No? -> rejected
+
+== water_spirit_info ==
+In [wave]my[/wave] well. [wave]I[/wave] have had them for a long time, [wave]plenty[/wave] in fact. They are the [i]reason[/i] why [wave]we[/wave] never have to worry about [color=#1478d6eb]water[/color] problems.
+> But why me? -> why_me_info
+
+== rejected ==
+[shake]N-[pause=0.5]No?[/shake][pause=0.8] [angry]Listen here[/angry] young boy! This is why [shake][bounce]NOBODY[/bounce][/shake] in this [color=#FF0000]town[/color] likes you. What [wave]I[/wave], am doing is [wave]giving[/wave] you an opportunity to prove [i]your[/i] worth to this [color=#FF0000]town[/color].
+> Ughhhh, fine -> accepted [set water_quest_accepted]
 
 == accepted ==
-[give lantern] Splendid! The well is in the middle of the square. Jump into the hollow and keep going down. The way is longer and nastier than you'd think. The spirits sleep at the very bottom. Bring them to the desert town's mayor and tell her Arse sent you.
-
-== later ==
-Fine, fine. Rest those legs. The desert isn't going anywhere, but its people are drying out, so don't take too long.
+[give lantern] Splendid! Take this [color=#ffd966]lantern[/color], jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1478d6eb]them[/color] to the [wave][color=#c98600]Desert Village[/color][/wave]'s [color=#c98600]mayor[/color] and tell her [color=#ffff00]200 gold[/color] each.
 
 == reminder ==
-Still here? The water spirits sleep at the bottom of the well. Jump into the hollow and keep going down. After that, the road east to the desert town.
+Still here? Jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1478d6eb]them[/color] to the [wave][color=#c98600]Desert Village[/color][/wave]'s [color=#c98600]mayor[/color] and tell her 200 gold each.
 
 == thanks ==
 The desert has water again, thanks to you. Chesburg is proud. Take a rest. You've earned it.

@@ -11,7 +11,10 @@
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="12_qcdpf"]
+[ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
+[ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://v12u13y33gam" path="res://assets/textures/stone_3.jpg" id="14_ma7sk"]
+[ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
 [ext_resource type="AudioStream" uid="uid://bm3pt86fb5qml" path="res://sounds/SFX/block_break.wav" id="15_qjpwx"]
 [ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="20_66osh"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="21_sm61l"]
@@ -20,12 +23,8 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
-[ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
-[ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
-[ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
-[ext_resource type="Script" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
-[ext_resource type="Script" path="res://world/level_ambience.gd" id="well_ambience_script"]
-[ext_resource type="AudioStream" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
+[ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="well_ambience_script"]
+[ext_resource type="AudioStream" uid="uid://jbaxxwgc2o27" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
 [ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
@@ -34,6 +33,7 @@
 [ext_resource type="Script" uid="uid://yt8pm0fgwhly" path="res://world/ambient_motes.gd" id="well_motes"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
+[ext_resource type="Script" uid="uid://bv77sg604o5hi" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -11408,7 +11408,7 @@ script = ExtResource("lvlenv_script")
 config = ExtResource("lvlenv_cfg")
 reverb_enabled = true
 
-[node name="Ambience" type="Node" parent="."]
+[node name="Ambience" type="Node" parent="." unique_id=1856049747]
 script = ExtResource("well_ambience_script")
 stream = ExtResource("well_ambience_stream")
 
@@ -12281,16 +12281,16 @@ light_energy = 3.0
 shadow_enabled = true
 omni_range = 9.0
 
-[node name="TutorialCrouchPound" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -2.2)
+[node name="TutorialCrouchPound" type="Node3D" parent="." unique_id=216151116]
+transform = Transform3D(0.3, 0, 0, 0, 0.06, 0, 0, 0, 0.24, 0, 0.5, -1.8)
 script = ExtResource("well_tut_trigger")
 popup_id = &"crouch_pound"
 rows_text = "crouch_pound | Ground | Crouch
 crouch_pound | Air | Ground Pound"
 size = Vector3(10, 8, 10)
 
-[node name="TutorialRollDive" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.05, -5.45, -31)
+[node name="TutorialRollDive" type="Node3D" parent="." unique_id=724072395]
+transform = Transform3D(0.55999994, 0, 0, 0, 0.19999999, 0, 0, 0, 0.6, -2.0500002, -3.4499998, -42)
 script = ExtResource("well_tut_trigger")
 popup_id = &"roll_dive"
 rows_text = "roll_dive | Ground | Roll
@@ -12336,6 +12336,18 @@ light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.9
 omni_range = 4.0
 
+[node name="WarmTorch8" type="OmniLight3D" parent="AccentLights" unique_id=459303748]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7470126, -8.509288, -14.5)
+light_color = Color(1, 0.7, 0.35, 1)
+light_energy = 0.9
+omni_range = 4.0
+
+[node name="WarmTorch9" type="OmniLight3D" parent="AccentLights" unique_id=804785814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7470126, -3.5092878, -9.5)
+light_color = Color(1, 0.7, 0.35, 1)
+light_energy = 0.9
+omni_range = 4.0
+
 [node name="CyanCrystal1" type="OmniLight3D" parent="AccentLights" unique_id=910000004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -6.628918, -21.189594)
 light_color = Color(0.4, 0.9, 1, 1)
@@ -12352,6 +12364,24 @@ mote_size = 0.04
 drift_speed = 0.35
 
 [node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal1" unique_id=920000110]
+script = ExtResource("well_crystal")
+
+[node name="CyanCrystal12" type="OmniLight3D" parent="AccentLights" unique_id=350833105]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, -5.628918, -11.189594)
+light_color = Color(0.4, 0.9, 1, 1)
+light_energy = 1.15
+omni_range = 5.5
+
+[node name="Wisps1" type="GPUParticles3D" parent="AccentLights/CyanCrystal12" unique_id=822293508]
+script = ExtResource("well_motes")
+area_size = Vector3(5, 3, 5)
+mote_count = 14
+color = Color(0.5, 0.95, 1, 0.9)
+glow_energy = 2.0
+mote_size = 0.04
+drift_speed = 0.35
+
+[node name="Crystal" type="Node3D" parent="AccentLights/CyanCrystal12" unique_id=845415526]
 script = ExtResource("well_crystal")
 
 [node name="CyanCrystal2" type="OmniLight3D" parent="AccentLights" unique_id=910000005]
