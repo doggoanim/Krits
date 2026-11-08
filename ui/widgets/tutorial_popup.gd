@@ -17,7 +17,7 @@ const TAG_WIDTH := 200.0
 const TAG_COLOR := Color(0.62, 0.75, 0.85)
 const FONT_SIZE := 44
 const FADE_TIME := 0.2
-const MIN_OPEN_TIME := 0.35   ## ignore the key briefly so a held press can't skip the card
+const MIN_OPEN_TIME := 1.0   ## ignore the key briefly so a held press can't skip the card
 
 var _queue: Array[Dictionary] = []
 var _showing := false
