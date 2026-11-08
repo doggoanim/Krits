@@ -26,6 +26,8 @@ const IRIS_TIME := 0.3   ## one direction of the wipe (closing or opening)
 ## near-instant swap never reads as a single-frame flicker — there's always
 ## at least a beat of "yep, that's a transition" on either side of it.
 const HOLD_TIME := 0.08
+const COVER_LAYER := 40        ## above everything, DialogueBox (20) included
+const HELD_LAYER := 10         ## while hold()ing: still hides the world and HUD, but under the DialogueBox
 
 static var instance: LoadingScreen
 
@@ -37,7 +39,7 @@ var _in_scene_change := false
 func _ready() -> void:
 	instance = self
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	layer = 40   # above DialogueBox (20), below nothing — this covers everything
+	layer = COVER_LAYER   # above DialogueBox (20), below nothing — this covers everything
 	visible = false
 	_mat = _iris.material as ShaderMaterial
 	_mat.set_shader_parameter(&"radius", MAX_RADIUS)
@@ -71,6 +73,7 @@ func run(swap: Callable) -> void:
 ## the screen at once if it was not already.
 func hold() -> void:
 	_held = true
+	layer = HELD_LAYER   # so a line spoken in the dark (the opening) shows over the black
 	visible = true
 	_mat.set_shader_parameter(&"radius", 0.0)
 
@@ -78,6 +81,7 @@ func hold() -> void:
 ## waiting on the hold it carries on with its own reveal; otherwise this opens it.
 func release() -> void:
 	_held = false
+	layer = COVER_LAYER
 	if _in_scene_change:
 		return
 	await _animate_radius(0.0, MAX_RADIUS)
