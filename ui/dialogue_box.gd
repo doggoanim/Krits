@@ -61,6 +61,8 @@ static func create() -> DialogueBox:
 func _ready() -> void:
 	instance = self
 	visible = false
+	for fx in DialogueEffects.all():
+		_text.install_effect(fx)
 	_typewriter.finished.connect(_on_line_finished)
 	_typewriter.character_revealed.connect(_on_character_revealed)
 	for c in [_plate, _name_tag]:

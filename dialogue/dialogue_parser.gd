@@ -27,7 +27,7 @@ extends RefCounted
 ## Several lines in a section play one after another. Choices must come last in
 ## a section, after its final line; `-> end` (or no arrow) ends the conversation.
 ## Directive and tag words (@speaker, [set ...]) ignore case; names (flags, items,
-## sections, speakers) do not. Line text keeps the dialogue box's BBCode ([shake], [pause=0.5], ...).
+## sections, speakers) do not. Line text keeps the dialogue box's BBCode ([shake], [pause=0.5], and the custom [angry] [whisper] [shiver] [bounce] [sad] — see DialogueEffects).
 ## Mistakes are reported as `file:line: message` and skipped, never fatal.
 ## Remember: Godot only exports .dlg files if Export > Resources > "Filters to
 ## export non-resource files" includes `*.dlg`.
