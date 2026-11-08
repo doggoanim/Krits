@@ -10,7 +10,6 @@
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="7_yugcs"]
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
-[ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
 [ext_resource type="Script" uid="uid://bjsii5rxx4c5t" path="res://world/water/water_volume.gd" id="12_qcdpf"]
 [ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
 [ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
@@ -23,6 +22,7 @@
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="27_odmq1"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
+[ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
 [ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
@@ -12253,7 +12253,7 @@ material = SubResource("CellPlugMat")
 break_sound = ExtResource("15_qjpwx")
 
 [node name="WaterSpirits" type="StaticBody3D" parent="." unique_id=622921074]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.75, -23.9, -7.6)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -49.75, -23.9, -7.6)
 script = ExtResource("well_pickup")
 item_id = &"water_spirits"
 pickup_id = &"well_water_spirits"
