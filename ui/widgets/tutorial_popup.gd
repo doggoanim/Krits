@@ -10,6 +10,7 @@ extends Control
 
 const PLATE_SCENE := preload("res://ui/widgets/key_hint_plate.tscn")
 const CLOSE_ACTIONS: Array[StringName] = [&"interact", &"jump", &"ui_accept"]
+const BOTTOM_MARGIN := 50.0   ## same gap the dialogue box leaves
 const FADE_TIME := 0.2
 const MIN_OPEN_TIME := 0.35   ## ignore the close button briefly so a held key can't skip it
 
@@ -31,16 +32,24 @@ func _ready() -> void:
 
 func _build() -> void:
 	var dim := ColorRect.new()
-	dim.color = Color(0.0, 0.0, 0.0, 0.55)
+	dim.color = Color(0.0, 0.0, 0.0, 0.4)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(dim)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(center)
+	# Sits where the dialogue box does: bottom centre, just above the screen edge.
+	var anchor := VBoxContainer.new()
+	anchor.set_anchors_preset(Control.PRESET_FULL_RECT)
+	anchor.alignment = BoxContainer.ALIGNMENT_END
+	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	anchor.add_theme_constant_override("separation", 0)
+	add_child(anchor)
 	_panel = PanelContainer.new()
-	center.add_child(_panel)
+	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	anchor.add_child(_panel)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, BOTTOM_MARGIN)
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	anchor.add_child(gap)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
