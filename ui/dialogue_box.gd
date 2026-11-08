@@ -67,7 +67,6 @@ func _ready() -> void:
 		c.resized.connect(_center_pivot.bind(c))
 		_center_pivot(c)
 	_plate.resized.connect(_place_name_tag)
-	_name_tag.resized.connect(_place_name_tag)
 	Settings.changed.connect(_on_setting_changed)
 	Events.player_died.connect(_end)   # dying cancels any conversation
 
@@ -251,7 +250,7 @@ func _refresh_hint() -> void:
 ## edge (overlapping it a little) instead of staying at a fixed height.
 func _place_name_tag() -> void:
 	_name_tag.offset_bottom = _plate.position.y + TAG_OVERLAP - _root.size.y
-	_name_tag.offset_top = _name_tag.offset_bottom - _name_tag.size.y
+	_name_tag.offset_top = _name_tag.offset_bottom - 1.0   # grows upward to its content's own height
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5
