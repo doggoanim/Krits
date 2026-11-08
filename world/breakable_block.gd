@@ -44,6 +44,13 @@ enum Method { GROUND_POUND, AIR_DIVE }
 		rubble_color = v
 		_rebuild_body()
 @export var break_sound: AudioStream
+## The pulsing glow that marks the block as breakable (the well's colour code:
+## orange pulse = break me, steady gold = climb me). Only applies to the box this
+## script builds itself. Set `glow_pulse` off for a plain look.
+@export var glow_pulse := true
+@export var hint_glow := Color(1.0, 0.5, 0.2)
+@export_range(0.0, 4.0, 0.05) var glow_min := 0.25
+@export_range(0.0, 4.0, 0.05) var glow_max := 1.2
 
 const HINT_COOLDOWN_MSEC := 2500
 static var _last_hint_msec := -100000
@@ -147,9 +154,26 @@ func _rebuild_body() -> void:
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	mi.mesh = mesh
-	mi.material_override = material if material != null else _default_material()
+	var mat: Material = material if material != null else _default_material()
+	if glow_pulse and not Engine.is_editor_hint() and mat is StandardMaterial3D:
+		mat = _glowing(mat as StandardMaterial3D)
+	mi.material_override = mat
 	add_child(mi)
 	_auto_nodes.append(mi)
+
+## A copy of `base` that pulses with hint_glow, so breakable blocks stand out
+## from the plain walls around them.
+func _glowing(base: StandardMaterial3D) -> StandardMaterial3D:
+	var m := base.duplicate() as StandardMaterial3D
+	m.emission_enabled = true
+	m.emission = hint_glow
+	m.emission_energy_multiplier = glow_min
+	var tween := create_tween().set_loops()
+	tween.tween_property(m, "emission_energy_multiplier", glow_max, 0.9) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(m, "emission_energy_multiplier", glow_min, 0.9) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return m
 
 func _default_material() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
