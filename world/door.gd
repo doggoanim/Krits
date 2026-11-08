@@ -32,15 +32,25 @@ extends Interactable
 @export_file("*.tscn") var target_level: String
 @export var target_spawn_id: StringName = &"start"
 
+## Story flag that must be set before the door works (empty = always usable).
+## E.g. the mayor's house stays shut until the quest is accepted.
+@export var required_flag: StringName = &""
+## Story flag set when the door is used (e.g. "entered_mayor_house").
+@export var sets_flag: StringName = &""
+
 ## Grounded and alive, same spirit as NPC's own gate — walking through a
 ## door mid-air/mid-roll/etc. would be a strange moment to cut away. Also
 ## refused while a swap is already underway (Game.input_locked, set for the
 ## swap's own duration — see Main), so a second press can't queue another
 ## one on top of it.
 func _can_interact() -> bool:
+	if required_flag != &"" and not Game.flag(required_flag):
+		return false
 	return not target_level.is_empty() and player != null and not player.dead \
 		and player.machine.current_name == &"Ground" and not Game.input_locked \
 		and not Game.in_combat
 
 func _interact() -> void:
+	if sets_flag != &"":
+		Game.set_flag(sets_flag)
 	Events.level_travel_requested.emit(load(target_level) as PackedScene, target_spawn_id)

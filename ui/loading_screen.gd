@@ -31,6 +31,8 @@ static var instance: LoadingScreen
 
 @onready var _iris: ColorRect = %Iris
 var _mat: ShaderMaterial
+var _held := false          ## the screen is being kept black by hold() until release()
+var _in_scene_change := false
 
 func _ready() -> void:
 	instance = self
@@ -63,16 +65,36 @@ func run(swap: Callable) -> void:
 	await _animate_radius(0.0, MAX_RADIUS)
 	visible = false
 
+## Keeps the screen black until release(), even across a go_to_scene() reveal —
+## for an opening scene that wants to start in the dark (call it from the new
+## scene's _ready, which runs before go_to_scene would open the iris). Covers
+## the screen at once if it was not already.
+func hold() -> void:
+	_held = true
+	visible = true
+	_mat.set_shader_parameter(&"radius", 0.0)
+
+## Lets the held black screen open (the iris wipe in). If a go_to_scene() is
+## waiting on the hold it carries on with its own reveal; otherwise this opens it.
+func release() -> void:
+	_held = false
+	if _in_scene_change:
+		return
+	await _animate_radius(0.0, MAX_RADIUS)
+	visible = false
+
 ## Iris out, change the whole scene while nothing is visible, then iris in once
 ## the new scene has had a couple of frames to build itself. `on_fail` (optional)
 ## runs if the scene can't be loaded; the iris reopens either way.
 func go_to_scene(path: String, on_fail := Callable()) -> void:
+	_in_scene_change = true
 	visible = true
 	await _animate_radius(MAX_RADIUS, 0.0)
 	await get_tree().create_timer(HOLD_TIME).timeout
 	var err := get_tree().change_scene_to_file(path)
 	if err != OK:
 		push_error("LoadingScreen: could not load %s (error %d)" % [path, err])
+		_in_scene_change = false
 		await _animate_radius(0.0, MAX_RADIUS)
 		visible = false
 		if on_fail.is_valid():
@@ -83,6 +105,9 @@ func go_to_scene(path: String, on_fail := Callable()) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	await get_tree().create_timer(HOLD_TIME).timeout
+	while _held:   # the new scene asked to start in the dark (hold())
+		await get_tree().process_frame
+	_in_scene_change = false
 	await _animate_radius(0.0, MAX_RADIUS)
 	visible = false
 

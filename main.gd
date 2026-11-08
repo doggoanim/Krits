@@ -36,6 +36,12 @@ const INTERIOR_GROUP := &"interior_level"
 const DUNGEON_GROUP := &"dungeon"
 const DUNGEON_START_GROUP := &"dungeon_start"
 
+## New-game intro (see _play_intro()).
+const INTRO_FLAG := &"intro_seen"
+const INTRO_BELL_WAIT := 2.0      ## black screen + first bell before the hero speaks
+const INTRO_REVEAL_WAIT := 1.0    ## after the line closes, before the iris opens
+const INTRO_LINE := "That bell calls for me, specifically, but at this hour?"
+
 ## Looping background music for every level OUTSIDE the INTERIOR_GROUP —
 ## right now that's always Chesburg, since it's the only outdoor level
 ## there is, but this is the one place to point at a different track later
@@ -65,6 +71,7 @@ const DUNGEON_START_GROUP := &"dungeon_start"
 var player: Player
 var _respawning := false
 var _current_env_config: EnvironmentConfig   ## the look last applied, so Graphics options can re-apply it
+var _bell: BellCall   ## the town bell calling the player to the mayor's house — see world/bell_call.gd
 var _gold_lost := 0   ## filled in while the iris is closed, announced after it opens
 var cam: CameraRig
 var encounters: EncounterManager
@@ -95,6 +102,10 @@ func _ready() -> void:
 	add_child(level)
 	_apply_level_lighting(level)
 	_apply_level_music(level)
+
+	_bell = BellCall.new()
+	add_child(_bell)
+	_bell.set_indoors(level.is_in_group(INTERIOR_GROUP))
 
 	player = Player.new()
 	add_child(player)
@@ -161,6 +172,27 @@ func _ready() -> void:
 		cam.global_position = player.global_position
 	else:
 		_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
+	if starting_indoors and not Game.flag(INTRO_FLAG):
+		_play_intro()
+
+## The very start of a new game: the screen stays black while the bell tolls
+## (muffled, we are indoors), then the hero muses about it, and only then does
+## the iris open on the room.
+func _play_intro() -> void:
+	Game.input_locked = true
+	player.enter_cinematic()
+	LoadingScreen.instance.hold()   # keeps the title->game reveal from opening yet
+	_bell.start()
+	await get_tree().create_timer(INTRO_BELL_WAIT).timeout
+	DialogueBox.instance.start(DialogueNode.say(Game.player_name, INTRO_LINE))
+	await Events.dialogue_ended
+	player.enter_cinematic()   # the dialogue handed control back; keep them held for the reveal
+	await get_tree().create_timer(INTRO_REVEAL_WAIT).timeout
+	Game.set_flag(INTRO_FLAG)
+	LoadingScreen.instance.release()
+	await get_tree().create_timer(0.6).timeout
+	player.teleport(player.global_position)   # back to Ground, in place
+	Game.input_locked = false
 
 func _travel_to(id: StringName) -> void:
 	for n in get_tree().get_nodes_in_group(&"spawnpoints"):
@@ -203,6 +235,7 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 	add_child(level)
 	_apply_level_lighting(level)
 	_apply_level_music(level)
+	_bell.set_indoors(level.is_in_group(INTERIOR_GROUP))
 	encounters.setup(player, level)
 	for n in level.find_children("*", "", true, false):
 		if n is WorldEnemy:

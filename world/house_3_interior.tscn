@@ -169,6 +169,7 @@ script = ExtResource("1")
 target_level = "res://world/chesburg.tscn"
 target_spawn_id = &"house_3_entrance"
 prompt_text = "Press E to exit"
+required_flag = &"water_quest_accepted"
 
 [node name="Collision" type="CollisionShape3D" parent="ReturnDoor" unique_id=545707350]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
