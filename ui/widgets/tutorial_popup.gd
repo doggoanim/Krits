@@ -25,7 +25,7 @@ var _plate: KeyHintPlate
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # runs while it holds the game paused
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_build()
 	Events.tutorial_popup_requested.connect(_on_requested)
@@ -33,16 +33,16 @@ func _ready() -> void:
 func _build() -> void:
 	var dim := ColorRect.new()
 	dim.color = Color(0.0, 0.0, 0.0, 0.4)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	# Sits where the dialogue box does: bottom centre, just above the screen edge.
 	var anchor := VBoxContainer.new()
-	anchor.set_anchors_preset(Control.PRESET_FULL_RECT)
 	anchor.alignment = BoxContainer.ALIGNMENT_END
 	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	anchor.add_theme_constant_override("separation", 0)
 	add_child(anchor)
+	anchor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_panel = PanelContainer.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	anchor.add_child(_panel)
