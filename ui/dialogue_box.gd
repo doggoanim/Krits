@@ -51,6 +51,7 @@ var _locked_until_msec := 0   ## interact presses are ignored until then (see SK
 var _typed := 0   ## visible characters revealed so far, for thinning out the typing sound
 var _tween: Tween
 
+const TAG_OVERLAP := 10.0     ## how far the name tag dips onto the plate
 const SKIP_DELAY := 0.25      ## seconds after a line appears before interact can skip its typing
 const ADVANCE_DELAY := 0.2    ## seconds after a line finishes before interact can move on
 
@@ -65,6 +66,8 @@ func _ready() -> void:
 	for c in [_plate, _name_tag]:
 		c.resized.connect(_center_pivot.bind(c))
 		_center_pivot(c)
+	_plate.resized.connect(_place_name_tag)
+	_name_tag.resized.connect(_place_name_tag)
 	Settings.changed.connect(_on_setting_changed)
 	Events.player_died.connect(_end)   # dying cancels any conversation
 
@@ -182,6 +185,7 @@ func _show_node(node: DialogueNode) -> void:
 	if not plate_styles.is_empty():
 		_plate.add_theme_stylebox_override(&"panel", plate_styles.pick_random())
 	_pop(_plate)
+	_place_name_tag.call_deferred()
 	if _name_tag.visible:
 		_pop(_name_tag)
 	_typewriter.speed = Settings.get_value(&"accessibility/text_speed")
@@ -242,6 +246,12 @@ func _end() -> void:
 func _refresh_hint() -> void:
 	var key := InputSetup.key_label(Settings.get_binding(&"interact"))
 	_hint.text = "%s     Esc" % key   # Esc (fixed) closes the conversation
+
+## The plate grows upward to fit a long line, so the name tag rides on its top
+## edge (overlapping it a little) instead of staying at a fixed height.
+func _place_name_tag() -> void:
+	_name_tag.offset_bottom = _plate.position.y + TAG_OVERLAP - _root.size.y
+	_name_tag.offset_top = _name_tag.offset_bottom - _name_tag.size.y
 
 func _center_pivot(c: Control) -> void:
 	c.pivot_offset = c.size * 0.5

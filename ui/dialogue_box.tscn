@@ -42,9 +42,9 @@ texture_margin_bottom = 40.0
 
 [sub_resource type="StyleBoxTexture" id="TagPlate"]
 content_margin_left = 44.0
-content_margin_top = 14.0
+content_margin_top = 4.0
 content_margin_right = 44.0
-content_margin_bottom = 14.0
+content_margin_bottom = 4.0
 texture = ExtResource("6")
 texture_margin_left = 40.0
 texture_margin_top = 40.0
@@ -121,6 +121,7 @@ theme_override_font_sizes/normal_font_size = 46
 theme_override_font_sizes/bold_font_size = 46
 theme_override_font_sizes/italics_font_size = 46
 bbcode_enabled = true
+fit_content = true
 scroll_active = false
 
 [node name="Hint" type="Label" parent="Root/Plate/Row/Column"]
@@ -150,7 +151,7 @@ theme_override_styles/panel = SubResource("TagPlate")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 46
+theme_override_font_sizes/font_size = 36
 text = "Name"
 
 [node name="Choices" type="VBoxContainer" parent="Root"]
