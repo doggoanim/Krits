@@ -28,7 +28,7 @@ signal stats_changed
 signal player_state_changed(state: StringName)   ## the player's state machine entered `state` (Ground, Air, Roll, ...)
 signal key_hint_requested(id: StringName, action: StringName, done_states: Array[StringName])   ## show a key plate (top centre) until the player enters one of done_states (or key_hint_dismissed) — see KeyHints
 signal key_hint_dismissed(id: StringName)
-signal tutorial_popup_requested(id: StringName, action: StringName, text: String)   ## show a pausing "[key] to ..." card (BBCode text) once, after any fanfare/dialogue — see TutorialPopup
+signal tutorial_popup_requested(id: StringName, rows: Array)   ## show a pausing key card once, after any fanfare/dialogue; rows are {action, tag, text} dictionaries (tag may be empty, text is BBCode) — see TutorialPopup
 signal stamina_denied   ## an ability was refused for lack of stamina — the HUD flashes the stamina bar
 signal game_saved   ## a save was just written to disk — the SaveIndicator badge shows
 

@@ -12285,16 +12285,17 @@ omni_range = 9.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -2.2)
 script = ExtResource("well_tut_trigger")
 popup_id = &"crouch_pound"
-action = &"crouch_pound"
-text = "to [color=#ffd966]crouch[/color] / [color=#ffd966]ground pound[/color]"
+rows_text = "crouch_pound | Ground | Crouch
+crouch_pound | Air | Ground Pound"
 size = Vector3(10, 8, 10)
 
 [node name="TutorialRollDive" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.05, -5.45, -31)
 script = ExtResource("well_tut_trigger")
 popup_id = &"roll_dive"
-action = &"roll_dive"
-text = "to [color=#ffd966]roll[/color] / [color=#ffd966]air dive[/color] / [color=#ffd966]long jump[/color]"
+rows_text = "roll_dive | Ground | Roll
+roll_dive | Air | Air Dive
+jump | Rolling | Long Jump"
 size = Vector3(10, 8, 10)
 
 [node name="hint" type="Decal" parent="." unique_id=288895221]

@@ -138,8 +138,8 @@ func _process(delta: float) -> void:
 		visible = owned
 		_last_pos = Vector3.ZERO   # no swing kick from the jump back into place
 		if owned:   # TutorialPopup skips it if they already know the key, and waits out the fanfare
-			Events.tutorial_popup_requested.emit(HINT_ID, ACTION,
-					"to toggle the [color=#ffd966]Lantern[/color]")
+			Events.tutorial_popup_requested.emit(HINT_ID, [{"action": ACTION, "tag": "",
+					"text": "to toggle the [color=#ffd966]Lantern[/color]"}])
 	if not owned:
 		return
 	if Input.is_action_just_pressed(ACTION) and not Game.input_locked \

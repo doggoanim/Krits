@@ -10,8 +10,10 @@ extends Node3D
 ## card remembers itself as `tutorial_<popup_id>`, so this never repeats.
 
 @export var popup_id: StringName = &""
-@export var action: StringName = &"jump"
-@export_multiline var text := "to jump"   ## BBCode, shown after the key plate
+## One card row per line: "action | tag | text". `tag` is the dim context word
+## shown in brackets (may be left empty), `text` is BBCode. The first line's key
+## closes the card. Example: crouch_pound | Ground | Crouch
+@export_multiline var rows_text := "jump | | Jump"
 @export var when_states: Array[StringName] = []
 @export var delay := 0.0   ## seconds to wait before the card opens (so it does not pounce the instant a move starts)
 @export var requires_flag: StringName = &""
@@ -56,7 +58,17 @@ func _request() -> void:
 		return
 	if delay > 0.0:
 		await get_tree().create_timer(delay).timeout
-	Events.tutorial_popup_requested.emit(popup_id, action, text)
+	Events.tutorial_popup_requested.emit(popup_id, _rows())
+
+func _rows() -> Array:
+	var rows: Array = []
+	for line in rows_text.split("\n", false):
+		var parts := line.split("|")
+		if parts.size() < 3:
+			continue
+		rows.append({"action": StringName(parts[0].strip_edges()),
+				"tag": parts[1].strip_edges(), "text": parts[2].strip_edges()})
+	return rows
 
 ## Editor-only wireframe of the trigger box so it can be placed by eye.
 func _refresh_preview() -> void:
