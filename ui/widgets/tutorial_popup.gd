@@ -9,7 +9,7 @@ extends Control
 ## `tutorial_<id>` so it never shows twice. Requests queue up one after another.
 
 const PLATE_SCENE := preload("res://ui/widgets/key_hint_plate.tscn")
-const BOTTOM_MARGIN := 50.0   ## same gap the dialogue box leaves
+const BOTTOM_FRACTION := 0.3   ## how far up the screen the card floats (0 = on the bottom edge, 0.5 = dead centre)
 const FADE_TIME := 0.2
 const MIN_OPEN_TIME := 0.35   ## ignore the key briefly so a held press can't skip the card
 
@@ -19,6 +19,7 @@ var _open_time := 0.0
 var _id: StringName = &""
 var _action: StringName = &""   ## the action the card teaches — pressing it closes the card
 var _panel: PanelContainer
+var _gap: Control
 var _row: HBoxContainer
 var _label: RichTextLabel
 var _plate: KeyHintPlate
@@ -36,6 +37,7 @@ func _ready() -> void:
 func _fit_to_screen() -> void:
 	position = Vector2.ZERO
 	size = get_viewport_rect().size
+	_gap.custom_minimum_size = Vector2(0, size.y * BOTTOM_FRACTION)
 
 func _build() -> void:
 	var dim := ColorRect.new()
@@ -43,7 +45,7 @@ func _build() -> void:
 	add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
-	# Sits where the dialogue box does: bottom centre, just above the screen edge.
+	# Bottom-up stack: card, then a gap that lifts it to a little below screen centre.
 	var anchor := VBoxContainer.new()
 	anchor.alignment = BoxContainer.ALIGNMENT_END
 	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -53,10 +55,9 @@ func _build() -> void:
 	_panel = PanelContainer.new()
 	_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	anchor.add_child(_panel)
-	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, BOTTOM_MARGIN)
-	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	anchor.add_child(gap)
+	_gap = Control.new()
+	_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	anchor.add_child(_gap)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
