@@ -4,20 +4,20 @@ extends Control
 ## (rebindable) key plate next to a line of text, e.g. [F] to toggle the
 ## Lantern. Anything asks with Events.tutorial_popup_requested(id, action, text)
 ## where `text` is BBCode ([color=...] to highlight the thing being taught). It
-## opens once the item-get fanfare / any conversation has finished, closes on
-## interact / jump / accept / click, and is remembered as the story flag
+## opens once the item-get fanfare / any conversation has finished, closes when
+## the player presses the very key it shows, and is remembered as the story flag
 ## `tutorial_<id>` so it never shows twice. Requests queue up one after another.
 
 const PLATE_SCENE := preload("res://ui/widgets/key_hint_plate.tscn")
-const CLOSE_ACTIONS: Array[StringName] = [&"interact", &"jump", &"ui_accept"]
 const BOTTOM_MARGIN := 50.0   ## same gap the dialogue box leaves
 const FADE_TIME := 0.2
-const MIN_OPEN_TIME := 0.35   ## ignore the close button briefly so a held key can't skip it
+const MIN_OPEN_TIME := 0.35   ## ignore the key briefly so a held press can't skip the card
 
 var _queue: Array[Dictionary] = []
 var _showing := false
 var _open_time := 0.0
 var _id: StringName = &""
+var _action: StringName = &""   ## the action the card teaches — pressing it closes the card
 var _panel: PanelContainer
 var _row: HBoxContainer
 var _label: RichTextLabel
@@ -111,6 +111,7 @@ func _show(entry: Dictionary) -> void:
 	_showing = true
 	_open_time = 0.0
 	_id = entry["id"]
+	_action = entry["action"]
 	_plate.set_key(InputSetup.key_label(Settings.get_binding(entry["action"])))
 	_label.text = entry["text"]
 	modulate.a = 0.0
@@ -121,13 +122,7 @@ func _show(entry: Dictionary) -> void:
 func _input(event: InputEvent) -> void:
 	if not _showing or _open_time < MIN_OPEN_TIME:
 		return
-	var pressed := false
-	for action in CLOSE_ACTIONS:
-		if event.is_action_pressed(action):
-			pressed = true
-	if event is InputEventMouseButton and event.pressed:
-		pressed = true
-	if pressed:
+	if event.is_action_pressed(_action):
 		get_viewport().set_input_as_handled()
 		_close()
 
