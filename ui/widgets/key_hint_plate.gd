@@ -1,6 +1,6 @@
 class_name KeyHintPlate
 extends TextureRect
-## One key plate of KeyHints: the hand-drawn button with the key's name on it.
+## One key plate of TutorialPopup: the hand-drawn button with the key's name on it.
 
 @onready var _key: Label = %Key
 
