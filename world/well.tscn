@@ -20,6 +20,9 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
+[ext_resource type="Texture2D" uid="uid://d36nejj80jrif" path="res://assets/ui/tutorial_roll.png" id="13_lmxyf"]
+[ext_resource type="Texture2D" uid="uid://7chwxhvnr6ue" path="res://assets/ui/tutorial_air_dive.png" id="14_lmxyf"]
+[ext_resource type="Texture2D" uid="uid://c5bofes38o7pv" path="res://assets/ui/tutorial_long_jump.png" id="15_5xx8t"]
 [ext_resource type="Script" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
 [ext_resource type="Script" path="res://world/level_ambience.gd" id="well_ambience_script"]
 [ext_resource type="AudioStream" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
@@ -12294,6 +12297,24 @@ text = "to [color=#ffd966]roll[/color] / [color=#ffd966]air dive[/color] / [colo
 when_states = Array[StringName]([&"Crouch", &"Pound"])
 requires_flag = &"tutorial_crouch_pound"
 delay = 1.5
+
+[node name="hint" type="Decal" parent="." unique_id=288895221]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.55, -2.1940737)
+layers = 2
+size = Vector3(2, 0.611853, 1.3000001)
+texture_albedo = ExtResource("13_lmxyf")
+
+[node name="hint2" type="Decal" parent="." unique_id=1969695126]
+transform = Transform3D(-4.371139e-08, 1, 0, 4.371139e-08, 0, -1, -1, -4.371139e-08, -4.3711385e-08, -5.0499997, -5.449999, -31)
+layers = 2
+size = Vector3(2, 0.3, 1.3000001)
+texture_albedo = ExtResource("14_lmxyf")
+
+[node name="hint3" type="Decal" parent="." unique_id=1350610853]
+transform = Transform3D(-4.371139e-08, 1, 0, 4.371139e-08, 0, -1, -1, -4.371139e-08, -4.3711385e-08, -5.05, -2.446589, -42.7746)
+layers = 2
+size = Vector3(2, 0.3, 1.3000001)
+texture_albedo = ExtResource("15_5xx8t")
 
 [node name="WellShaft" type="SpotLight3D" parent="." unique_id=910000001]
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.5, 9.5, -0.3)
