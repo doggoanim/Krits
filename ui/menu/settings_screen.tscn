@@ -507,6 +507,29 @@ tick_count = 11
 ticks_on_borders = true
 metadata/setting = &"audio/sfx"
 
+[node name="AmbienceSliderRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="Content/Pages/AudioPage/AmbienceSliderRow"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "Ambience"
+
+[node name="AmbienceSlider" type="HSlider" parent="Content/Pages/AudioPage/AmbienceSliderRow"]
+custom_minimum_size = Vector2(600, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.0
+max_value = 1.0
+step = 0.1
+value = 0.0
+tick_count = 11
+ticks_on_borders = true
+metadata/setting = &"audio/ambience"
+
 [node name="MuteUnfocusedRow" type="HBoxContainer" parent="Content/Pages/AudioPage"]
 layout_mode = 2
 theme_override_constants/separation = 40

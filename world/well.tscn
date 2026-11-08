@@ -23,6 +23,8 @@
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
+[ext_resource type="Script" path="res://world/level_ambience.gd" id="well_ambience_script"]
+[ext_resource type="AudioStream" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
 [ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
@@ -11404,6 +11406,10 @@ size = Vector3(1.2, 10, 0.2)
 script = ExtResource("lvlenv_script")
 config = ExtResource("lvlenv_cfg")
 reverb_enabled = true
+
+[node name="Ambience" type="Node" parent="."]
+script = ExtResource("well_ambience_script")
+stream = ExtResource("well_ambience_stream")
 
 [node name="CyclopsBlocks" type="Node3D" parent="." unique_id=2050784714]
 script = ExtResource("1_dxlgf")

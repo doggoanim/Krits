@@ -16,6 +16,7 @@ const MODEL := preload("res://assets/npcs/water_spirit.glb")
 const ANIMATIONS: Array[StringName] = [&"spirit_1", &"spirit_2", &"spirit_3"]   ## one per spirit
 const MODEL_SCALE := 0.45      ## size of each spirit; raise/lower to taste
 const FACE_OFFSET := 0.0       ## radians; set to PI if the models end up facing away from the camera
+const LOOP_SFX_PATH := "res://sounds/SFX/others/water_spirits.wav"
 const ORBIT_RADIUS := 0.32
 const ORBIT_SPEED := 0.9       ## rad/s
 const BOB_HEIGHT := 0.08
@@ -35,11 +36,32 @@ func _init() -> void:
 		ModelUtil.apply_cel_shading(model)
 		_play(model, ANIMATIONS[i], float(i))
 	add_child(_make_drops())
+	_add_loop_sound()
 	_place(0.0)
 
 func _process(delta: float) -> void:
 	_t += delta
 	_place(_t)
+
+## The spirits' looping hum, positional so it fades with distance (and follows
+## them when they are held up as an item). Skipped in the editor.
+func _add_loop_sound() -> void:
+	if Engine.is_editor_hint() or not ResourceLoader.exists(LOOP_SFX_PATH):
+		return
+	var stream := load(LOOP_SFX_PATH) as AudioStreamWAV
+	if stream == null:
+		return
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	stream.loop_end = int(stream.get_length() * stream.mix_rate)
+	var sfx := AudioStreamPlayer3D.new()
+	sfx.name = "Hum"
+	sfx.stream = stream
+	sfx.bus = &"SFX"
+	sfx.unit_size = 4.0
+	sfx.max_distance = 30.0
+	sfx.autoplay = true
+	add_child(sfx)
 
 ## Loops `anim` on the model's AnimationPlayer, started `offset` seconds in so
 ## the spirits don't move in lockstep.

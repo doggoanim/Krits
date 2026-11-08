@@ -44,6 +44,7 @@ const DEFAULTS := {
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,
+	&"audio/ambience": 1.0,
 	&"audio/mute_unfocused": false,
 	&"controls/camera_sens": 1.0,       ## multiplier on the camera's base sensitivity
 	&"controls/invert_y": false,
@@ -58,6 +59,7 @@ const _VOLUME_BUSES := {
 	&"audio/master": &"Master",
 	&"audio/music": &"Music",
 	&"audio/sfx": &"SFX",
+	&"audio/ambience": &"Ambience",
 }
 
 var _values := {}
@@ -139,7 +141,7 @@ func set_binding(action: StringName, keycode: Key) -> void:
 
 func _apply(key: StringName) -> void:
 	match key:
-		&"audio/master", &"audio/music", &"audio/sfx", &"audio/mute_unfocused":
+		&"audio/master", &"audio/music", &"audio/sfx", &"audio/ambience", &"audio/mute_unfocused":
 			_apply_volumes()
 		&"display/window_mode":
 			_apply_window_mode()
