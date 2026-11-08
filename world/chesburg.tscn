@@ -320,11 +320,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.77, 4.8)
 script = ExtResource("47_door")
 target_level = "res://world/house_3_interior.tscn"
 target_spawn_id = &"enter"
-prompt_text = "Press E to enter"
 sets_flag = &"entered_mayor_house"
+prompt_text = "Press E to enter"
 
-[node name="BellPoint" type="Marker3D" parent="Buildings/house_chesburg_3" groups=["bell_point"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+[node name="BellPoint" type="Marker3D" parent="Buildings/house_chesburg_3" unique_id=1696566758 groups=["bell_point"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.999999, 0)
 
 [node name="House3EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_3" unique_id=1073118099]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.77, 4.4)
