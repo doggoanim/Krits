@@ -28,7 +28,14 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_build()
+	get_viewport().size_changed.connect(_fit_to_screen)
 	Events.tutorial_popup_requested.connect(_on_requested)
+
+## Belt and braces for a Control parented to a CanvasLayer: pin the root to the
+## whole screen explicitly so the bottom-centre layout below has a real size.
+func _fit_to_screen() -> void:
+	position = Vector2.ZERO
+	size = get_viewport_rect().size
 
 func _build() -> void:
 	var dim := ColorRect.new()
@@ -116,6 +123,7 @@ func _show(entry: Dictionary) -> void:
 	_label.text = entry["text"]
 	modulate.a = 0.0
 	visible = true
+	_fit_to_screen()
 	get_tree().paused = true
 	create_tween().tween_property(self, "modulate:a", 1.0, FADE_TIME)
 
