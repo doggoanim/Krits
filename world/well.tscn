@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://ohysk81aypln"]
 
 [ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
+[ext_resource type="Script" path="res://world/well_atmosphere.gd" id="well_atmo_script"]
+[ext_resource type="Script" path="res://world/well_bats.gd" id="well_bats_script"]
 [ext_resource type="Script" uid="uid://u2kq7fluf2tu" path="res://addons/cyclops_level_builder/nodes/cyclops_blocks.gd" id="1_dxlgf"]
 [ext_resource type="Script" uid="uid://c5jpx1aoa7iso" path="res://addons/cyclops_level_builder/resources/data_vector_byte.gd" id="3_yugcs"]
 [ext_resource type="Script" uid="uid://dekcd1o0m0k3r" path="res://addons/cyclops_level_builder/resources/data_vector_float.gd" id="4_8grio"]
