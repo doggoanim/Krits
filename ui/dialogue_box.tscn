@@ -41,10 +41,10 @@ texture_margin_right = 40.0
 texture_margin_bottom = 40.0
 
 [sub_resource type="StyleBoxTexture" id="TagPlate"]
-content_margin_left = 34.0
-content_margin_top = 6.0
-content_margin_right = 34.0
-content_margin_bottom = 6.0
+content_margin_left = 52.0
+content_margin_top = 18.0
+content_margin_right = 52.0
+content_margin_bottom = 18.0
 texture = ExtResource("6")
 texture_margin_left = 40.0
 texture_margin_top = 40.0
@@ -144,6 +144,7 @@ offset_right = 260.0
 offset_bottom = -390.0
 grow_vertical = 0
 rotation = 0.026
+custom_minimum_size = Vector2(180, 100)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("TagPlate")
 
@@ -151,7 +152,7 @@ theme_override_styles/panel = SubResource("TagPlate")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 46
 text = "Name"
 
 [node name="Choices" type="VBoxContainer" parent="Root"]
