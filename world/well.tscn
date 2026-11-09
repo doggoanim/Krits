@@ -11343,11 +11343,8 @@ albedo = Color(0.55, 0.82, 0.9, 1)
 height_falloff = 1.4
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sm61l"]
-albedo_color = Color(0.85, 0.68, 0.38, 1)
+albedo_color = Color(0.25512275, 0.2772886, 0.3437208, 1)
 albedo_texture = ExtResource("20_66osh")
-emission_enabled = true
-emission = Color(1, 0.78, 0.4, 1)
-emission_energy_multiplier = 0.5
 
 [sub_resource type="BoxMesh" id="BoxMesh_244o2"]
 size = Vector3(3, 20.6, 0.1)
