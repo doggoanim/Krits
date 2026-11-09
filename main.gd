@@ -150,6 +150,8 @@ func _ready() -> void:
 	for e in get_tree().get_nodes_in_group(&"world_enemies"):
 		encounters.register_world_enemy(e)
 
+	add_child(CombatTutorial.new())   # the first-fight cards — see combat/combat_tutorial.gd
+
 	var debug := DebugTools.new()
 	add_child(debug)
 	debug.setup(player, encounters)

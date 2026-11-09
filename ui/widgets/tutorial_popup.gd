@@ -16,6 +16,7 @@ const BOTTOM_FRACTION := 0.3   ## how far up the screen the card floats (0 = on 
 const TAG_WIDTH := 200.0
 const TAG_COLOR := Color(0.62, 0.75, 0.85)
 const FONT_SIZE := 44
+const CONTINUE_ACTION := &"interact"
 const FADE_TIME := 0.2
 const MIN_OPEN_TIME := 1.0   ## ignore the key briefly so a held press can't skip the card
 
@@ -27,6 +28,7 @@ var _action: StringName = &""   ## the first row's action — pressing it closes
 var _panel: PanelContainer
 var _gap: Control
 var _rows: VBoxContainer
+var _footer: Label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # runs while it holds the game paused
@@ -68,9 +70,18 @@ func _build() -> void:
 	for side in ["top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 32)
 	_panel.add_child(margin)
+	var stack := VBoxContainer.new()
+	stack.add_theme_constant_override("separation", 14)
+	margin.add_child(stack)
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", 18)
-	margin.add_child(_rows)
+	stack.add_child(_rows)
+	_footer = Label.new()
+	_footer.add_theme_font_size_override("font_size", 26)
+	_footer.add_theme_color_override("font_color", TAG_COLOR)
+	_footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_footer.visible = false
+	stack.add_child(_footer)
 
 ## Rebuilds the card's rows from {action, tag, text} dictionaries.
 func _fill(rows: Array) -> void:
@@ -80,9 +91,10 @@ func _fill(rows: Array) -> void:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 28)
 		_rows.add_child(line)
-		var plate := PLATE_SCENE.instantiate() as KeyHintPlate
-		line.add_child(plate)
-		plate.set_key(InputSetup.key_label(Settings.get_binding(entry["action"])))
+		if entry["action"] != &"":   # keyless rows are just a line of text
+			var plate := PLATE_SCENE.instantiate() as KeyHintPlate
+			line.add_child(plate)
+			plate.set_key(InputSetup.key_label(Settings.get_binding(entry["action"])))
 		var tag: String = entry.get("tag", "")
 		if tag != "":
 			var tag_label := Label.new()
@@ -146,7 +158,12 @@ func _show(entry: Dictionary) -> void:
 	_open_time = 0.0
 	_id = entry["id"]
 	_action = entry["rows"][0]["action"]
+	var keyless: bool = _action == &""
+	if keyless:
+		_action = CONTINUE_ACTION   # a card with no key of its own is closed with interact
 	_fill(entry["rows"])
+	_footer.visible = keyless
+	_footer.text = "%s to continue" % InputSetup.key_label(Settings.get_binding(CONTINUE_ACTION))
 	modulate.a = 0.0
 	visible = true
 	_fit_to_screen()
