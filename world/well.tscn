@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="20_66osh"]
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="21_sm61l"]
 [ext_resource type="Texture2D" uid="uid://8t3skwq7l2js" path="res://assets/textures/ladder.png" id="22_244o2"]
+[ext_resource type="Texture2D" uid="uid://bo1nd5sxmgoxi" path="res://assets/ui/tutorial_ground_pound_jump.png" id="24_hufnp"]
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="27_odmq1"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
@@ -11345,7 +11346,6 @@ height_falloff = 1.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sm61l"]
 albedo_color = Color(0.25512275, 0.2772886, 0.3437208, 1)
 albedo_texture = ExtResource("20_66osh")
-emission_enabled = true
 emission = Color(1, 0.78, 0.4, 1)
 emission_energy_multiplier = 0.5
 
@@ -12293,7 +12293,7 @@ crouch_pound | Air | Ground Pound"
 size = Vector3(10, 8, 10)
 
 [node name="TutorialRollDive" type="Node3D" parent="." unique_id=724072395]
-transform = Transform3D(0.55999994, 0, 0, 0, 0.19999999, 0, 0, 0, 0.6, -2.0500002, -3.4499998, -42)
+transform = Transform3D(0.30239996, 0, 0, 0, 0.41999996, 0, 0, 0, 0.12, -3.65, -7.45, -30)
 script = ExtResource("well_tut_trigger")
 popup_id = &"roll_dive"
 rows_text = "roll_dive | Ground | Roll
@@ -12318,6 +12318,12 @@ transform = Transform3D(-4.371139e-08, 1, 0, 4.371139e-08, 0, -1, -1, -4.371139e
 layers = 2
 size = Vector3(2, 0.3, 1.3000001)
 texture_albedo = ExtResource("15_5xx8t")
+
+[node name="hint4" type="Decal" parent="." unique_id=574399100]
+transform = Transform3D(-1, -8.742278e-08, -4.3711385e-08, 4.371139e-08, 0, -1, 8.742278e-08, -1, 1.9106853e-15, -12.05, -23.446589, -49.9746)
+layers = 2
+size = Vector3(2, 0.3, 1.3000001)
+texture_albedo = ExtResource("24_hufnp")
 
 [node name="WellShaft" type="SpotLight3D" parent="." unique_id=910000001]
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.5, 9.5, -0.3)
