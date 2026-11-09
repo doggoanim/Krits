@@ -6,36 +6,36 @@
 @when water_quest_accepted -> reminder
 
 == offer ==
-[wave]Oh dear[/wave]...[pause=0.8] [i]you[/i] actually came!
+[i]Oh dear[/i]...[pause=0.8] [i]you[/i] actually came!
 > What did you call me here for? -> info
 
 == info ==
-[sad][wave]My[/wave] old friend, [color=#c98600]Mayor Cox[/color][/sad], from the [wave][color=#c98600]Desert Village[/color][/wave] has told [wave]me[/wave] that his [whisper]little[/whisper] [color=#c98600]village[/color] has been suffering from a month-long drought.
+[sad][i]My[/i] old friend, [color=#a86f00]Mayor Cox[/color][/sad], from the [wave][color=#a86f00]Desert Village[/color][/wave] has told [i]me[/i] that her [whisper]little[/whisper] [color=#a86f00]village[/color] has been suffering from a month-long drought.
 > So? -> info_2
 
 == info_2 ==
-It [shake]would[/shake] be great help [bounce]diplomatically[/bounce] if you can, deliver some of our [color=#1478d6eb]water spirits[/color] to their village to sell them.
+It [shake]would[/shake] be great help [bounce]diplomatically[/bounce] if you can, deliver some of our [color=#1a5fb4]water spirits[/color] to their village to sell them.
 > Wait, what spirits? -> water_spirit_info
 > Why me specifically? -> why_me_info
 
 == why_me_info ==
-[wave]I[/wave] am giving [i]you[/i] something to do? Shouldn't [i]you[/i] be like[pause=0.8], [rainbow]happy[/rainbow] to get orders from [wave]me[/wave]?
+[i]I[/i] am giving [i]you[/i] something to do? Shouldn't [i]you[/i] be like[pause=0.8], [rainbow]happy[/rainbow] to get orders from [i]me[/i]?
 > Ughhhh, fine -> accepted [set water_quest_accepted]
 > No? -> rejected
 
 == water_spirit_info ==
-In [wave]my[/wave] well. [wave]I[/wave] have had them for a long time, [wave]plenty[/wave] in fact. They are the [i]reason[/i] why [wave]we[/wave] never have to worry about [color=#1478d6eb]water[/color] problems.
+In [i]my[/i] well. [i]I[/i] have had them for a long time, [i]plenty[/i] in fact. They are the [i]reason[/i] why [i]we[/i] never have to worry about [color=#1a5fb4]water[/color] problems.
 > But why me? -> why_me_info
 
 == rejected ==
-[shake]N-[pause=0.5]No?[/shake][pause=0.8] [angry]Listen here[/angry] young boy! This is why [shake][bounce]NOBODY[/bounce][/shake] in this [color=#FF0000]town[/color] likes you. What [wave]I[/wave], am doing is [wave]giving[/wave] you an opportunity to prove [i]your[/i] worth to this [color=#FF0000]town[/color].
+[shake]N-[pause=0.5]No?[/shake][pause=0.8] [angry]Listen here[/angry] young boy! This is why [shake][bounce]NOBODY[/bounce][/shake] in this [color=#a02020]town[/color] likes you. What [i]I[/i], am doing is [i]giving[/i] you an opportunity to prove [i]your[/i] worth to this [color=#a02020]town[/color].
 > Ughhhh, fine -> accepted [set water_quest_accepted]
 
 == accepted ==
-[give lantern] Splendid! Take this [color=#ffd966]lantern[/color], jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1478d6eb]them[/color] to the [wave][color=#c98600]Desert Village[/color][/wave]'s [color=#c98600]mayor[/color] and tell her [color=#ffff00]200 gold[/color] each.
+[give lantern] Splendid! Take this [color=#9a6b00]lantern[/color], jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Village[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
 
 == reminder ==
-Still here? Jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1478d6eb]them[/color] to the [wave][color=#c98600]Desert Village[/color][/wave]'s [color=#c98600]mayor[/color] and tell her 200 gold each.
+Still here? Jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Village[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
 
 == thanks ==
 The desert has water again, thanks to you. Chesburg is proud. Take a rest. You've earned it.
