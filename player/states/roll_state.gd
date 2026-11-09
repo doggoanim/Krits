@@ -95,6 +95,12 @@ func physics_update(delta: float) -> void:
 	var prev_h := p.get_hvel()
 	p.safe_move_and_slide()
 
+	# Rolled into a breakable wall with the right weapon: it shatters and the roll
+	# carries straight on through (same as a dive / long jump).
+	if p.impact_breakables(&"roll", prev_h.length()):
+		p.set_hvel(prev_h)
+		return
+
 	# Same launch-into-air bounce Dive/LongJump use, just reachable from the
 	# ground — pops you upward with the collision pose instead of just
 	# stopping dead against the wall.

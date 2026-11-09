@@ -4,7 +4,7 @@ extends StaticBody3D
 ## A block that only gives way to one specific move, performed with the right
 ## weapon:
 ##   * GROUND_POUND — slam down onto its top (a floor to break through), or
-##   * AIR_DIVE     — dive or long-jump into its side (a wall to break through).
+##   * AIR_DIVE     — dive, long-jump or roll into its side (a wall to break through).
 ## The player must be holding a weapon of `required_weapon`'s class whose
 ## power (WeaponData.damage_bonus) is at least `min_power`. Any other attempt
 ## with the right move just tells the player what's missing; any other move
@@ -80,7 +80,7 @@ func _is_my_move(kind: StringName, p: Player, normal: Vector3, speed: float) -> 
 		Method.GROUND_POUND:
 			return kind == &"pound" and normal.y > 0.5
 		Method.AIR_DIVE:
-			return (kind == &"dive" or kind == &"long_jump") and absf(normal.y) < 0.5 and speed >= p.config.wall_min_speed
+			return (kind == &"dive" or kind == &"long_jump" or kind == &"roll") and absf(normal.y) < 0.5 and speed >= p.config.wall_min_speed
 	return false
 
 func _break(p: Player) -> void:
