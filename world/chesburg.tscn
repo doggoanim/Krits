@@ -7,8 +7,11 @@
 [ext_resource type="PackedScene" uid="uid://dld5ve85ktgju" path="res://assets/world/lake_chesburg.glb" id="2_l8gsu"]
 [ext_resource type="PackedScene" uid="uid://b17cmgjxs20u7" path="res://assets/world/terrain/nocol_darkened_grass_terrain.glb" id="4_256to"]
 [ext_resource type="Texture2D" uid="uid://blyhfnknmn2ya" path="res://assets/textures/path.jpg" id="6_b0hj8"]
+[ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="7_w45hh"]
+[ext_resource type="Texture2D" uid="uid://v12u13y33gam" path="res://assets/textures/stone_3.jpg" id="8_2qclh"]
 [ext_resource type="PackedScene" uid="uid://bcrwgpmkdcdkv" path="res://assets/world/nature/rock_1.glb" id="8_cx2cw"]
 [ext_resource type="PackedScene" uid="uid://c18rqgadpyua4" path="res://assets/world/nature/rock_2.glb" id="9_38blh"]
+[ext_resource type="AudioStream" uid="uid://bm3pt86fb5qml" path="res://sounds/SFX/block_break.wav" id="9_tv1o7"]
 [ext_resource type="PackedScene" uid="uid://hoc3sbkq44s2" path="res://assets/world/terrain/nocol_dirt_terrain.glb" id="10_a5ueg"]
 [ext_resource type="PackedScene" uid="uid://cpqakqbcuurt3" path="res://assets/world/nature/rock_3.glb" id="10_jq25j"]
 [ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/nature/tree_chesburg_1.glb" id="10_qjukg"]
@@ -72,6 +75,10 @@ size = Vector3(4, 18.6, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qie8l"]
 size = Vector3(4, 18.6, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="CellPlugMat"]
+albedo_color = Color(0.6452097, 0.6452098, 0.6452097, 1)
+albedo_texture = ExtResource("8_2qclh")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
@@ -173,6 +180,9 @@ transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 6.4320006, 23.199999, 8.28,
 
 [node name="rock_terrain17" parent="Terrain" unique_id=306982721 instance=ExtResource("26_lybmh")]
 transform = Transform3D(20.400002, 0, 0, 0, 13.759198, 0, 0, 0, 6.4320006, 23.199999, 13.379999, 34.3624)
+
+[node name="rock_terrain18" parent="Terrain" unique_id=1195395982 instance=ExtResource("26_lybmh")]
+transform = Transform3D(10.200001, 0, 0, 0, 20.638798, 0, 0, 0, 6.4320006, -6.800001, 20.38, 30.3624)
 
 [node name="rock_terrain9" parent="Terrain" unique_id=2091630497 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.7429996, 0, 0, 0, 7.2799997, 0, 0, 0, 3.34464, 34.657997, 6.0386243, 20.238266)
@@ -288,6 +298,19 @@ mesh = SubResource("BoxMesh_wgm46")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/climbable_wall2" unique_id=420992141]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.02399826, 0.6999998, 0.8225002)
 shape = SubResource("BoxShape3D_qie8l")
+
+[node name="breakable_floor" type="StaticBody3D" parent="Terrain" unique_id=1343628368]
+transform = Transform3D(-2.0799997, 7.976666e-09, 7.693204e-08, 1.4774449e-07, -1.9331798e-08, 0.715, 5.217668e-08, 0.64638, 4.5678398e-08, 0.46999788, -1.6250004, -93.0418)
+collision_layer = 129
+collision_mask = 129
+script = ExtResource("7_w45hh")
+size = Vector3(3.5, 6, 1)
+material = SubResource("CellPlugMat")
+break_sound = ExtResource("9_tv1o7")
+glow_pulse = null
+hint_glow = null
+glow_min = null
+glow_max = null
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
@@ -473,6 +496,57 @@ leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 transform = Transform3D(-2.9802322e-08, 0, -1.9000001, 0, 1.3, 0, 1.5999999, 0, -5.9604645e-08, 24, 0, -6)
 
 [node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_12" unique_id=753117232]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_14" parent="Props/Trees" unique_id=1121986775 instance=ExtResource("15_256to")]
+transform = Transform3D(-0.86602545, 0, 0.49999994, 0, 1, 0, -0.49999994, 0, -0.86602545, -14.761999, 0, 20.162)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_14" unique_id=1477864345]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_15" parent="Props/Trees" unique_id=1212165256 instance=ExtResource("13_b2jir")]
+transform = Transform3D(-3.5406224e-08, 0, 0.80999994, 0, 0.8, 0, -0.80999994, 0, -3.5406224e-08, -8.952, 0, 20.162)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_15" unique_id=1950965029]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="Leaves2" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_15" unique_id=1091189075]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_16" parent="Props/Trees" unique_id=1170383678 instance=ExtResource("14_aa14t")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 0.8, 0, -1, 0, -4.371139e-08, 3.2380009, 0, 20.162)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_16" unique_id=176531876]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_17" parent="Props/Trees" unique_id=2073355676 instance=ExtResource("16_i8mdn")]
+transform = Transform3D(-0.2484664, 0, 1.7038933, 0, 1.368, 0, -0.92728895, 0, -0.45655695, -5.761999, 0, 17.162)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_17" unique_id=1798587367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_18" parent="Props/Trees" unique_id=302678408 instance=ExtResource("30_vgvlt")]
+transform = Transform3D(1.5999999, 0, 2.3446994e-08, 0, 1.3, 0, -4.01359e-08, 0, 1.9000001, 7.237999, 0, 17.162)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_18" unique_id=1230659458]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 script = ExtResource("43_falling_leaves")
 leaf_count = 8
