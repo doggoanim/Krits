@@ -307,10 +307,6 @@ script = ExtResource("7_w45hh")
 size = Vector3(3.5, 6, 1)
 material = SubResource("CellPlugMat")
 break_sound = ExtResource("9_tv1o7")
-glow_pulse = null
-hint_glow = null
-glow_min = null
-glow_max = null
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
