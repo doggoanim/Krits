@@ -6,6 +6,9 @@ extends RefCounted
 ## Names/descriptions live in data/descriptions.cfg ([names] / [abilities]).
 ## `starting()` are known (and hotbar-equipped) on a fresh save — currently none.
 
+## false = every slot shows the first letter of its name in its colour instead of an
+## icon PNG. Set to true to start using PNGs dropped in ICON_DIR again.
+const USE_ICON_FILES := false
 const ICON_DIR := "res://assets/abilities/"
 
 static func heal() -> AbilityData:
@@ -74,6 +77,6 @@ static func _make(id: StringName, effect: AbilityData.Effect,
 	a.price = price
 	a.color = color
 	var path := ICON_DIR + String(id) + ".png"
-	if ResourceLoader.exists(path):
+	if USE_ICON_FILES and ResourceLoader.exists(path):
 		a.icon = load(path)
 	return a

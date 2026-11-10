@@ -6,6 +6,9 @@ extends RefCounted
 ## they live in data/descriptions.cfg ([names] / [items]). Icons: drop a PNG at
 ## res://assets/items/<id>.png and it's picked up automatically.
 
+## false = every slot shows the first letter of its name in its colour instead of an
+## icon PNG. Set to true to start using PNGs dropped in ICON_DIR again.
+const USE_ICON_FILES := false
 const ICON_DIR := "res://assets/items/"
 
 # ---------------------------------------------------------------- consumables
@@ -118,7 +121,7 @@ static func _make(id: StringName, cat: ItemData.Category,
 	i.buy_price = buy
 	i.sell_price = sell
 	var path := ICON_DIR + String(id) + ".png"
-	if ResourceLoader.exists(path):
+	if USE_ICON_FILES and ResourceLoader.exists(path):
 		i.icon = load(path)
 	return i
 
