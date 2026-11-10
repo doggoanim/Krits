@@ -121,4 +121,17 @@ func from_dict(d: Dictionary) -> void:
 	var raw: Array = d.get("slots", [])
 	for i in SLOT_COUNT:
 		slots[i] = LegacyIds.fix(StringName(raw[i])) if i < raw.size() else &""
+	_ensure_starting_abilities()
 	changed.emit()
+
+## Saves from before an ability became a starting one still get it, in the
+## first free ability slot (never bumping something the player placed).
+func _ensure_starting_abilities() -> void:
+	for a in AbilityLibrary.starting():
+		if not knows(a.id):
+			known.append(a.id)
+		if slot_of(a.id) == -1:
+			for i in ABILITY_SLOTS:
+				if slots[i] == &"":
+					slots[i] = a.id
+					break

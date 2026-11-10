@@ -45,12 +45,17 @@ static func orb_stack() -> AbilityData:
 	a.stamina_cost = 80.0
 	return a
 
-static func all_abilities() -> Array[AbilityData]:
-	return [heal(), super_jump(), guard_up(), shockwave(), orb_stack()]
+## Cast a line at water in front of you (see FishingSession). Free to use, no cooldown.
+static func fishing() -> AbilityData:
+	return _make(&"fishing",
+		AbilityData.Effect.FISH, 0.0, 0, Color(0.45, 0.8, 0.95))
 
-## A new game knows no abilities; they're learned from shops or the story.
+static func all_abilities() -> Array[AbilityData]:
+	return [heal(), super_jump(), guard_up(), shockwave(), orb_stack(), fishing()]
+
+## A new game starts with fishing; the rest are learned from shops or the story.
 static func starting() -> Array[AbilityData]:
-	return []
+	return [fishing()]
 
 static func by_id(id: StringName) -> AbilityData:
 	for a in all_abilities():

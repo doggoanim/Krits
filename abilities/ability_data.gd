@@ -4,7 +4,7 @@ extends Resource
 ## AbilityLibrary; `id` is what gets saved. What it actually does when
 ## triggered lives in AbilityRunner, switched on `effect`.
 
-enum Effect { HEAL, GUARD, SUPER_JUMP, SHOCKWAVE, ORB_STACK }
+enum Effect { HEAL, GUARD, SUPER_JUMP, SHOCKWAVE, ORB_STACK, FISH }
 
 @export var id: StringName = &""
 @export var display_name := ""

@@ -35,6 +35,8 @@ static func activate(ability: AbilityData, player: Player, tree: SceneTree) -> S
 			var count := int(ability.staff_amount if staff and ability.staff_amount > 0.0 else ability.amount)
 			if not arena.stack_orbs_on_nearest(player.global_position, count):
 				return "No orbs to stack on."
+		AbilityData.Effect.FISH:
+			return FishingSession.start(player, tree)
 	return ""
 
 static func _shockwave(ability: AbilityData, player: Player, arena: Arena) -> void:

@@ -26,6 +26,19 @@ static func slime_goo() -> ItemData:
 	return _make(&"slime_goo", ItemData.Category.MATERIAL,
 		Color(0.45, 0.75, 0.3), 0, 4)
 
+# ---------------------------------------------------------------- fish (see FishCatalog)
+static func minnow() -> ItemData:
+	return _make(&"minnow", ItemData.Category.MATERIAL, Color(0.7, 0.8, 0.85), 0, 6)
+
+static func perch() -> ItemData:
+	return _make(&"perch", ItemData.Category.MATERIAL, Color(0.55, 0.75, 0.4), 0, 14)
+
+static func silver_trout() -> ItemData:
+	return _make(&"silver_trout", ItemData.Category.MATERIAL, Color(0.82, 0.88, 0.95), 0, 32)
+
+static func golden_koi() -> ItemData:
+	return _make(&"golden_koi", ItemData.Category.MATERIAL, Color(1.0, 0.8, 0.3), 0, 140)
+
 # ---------------------------------------------------------------- key items
 static func key() -> ItemData:
 	var i := _make(&"key", ItemData.Category.KEY,
@@ -66,7 +79,7 @@ static func lantern() -> ItemData:
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack()]
+	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():
