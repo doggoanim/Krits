@@ -54,6 +54,8 @@ const STAGGER_TIME := 0.4          ## can't walk for this long after being knock
 const STEP_DISTANCE := 1.1          ## metres between footstep sounds
 const SFX_BUS := &"SFX"
 const SFX_PITCH_VARIANCE := 0.1
+const SWIM_VERTICAL_DRAG := 18.0   ## how fast a swimmer's vertical speed settles to what it wants (m/s per second)
+const LUNGE_VERTICAL_REACH := 1.25 ## a lunge hits the player if within leap_radius x this vertically of where it lands
 const STUCK_CHECK_TIME := 0.6      ## how often "am I actually getting anywhere?" is checked
 const ENEMY_LAYER := 1 << 2        ## physics layer 3: enemy
 const COLLIDE_MASK := 1 | (1 << 6) | (1 << 2)   ## world, arena walls, other enemies (not the player)
@@ -97,6 +99,9 @@ func _ready() -> void:
 	collision_mask = COLLIDE_MASK
 	floor_snap_length = 0.5
 	floor_max_angle = deg_to_rad(55.0)
+	if data.aquatic:
+		motion_mode = CharacterBody3D.MOTION_MODE_FLOATING   # swims: no floor, no gravity
+		floor_snap_length = 0.0
 	_build_collider()
 	if data.model:
 		_visual = EnemyVisual.new()
@@ -104,11 +109,20 @@ func _ready() -> void:
 		_visual.setup(data)
 	else:
 		var sphere_radius := 0.7 * data.size
-		var sm := SphereMesh.new()
-		sm.radius = sphere_radius
-		sm.height = 1.4 * data.size
 		_mesh = MeshInstance3D.new()
-		_mesh.mesh = sm
+		if data.aquatic:
+			# Placeholder fish: a capsule lying along its swim direction (-Z).
+			var body := CapsuleMesh.new()
+			body.radius = 0.4 * data.size
+			body.height = 1.6 * data.size
+			_mesh.mesh = body
+			_mesh.rotation_degrees.x = 90.0
+			sphere_radius = body.radius
+		else:
+			var sm := SphereMesh.new()
+			sm.radius = sphere_radius
+			sm.height = 1.4 * data.size
+			_mesh.mesh = sm
 		_mat.albedo_color = data.color
 		# Cel-shaded to match the character: hard light/shadow bands, no shiny highlight.
 		_mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
@@ -161,6 +175,9 @@ func _apply_physics(delta: float) -> void:
 	if _busy_with_special:
 		velocity = Vector3.ZERO
 		return
+	if data.aquatic:
+		_apply_swim_physics(delta)
+		return
 	var on_floor := is_on_floor()
 	var horizontal := _knock + (_walk if _stagger_t <= 0.0 else Vector3.ZERO)
 	_knock = _knock.move_toward(Vector3.ZERO, (KNOCK_FRICTION if on_floor else KNOCK_FRICTION_AIR) * delta)
@@ -178,6 +195,18 @@ func _apply_physics(delta: float) -> void:
 		if _step_dist >= STEP_DISTANCE:
 			_step_dist = 0.0
 			_play_random_sfx(data.sfx_footsteps)
+
+## Swimming: no gravity. The wanted velocity (`_walk`, 3D) is blended in with a
+## little drag so a knockback's vertical pop settles back to the swim course.
+func _apply_swim_physics(delta: float) -> void:
+	var horizontal := _knock + (Vector3(_walk.x, 0.0, _walk.z) if _stagger_t <= 0.0 else Vector3.ZERO)
+	_knock = _knock.move_toward(Vector3.ZERO, KNOCK_FRICTION_AIR * 4.0 * delta)
+	_stagger_t = maxf(0.0, _stagger_t - delta)
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
+	var want_y := _walk.y if _stagger_t <= 0.0 else 0.0
+	velocity.y = move_toward(velocity.y, want_y, SWIM_VERTICAL_DRAG * delta)
+	move_and_slide()
 
 ## World-space middle of the body (a model's origin is at its feet, the
 ## placeholder sphere's at its centre) — where shots come out and what hits aim at.
@@ -223,10 +252,10 @@ func _move(delta: float) -> void:
 			_visual.play_idle()
 		return
 	var flat := _dest - global_position
-	flat.y = 0.0
+	if not data.aquatic:
+		flat.y = 0.0
 	if flat.length() < 0.5:
-		_dest = arena.random_point(0.8)
-		_dest.y = global_position.y
+		_dest = _pick_dest()
 		if _visual:
 			_visual.play_idle()
 		return
@@ -237,6 +266,15 @@ func _move(delta: float) -> void:
 	if _visual:
 		_visual.play_move()
 
+## Where to wander next: a point on the ground at its own height, or (swimmers)
+## anywhere in the open water of the dome.
+func _pick_dest() -> Vector3:
+	if data.aquatic and arena.is_underwater():
+		return arena.random_swim_point(0.8)
+	var dest := arena.random_point(0.8)
+	dest.y = global_position.y
+	return dest
+
 ## If the enemy keeps walking but isn't getting anywhere (jammed against a
 ## rock or another enemy), give up on that destination and pick a new one.
 func _check_stuck(delta: float) -> void:
@@ -246,7 +284,7 @@ func _check_stuck(delta: float) -> void:
 	var expected := data.move_speed * _speed_mult * _stuck_t
 	var moved := Vector2(global_position.x - _stuck_from.x, global_position.z - _stuck_from.z).length()
 	if moved < expected * 0.25:
-		_dest = arena.random_point(0.8)
+		_dest = _pick_dest()
 	_stuck_t = 0.0
 	_stuck_from = global_position
 
@@ -434,6 +472,9 @@ func _next_physics_frame() -> void:
 		await get_tree().physics_frame
 
 func _do_leap_attack() -> void:
+	if data.aquatic:
+		await _do_lunge_attack()
+		return
 	if _visual:
 		_visual.play_leap_ready()
 	# Telegraph: a "!" and a landing circle that follows the player and fills
@@ -489,6 +530,67 @@ func _do_leap_attack() -> void:
 	_play_sfx(data.sfx_land)
 	_land_leap(land)
 	zone.fade_out()
+
+## The swimmer's version of the leap: a danger circle fills on the seabed under
+## the player (the column above it is the threat), then the fish darts in a
+## straight line to where the player was when it locked. Dodgeable the same way.
+func _do_lunge_attack() -> void:
+	if _visual:
+		_visual.play_leap_ready()
+	Telegraph.exclaim(self, body_height(data) + 0.5)
+	var zone := Telegraph.circle(arena, data.leap_radius)
+	var waited := 0.0
+	while waited < data.leap_ready_time:
+		if _dying or not is_instance_valid(target):
+			zone.queue_free()
+			return
+		_place_lunge_zone(zone)
+		_face_point_instant(target.global_position)
+		zone.set_fill(waited / data.leap_ready_time)
+		await _next_physics_frame()
+		waited += get_physics_process_delta_time() * _speed_mult
+	if _dying:
+		zone.queue_free()
+		return
+	_place_lunge_zone(zone)
+	zone.lock()
+	var start := global_position
+	var land := _lunge_point()
+	_face_point_instant(land)
+	_play_sfx(data.sfx_leap)
+	if _visual:
+		_visual.play_leap()
+	var dur := maxf(0.05, data.leap_travel_time) / maxf(_speed_mult, 0.1)
+	var t := 0.0
+	while t < dur:
+		t += get_physics_process_delta_time()
+		var frac := clampf(t / dur, 0.0, 1.0)
+		global_position = start.lerp(land, 1.0 - pow(1.0 - frac, 2.0))   # fast out, easing in at the end
+		await _next_physics_frame()
+		if _dying:
+			zone.queue_free()
+			return
+	global_position = land
+	_play_sfx(data.sfx_land)
+	if is_instance_valid(target) and target is Player and not (target as Player).dead:
+		var offset := target.global_position - land
+		if Vector2(offset.x, offset.z).length() <= data.leap_radius 				and absf(offset.y) <= data.leap_radius * LUNGE_VERTICAL_REACH:
+			(target as Player).hit(data.leap_damage, false, global_position)
+	VFX.smoke_puff(arena, land, data.size)
+	zone.fade_out()
+
+## Where a lunge ends: the player's centre, kept inside the dome and the water column.
+func _lunge_point() -> Vector3:
+	var raw := target.global_position + Vector3.UP * (Player.STAND_HEIGHT * 0.5)
+	var flat := arena.clamp_inside(raw - arena.global_position, 0.85)
+	var land := arena.global_position + flat
+	land.y = clampf(raw.y, arena.global_position.y + 1.0, arena.swim_top - 0.8)
+	return land
+
+## The danger circle sits on the seabed under the lunge point.
+func _place_lunge_zone(zone: Telegraph) -> void:
+	var land := _lunge_point()
+	zone.global_position = Vector3(land.x, arena.ground_height(land) + Telegraph.FLOOR_LIFT, land.z)
 
 func _place_leap_zone(zone: Telegraph) -> void:
 	var land := _clamped_landing_point(target.global_position)

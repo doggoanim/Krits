@@ -12866,6 +12866,27 @@ enemy_id = &"well_slime_1"
 spawn_radius = 12.0
 wander_radius = 2.5
 
+[node name="TestFish1" type="CharacterBody3D" parent="Enemies"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.5, -27.6, -14.0)
+script = ExtResource("27_odmq1")
+type = 3
+spawn_radius = 14.0
+wander_radius = 3.5
+
+[node name="TestFish2" type="CharacterBody3D" parent="Enemies"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.0, -28.2, -17.5)
+script = ExtResource("27_odmq1")
+type = 3
+spawn_radius = 14.0
+wander_radius = 3.5
+
+[node name="TestFish3" type="CharacterBody3D" parent="Enemies"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.5, -27.2, -10.5)
+script = ExtResource("27_odmq1")
+type = 3
+spawn_radius = 14.0
+wander_radius = 3.5
+
 [node name="Water" parent="." unique_id=691222566 instance=ExtResource("11_fhlm3")]
 transform = Transform3D(0.68999976, 0, 0, 0, 1, 0, 0, 0, 1, -45.789513, -24.820686, -14.09804)
 

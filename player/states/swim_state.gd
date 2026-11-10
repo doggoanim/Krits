@@ -34,6 +34,7 @@ var _prev_motion_mode := CharacterBody3D.MOTION_MODE_GROUNDED
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	var p := player
 	p.can_dive = true
+	p.swim_current = Vector3.ZERO
 	# Whatever speed you were carrying in (a dive, a long fall, a running
 	# jump off the shore) is killed outright rather than left to bleed off
 	# via swim_accel/swim_vertical_accel — hitting the water is what stops
@@ -157,7 +158,14 @@ func physics_update(delta: float) -> void:
 	# the player moves vertically through the water.
 	p.effects.update_bubble_ceiling(water)
 
+	# An orb's current rides on top of the swim input for a moment (see
+	# Player.swim_off_orb()); it's added just for this move so it never
+	# becomes part of the swim velocity itself.
+	var push := p.swim_current
+	p.swim_current = push.move_toward(Vector3.ZERO, Player.SWIM_CURRENT_DECAY * delta)
+	p.velocity += push
 	p.safe_move_and_slide()
+	p.velocity -= push
 
 ## See STROKE_PHASES above — identical edge-crossing logic to
 ## GroundState._update_footsteps(), just against whichever clip (paddle or

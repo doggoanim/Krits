@@ -14,6 +14,10 @@ extends Resource
 @export var size := 1.0
 @export var patterns: Array[BulletPattern] = []
 @export var drops: Array[ItemDrop] = []   ## rolled when this enemy is defeated; collected when the fight is won
+## Swims instead of walking: lives in a WaterVolume, only notices/fights a
+## swimming player, and is fought inside a submerged arena (see
+## UnderwaterRules / Arena). Its "leap" becomes a straight-line lunge.
+@export var aquatic := false
 
 ## Optional animated model (see EnemyVisual). Leave unset to keep the plain
 ## procedural sphere — existing enemies (Spinner, Piercer, ...) don't need

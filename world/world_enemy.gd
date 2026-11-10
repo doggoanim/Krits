@@ -10,7 +10,7 @@ signal touched(enemy: WorldEnemy)
 
 @export var enemy_id: StringName = &""        ## unique id; defeated ids are saved as cleared
 @export var data: EnemyData                     ## leave empty to use `type` below
-@export_enum("Green Slime", "Spinner", "Piercer") var type := 0   ## pick the enemy right in the Inspector
+@export_enum("Green Slime", "Spinner", "Piercer", "Fish") var type := 0   ## pick the enemy right in the Inspector
 @export var spawn_radius := 22.0
 @export var despawn_radius := 32.0
 @export var wander_radius := 8.0
@@ -31,6 +31,11 @@ const LOSE_RANGE_MULT := 1.4     ## farther than detect_radius * this counts as 
 const HOME_ARRIVE_DIST := 1.0
 const CHASE_LEAD_MAX := 0.6      ## seconds of the player's motion a chaser aims ahead by
 const LEDGE_PROBE_DEPTH := 4.0   ## no ground within this far below the next step = a drop, so don't step
+const WATER_STOP_DEPTH := 0.6    ## a land enemy won't step into water deeper than this (it stops at the edge)
+const WATER_AGGRO_COOLDOWN := 3.0   ## after giving up at the water's edge it ignores the player this long, so it doesn't re-notice and re-chase at once
+const FISH_SURFACE_MARGIN := 0.6    ## a fish keeps its body this far below the waterline
+const FISH_WANDER_HEIGHT := 1.5     ## wandering fish drift this far above/below their home depth
+const SWIM_DRAG := 8.0              ## how fast a fish stops when it has nowhere to go
 
 var frozen := false:
 	set(value):
@@ -46,6 +51,8 @@ var _mode_t := 0.0           ## ALERT: time left on the "!"; CHASE: time spent u
 var _recover_t := 0.0        ## after hurting an unarmed player: stands off until this runs out
 var _chase_t := 0.0          ## seconds spent chasing without losing the player (drives the speed ramp)
 var _awake := false
+var _aggro_cd := 0.0         ## >0 right after giving up at the water's edge: no noticing yet
+var _water: WaterVolume      ## aquatic only: the body of water this fish lives in (found lazily)
 var _solid := false          ## true once the pop-in finished; only then can it be touched
 var _home := Vector3.ZERO
 var _dest := Vector3.ZERO
@@ -58,13 +65,15 @@ var _tween: Tween
 
 func _ready() -> void:
 	if data == null:
-		data = [EnemyLibrary.green_slime, EnemyLibrary.spinner, EnemyLibrary.piercer][type].call()
+		data = [EnemyLibrary.green_slime, EnemyLibrary.spinner, EnemyLibrary.piercer, EnemyLibrary.fish][type].call()
 	if enemy_id != &"" and Game.flag(_cleared_key(), false):
 		queue_free()
 		return
 	add_to_group(&"world_enemies")
 	collision_layer = 1 << 2   # layer 3: enemy
 	collision_mask = 1
+	if data.aquatic:
+		motion_mode = CharacterBody3D.MOTION_MODE_FLOATING   # no floor, no gravity: it swims
 	_home = global_position
 	_dest = _home
 
@@ -157,6 +166,9 @@ func _physics_process(delta: float) -> void:
 	if frozen or _dead:
 		return
 	_recover_t = maxf(0.0, _recover_t - delta)
+	_aggro_cd = maxf(0.0, _aggro_cd - delta)
+	if data.aquatic and _water == null:
+		_water = WaterVolume.at(global_position)   # the pool it was placed in
 	if _player == null:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
 		if _player == null:
@@ -206,12 +218,16 @@ func _try_notice(dist: float) -> void:
 func _can_notice(dist: float) -> bool:
 	if not data.chase_enabled or not _solid or _player.dead or Game.in_combat or Game.input_locked:
 		return false
+	if _aggro_cd > 0.0 or not _same_medium():
+		return false
 	if dist > data.detect_radius or _out_of_reach():
 		return false
 	return not data.line_of_sight or _can_see_player()
 
 ## The player is on a ledge higher than this enemy can get to, or far below it.
 func _out_of_reach() -> bool:
+	if data.aquatic:
+		return false   # swimmers share the pool in 3D: depth is no obstacle
 	var dy := _player.global_position.y - global_position.y
 	return dy > data.max_climb or dy < -8.0
 
@@ -248,8 +264,8 @@ func _chase(delta: float, to_player: Vector3, dist: float) -> void:
 		move_and_slide()
 		return
 	var too_far_from_home := global_position.distance_to(_home) > data.leash_radius
-	if _player.dead or Game.in_combat or too_far_from_home or dist > data.give_up_radius:
-		_give_up()
+	if _player.dead or Game.in_combat or too_far_from_home or dist > data.give_up_radius or not _same_medium():
+		_give_up()   # (also when the player dives in / climbs out: it can't follow into the other medium)
 		return
 	# Out of range or out of sight for a while = lost them.
 	var lost := dist > data.detect_radius * LOSE_RANGE_MULT \
@@ -264,9 +280,15 @@ func _chase(delta: float, to_player: Vector3, dist: float) -> void:
 	# Head for where the player is going, not where they were: a dash or a long
 	# jump would otherwise leave it running at an empty spot.
 	var lead := _player.get_hvel() * minf(dist / maxf(speed, 0.1), CHASE_LEAD_MAX)
+	if data.aquatic:
+		_chase_swim(speed, delta)
+		return
 	var aim := to_player + lead
 	aim.y = 0.0
 	if aim.length() > 0.01:
+		if _water_ahead(aim.normalized()):
+			_give_up_at_water()   # the player went into the water: this is as far as it goes
+			return
 		_move_toward(aim.normalized(), speed, delta)
 		_track_blocked(speed, delta)
 
@@ -281,12 +303,25 @@ func _track_blocked(speed: float, delta: float) -> void:
 	else:
 		_blocked_t = 0.0
 
+func _give_up_at_water() -> void:
+	_aggro_cd = WATER_AGGRO_COOLDOWN
+	_give_up()
+
 func _give_up() -> void:
 	_blocked_t = 0.0
 	_mode = Mode.RETURN
 	_mode_t = 0.0
 
 func _return_home(delta: float) -> void:
+	if data.aquatic:
+		var back := _home - global_position
+		if back.length() < HOME_ARRIVE_DIST:
+			_mode = Mode.WANDER
+			_dest = _home
+			_wait = 0.5
+			return
+		_swim_toward(back.normalized(), data.move_speed, delta)
+		return
 	var flat := _home - global_position
 	flat.y = 0.0
 	if flat.length() < HOME_ARRIVE_DIST:
@@ -298,7 +333,7 @@ func _return_home(delta: float) -> void:
 
 ## Walks along `dir` at `speed`, turning to face it; stops at the edge of a drop.
 func _move_toward(dir: Vector3, speed: float, delta: float) -> void:
-	if _ground_ahead(dir):
+	if _ground_ahead(dir) and not _water_ahead(dir):
 		velocity.x = dir.x * speed
 		velocity.z = dir.z * speed
 		if _model_visual:
@@ -313,6 +348,9 @@ func _move_toward(dir: Vector3, speed: float, delta: float) -> void:
 	move_and_slide()
 
 func _apply_gravity(delta: float) -> void:
+	if data.aquatic:
+		velocity.y = move_toward(velocity.y, 0.0, SWIM_DRAG * delta)
+		return
 	velocity.y = -1.0 if is_on_floor() else velocity.y - gravity * delta
 
 ## Is there floor a step ahead? (so a chaser doesn't run off a cliff)
@@ -331,6 +369,9 @@ func _can_see_player() -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 func _wander(delta: float) -> void:
+	if data.aquatic:
+		_wander_swim(delta)
+		return
 	var flat := _dest - global_position
 	flat.y = 0.0
 	if _wait > 0.0:
@@ -347,6 +388,10 @@ func _wander(delta: float) -> void:
 			_model_visual.play_idle()
 	else:
 		var dir := flat.normalized()
+		if _water_ahead(dir):
+			_dest = _home   # don't wander into the water: turn back
+			_wait = 0.8
+			return
 		velocity.x = dir.x * data.move_speed * 0.6
 		velocity.z = dir.z * data.move_speed * 0.6
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), minf(1.0, 8.0 * delta))
@@ -391,3 +436,87 @@ func _set_dormant_visuals() -> void:
 func _kill_tween() -> void:
 	if _tween and _tween.is_valid():
 		_tween.kill()
+
+# --- Water rules --------------------------------------------------------------
+
+## True if this enemy and the player are in the same medium: fish with a
+## swimming player, land enemies with anyone who isn't swimming.
+func _same_medium() -> bool:
+	return data.aquatic == UnderwaterRules.is_swimming(_player)
+
+## Would the next step take a land enemy into water deeper than WATER_STOP_DEPTH?
+func _water_ahead(dir: Vector3) -> bool:
+	var p := global_position + dir * (0.9 * data.size + 0.4)
+	var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP, p + Vector3.DOWN * LEDGE_PROBE_DEPTH, 1)
+	q.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return false
+	var ground: Vector3 = hit.position
+	var vol := WaterVolume.at(ground)
+	return vol != null and vol.surface_world_y() - ground.y > WATER_STOP_DEPTH
+
+# --- Swimming (aquatic enemies) --------------------------------------------------
+
+## Drifts around its home depth in the pool, pausing now and then.
+func _wander_swim(delta: float) -> void:
+	var to_dest := _dest - global_position
+	if _wait > 0.0:
+		_wait -= delta
+		velocity = velocity.move_toward(Vector3.ZERO, SWIM_DRAG * delta)
+		if _model_visual:
+			_model_visual.play_idle()
+		_move_in_water(delta)
+	elif to_dest.length() < 0.6:
+		_wait = randf_range(0.3, 1.2)
+		_dest = _pick_swim_dest()
+	else:
+		_swim_toward(to_dest.normalized(), data.move_speed * 0.6, delta)
+
+func _pick_swim_dest() -> Vector3:
+	for _i in 8:
+		var a := randf() * TAU
+		var r := randf_range(1.0, wander_radius)
+		var p := _home + Vector3(cos(a) * r, randf_range(-FISH_WANDER_HEIGHT, FISH_WANDER_HEIGHT), sin(a) * r)
+		if _inside_water(p):
+			return p
+	return _home
+
+## Chases the player in 3D, leading their motion a little like a land chaser does.
+func _chase_swim(speed: float, delta: float) -> void:
+	var chest := _player.global_position + Vector3.UP * (Player.STAND_HEIGHT * 0.5)
+	var body := global_position + Vector3.UP * (0.7 * data.size)
+	var lead := _player.velocity * 0.25
+	var aim := chest + lead - body
+	if aim.length() > 0.1:
+		_swim_toward(aim.normalized(), speed, delta)
+		_track_blocked(speed, delta)
+
+func _swim_toward(dir: Vector3, speed: float, delta: float) -> void:
+	velocity = dir * speed
+	if _model_visual:
+		_model_visual.play_move()
+	var flat := Vector3(dir.x, 0.0, dir.z)
+	if flat.length() > 0.01:
+		rotation.y = lerp_angle(rotation.y, atan2(-flat.x, -flat.z), minf(1.0, 10.0 * delta))
+	_move_in_water(delta)
+
+## Moves with the current velocity, but never lets a step leave the pool
+## (sideways past its edge, up through the surface, down through the floor).
+func _move_in_water(delta: float) -> void:
+	if _water != null:
+		var step := velocity * delta
+		if not _inside_water(global_position + step):
+			var flat_step := Vector3(step.x, 0.0, step.z)
+			if _inside_water(global_position + flat_step):
+				velocity.y = 0.0
+			elif _inside_water(global_position + Vector3(0.0, step.y, 0.0)):
+				velocity.x = 0.0
+				velocity.z = 0.0
+			else:
+				velocity = Vector3.ZERO
+	move_and_slide()
+
+## Is the fish's body, with the surface margin, still inside the water at `pos`?
+func _inside_water(pos: Vector3) -> bool:
+	return _water == null or _water.contains_point(pos + Vector3.UP * (0.7 * data.size + FISH_SURFACE_MARGIN))
