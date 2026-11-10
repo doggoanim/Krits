@@ -49,6 +49,13 @@ static func yule_ball() -> ItemData:
 	i.max_stack = 1
 	return i
 
+## Brant the hiker's pack, from the ledge side quest outside town.
+static func hiker_pack() -> ItemData:
+	var i := _make(&"hiker_pack", ItemData.Category.KEY,
+		Color(0.7, 0.5, 0.3))
+	i.max_stack = 1
+	return i
+
 ## Hangs on the player's left hip and lights their way (see HipLantern).
 static func lantern() -> ItemData:
 	var i := _make(&"lantern", ItemData.Category.KEY,
@@ -59,7 +66,7 @@ static func lantern() -> ItemData:
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball()]
+	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():

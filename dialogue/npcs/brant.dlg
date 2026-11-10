@@ -1,0 +1,27 @@
+# Brant — a hiker whose pack is stuck on a high ledge. Format: dialogue/dialogue_parser.gd
+@speaker Brant
+@when brant_got_pack -> after
+@when brant_quest_accepted -> reminder
+
+== offer ==
+Don't mind me, I'm just standing here [i]staring[/i] at my backpack. See that ledge? Up there. A gust took it right off my shoulders. [shiver]All my snacks are in it.[/shiver]
+I tried to climb, but those stones are slippery, and my knees... well. You look nimble. Could you [wave]fetch it[/wave]?
+> Leave it to me. -> accepted [set brant_quest_accepted]
+> Sorry, no. -> no
+
+== no ==
+Right. Right... I'll stare at it some more.
+
+== accepted ==
+Bless you! There's a gap you'll have to leap across, then a wall to climb. [whisper]Mind the fall. I did.[/whisper]
+
+== reminder ==
+Any luck with my pack? It's on the ledge, up past the gap and the wall.
+> Got it! -> thanks [item hiker_pack] [set brant_got_pack]
+> Working on it.
+
+== thanks ==
+My [bounce]snacks![/bounce] Oh, there's even a dried plum left. You've earned this. Take it, and take my thanks.
+
+== after ==
+I'm never hiking again. ...Until next week. Thanks again!

@@ -58,6 +58,48 @@
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="Script" path="res://world/npc.gd" id="yule_npc_script"]
 [ext_resource type="PackedScene" path="res://assets/npcs/Yule.glb" id="yule_model"]
+[ext_resource type="Script" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_LedgeStone"]
+albedo_color = Color(0.5, 0.47, 0.43, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_LedgeGrass"]
+albedo_color = Color(0.36, 0.55, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_HikerPack"]
+albedo_color = Color(0.7, 0.45, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_HikerPack"]
+size = Vector3(0.5, 0.65, 0.35)
+
+[sub_resource type="BoxShape3D" id="Shape_HikerPack"]
+size = Vector3(1.2, 1.2, 1.2)
+
+[sub_resource type="BoxMesh" id="LM_Step1"]
+size = Vector3(3, 1.5, 3)
+
+[sub_resource type="BoxShape3D" id="LS_Step1"]
+size = Vector3(3, 1.5, 3)
+
+[sub_resource type="BoxMesh" id="LM_Step2"]
+size = Vector3(3, 2.5, 3)
+
+[sub_resource type="BoxShape3D" id="LS_Step2"]
+size = Vector3(3, 2.5, 3)
+
+[sub_resource type="BoxMesh" id="LM_ClimbWall"]
+size = Vector3(4, 8, 1)
+
+[sub_resource type="BoxShape3D" id="LS_ClimbWall"]
+size = Vector3(4, 8, 1)
+
+[sub_resource type="BoxMesh" id="LM_Ledge"]
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxShape3D" id="LS_Ledge"]
+size = Vector3(6, 0.6, 6)
 
 [sub_resource type="CapsuleShape3D" id="Shape_YuleBody"]
 radius = 0.35
@@ -854,6 +896,87 @@ shape = SubResource("Shape_YuleBody")
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/Marta"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
+
+[node name="Brant" type="StaticBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
+script = ExtResource("yule_npc_script")
+dialogue_file = "res://dialogue/npcs/brant.dlg"
+head_height = 1.6
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Brant"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_YuleBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Brant"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("Mesh_ShopBody")
+
+[node name="OvergrownLedges" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 20)
+
+[node name="Step1" type="StaticBody3D" parent="OvergrownLedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 8)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="OvergrownLedges/Step1"]
+material_override = SubResource("Mat_LedgeStone")
+mesh = SubResource("LM_Step1")
+
+[node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/Step1"]
+shape = SubResource("LS_Step1")
+
+[node name="Step2" type="StaticBody3D" parent="OvergrownLedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -3)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="OvergrownLedges/Step2"]
+material_override = SubResource("Mat_LedgeStone")
+mesh = SubResource("LM_Step2")
+
+[node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/Step2"]
+shape = SubResource("LS_Step2")
+
+[node name="ClimbWall" type="StaticBody3D" parent="OvergrownLedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -5.0)
+collision_layer = 257
+collision_mask = 257
+
+[node name="Mesh" type="MeshInstance3D" parent="OvergrownLedges/ClimbWall"]
+material_override = SubResource("StandardMaterial3D_m7dut")
+mesh = SubResource("LM_ClimbWall")
+
+[node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/ClimbWall"]
+shape = SubResource("LS_ClimbWall")
+
+[node name="Ledge" type="StaticBody3D" parent="OvergrownLedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.7, -8.5)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="OvergrownLedges/Ledge"]
+material_override = SubResource("Mat_LedgeGrass")
+mesh = SubResource("LM_Ledge")
+
+[node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/Ledge"]
+shape = SubResource("LS_Ledge")
+
+[node name="HikerPack" type="StaticBody3D" parent="OvergrownLedges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.3, -8.5)
+script = ExtResource("ledge_pickup_script")
+item_id = &"hiker_pack"
+pickup_id = &"brant_pack"
+prompt_text = "Press E to take"
+
+[node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/HikerPack"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("Shape_HikerPack")
+
+[node name="Mesh" type="MeshInstance3D" parent="OvergrownLedges/HikerPack"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33, 0)
+material_override = SubResource("Mat_HikerPack")
+mesh = SubResource("Mesh_HikerPack")
 
 [node name="Spawnpoints" type="Node3D" parent="." unique_id=607103561]
 

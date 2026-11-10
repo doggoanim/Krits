@@ -56,8 +56,23 @@ static func goo_for_marta() -> QuestData:
 	_texts(q)
 	return q
 
+## Side quest: Brant's pack is stuck on a high ledge outside town. Long-jump the
+## gap, climb the wall, bring it back (the parkour route is the "OvergrownLedges" prop in chesburg.tscn).
+static func overgrown_ledges() -> QuestData:
+	var q := _make(&"overgrown_ledges")
+	q.start_flag = &"brant_quest_accepted"
+	q.objectives = [
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"brant_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.COLLECT, &"hiker_pack", 1, true),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"brant_got_pack"),
+	]
+	q.reward_gold = 100
+	q.reward_items = {&"health_potion": 2}
+	_texts(q)
+	return q
+
 static func all_quests() -> Array[QuestData]:
-	return [water_for_the_desert(), yules_ball(), goo_for_marta()]
+	return [water_for_the_desert(), yules_ball(), goo_for_marta(), overgrown_ledges()]
 
 static func by_id(id: StringName) -> QuestData:
 	for q in all_quests():
