@@ -28,8 +28,22 @@ static func water_for_the_desert() -> QuestData:
 	_texts(q)
 	return q
 
+## Side quest: Yule lost a ball down the well. Find it, bring it back.
+static func yules_ball() -> QuestData:
+	var q := _make(&"yules_ball")
+	q.start_flag = &"yule_quest_accepted"
+	q.objectives = [
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"yule_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.COLLECT, &"yule_ball", 1, true),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"yule_got_ball"),
+	]
+	q.reward_gold = 60
+	q.reward_items = {&"health_potion": 2}
+	_texts(q)
+	return q
+
 static func all_quests() -> Array[QuestData]:
-	return [water_for_the_desert()]
+	return [water_for_the_desert(), yules_ball()]
 
 static func by_id(id: StringName) -> QuestData:
 	for q in all_quests():

@@ -56,6 +56,12 @@
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
+[ext_resource type="Script" path="res://world/npc.gd" id="yule_npc_script"]
+[ext_resource type="PackedScene" path="res://assets/npcs/Yule.glb" id="yule_model"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_YuleBody"]
+radius = 0.35
+height = 1.5
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -820,6 +826,20 @@ shape = SubResource("Shape_ShopBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.49585128, 0.9, 0)
 material_override = SubResource("Mat_ShopRobe")
 mesh = SubResource("Mesh_ShopBody")
+
+[node name="Yule" type="StaticBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 0, -4.2)
+script = ExtResource("yule_npc_script")
+dialogue_file = "res://dialogue/npcs/yule.dlg"
+facing_offset = 3.14159
+model = ExtResource("yule_model")
+model_height = 1.4
+head_height = 1.2
+idle_animation = &"Yule_Idle"
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Yule"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("Shape_YuleBody")
 
 [node name="Spawnpoints" type="Node3D" parent="." unique_id=607103561]
 

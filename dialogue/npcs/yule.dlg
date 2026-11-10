@@ -1,0 +1,27 @@
+# Yule — a kid by Chesburg's well who lost their ball down it. Format: dialogue/dialogue_parser.gd
+@speaker Yule
+@when yule_got_ball -> after
+@when yule_quest_accepted -> reminder
+
+== offer ==
+Psst! ...You're the one who's going down the well, right? Everyone's talking about it.
+I kicked my ball in there yesterday. It was [i]so[/i] bouncy. Mama says never go near the well. [whisper]So, uh... will you?[/whisper]
+> I'll look for it. -> accepted [set yule_quest_accepted]
+> Sorry, I'm busy. -> busy
+
+== busy ==
+[sad]Oh... okay.[/sad] It's right by where you land, I think. If you [i]happen[/i] to see it...
+
+== accepted ==
+Really?! [bounce]Yay![/bounce] It's red with a yellow stripe. Don't tell Mama!
+
+== reminder ==
+Did you find my ball? It's red with a yellow stripe.
+> Here it is! -> thanks [item yule_ball] [set yule_got_ball]
+> Still looking.
+
+== thanks ==
+[bounce]My BALL![/bounce] You found it! Thank you, thank you! Here, take this. I was saving it, but you earned it.
+
+== after ==
+Mama still doesn't know. [whisper]Thanks again.[/whisper]
