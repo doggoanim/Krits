@@ -42,8 +42,22 @@ static func yules_ball() -> QuestData:
 	_texts(q)
 	return q
 
+## Side quest: Marta the baker needs three slime goo from the slimes out by the hilltop.
+static func goo_for_marta() -> QuestData:
+	var q := _make(&"goo_for_marta")
+	q.start_flag = &"marta_quest_accepted"
+	q.objectives = [
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"marta_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.COLLECT, &"slime_goo", 3, true),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"marta_got_goo"),
+	]
+	q.reward_gold = 80
+	q.reward_items = {&"shield_restore": 1}
+	_texts(q)
+	return q
+
 static func all_quests() -> Array[QuestData]:
-	return [water_for_the_desert(), yules_ball()]
+	return [water_for_the_desert(), yules_ball(), goo_for_marta()]
 
 static func by_id(id: StringName) -> QuestData:
 	for q in all_quests():

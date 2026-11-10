@@ -841,6 +841,20 @@ idle_animation = &"Yule_Idle"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("Shape_YuleBody")
 
+[node name="Marta" type="StaticBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 11)
+script = ExtResource("yule_npc_script")
+dialogue_file = "res://dialogue/npcs/marta.dlg"
+head_height = 1.6
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Marta"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_YuleBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Marta"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("Mesh_ShopBody")
+
 [node name="Spawnpoints" type="Node3D" parent="." unique_id=607103561]
 
 [node name="StartSpawn" type="Area3D" parent="Spawnpoints" unique_id=1738210625]

@@ -1,0 +1,28 @@
+# Marta — Chesburg's baker, short on slime goo. Format: dialogue/dialogue_parser.gd
+@speaker Marta
+@when marta_got_goo -> after
+@when marta_quest_accepted -> reminder
+
+== offer ==
+Ugh, don't come in — I mean, [i]do[/i] come in, but mind the flour. I'm out of [color=#4a7a1a]slime goo[/color]!
+Don't give me that look. A pinch of it makes the jelly buns [bounce]bounce[/bounce]. Everybody wants jelly buns the week the mayor's in a mood.
+Could you fetch me three? There's a slime out past the hilltop. It grows back, so don't be shy.
+> Fine, three goo. -> accepted [set marta_quest_accepted]
+> Not now. -> later
+
+== later ==
+Hmph. The buns won't bake themselves.
+
+== accepted ==
+You're a lifesaver! Three, remember. [whisper]Bring it back before the dough goes flat.[/whisper]
+
+== reminder ==
+Got my three [color=#4a7a1a]slime goo[/color] yet? They come off the green slimes, out past the hilltop.
+> Here, three goo. -> thanks [item slime_goo] [set marta_got_goo]
+> Still hunting.
+
+== thanks ==
+Oh, [bounce]look at that gloop![/bounce] Perfect. Take this for your trouble, and a bun — I mean, the gold. I'm keeping the buns.
+
+== after ==
+The jelly buns are selling like — well, like jelly buns. Thanks again!
