@@ -8,9 +8,10 @@ extends RefCounted
 ##   * The medium is decided when a fight starts and never changes: a player
 ##     swimming (SwimState) fights fish; a player on land fights land enemies.
 ##   * Fish only notice / fight swimmers, land enemies only land players.
-##   * A fight needs a real water column (MIN_FIGHT_DEPTH, surface to seabed).
+##   * Any depth will do: the arena squeezes into whatever water column there is
+##     (see MIN_HEADROOM and Arena's underwater orb/fish heights).
 
-const MIN_FIGHT_DEPTH := 3.0      ## metres of water, surface to seabed, below which no fish fight starts
+const MIN_HEADROOM := 2.5        ## the submerged arena is at least this tall (seabed to ceiling), however shallow the water
 const SEABED_PROBE := 80.0        ## how far down the seabed is searched for
 const CEILING_GAP := 0.15         ## extra headroom (x STAND_HEIGHT) kept under the surface-jump threshold
 
@@ -31,15 +32,10 @@ static func seabed_y(player: Player, pos: Vector3) -> float:
 	var hit := space.intersect_ray(q)
 	return hit.position.y if not hit.is_empty() else -INF
 
-## True if the water under the player is deep enough to host a fight.
-static func deep_enough(player: Player, water: WaterVolume) -> bool:
-	var floor_y := seabed_y(player, player.global_position)
-	return floor_y > -INF and water.surface_world_y() - floor_y >= MIN_FIGHT_DEPTH
-
 ## World Y the swimmer's head may not pass during a fight: low enough that the
 ## swim state's "jump out at the surface" check can never trigger (see
 ## SwimState), so the fight stays fully submerged with no surface to escape to.
-static func swim_ceiling_y(water: WaterVolume, player: Player) -> float:
+static func swim_ceiling_y(water: WaterVolume, player: Player, floor_y: float) -> float:
 	var c := player.config
 	var feet_max := water.surface_world_y() - (c.water_swim_depth_ratio + c.swim_surface_jump_margin + CEILING_GAP) * Player.STAND_HEIGHT
-	return feet_max + Player.STAND_HEIGHT
+	return maxf(feet_max + Player.STAND_HEIGHT, floor_y + MIN_HEADROOM)
