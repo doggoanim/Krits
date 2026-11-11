@@ -7,6 +7,10 @@ extends Node
 ## Zones load without a loading screen. Interiors and dungeons stay
 ## door-swapped levels.
 
+## Haze density outside every zone's mood. Higher = the lake fades out sooner,
+## so the town reads as a small island. Negative keeps the level's own value.
+@export var base_haze_density := 0.012
+
 const CHECK_INTERVAL := 0.25
 const FOG_BLEND_SPEED := 1.5
 
@@ -21,7 +25,7 @@ func setup(player: Node3D, env: Environment) -> void:
 	_player = player
 	_env = env
 	_base_color = env.fog_light_color
-	_base_density = env.fog_density
+	_base_density = env.fog_density if base_haze_density < 0.0 else base_haze_density
 	_zones.clear()
 	for n in get_parent().find_children("*", "WorldZone", true, false):
 		_zones.append(n as WorldZone)

@@ -71,7 +71,7 @@
 [sub_resource type="Resource" id="OzMood"]
 script = ExtResource("oz_mood")
 haze_color = Color(0.78, 0.88, 0.96, 1)
-haze_density = 0.0035
+haze_density = 0.012
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
