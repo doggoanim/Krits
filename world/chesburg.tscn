@@ -66,6 +66,7 @@
 [ext_resource type="Script" path="res://world/open_world/endless_water.gd" id="oz_water"]
 [ext_resource type="Script" path="res://world/open_world/world_zone.gd" id="oz_zone"]
 [ext_resource type="Script" path="res://world/open_world/zone_mood.gd" id="oz_mood"]
+[ext_resource type="Script" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="PackedScene" path="res://world/open_world/zones/placeholder_isle.tscn" id="oz_isle"]
 
 [sub_resource type="Resource" id="OzMood"]
@@ -1438,3 +1439,14 @@ mood = SubResource("OzMood")
 load_radius = 150.0
 unload_radius = 200.0
 mood_radius = 150.0
+
+[node name="FieldGate" type="Area3D" parent="." unique_id=1900000010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 34)
+script = ExtResource("oz_gate")
+target_level = "res://world/hub_field.tscn"
+target_spawn_id = &"from_chesburg"
+
+[node name="FromFieldSpawn" type="Node3D" parent="." unique_id=1900000011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 28)
+script = ExtResource("47_door_spawn")
+spawn_id = &"from_field"
