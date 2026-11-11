@@ -11,6 +11,7 @@ extends HBoxContainer
 @export var group_gap := 240.0   ## extra space between the ability slots (1-3) and consumable slots (4-6)
 
 var _slots: Array[InventorySlot] = []
+var _pop_tweens := {}   ## slot -> its running pop tween, so a fast re-press restarts cleanly
 
 func _ready() -> void:
 	if interactive:
@@ -87,11 +88,19 @@ func _try_use(index: int) -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	if player == null or player.dead or player.machine.current_name == &"Frozen":
 		return
-	if Game.hotbar.use_slot(index, player):
-		_pop(_slots[index])
+	var used := Game.hotbar.use_slot(index, player)
+	_pop(_slots[index], used)
 
-func _pop(slot: Control) -> void:
+## Every press pops its slot — even an empty one, or a failed use — so the
+## keypress always has feedback. A successful use pops bigger and flashes.
+func _pop(slot: Control, success: bool) -> void:
 	slot.pivot_offset = slot.size * 0.5
-	slot.scale = Vector2.ONE * 1.25
-	create_tween().tween_property(slot, "scale", Vector2.ONE, 0.25) \
+	if _pop_tweens.has(slot) and _pop_tweens[slot].is_valid():
+		_pop_tweens[slot].kill()
+	slot.scale = Vector2.ONE * (1.3 if success else 1.12)
+	slot.modulate = Color(1.6, 1.6, 1.6) if success else Color.WHITE
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(slot, "scale", Vector2.ONE, 0.28) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(slot, "modulate", Color.WHITE, 0.22)
+	_pop_tweens[slot] = tw

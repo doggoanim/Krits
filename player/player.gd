@@ -180,6 +180,8 @@ func _ready() -> void:
 	visual = PlayerVisual.new()
 	add_child(visual)
 
+	add_child(FallEffects.new())   # speed streaks + stretch the longer you fall
+
 	gear = GearDisplay.new()
 	add_child(gear)
 	add_child(HipLantern.new())   # the lantern on the left hip, once owned

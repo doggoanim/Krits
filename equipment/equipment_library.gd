@@ -48,7 +48,7 @@ static func all_armors() -> Array[ArmorData]:
 static func wooden_shield() -> ShieldData:
 	var s := ShieldData.new()
 	s.id = &"wooden_shield"
-	s.price = 0
+	s.price = 25   # the player starts owning one; this lets the shop sell a spare
 	s.shield_bonus = 10.0
 	_look(s, "shield_wooden", 0.26, Vector3.ZERO, Vector3.ZERO)
 	s.display_name = Descriptions.text("names", s.id)
