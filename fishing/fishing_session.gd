@@ -61,6 +61,7 @@ var _cast_t := 0.0
 var _rumble_t := 0.0
 var _tension := 0.0           ## 0..1: how hard the line is pulled (0 slack/sagging, 1 taut)
 var _plate: KeyHintPlate
+var _sfx := FishingSfx.new()
 
 ## Jump or the left mouse button: hooks the fish at the bite and reels after.
 func _hook_pressed() -> bool:
@@ -133,6 +134,9 @@ func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	player.face(toward)
 	Events.player_hurt.connect(_on_player_hurt)
 	_build_visuals()
+	_sfx.world = get_parent()
+	add_child(_sfx)
+	_sfx.cast(player.global_position)
 	_player.visual.squash_stretch(0.85, 1.12)   # the wind-up of the cast
 
 func _exit_tree() -> void:
@@ -171,6 +175,7 @@ func _wait(delta: float) -> void:
 		_timer = BITE_WINDOW
 		Telegraph.exclaim(_bobber, 0.7)
 		_build_ui()   # the key plate appears with the bite
+		_sfx.hooked(_spot)
 		_player.effects.burst_water_splash(_spot, true, false)
 		_player.audio.play_water_splash(false)
 		_ripple(_spot, 2.6)
@@ -187,6 +192,7 @@ func _bite(delta: float) -> void:
 func _start_reel() -> void:
 	_phase = Phase.REEL
 	_build_bar()
+	_sfx.start_reel_loop()
 	HitStop.freeze(0.07)   # the yank of setting the hook
 	_shake(0.4)
 	_player.effects.burst_water_splash(_spot, true, true)
@@ -223,6 +229,7 @@ func _reel(delta: float) -> void:
 	_progress += (PROGRESS_GAIN if covered else -PROGRESS_LOSS) * delta
 	_update_ui(half, covered)
 	_tension = move_toward(_tension, 1.0 if covered else 0.2, delta * 4.0)
+	_sfx.set_reel_intensity(_tension)
 	_reel_juice(delta, covered)
 	if _progress >= 1.0:
 		_land_catch()
@@ -258,6 +265,7 @@ func _land_catch() -> void:
 ## the meter pops away, then the item is handed over.
 func _celebrate(id: StringName, item: ItemData) -> void:
 	_phase = Phase.CELEBRATE
+	_sfx.stop_reel_loop()
 	HitStop.freeze(0.1)
 	_shake(0.5)
 	_player.audio.play_water_splash(true)
@@ -309,6 +317,8 @@ func _on_player_hurt(_from: Vector3) -> void:
 
 ## Ends the cast with a message (empty = none).
 func _end(message: String) -> void:
+	if _phase != Phase.CELEBRATE and _phase != Phase.DONE and message != "":
+		_sfx.reel_in(_spot)   # the line comes back in empty
 	if message != "":
 		Events.notice.emit(message)
 	_finish()
@@ -317,6 +327,7 @@ func _finish() -> void:
 	if _phase == Phase.DONE:
 		return
 	_phase = Phase.DONE
+	_sfx.stop_reel_loop()
 	_release()
 	queue_free()
 
@@ -367,6 +378,7 @@ func _advance_cast(delta: float) -> void:
 		return
 	_cast_t = minf(1.0, _cast_t + delta / CAST_TIME)
 	if _cast_t >= 1.0:
+		_sfx.bait_lands(_spot)
 		_player.effects.burst_water_splash(_spot, true, false)
 		_player.audio.play_water_splash(false)
 		_ripple(_spot, 2.2)
