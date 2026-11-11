@@ -334,8 +334,6 @@ func _build_bar() -> void:
 func _update_ui(half: float, covered: bool) -> void:
 	if _meter == null:
 		return
-	if absf(_fish_target - _fish_pos) > 0.002:
-		_meter.fish_facing = signf(_fish_target - _fish_pos)
 	_meter.fish_pos = _fish_pos
 	_meter.zone_pos = _hook_pos
 	_meter.zone_width = half * 2.0

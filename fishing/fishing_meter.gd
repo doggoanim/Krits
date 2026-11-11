@@ -20,13 +20,14 @@ const WATER_DEEP := Color(0.38, 0.65, 0.82)
 const ZONE := Color(0.45, 0.9, 0.5)
 const ZONE_HIT := Color(0.65, 1.0, 0.55)
 const FISH_BODY := Color(1.0, 0.62, 0.2)
-const FISH_HALF_LENGTH := 17.0
-const FISH_HALF_HEIGHT := 10.0
+const FISH_TEXT := "FISH"
+const FISH_FONT_SIZE := 24
+const FISH_OUTLINE := 8
+const FISH_HALF_LENGTH := 30.0   ## roughly half the word's width: keeps it inside the track at the ends
 
 var zone_pos := 0.5       ## 0..1 centre of the catch zone along the track
 var zone_width := 0.25    ## fraction of the track
 var fish_pos := 0.5       ## 0..1
-var fish_facing := 1.0    ## +1 swimming right, -1 left
 var progress := 0.3       ## 0..1
 var covered := false      ## is the zone on the fish right now?
 
@@ -79,28 +80,17 @@ func _draw_track() -> void:
 	var zone_rect := Rect2(zx, r.position.y + 3.0, zw, r.size.y - 6.0)
 	draw_style_box(_rounded(ZONE_HIT if covered else ZONE, 9, 3), zone_rect)
 	# The fish, drawn on top.
-	var fx := r.position.x + FISH_HALF_LENGTH * 1.6 + fish_pos * (r.size.x - FISH_HALF_LENGTH * 3.2)
+	var fx := r.position.x + FISH_HALF_LENGTH + 4.0 + fish_pos * (r.size.x - (FISH_HALF_LENGTH + 4.0) * 2.0)
 	_draw_fish(Vector2(fx, r.position.y + r.size.y * 0.5))
 
-## A little cartoon fish: oval body, triangle tail, eye. `fish_facing` flips it.
+## The fish is just the word "FISH", bobbing a little, in the game's font with an ink outline.
 func _draw_fish(center: Vector2) -> void:
-	var f := fish_facing
-	var wag := sin(_t * 18.0) * 3.0
-	var body := PackedVector2Array()
-	for i in 20:
-		var a := TAU * float(i) / 20.0
-		body.append(center + Vector2(cos(a) * FISH_HALF_LENGTH * f, sin(a) * FISH_HALF_HEIGHT))
-	var tail := PackedVector2Array([
-		center + Vector2(-FISH_HALF_LENGTH * 0.8 * f, 0.0),
-		center + Vector2(-FISH_HALF_LENGTH * 1.5 * f, -FISH_HALF_HEIGHT * 0.9 + wag),
-		center + Vector2(-FISH_HALF_LENGTH * 1.5 * f, FISH_HALF_HEIGHT * 0.9 + wag),
-	])
-	draw_colored_polygon(tail, FISH_BODY)
-	draw_polyline(PackedVector2Array([tail[0], tail[1], tail[2], tail[0]]), INK, 3.0)
-	draw_colored_polygon(body, FISH_BODY)
-	draw_polyline(body + PackedVector2Array([body[0]]), INK, 3.0)
-	draw_circle(center + Vector2(FISH_HALF_LENGTH * 0.45 * f, -FISH_HALF_HEIGHT * 0.25), 3.2, Color.WHITE)
-	draw_circle(center + Vector2(FISH_HALF_LENGTH * 0.5 * f, -FISH_HALF_HEIGHT * 0.25), 1.6, INK)
+	var font := get_theme_default_font()
+	var text_size := font.get_string_size(FISH_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, FISH_FONT_SIZE)
+	var bob := sin(_t * 9.0) * 1.5
+	var pos := Vector2(center.x - text_size.x * 0.5, center.y + text_size.y * 0.3 + bob)
+	draw_string_outline(font, pos, FISH_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, FISH_FONT_SIZE, FISH_OUTLINE, INK)
+	draw_string(font, pos, FISH_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, FISH_FONT_SIZE, FISH_BODY)
 
 func _draw_progress() -> void:
 	var r := _progress_rect()
