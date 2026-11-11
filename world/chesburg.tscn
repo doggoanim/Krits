@@ -55,6 +55,7 @@
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="47_door_spawn"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="52_0gspa"]
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
+[ext_resource type="PackedScene" uid="uid://dag8n5ljmek1r" path="res://assets/world/terrain/nocol_grass_terrain.glb" id="62_7686p"]
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
@@ -90,6 +91,37 @@ size = Vector3(4, 13, 0.1)
 [sub_resource type="StandardMaterial3D" id="CellPlugMat"]
 albedo_color = Color(0.6452097, 0.6452098, 0.6452097, 1)
 albedo_texture = ExtResource("8_2qclh")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+render_priority = 0
+shader = ExtResource("18_water2_shader")
+shader_parameter/albedo_texture = ExtResource("30_lcfa2")
+shader_parameter/uv_scroll_speed = Vector2(0.05, 0.03)
+shader_parameter/shallow_color = Color(0.3019608, 0.81960785, 0.92941177, 0.78039217)
+shader_parameter/deep_color = Color(0.08, 0.47, 0.84, 0.92)
+shader_parameter/wave_height = 0.08
+shader_parameter/wave_scale = 1.3
+shader_parameter/wave_speed = 0.1
+shader_parameter/fresnel_power = 3.0
+shader_parameter/color_bands = 3.0
+shader_parameter/sparkle_strength = 0.3
+shader_parameter/sparkle_density = 40.0
+shader_parameter/sparkle_speed = 2.5
+shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
+shader_parameter/texture_strength = 0.2
+shader_parameter/foam_color = Color(1, 1, 1, 1)
+shader_parameter/depth_color_range = 3.0
+shader_parameter/foam_width = 0.12
+shader_parameter/foam_wobble = 0.55
+shader_parameter/line_strength = 0.55
+shader_parameter/line_scale = 1.6
+shader_parameter/line_speed = 0.35
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_7686p"]
+material = SubResource("ShaderMaterial_water")
+size = Vector2(150, 150)
+subdivide_width = 20
+subdivide_depth = 20
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
@@ -170,7 +202,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1604843, 4.194363, -10.870
 shape = SubResource("BoxShape3D_70bq6")
 
 [node name="grass_terrain" parent="Terrain" unique_id=1134780653 instance=ExtResource("2_256to")]
-transform = Transform3D(45, 0, 0, 0, 1, 0, 0, 0, 45, 2.748478, -1, 6.742401)
+transform = Transform3D(45, 0, 0, 0, 11.3925, 0, 0, 0, 45, 2.748478, -11.4, 6.742401)
 
 [node name="nocol_darkened_grass_terrain" parent="Terrain" unique_id=316777790 instance=ExtResource("4_256to")]
 transform = Transform3D(4.32, 0, 0, 0, 0.07445519, 0, 0, 0, 14.256001, 22.7, 0.032082558, -17.704)
@@ -200,7 +232,7 @@ transform = Transform3D(0.19999999, 0, 0, 0, 0.044796467, 0, 0, 0, 0.19999999, -
 transform = Transform3D(0.19999999, 0, 0, 0, 0.044796467, 0, 0, 0, 0.19999999, -0.6, 0.01447773, 0.8)
 
 [node name="rock_terrain" parent="Terrain" unique_id=1604554837 instance=ExtResource("26_lybmh")]
-transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 10.72, 47, 1, -25.720001)
+transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 10.72, 46.7, 1, -26.12)
 
 [node name="rock_terrain40" parent="Terrain" unique_id=1195395982 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 4.2879996, 34, 8, -38.420002)
@@ -214,11 +246,32 @@ transform = Transform3D(1.3708802, 0, 0, 0, 1.2979198, 0, 0, 0, 1.5007999, 34.77
 [node name="rock_terrain23" parent="Terrain" unique_id=829037463 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 19.968, 0, 0, 0, 10.72, 47, 1, -4.720001)
 
+[node name="rock_terrain50" parent="Terrain" unique_id=1937600904 instance=ExtResource("26_lybmh")]
+transform = Transform3D(3.4, 0, 0, 0, 2.3961594, 0, 0, 0, 11.2024, 44, 2.1000001, 16.98)
+
 [node name="rock_terrain2" parent="Terrain" unique_id=1092030027 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 6.4320006, 23.199999, 8.28, 21.6624)
 
 [node name="rock_terrain17" parent="Terrain" unique_id=306982721 instance=ExtResource("26_lybmh")]
 transform = Transform3D(20.400002, 0, 0, 0, 13.759198, 0, 0, 0, 6.4320006, 23.199999, 13.379999, 34.3624)
+
+[node name="rock_terrain43" parent="Terrain" unique_id=1497631030 instance=ExtResource("26_lybmh")]
+transform = Transform3D(8.0325, 0, 0, 0, 8.255519, 0, 0, 0, 6.4320006, -38.000008, 5.1244802, 34.3624)
+
+[node name="rock_terrain45" parent="Terrain" unique_id=1288843771 instance=ExtResource("26_lybmh")]
+transform = Transform3D(8.0325, 0, 0, 0, 1.7831923, 0, 0, 0, 2.5728002, -21.935007, 13.379999, 34.3624)
+
+[node name="rock_terrain47" parent="Terrain" unique_id=541512870 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.9278002, 0, 0, 0, 0.71327686, 0, 0, 0, 2.5728002, -18.079407, 0.5410143, 31.7896)
+
+[node name="rock_terrain48" parent="Terrain" unique_id=758284283 instance=ExtResource("26_lybmh")]
+transform = Transform3D(2.3133602, 0, 0, 0, 1.9971753, 0, 0, 0, 4.1164804, -30.995668, 0.5410143, 30.966305)
+
+[node name="rock_terrain46" parent="Terrain" unique_id=1582541860 instance=ExtResource("26_lybmh")]
+transform = Transform3D(3.4079013, -1.702225, 0, 3.4079013, 1.7022251, 0, 0, 0, 2.31552, -18.573227, 15.584604, 34.3624)
+
+[node name="rock_terrain44" parent="Terrain" unique_id=1588436242 instance=ExtResource("26_lybmh")]
+transform = Transform3D(4.8195004, 0, 0, 0, 4.9533114, 0, 0, 0, 6.4320006, -38.000008, 2.6478245, 21.498398)
 
 [node name="rock_terrain20" parent="Terrain" unique_id=1443854835 instance=ExtResource("26_lybmh")]
 transform = Transform3D(9.792002, 0, 0, 0, 0.8255516, 0, 0, 0, 6.4320006, 4.199999, 19.38, 24.3624)
@@ -248,6 +301,10 @@ transform = Transform3D(0.39167988, 0, 0, 0, 0.28597942, -2.2512, 0, 0.16511032,
 transform = Transform3D(0.39167988, 0, 0, 0, 0.28597942, -2.2512, 0, 0.16511032, 3.899193, -15.800001, 19.08, 23.9624)
 
 [node name="rock_terrain30" parent="Terrain" unique_id=881817512 instance=ExtResource("26_lybmh")]
+transform = Transform3D(0.3, 0, 0, 0, 1, 0, 0, 0, 0.3, -2.2, 0.5, 0)
+
+[node name="rock_terrain42" parent="Terrain" unique_id=284218869 instance=ExtResource("26_lybmh")]
+transform = Transform3D(0.3, 0, 0, 0, 1.1, 0, 0, 0, 0.3, -2.8000002, 0.61, -2.4)
 
 [node name="rock_terrain21" parent="Terrain" unique_id=1893045199 instance=ExtResource("26_lybmh")]
 transform = Transform3D(0.5, 0, 0, 0, 10.311651, 0, 0, 0, 0.5, 11.199999, 9.379999, 24.3624)
@@ -298,10 +355,10 @@ transform = Transform3D(4.32, 0, 0, 0, 1.5, 0, 0, 0, 10.060201, 36.1, 6.4, -23)
 transform = Transform3D(4.5144, 0, 0, 0, 0.3, 0, 0, 0, 10.150001, 36.1, 8, -23)
 
 [node name="dirt_terrain6" parent="Terrain" unique_id=1488067545 instance=ExtResource("27_2m3w5")]
-transform = Transform3D(3.024, 0, 0, 0, 1.1691341, -1.3520907, 0, 0.675, 2.34189, 36.1, 5.62081, -11.192499)
+transform = Transform3D(3.0239997, 0, 0, 0, 1.268585, -1.553806, 0, 0.4617273, 4.2690473, 36.1, 5.2683225, -9.079938)
 
 [node name="grass_terrain6" parent="Terrain" unique_id=502974511 instance=ExtResource("2_256to")]
-transform = Transform3D(3.1600797, 0, 0, 0, 0.07794229, -1.3641601, 0, 0.044999998, 2.3627942, 36.1, 6.8548956, -10.48)
+transform = Transform3D(3.1600802, 0, 0, 0, 0.084572345, -1.5676765, 0, 0.030781815, 4.3071547, 36.1, 6.6073837, -8.592561)
 
 [node name="dirt_terrain8" parent="Terrain" unique_id=1971030959 instance=ExtResource("27_2m3w5")]
 transform = Transform3D(-7.3543234e-08, -0.954594, -1.5297164, -1.9705851e-08, 0.95459396, -1.5297159, 1.741824, 5.3377267e-09, -1.1413016e-07, 29.303814, 2.9340398, 0.9942286)
@@ -326,12 +383,6 @@ transform = Transform3D(3.5545166, 0, 0, 0, 2.7, 0, 0, 0, 5.82358, 43.588936, 7,
 
 [node name="grass_terrain9" parent="Terrain" unique_id=646076985 instance=ExtResource("2_256to")]
 transform = Transform3D(3.6574998, 0, 0, 0, 0.15999995, 0, 0, 0, 5.896226, 43.598045, 9.799999, 11.335753)
-
-[node name="grass_terrain11" parent="Terrain" unique_id=1730550996 instance=ExtResource("2_256to")]
-transform = Transform3D(1.8287499, 0, 0, 0, 0.15999995, 0, 0, 0, 3.5377357, 37.598045, 7.799999, 11.335753)
-
-[node name="grass_terrain12" parent="Terrain" unique_id=1326607534 instance=ExtResource("2_256to")]
-transform = Transform3D(-2.1945, 0, -3.7113443e-07, 0, 0.23999992, 0, 1.9184928e-07, 0, -4.245283, 32.598045, 7.799999, 7.3357534)
 
 [node name="dirt_terrain10" parent="Terrain" unique_id=332809236 instance=ExtResource("27_2m3w5")]
 transform = Transform3D(3.5545166, 0, 0, 0, 3.78, 0, 0, 0, 5.82358, 42.988937, 7, 22.275288)
@@ -368,6 +419,9 @@ transform = Transform3D(1.656, 0, 0, 0, 0.050000012, 0, 0, 0, 0.792, -4.1863136,
 
 [node name="rock_terrain14" parent="Terrain" unique_id=235425027 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.1400003, 0, 0, 0, 0.050000012, 0, 0, 0, 1.3199999, -6.6571712, 0, 0.5199995)
+
+[node name="rock_terrain49" parent="Terrain" unique_id=2056262643 instance=ExtResource("26_lybmh")]
+transform = Transform3D(12.834002, 0, 0, 0, 0.050000012, 0, 0, 0, 1.3199999, -23.657171, 0, 0.5199995)
 
 [node name="rock_terrain4" parent="Terrain" unique_id=1003991270 instance=ExtResource("26_lybmh")]
 transform = Transform3D(1.2, 0, 0, 0, 0.36999992, 0, 0, 0, 1.1880001, 18.699999, 0.3, -1.9860001)
@@ -476,6 +530,21 @@ transform = Transform3D(1.7166007, 0, 0, 0, 0.058499984, 0, 0, 0, 1.8195835, 1.4
 transform = Transform3D(-5.7719237e-08, 0, 0.70199984, 0, 0.05849998, 0, -1.3204621, 0, -3.0685385e-08, 19.447855, 18.76, 18.626665)
 
 [node name="nocol_rock_terrain17" parent="Terrain" unique_id=1575650712 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(-1.5006997e-07, 0, 3.2011192, 0, 0.05849998, 0, -3.4332006, 0, -1.3992535e-07, 48.447853, 20.96, 0.6266651)
+
+[node name="nocol_rock_terrain22" parent="Terrain" unique_id=1814981704 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(-1.8008397e-07, 0, 2.2407835, 0, 0.05849998, 0, -4.119841, 0, -9.794774e-08, 45.447853, 20.96, -7.373335)
+
+[node name="nocol_rock_terrain23" parent="Terrain" unique_id=1691132161 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(4.5020988e-07, 0, -3.2011192, 0, 0.05849998, 0, 3.433201, 0, 4.1977611e-07, 45.447853, 11.459999, -29.373339)
+
+[node name="nocol_rock_terrain24" parent="Terrain" unique_id=1434437056 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(5.402519e-07, 0, -2.2407835, 0, 0.05849998, 0, 4.119841, 0, 2.9384324e-07, 48.447853, 11.459999, -21.373337)
+
+[node name="nocol_rock_terrain25" parent="Terrain" unique_id=1049443410 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(1.6479363, 0, 2.3841856e-07, 0, 0.05849999, 0, -1.9073485e-07, 0, 2.2407832, 50.447853, 11.459999, -32.373337)
+
+[node name="nocol_rock_terrain21" parent="Terrain" unique_id=1472912834 instance=ExtResource("25_3y8fk")]
 transform = Transform3D(-1.5006998e-07, 0, 1.6847994, 0, 0.05849998, 0, -3.4332008, 0, -7.364492e-08, 26.447855, 18.76, 19.626665)
 
 [node name="nocol_rock_terrain20" parent="Terrain" unique_id=1382903783 instance=ExtResource("25_3y8fk")]
@@ -682,7 +751,58 @@ script = ExtResource("43_falling_leaves")
 leaf_count = 8
 leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 
-[node name="tree_chesburg_14" parent="Props/Trees" unique_id=1121986775 instance=ExtResource("15_256to")]
+[node name="tree_chesburg_19" parent="Props/Trees" unique_id=1121986775 instance=ExtResource("15_256to")]
+transform = Transform3D(-0.86602545, 0, 0.49999994, 0, 1, 0, -0.49999994, 0, -0.86602545, -0.56199837, 0, -33.038002)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_19" unique_id=1129266431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_20" parent="Props/Trees" unique_id=1212165256 instance=ExtResource("13_b2jir")]
+transform = Transform3D(-3.5406224e-08, 0, 0.80999994, 0, 0.8, 0, -0.80999994, 0, -3.5406224e-08, 5.248001, 0, -33.038002)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_20" unique_id=1168058620]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="Leaves2" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_20" unique_id=33743795]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_21" parent="Props/Trees" unique_id=1100769911 instance=ExtResource("10_qjukg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1.035, 0, -1, 0, -4.371139e-08, 11.438002, 0, -33.038002)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_21" unique_id=655826225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_22" parent="Props/Trees" unique_id=2073355676 instance=ExtResource("16_i8mdn")]
+transform = Transform3D(-0.2484664, 0, 1.7038933, 0, 1.368, 0, -0.92728895, 0, -0.45655695, 8.438002, 0, -36.038002)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_22" unique_id=1322958599]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_23" parent="Props/Trees" unique_id=302678408 instance=ExtResource("30_vgvlt")]
+transform = Transform3D(1.5999999, 0, 2.3446994e-08, 0, 1.3, 0, -4.01359e-08, 0, 1.9000001, 21.438004, 0, -34.038002)
+
+[node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_23" unique_id=2011519476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("43_falling_leaves")
+leaf_count = 8
+leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
+
+[node name="tree_chesburg_14" parent="Props/Trees" unique_id=765889511 instance=ExtResource("15_256to")]
 transform = Transform3D(-0.86602545, 0, 0.49999994, 0, 1, 0, -0.49999994, 0, -0.86602545, -14.761999, 0, 20.162)
 
 [node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_14" unique_id=1477864345]
@@ -691,7 +811,7 @@ script = ExtResource("43_falling_leaves")
 leaf_count = 8
 leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 
-[node name="tree_chesburg_15" parent="Props/Trees" unique_id=1212165256 instance=ExtResource("13_b2jir")]
+[node name="tree_chesburg_15" parent="Props/Trees" unique_id=1823077418 instance=ExtResource("13_b2jir")]
 transform = Transform3D(-3.5406224e-08, 0, 0.80999994, 0, 0.8, 0, -0.80999994, 0, -3.5406224e-08, -8.952, 0, 20.162)
 
 [node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_15" unique_id=1950965029]
@@ -715,7 +835,7 @@ script = ExtResource("43_falling_leaves")
 leaf_count = 8
 leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 
-[node name="tree_chesburg_17" parent="Props/Trees" unique_id=2073355676 instance=ExtResource("16_i8mdn")]
+[node name="tree_chesburg_17" parent="Props/Trees" unique_id=536242462 instance=ExtResource("16_i8mdn")]
 transform = Transform3D(-0.2484664, 0, 1.7038933, 0, 1.368, 0, -0.92728895, 0, -0.45655695, -5.761999, 0, 17.162)
 
 [node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_17" unique_id=1798587367]
@@ -724,7 +844,7 @@ script = ExtResource("43_falling_leaves")
 leaf_count = 8
 leaf_color = Color(0.23921569, 0.8117647, 0.03137255, 1)
 
-[node name="tree_chesburg_18" parent="Props/Trees" unique_id=302678408 instance=ExtResource("30_vgvlt")]
+[node name="tree_chesburg_18" parent="Props/Trees" unique_id=520799013 instance=ExtResource("30_vgvlt")]
 transform = Transform3D(1.5999999, 0, 2.3446994e-08, 0, 1.3, 0, -4.01359e-08, 0, 1.9000001, 7.237999, 0, 17.162)
 
 [node name="Leaves" type="GPUParticles3D" parent="Props/Trees/tree_chesburg_18" unique_id=1230659458]
@@ -755,7 +875,7 @@ area_size = Vector3(16, 4, 16)
 mote_count = 50
 
 [node name="Fireflies" type="GPUParticles3D" parent="Props" unique_id=640155073]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1, -2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2, -9)
 script = ExtResource("41_ambient_motes")
 area_size = Vector3(10, 2.5, 10)
 mote_count = 24
@@ -772,14 +892,15 @@ line_thickness = 0.08
 trail_fraction = 1.0
 
 [node name="Water" parent="Props" unique_id=2126579471 instance=ExtResource("13_8ru6n")]
-transform = Transform3D(6, 0, 0, 0, 1, 0, 0, 0, 6, 2.748, -0.821, 6.742)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.748, -0.821, 6.742)
+mesh = SubResource("PlaneMesh_7686p")
 
 [node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
-size = Vector3(20, 10, 20)
+size = Vector3(150, 10, 150)
 
 [node name="lake_chesburg" parent="Props" unique_id=1685882827 instance=ExtResource("2_l8gsu")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -27.280123, 0.017999172, 0.9797595)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.280123, 0.017999172, -17.02024)
 
 [node name="Water2" parent="Props/lake_chesburg" unique_id=691222566 instance=ExtResource("13_8ru6n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.41620445, 1.2802064, 0.42698288)
@@ -1013,6 +1134,90 @@ transform = Transform3D(0.8660254, 0, 0.5, 0, 1.2, 0, -0.5, 0, 0.8660254, 12.3, 
 [node name="Wind" type="Node" parent="Props/eyecandies/red_flower" unique_id=53316323]
 script = ExtResource("40_foliage_wind")
 
+[node name="blue_flower10" parent="Props/eyecandies" unique_id=1358624270 instance=ExtResource("41_qie8l")]
+transform = Transform3D(0.25881907, 0, -0.9659258, 0, 1.4, 0, 0.9659258, 0, 0.25881907, 12.648414, 0, 4.0883045)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower10" unique_id=932076043]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower12" parent="Props/eyecandies" unique_id=2001290390 instance=ExtResource("41_qie8l")]
+transform = Transform3D(0.25881907, 0, -0.9659258, 0, 1.4, 0, 0.9659258, 0, 0.25881907, 10.648414, 0, 16.088305)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower12" unique_id=924544932]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower13" parent="Props/eyecandies" unique_id=1764982449 instance=ExtResource("41_qie8l")]
+transform = Transform3D(-0.7071067, 0, 0.7071067, 0, 1.6999999, 0, -0.7071067, 0, -0.7071067, 9, 0, 15)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower13" unique_id=2000048514]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower14" parent="Props/eyecandies" unique_id=357831517 instance=ExtResource("41_qie8l")]
+transform = Transform3D(-0.7071067, 0, 0.7071067, 0, 1.6999999, 0, -0.7071067, 0, -0.7071067, 1, 0, 18)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower14" unique_id=1097676389]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower15" parent="Props/eyecandies" unique_id=1707211667 instance=ExtResource("41_qie8l")]
+transform = Transform3D(-0.6830126, -0.4399923, 0.6830126, -0.18301268, 1.6420739, 0.18301268, -0.70710665, 0, -0.70710665, 0.6, -0.2, 18)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower15" unique_id=348580874]
+script = ExtResource("40_foliage_wind")
+
+[node name="green_flower2" parent="Props/eyecandies" unique_id=1258601816 instance=ExtResource("42_186l7")]
+transform = Transform3D(0.93301266, 0.25, 0.2588191, -0.25881907, 0.96592593, -8.881784e-16, -0.2500001, -0.06698732, 0.96592593, 12.29486, 0, 4.700677)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/green_flower2" unique_id=1384037205]
+script = ExtResource("40_foliage_wind")
+
+[node name="green_flower4" parent="Props/eyecandies" unique_id=1504199783 instance=ExtResource("42_186l7")]
+transform = Transform3D(0.93301266, 0.25, 0.2588191, -0.25881907, 0.96592593, -8.881784e-16, -0.2500001, -0.06698732, 0.96592593, -8.70514, 0, 16.700676)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/green_flower4" unique_id=944362789]
+script = ExtResource("40_foliage_wind")
+
+[node name="green_flower5" parent="Props/eyecandies" unique_id=978161500 instance=ExtResource("42_186l7")]
+transform = Transform3D(0.9624349, -0.014467944, 0.2617228, -0.00846778, 1.6945257, 0.07012841, -0.24850935, -0.113771416, 1.0112193, -9.50514, 0, 16.700676)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/green_flower5" unique_id=1570374431]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower5" parent="Props/eyecandies" unique_id=539560368 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.7071068, 0, -0.7071067, 0, 1.2, 0, 0.7071067, 0, 0.7071068, 11.856726, 0, 4.6110196)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower5" unique_id=1891234003]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower7" parent="Props/eyecandies" unique_id=1241175166 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.7071068, 0, -0.7071067, 0, 1.2, 0, 0.7071067, 0, 0.7071068, -8.143274, 0, 19.61102)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower7" unique_id=8779226]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower8" parent="Props/eyecandies" unique_id=918681354 instance=ExtResource("43_qssed")]
+transform = Transform3D(0.6830127, -0.31058288, -0.6830126, 0.18301271, 1.159111, -0.18301268, 0.7071067, 0, 0.7071068, -15.143274, 0, 18.61102)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower8" unique_id=942342510]
+script = ExtResource("40_foliage_wind")
+
+[node name="blue_flower11" parent="Props/eyecandies" unique_id=180496546 instance=ExtResource("41_qie8l")]
+transform = Transform3D(-0.5429646, 0, 0.9712489, 0, 1.9599999, 0, -0.5429646, 0, -0.9712489, 9.068677, 0, 8.0370655)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/blue_flower11" unique_id=775987433]
+script = ExtResource("40_foliage_wind")
+
+[node name="green_flower3" parent="Props/eyecandies" unique_id=890758046 instance=ExtResource("42_186l7")]
+transform = Transform3D(-0.83283263, -0.27728057, -0.84296477, -0.3155915, 1.4634641, -1.058826e-15, 0.8328329, 0.27728063, -0.8429647, 9.068677, 0, 7.2592487)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/green_flower3" unique_id=1035919030]
+script = ExtResource("40_foliage_wind")
+
+[node name="red_flower6" parent="Props/eyecandies" unique_id=420149488 instance=ExtResource("43_qssed")]
+transform = Transform3D(-1.3737903, 0, 0.2544359, 0, 1.6800001, 0, -0.36810595, 0, -0.94956785, 9.662646, 0, 7.1036844)
+
+[node name="Wind" type="Node" parent="Props/eyecandies/red_flower6" unique_id=2098730931]
+script = ExtResource("40_foliage_wind")
+
 [node name="red_flower2" parent="Props/eyecandies" unique_id=1417812405 instance=ExtResource("43_qssed")]
 transform = Transform3D(0.8660254, 0, -0.5, 0, 1.2, 0, 0.5, 0, 0.8660254, 19.032053, 0, 1.5602541)
 
@@ -1071,7 +1276,7 @@ material_override = SubResource("Mat_ShopRobe")
 mesh = SubResource("Mesh_ShopBody")
 
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
-transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0, -8.2)
+transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0.1, -8.2)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/yule.dlg"
 head_height = 1.2
@@ -1171,3 +1376,39 @@ palette = Array[Color]([Color(0.6, 0.8, 1, 1), Color(1, 1, 0.95, 1), Color(0.95,
 [node name="Butterflies3" type="Node3D" parent="Scatter" unique_id=920000006]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -2)
 script = ExtResource("91_butterflies")
+
+[node name="Butterflies4" type="Node3D" parent="Scatter" unique_id=1991879735]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2, 28)
+script = ExtResource("91_butterflies")
+
+[node name="Butterflies5" type="Node3D" parent="Scatter" unique_id=1404129135]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 2, 28)
+script = ExtResource("91_butterflies")
+
+[node name="Butterflies6" type="Node3D" parent="Scatter" unique_id=830936182]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 2, 28)
+script = ExtResource("91_butterflies")
+
+[node name="nocol_grass_terrain" parent="." unique_id=1309322825 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 3.4, 37, 7.7000003, 12)
+
+[node name="nocol_grass_terrain2" parent="." unique_id=580090696 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.3800001, 0, 0, 0, 0.071999975, 0, 0, 0, 2.0400002, 33, 7.7000003, 6)
+
+[node name="nocol_grass_terrain3" parent="." unique_id=804154584 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.1040001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 15.2, 2.9802322e-07, 6)
+
+[node name="nocol_grass_terrain4" parent="." unique_id=856725632 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.4352001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 16.2, 2.9802322e-07, -21)
+
+[node name="nocol_grass_terrain5" parent="." unique_id=1085442607 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 2.2848003, 9.024, 2.9802322e-07, -30.792002)
+
+[node name="nocol_grass_terrain6" parent="." unique_id=552433615 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 4.1126404, -1.5964804, 2.9802322e-07, -32.20858)
+
+[node name="nocol_grass_terrain7" parent="." unique_id=1887330071 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.16058985e-07, 0, 3.2901123, 0, 0.071999975, 0, -2.6551201, 0, -1.4381537e-07, 22.513462, 2.9802322e-07, -35.12921)
+
+[node name="nocol_grass_terrain8" parent="." unique_id=1162537257 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.6551201, 0, -1.4381537e-07, 12.643126, 2.9802322e-07, -35.12921)
