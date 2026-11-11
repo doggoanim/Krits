@@ -297,6 +297,7 @@ func _play_death_sequence() -> void:
 	add_child(_death_cam_hold)
 	_death_cam_hold.global_position = player.global_position
 	cam.target = _death_cam_hold
+	cam.look_locked = true
 	await get_tree().create_timer(DEATH_FREEZE_WAIT, true, false, true).timeout
 	var cam3d := cam.get_camera()
 	var uv := cam3d.unproject_position(player.global_position + Vector3.UP * 0.9) / get_viewport().get_visible_rect().size
@@ -321,6 +322,7 @@ func _respawn_after_death() -> void:
 	await LoadingScreen.instance.run(func():
 		if _death_overlay != null:
 			_death_overlay.clear()   # fully covered now: the player goes back to being drawn normally
+		cam.look_locked = false
 		cam.target = player   # the camera was parked while the player fell away (see _play_death_sequence())
 		if is_instance_valid(_death_cam_hold):
 			_death_cam_hold.queue_free()

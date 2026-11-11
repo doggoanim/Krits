@@ -28,6 +28,7 @@ const WORLD_LAYER := 1   ## ordinary walls/props — see _update_collision_mask(
 @export var clip_through_walls := true
 
 var target: Node3D
+var look_locked := false   ## true while the player can't turn the camera (the death sequence)
 var yaw := 0.0
 var pitch := -0.35
 var extra_distance := 0.0   ## set by the arena to frame the whole fight
@@ -117,7 +118,7 @@ func _update_focus(delta: float) -> float:
 	return k
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _focus_on or _focus_weight > 0.0:
+	if look_locked or _focus_on or _focus_weight > 0.0:
 		return   # the conversation owns the camera until it has eased back
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var sens := mouse_sensitivity * _sens_scale
