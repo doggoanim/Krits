@@ -94,6 +94,7 @@ func _try_use(index: int) -> void:
 ## Every press pops its slot — even an empty one, or a failed use — so the
 ## keypress always has feedback. A successful use pops bigger and flashes.
 func _pop(slot: Control, success: bool) -> void:
+	UiSfx.click()
 	slot.pivot_offset = slot.size * 0.5
 	if _pop_tweens.has(slot) and _pop_tweens[slot].is_valid():
 		_pop_tweens[slot].kill()
