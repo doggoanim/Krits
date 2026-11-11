@@ -62,17 +62,7 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
-[ext_resource type="Script" path="res://world/open_world/zone_streamer.gd" id="oz_streamer"]
-[ext_resource type="Script" path="res://world/open_world/endless_water.gd" id="oz_water"]
-[ext_resource type="Script" path="res://world/open_world/world_zone.gd" id="oz_zone"]
-[ext_resource type="Script" path="res://world/open_world/zone_mood.gd" id="oz_mood"]
 [ext_resource type="Script" path="res://world/region_gate.gd" id="oz_gate"]
-[ext_resource type="PackedScene" path="res://world/open_world/zones/placeholder_isle.tscn" id="oz_isle"]
-
-[sub_resource type="Resource" id="OzMood"]
-script = ExtResource("oz_mood")
-haze_color = Color(0.78, 0.88, 0.96, 1)
-haze_density = 0.0025
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -1423,22 +1413,6 @@ transform = Transform3D(-1.16058985e-07, 0, 3.2901123, 0, 0.071999975, 0, -2.655
 
 [node name="nocol_grass_terrain8" parent="." unique_id=1162537257 instance=ExtResource("62_7686p")]
 transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.6551201, 0, -1.4381537e-07, 12.643126, 2.9802322e-07, -35.12921)
-
-[node name="OpenWorld" type="Node" parent="." unique_id=1900000001]
-script = ExtResource("oz_streamer")
-
-[node name="EndlessWater" type="MeshInstance3D" parent="OpenWorld" unique_id=1900000002]
-script = ExtResource("oz_water")
-surface_y = -0.84
-
-[node name="PlaceholderIsleZone" type="Node3D" parent="." unique_id=1900000003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -320)
-script = ExtResource("oz_zone")
-scene = ExtResource("oz_isle")
-mood = SubResource("OzMood")
-load_radius = 150.0
-unload_radius = 200.0
-mood_radius = 150.0
 
 [node name="FieldGate" type="Area3D" parent="." unique_id=1900000010]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 34)
