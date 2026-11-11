@@ -191,13 +191,31 @@ transform = Transform3D(0.19999999, 0, 0, 0, 0.044796467, 0, 0, 0, 0.19999999, -
 [node name="rock_terrain" parent="Terrain" unique_id=1604554837 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 10.72, 47, 1, -25.720001)
 
+[node name="rock_terrain24" parent="Terrain" unique_id=1195395982 instance=ExtResource("26_lybmh")]
+transform = Transform3D(2.2848003, 0, 0, 0, 0.49919993, 0, 0, 0, 1.5007999, 37.9696, 5.4927998, 1.9375982)
+
+[node name="rock_terrain25" parent="Terrain" unique_id=58953514 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.3708802, 0, 0, 0, 1.2979198, 0, 0, 0, 1.5007999, 34.77088, 5.4927998, 1.3372782)
+
+[node name="rock_terrain23" parent="Terrain" unique_id=829037463 instance=ExtResource("26_lybmh")]
+transform = Transform3D(6.8, 0, 0, 0, 19.968, 0, 0, 0, 10.72, 47, 1, -4.720001)
+
 [node name="rock_terrain2" parent="Terrain" unique_id=1092030027 instance=ExtResource("26_lybmh")]
 transform = Transform3D(6.8, 0, 0, 0, 10.4, 0, 0, 0, 6.4320006, 23.199999, 8.28, 21.6624)
 
 [node name="rock_terrain17" parent="Terrain" unique_id=306982721 instance=ExtResource("26_lybmh")]
 transform = Transform3D(20.400002, 0, 0, 0, 13.759198, 0, 0, 0, 6.4320006, 23.199999, 13.379999, 34.3624)
 
-[node name="rock_terrain18" parent="Terrain" unique_id=1195395982 instance=ExtResource("26_lybmh")]
+[node name="rock_terrain20" parent="Terrain" unique_id=1443854835 instance=ExtResource("26_lybmh")]
+transform = Transform3D(9.792002, 0, 0, 0, 0.8255516, 0, 0, 0, 6.4320006, 4.199999, 19.38, 24.3624)
+
+[node name="rock_terrain21" parent="Terrain" unique_id=1893045199 instance=ExtResource("26_lybmh")]
+transform = Transform3D(0.5, 0, 0, 0, 10.311651, 0, 0, 0, 0.5, 11.199999, 9.379999, 24.3624)
+
+[node name="rock_terrain22" parent="Terrain" unique_id=450992928 instance=ExtResource("26_lybmh")]
+transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 10.311651, 0, -0.5, 0, -2.1855694e-08, -0.80000114, 9.379999, 20.3624)
+
+[node name="rock_terrain18" parent="Terrain" unique_id=1394621751 instance=ExtResource("26_lybmh")]
 transform = Transform3D(10.200001, 0, 0, 0, 20.638798, 0, 0, 0, 6.4320006, -6.800001, 20.38, 30.3624)
 
 [node name="rock_terrain9" parent="Terrain" unique_id=2091630497 instance=ExtResource("26_lybmh")]
@@ -251,6 +269,24 @@ transform = Transform3D(1.444608, 0, 0, 0, 0.3, 0, 0, 0, 15.363034, 28.5, 3, -18
 [node name="grass_terrain4" parent="Terrain" unique_id=1789673588 instance=ExtResource("2_256to")]
 transform = Transform3D(5.225, 0, 0, 0, 0.15999995, 0, 0, 0, 18.425707, 35, 5.4, -15.6)
 
+[node name="dirt_terrain9" parent="Terrain" unique_id=264288035 instance=ExtResource("27_2m3w5")]
+transform = Transform3D(3.5545166, 0, 0, 0, 2.7, 0, 0, 0, 5.82358, 43.588936, 7, 11.275287)
+
+[node name="grass_terrain9" parent="Terrain" unique_id=646076985 instance=ExtResource("2_256to")]
+transform = Transform3D(3.6574998, 0, 0, 0, 0.15999995, 0, 0, 0, 5.896226, 43.598045, 9.799999, 11.335753)
+
+[node name="grass_terrain11" parent="Terrain" unique_id=1730550996 instance=ExtResource("2_256to")]
+transform = Transform3D(1.8287499, 0, 0, 0, 0.15999995, 0, 0, 0, 3.5377357, 37.598045, 7.799999, 11.335753)
+
+[node name="grass_terrain12" parent="Terrain" unique_id=1326607534 instance=ExtResource("2_256to")]
+transform = Transform3D(-2.1945, 0, -3.7113443e-07, 0, 0.23999992, 0, 1.9184928e-07, 0, -4.245283, 32.598045, 7.799999, 7.3357534)
+
+[node name="dirt_terrain10" parent="Terrain" unique_id=332809236 instance=ExtResource("27_2m3w5")]
+transform = Transform3D(3.5545166, 0, 0, 0, 3.78, 0, 0, 0, 5.82358, 42.988937, 7, 22.275288)
+
+[node name="grass_terrain10" parent="Terrain" unique_id=1355363446 instance=ExtResource("2_256to")]
+transform = Transform3D(3.6574998, 0, 0, 0, 0.15999995, 0, 0, 0, 5.896226, 42.998047, 10.799999, 22.335754)
+
 [node name="rock_terrain3" parent="Terrain" unique_id=2083804871 instance=ExtResource("26_lybmh")]
 transform = Transform3D(1.5, 0, 0, 0, 1, 0, 0, 0, 1.98, 21.4, 1, -1.386)
 
@@ -268,6 +304,12 @@ transform = Transform3D(6.9000006, 0, 0, 0, 0.050000012, 0, 0, 0, 1.3199999, 7, 
 
 [node name="rock_terrain12" parent="Terrain" unique_id=693846102 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-3.728766e-07, 0, -1.3199999, 0, 0.050000012, 0, 8.530422, 0, -5.769903e-08, -1.2073469, 0, -8.690684)
+
+[node name="rock_terrain26" parent="Terrain" unique_id=1361047320 instance=ExtResource("26_lybmh")]
+transform = Transform3D(-8.9490385e-08, 0, 1.3199999, 0, 0.05000002, 0, -2.0473015, 0, -5.769903e-08, -2.207347, 0, -19.290686)
+
+[node name="rock_terrain27" parent="Terrain" unique_id=1701928687 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.3423559e-07, 0, -0.5939999, 0, 0.05000002, 0, 1.0236509, 0, 7.789368e-08, -4.107347, 0, -20.290686)
 
 [node name="rock_terrain13" parent="Terrain" unique_id=1488257694 instance=ExtResource("26_lybmh")]
 transform = Transform3D(1.656, 0, 0, 0, 0.050000012, 0, 0, 0, 0.792, -4.1863136, 0, -1.5756259)
@@ -346,6 +388,9 @@ spawn_id = &"house_1_entrance"
 
 [node name="house_chesburg_5" parent="Buildings" unique_id=2135377020 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 4.479099, 0, -10.312209)
+
+[node name="house_chesburg_6" parent="Buildings" unique_id=491103847 instance=ExtResource("14_6yx7h")]
+transform = Transform3D(-2.1855693e-07, 0, 1, 0, 1, 0, -1, 0, -2.1855693e-07, -7.5209017, 0, -20.312206)
 
 [node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.706156, 0, -7.0017056)
