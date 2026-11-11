@@ -451,15 +451,17 @@ func _do_leap_attack() -> void:
 	var zone := Telegraph.circle(arena, data.leap_radius)
 	var waited := 0.0
 	while waited < data.leap_ready_time:
-		if _dying or not is_instance_valid(target):
-			zone.queue_free()
+		if _dying or not is_instance_valid(target) or not is_instance_valid(zone):
+			if is_instance_valid(zone):
+				zone.queue_free()
 			return
 		_place_leap_zone(zone)
 		zone.set_fill(waited / data.leap_ready_time)
 		await _next_physics_frame()
 		waited += get_physics_process_delta_time() * _speed_mult   # slowed: the wind-up takes longer
-	if _dying:
-		zone.queue_free()
+	if _dying or not is_instance_valid(zone):
+		if is_instance_valid(zone):
+			zone.queue_free()
 		return
 	_place_leap_zone(zone)
 	zone.lock()
@@ -490,14 +492,16 @@ func _do_leap_attack() -> void:
 				_spawn_puddle(global_position, data.puddle_radius)
 		await _next_physics_frame()
 		if _dying:
-			zone.queue_free()
+			if is_instance_valid(zone):
+				zone.queue_free()
 			return
 
 	global_position = land
 	rotation = Vector3.ZERO   # land upright, whatever the tumble left it at
 	_play_sfx(data.sfx_land)
 	_land_leap(land)
-	zone.fade_out()
+	if is_instance_valid(zone):
+		zone.fade_out()
 
 func _place_leap_zone(zone: Telegraph) -> void:
 	var land := _clamped_landing_point(target.global_position)
@@ -539,8 +543,9 @@ func _do_burst_shoot() -> void:
 	# the volley speeds up (later balls can arrive inside i-frames — dodge!).
 	var spacing := maxf(data.shoot_interval, Player.HIT_INVULN + 0.02)
 	for i in count:
-		if _dying or not is_instance_valid(target):
-			aim.queue_free()
+		if _dying or not is_instance_valid(target) or not is_instance_valid(aim):
+			if is_instance_valid(aim):
+				aim.queue_free()
 			return
 		_face_point_instant(_predicted_point())
 		if _visual:
@@ -551,7 +556,8 @@ func _do_burst_shoot() -> void:
 			if not await _wait_aiming(spacing, aim):
 				return
 			spacing /= maxf(data.shoot_rate_ramp, 1.0)
-	aim.fade_out()
+	if is_instance_valid(aim):
+		aim.fade_out()
 
 ## Waits `seconds` (physics time) while keeping the aim line and facing on
 ## the player. False if the enemy died / the target vanished meanwhile (the
@@ -559,8 +565,9 @@ func _do_burst_shoot() -> void:
 func _wait_aiming(seconds: float, aim: Telegraph) -> bool:
 	var waited := 0.0
 	while waited < seconds:
-		if _dying or not is_instance_valid(target):
-			aim.queue_free()
+		if _dying or not is_instance_valid(target) or not is_instance_valid(aim):
+			if is_instance_valid(aim):
+				aim.queue_free()
 			return false
 		var aim_at := _predicted_point()
 		aim.set_line(center_point(), aim_at)
