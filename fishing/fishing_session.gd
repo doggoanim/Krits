@@ -50,6 +50,9 @@ var _line_mesh := ImmediateMesh.new()
 var _fish_pos := 0.5
 var _fish_target := 0.5
 var _retarget := 0.0
+const REEL_INPUT_DELAY := 0.45   ## seconds after hooking before the reel listens to input at all
+var _reel_lock := 0.0
+var _need_release := false      ## ...and the button must also have been let go once
 var _hook_pos := 0.5
 var _hook_vel := 0.0
 var _progress := PROGRESS_START
@@ -193,6 +196,8 @@ func _start_reel() -> void:
 	_fish_target = 0.5
 	_hook_pos = 0.5
 	_hook_vel = 0.0
+	_reel_lock = REEL_INPUT_DELAY   # the press that hooked the fish must not also start the reel
+	_need_release = true
 	_progress = PROGRESS_START
 	_retarget = 0.0
 
@@ -205,6 +210,14 @@ func _reel(delta: float) -> void:
 	_fish_pos = move_toward(_fish_pos, _fish_target, float(_catch["speed"]) * delta)
 	# Holding Jump slides the catch zone right; letting go lets it fall back left.
 	var held := _hook_held()
+	if _reel_lock > 0.0:
+		_reel_lock -= delta
+		held = false
+	elif _need_release:
+		if held:
+			held = false   # still holding from the hook press: wait for a release
+		else:
+			_need_release = false
 	_hook_vel = clampf(_hook_vel + (HOOK_ACCEL if held else -HOOK_ACCEL) * delta, -HOOK_MAX_SPEED, HOOK_MAX_SPEED)
 	_hook_pos += _hook_vel * delta
 	# The zone is drawn inside the track, so its CENTRE can only travel between
