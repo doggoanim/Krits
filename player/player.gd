@@ -1260,6 +1260,12 @@ const DEATH_SHAKE := 0.4
 func _begin_death(_from: Vector3) -> void:
 	dead = true
 	velocity = Vector3.ZERO
+	# Dying mid-swim: leave the swim state properly (floating motion mode, bubbles,
+	# upside-down/tilt) so the death hop is an ordinary fall, and drop the water
+	# foam ring, which only updates while alive and would stay on the surface.
+	if machine.current_name == &"Swim":
+		machine.transition_to(&"Air")
+	effects.update_water_foam(null, 0.0)
 	set_crouching(false)
 	visual.cancel_hold()
 	visual.rotation.x = 0.0
