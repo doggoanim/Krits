@@ -133,16 +133,14 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var land_squash_xz := 1.3
 @export var uncrouch_bounce_y := 1.12   ## small stretchy "pop" when standing back up
 @export var uncrouch_bounce_xz := 0.94
-@export var pound_windup_squash_y := 0.72   ## crouching down to wind up a ground pound
-@export var pound_windup_squash_xz := 1.25
 @export var pound_fall_stretch_y := 1.45    ## held while plunging
 @export var pound_fall_stretch_xz := 0.82
-@export var pound_land_squash_y := 0.6      ## the slam hitting the ground
-@export var pound_land_squash_xz := 1.45
-@export var pound_land_squash_time := 0.28
-@export var pound_jump_stretch_y := 1.65    ## the high jump out of the slam
-@export var pound_jump_stretch_xz := 0.8
-@export var pound_jump_stretch_time := 0.24
+@export var pound_land_squash_y := 0.4      ## the slam hitting the ground
+@export var pound_land_squash_xz := 1.65
+@export var pound_land_squash_time := 0.34
+@export var pound_jump_stretch_y := 2.1    ## the high jump out of the slam
+@export var pound_jump_stretch_xz := 0.62
+@export var pound_jump_stretch_time := 0.3
 @export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes
 
 var _squash_tween: Tween
