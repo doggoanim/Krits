@@ -916,13 +916,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.540747, 0.6118926, 31.145
 script = ExtResource("53_4t2cb")
 metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
 
-[node name="TestFish1" type="CharacterBody3D" parent="Enemies" unique_id=251097689]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, -4, 57)
-script = ExtResource("53_4t2cb")
-type = 3
-spawn_radius = 14.0
-wander_radius = 3.5
-
 [node name="Scatter" type="Node3D" parent="." unique_id=920000001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -10)
 
