@@ -269,7 +269,7 @@ func begin(p: Player, origin: Vector3, roster: Array[EnemyData], water: WaterVol
 	_water = water
 	global_position = origin
 	if _water != null:
-		swim_top = UnderwaterRules.swim_ceiling_y(_water, p, origin.y)
+		swim_top = UnderwaterRules.swim_ceiling_y(_water, p)
 	_fit_shape(radius_for(roster.size()))
 	_build_barrier()
 	if _water != null:
@@ -539,9 +539,7 @@ func _free_orb_position(existing: Array[Vector3]) -> Vector3:
 		var pos := random_point(0.9)
 		var heights := ORB_HEIGHT
 		if _water != null:   # keep underwater orbs inside the submerged column, under the ceiling
-			var span := swim_top - global_position.y   # shallow water: squeeze the orbs into whatever column there is
-			var low := minf(WATER_ORB_HEIGHT.x, span * 0.45)
-			heights = Vector2(low, maxf(low, minf(WATER_ORB_HEIGHT.y, span - 0.8)))
+			heights = Vector2(WATER_ORB_HEIGHT.x, maxf(WATER_ORB_HEIGHT.x, minf(WATER_ORB_HEIGHT.y, swim_top - global_position.y - 1.0)))
 		pos.y += randf_range(heights.x, heights.y)   # float above whatever ground is under it
 		var nearest := INF
 		for t in existing:

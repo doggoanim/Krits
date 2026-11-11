@@ -46,6 +46,10 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	var water := UnderwaterRules.swim_water(player)
 	if (water != null) != enemy.data.aquatic:
 		return
+	if water != null and not UnderwaterRules.deep_enough(player, water):
+		_warn_shallow()
+		enemy.strike_player(player)   # it still nips you, so shallow water isn't a free pass
+		return
 	if Game.stats.equipped_weapon == null:
 		# Can't start a fight bare-handed: the enemy just hurts you instead.
 		_warn_unarmed()
@@ -74,6 +78,12 @@ func _warn_unarmed() -> void:
 	_unarmed_notice_left = UNARMED_NOTICE_COOLDOWN
 	Events.notice.emit("You can't fight without a weapon.")
 
+func _warn_shallow() -> void:
+	if _unarmed_notice_left > 0.0:
+		return
+	_unarmed_notice_left = UNARMED_NOTICE_COOLDOWN
+	Events.notice.emit("The water is too shallow to fight in.")
+
 ## Full encounter. `world_enemies` are the overworld enemies taking part (may be empty, e.g. debug).
 ## `water` is set for an underwater fight (the player is swimming in it): the
 ## arena is then a submerged dome on the seabed and the player keeps swimming.
@@ -96,8 +106,7 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	get_parent().add_child(arena)
 	var origin := player.global_position
 	if water != null:
-		var seabed := UnderwaterRules.seabed_y(player, origin)
-		origin.y = seabed if seabed > -INF else origin.y - 1.0   # the arena's floor is the seabed under the player
+		origin.y = UnderwaterRules.seabed_y(player, origin)   # the arena's floor is the seabed under the player
 	arena.begin(player, origin, roster, water)
 	await arena.play_intro()   # ground ring sweeps in, then the walls grow up (see Arena)
 	player.machine.transition_to(&"Swim" if water != null else &"Ground")
