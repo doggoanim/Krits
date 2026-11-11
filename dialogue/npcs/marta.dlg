@@ -18,7 +18,7 @@ You're a lifesaver! Three, remember. [whisper]Bring it back before the dough goe
 
 == reminder ==
 Got my three [color=#4a7a1a]slime goo[/color] yet? They come off the green slimes, out past the hilltop.
-> Here, three goo. -> thanks [item slime_goo] [set marta_got_goo]
+> Here, three goo. -> thanks [item slime_goo 3] [set marta_got_goo]
 > Still hunting.
 
 == thanks ==

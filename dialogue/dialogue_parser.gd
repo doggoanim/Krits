@@ -17,7 +17,7 @@ extends RefCounted
 ##   Take this.  [give lantern 1]     [set flag]  [give item] / [give item N]
 ##                                    (an `important` item plays the item-get fanfare once the talk ends — see core/item_get.gd)
 ##   > Accept. -> accepted [set water_quest_accepted]    a choice, then where it leads
-##   > Show it. -> thanks [item water_spirits] [if met_mayor]   [item x] [if flag]
+##   > Show it. -> thanks [item water_spirits] [if met_mayor]   [item x] / [item x N] (needs N in the bag) [if flag]
 ##   > Never mind.                    no `->` ends the conversation
 ##
 ##   == accepted ==
@@ -44,6 +44,7 @@ class ChoiceDef:
 	var target := ""
 	var if_flag := ""
 	var item := ""
+	var item_count := 1
 	var set_flag := ""
 	var line := 0
 
@@ -61,6 +62,7 @@ class Mods:
 	var set_flag := ""
 	var if_flag := ""
 	var item := ""
+	var item_count := 1
 	var give_item := ""
 	var give_count := 1
 
@@ -191,6 +193,7 @@ func _choice(section: Section, body: String, n: int) -> void:
 	c.target = mods.text.substr(arrow + 2).strip_edges() if arrow >= 0 else ""
 	c.if_flag = mods.if_flag
 	c.item = mods.item
+	c.item_count = mods.item_count
 	c.set_flag = mods.set_flag
 	if c.text.is_empty():
 		_error(n, "choice has no text")
@@ -221,6 +224,8 @@ func _strip_mods(t: String) -> Mods:
 				mods.if_flag = value
 			"item":
 				mods.item = value
+				if m.get_string(3) != "":
+					mods.item_count = m.get_string(3).to_int()
 			"give":
 				mods.give_item = value
 				if m.get_string(3) != "":
@@ -283,6 +288,7 @@ func _build() -> DialogueScript:
 				choice.next = _resolve(c.target, c.line)
 				choice.required_flag = StringName(c.if_flag)
 				choice.required_item = StringName(c.item)
+				choice.required_count = c.item_count
 				choice.sets_flag = StringName(c.set_flag)
 				list.append(choice)
 			last.choices = list
