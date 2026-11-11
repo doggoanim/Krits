@@ -60,9 +60,18 @@ func _process(_delta: float) -> void:
 		return
 	_shield_grip.position = grips.shield_offset
 	_shield_grip.rotation_degrees = grips.shield_rotation_deg
-	var g := grips.weapon_grip(["sword", "bow", "staff"].find(weapon))
-	_weapon_grip.position = g[0]
-	_weapon_grip.rotation_degrees = g[1]
+	# Read the properties directly (not HandGrips.weapon_grip()): the editor can
+	# hold a stale copy of the resource whose script methods aren't callable.
+	match weapon:
+		"bow":
+			_weapon_grip.position = grips.bow_offset
+			_weapon_grip.rotation_degrees = grips.bow_rotation_deg
+		"staff":
+			_weapon_grip.position = grips.staff_offset
+			_weapon_grip.rotation_degrees = grips.staff_rotation_deg
+		_:
+			_weapon_grip.position = grips.weapon_offset
+			_weapon_grip.rotation_degrees = grips.weapon_rotation_deg
 
 ## Swaps the model under the weapon grip for the chosen weapon.
 func _show_weapon() -> void:
