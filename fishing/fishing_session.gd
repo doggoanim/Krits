@@ -348,10 +348,9 @@ func _build_visuals() -> void:
 	add_child(_line)
 	_line.global_transform = Transform3D.IDENTITY
 
-## Camera kick, if a rig is available.
-func _shake(amount: float) -> void:
-	if _player != null and _player.camera_rig != null:
-		_player.camera_rig.shake(amount)
+## Intentionally a no-op: fishing has no camera shake.
+func _shake(_amount: float) -> void:
+	pass   # fishing doesn't shake the camera; kept as one switch so the call sites stay readable
 
 ## Flies the bobber from the rod to the water at the start; when it lands:
 ## splash, ripple, a little kick.
