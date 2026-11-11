@@ -206,6 +206,14 @@ func covers_xz(pos: Vector3) -> bool:
 		return Vector2(local.x, local.z).length() <= radius
 	return absf(local.x) <= size.x * 0.5 and absf(local.z) <= size.z * 0.5
 
+## The water (if any) whose footprint is under `pos` and whose surface is at or
+## above it. Like covers_xz() it ignores `size.y`, so zero-depth volumes work.
+static func over(pos: Vector3) -> WaterVolume:
+	for w in active:
+		if w.covers_xz(pos) and pos.y <= w.surface_world_y() + 0.01:
+			return w
+	return null
+
 ## How submerged a body of `height`, standing with its feet at world Y
 ## `feet_y`, is in THIS volume — 0.0 (dry) to 1.0 (fully underwater). See
 ## Player.water_submersion(), which calls this with its own global_position.y
