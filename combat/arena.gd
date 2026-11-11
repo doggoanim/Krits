@@ -105,8 +105,8 @@ const POST_RADIUS := 0.3
 const POST_OUTLINE := 0.05
 const DASH_FRACTION := 0.6      ## how much of each ring segment is drawn (the rest is a gap)
 const RING_WIDTH := 0.55
-const OUTRO_WALL_TIME := 0.4
-const OUTRO_RING_TIME := 0.35
+const OUTRO_WALL_TIME := 1.0
+const OUTRO_RING_TIME := 0.9
 const RING_DRAW_TIME := 0.5     ## total time for the ground ring to sweep fully around
 const RING_POP_TIME := 0.12     ## how long each individual ring segment's own pop-in takes
 const WALL_GROW_TIME := 0.45    ## how long the walls take to rise once the ring's done
@@ -291,18 +291,18 @@ func play_outro() -> void:
 	tw.tween_property(_platform_mesh, "scale", Vector3.ZERO, OUTRO_RING_TIME + 0.2) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_method(_set_wall_growth, 1.0, 0.0, OUTRO_WALL_TIME) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)   # sinks smoothly, no snap at the end
 	for i in _ring_pieces.size():
 		var start_t := OUTRO_RING_TIME * float(i) / float(_ring_pieces.size())
-		tw.tween_property(_ring_pieces[i], "scale", Vector3.ZERO, 0.15) \
+		tw.tween_property(_ring_pieces[i], "scale", Vector3.ZERO, 0.3) \
 				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	for k in _posts.size():
 		var post := _posts[k]
 		var start_t := OUTRO_RING_TIME * float(_post_segment[k]) / float(_ring_pieces.size())
-		tw.tween_property(post, "scale", Vector3.ZERO, 0.2) \
+		tw.tween_property(post, "scale", Vector3.ZERO, 0.3) \
 				.set_delay(start_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 		tw.tween_callback(VFX.shatter.bind(self, post.global_position + Vector3.UP * POST_HEIGHT * 0.5, Color.WHITE, 0.7)) \
-				.set_delay(start_t + 0.15)
+				.set_delay(start_t + 0.25)
 	await tw.finished
 	await get_tree().create_timer(0.35, false).timeout   # let the last puffs play out
 
