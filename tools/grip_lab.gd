@@ -9,16 +9,27 @@ extends Node3D
 
 const KRITS := preload("res://assets/player/Krits.glb")
 const SWORD := preload("res://assets/equipments/sword_wooden.glb")
+const BOW := preload("res://assets/equipments/bow_wooden.glb")
+const STAFF := preload("res://assets/equipments/staff_apprentice.glb")
 const SHIELD := preload("res://assets/equipments/shield_wooden.glb")
 const SWORD_SCALE := 0.3
 const SWORD_OFFSET := Vector3(0.0, 0.1, 0.0)
 const SWORD_ROT := Vector3(0.0, 0.0, 180.0)
+const BOW_SCALE := 0.3
+const BOW_OFFSET := Vector3(0.0, -0.3, 0.0)
+const STAFF_SCALE := 0.28
+const STAFF_OFFSET := Vector3(0.0, -0.315, 0.0)
 const SHIELD_SCALE := 0.26
 const HEIGHT := 1.8   ## Player.STAND_HEIGHT
 const SHIELD_BONE := &"LowerArm.L"
 const WEAPON_BONE := &"LowerArm.R"
 
 @export var grips: HandGrips
+## Which weapon is shown in the right hand; the grip fields for that weapon are the ones that apply.
+@export_enum("sword", "bow", "staff") var weapon := "sword":
+	set(v):
+		weapon = v
+		_show_weapon()
 @export_enum("idle", "run", "attack1", "attack2", "attack3", "crouch_idle", "falling", "ground_pound", "ground_pound_land") var pose := "idle":
 	set(v):
 		pose = v
@@ -41,6 +52,7 @@ func _ready() -> void:
 		return
 	_shield_grip = _make_grip(SHIELD_BONE, SHIELD, SHIELD_SCALE, Vector3.ZERO, Vector3.ZERO)
 	_weapon_grip = _make_grip(WEAPON_BONE, SWORD, SWORD_SCALE, SWORD_OFFSET, SWORD_ROT)
+	_show_weapon()
 	_play()
 
 func _process(_delta: float) -> void:
@@ -48,8 +60,35 @@ func _process(_delta: float) -> void:
 		return
 	_shield_grip.position = grips.shield_offset
 	_shield_grip.rotation_degrees = grips.shield_rotation_deg
-	_weapon_grip.position = grips.weapon_offset
-	_weapon_grip.rotation_degrees = grips.weapon_rotation_deg
+	var g := grips.weapon_grip(["sword", "bow", "staff"].find(weapon))
+	_weapon_grip.position = g[0]
+	_weapon_grip.rotation_degrees = g[1]
+
+## Swaps the model under the weapon grip for the chosen weapon.
+func _show_weapon() -> void:
+	if _weapon_grip == null:
+		return
+	for c in _weapon_grip.get_children():
+		c.queue_free()
+	var scene := SWORD
+	var scl := SWORD_SCALE
+	var off := SWORD_OFFSET
+	var rot := SWORD_ROT
+	if weapon == "bow":
+		scene = BOW
+		scl = BOW_SCALE
+		off = BOW_OFFSET
+		rot = Vector3.ZERO
+	elif weapon == "staff":
+		scene = STAFF
+		scl = STAFF_SCALE
+		off = STAFF_OFFSET
+		rot = Vector3.ZERO
+	var item := scene.instantiate() as Node3D
+	item.scale = Vector3.ONE * scl
+	item.position = off
+	item.rotation_degrees = rot
+	_weapon_grip.add_child(item)
 
 func _play() -> void:
 	if _anim != null and _anim.has_animation(pose):

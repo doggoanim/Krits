@@ -175,12 +175,16 @@ func _sync_hand_mode() -> void:
 		_place_models()
 
 ## Moves the worn models between their floating spots and the hand grips.
-## A staff always stays floating.
 func _place_models() -> void:
 	var shield_parent: Node3D = _shield_grip if _in_hand and _shield_grip else _anchor
 	_reparent(_shield_model, shield_parent)
-	var staff := Game.stats.equipped_weapon != null and Game.stats.equipped_weapon.kind == WeaponData.Kind.STAFF
-	var weapon_parent: Node3D = _staff_mount if staff else (_weapon_grip if _in_hand and _weapon_grip else _weapon_pivot)
+	var weapon := Game.stats.equipped_weapon
+	var staff := weapon != null and weapon.kind == WeaponData.Kind.STAFF
+	var weapon_parent: Node3D = _weapon_grip if _in_hand and _weapon_grip else (_staff_mount if staff else _weapon_pivot)
+	if _in_hand and _weapon_grip and weapon != null:
+		var g := grips.weapon_grip(weapon.kind)   # each kind of weapon is held differently
+		_weapon_grip.position = g[0]
+		_weapon_grip.rotation_degrees = g[1]
 	_reparent(_weapon_model, weapon_parent)
 
 func _reparent(model: Node3D, parent: Node3D) -> void:
