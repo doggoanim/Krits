@@ -35,18 +35,18 @@ const LOW_WALL_HEIGHT := 2.0       ## walls and obstacles lower than this don't 
 const FIT_HEIGHTS := [LOW_WALL_HEIGHT + 0.2, LOW_WALL_HEIGHT + 1.2]   ## probe heights above the origin: just over a low wall, so only tall ones are hit
 const FIT_MARGIN := 1.0            ## kept between the barrier and the wall it fits against (the floor disc extends 1.5 past the ring)
 const WALL_LAYER := 1 << 6      ## physics layer 7 — blocks the player; CameraRig also
-                                 ## collides with it so the camera can't peek through the
-                                 ## barrier during a fight
+								 ## collides with it so the camera can't peek through the
+								 ## barrier during a fight
 const WALL_HEIGHT := 90.0       ## tall enough that there's no realistic camera angle
-                                 ## (even zoomed out mid-fight) that sees over it
+								 ## (even zoomed out mid-fight) that sees over it
 const WALL_DEPTH_BELOW_GROUND := 20.0   ## how far the wall's COLLIDER (only) extends below
-                                 ## the ground height sampled at its segment's center —
-                                 ## the terrain can dip within a segment's own span even
-                                 ## though only its center point is raycast, which left a
-                                 ## gap a player could slide/roll under at the segment's
-                                 ## edges; purely underground so it's never visible
+								 ## the ground height sampled at its segment's center —
+								 ## the terrain can dip within a segment's own span even
+								 ## though only its center point is raycast, which left a
+								 ## gap a player could slide/roll under at the segment's
+								 ## edges; purely underground so it's never visible
 const WALL_VISIBLE_BELOW := 14.0   ## the wall's visible mesh also reaches this far underground, so it
-                                   ## shows through slopes/dips (the intro grows it up AND down)
+								   ## shows through slopes/dips (the intro grows it up AND down)
 const ORBS_BASE := 5
 const ORBS_PER_ENEMY := 2
 const ORB_HEIGHT := Vector2(1.8, 4.4)
@@ -67,7 +67,7 @@ const INTRO_DELAY := 1.0       ## enemies hold fire for this long after the reve
 ## ---- weapon-specific orb behavior (see _on_orb_hit()/_spawn_orbs()) ----
 const BOW_ARROW_WEIGHT := 0.6   ## vs. BOW_SHOOT_WEIGHT when randomly picking each orb's
 const BOW_SHOOT_WEIGHT := 0.4   ## kind — weighted more toward arrows since a shoot orb
-                                 ## spends the whole stack in one go
+								 ## spends the whole stack in one go
 const STAFF_SLOW_MULT := 0.5
 const STAFF_SLOW_TIME := {1: 6.0, 2: 10.0, 3: 30.0}   ## Ice slow duration by queued runes
 ## How long each element's status effect lasts once a spell applies it —
@@ -82,16 +82,16 @@ const PILLAR_DAMAGE_MULT := {1: 2.0, 2: 2.5, 3: 7.0}   ## Earth cast while armor
 const STAFF_BUFFER_MAX := 3        ## queuing a 4th overloads the staff instead — see _overload_staff()
 const STAFF_BUFFER_TIMEOUTS := [6.0, 4.0, 3.0]  ## seconds of not queueing a new rune before one fizzles, by how many are queued (1, 2, 3) — more runes, less patience
 const STAFF_OVERLOAD_DAMAGE := 15.0   ## self-inflicted, pierces shield (Player.hit()'s pierces_shield) —
-                                        ## an overload is a mistake, not something a shield should soften
+										## an overload is a mistake, not something a shield should soften
 const STAFF_OVERLOAD_FLING_UP := 8.0     ## vertical pop from an overload — gentler than a real
 const STAFF_OVERLOAD_FLING_PUSH := 5.0   ## wall bounce (PlayerConfig.wall_bounce_up/push), just enough
-                                           ## to read as "that knocked me back" rather than a launch
+										   ## to read as "that knocked me back" rather than a launch
 const GROUND_PROBE_UP := 6.0    ## how far above a candidate point the ground raycast starts
 const GROUND_PROBE_DOWN := 50.0 ## how far down it's willing to look
 const MAX_GROUND_DEVIATION := 4.0  ## reject ground found further than this above/below the
-                                    ## arena's own base height — stops a spot that happens to
-                                    ## land on a disconnected nearby platform (or a gap with no
-                                    ## floor) from reading as part of this fight
+									## arena's own base height — stops a spot that happens to
+									## land on a disconnected nearby platform (or a gap with no
+									## floor) from reading as part of this fight
 const RANDOM_POINT_ATTEMPTS := 8
 const CLEAR_POINT_ATTEMPTS := 30   ## more tries when the spot must also be free of geometry
 const SPAWN_CLEARANCE_LIFT := 0.4  ## see is_spot_clear()
@@ -128,12 +128,12 @@ var loot: Dictionary = {}   ## item id -> count rolled from defeated enemies; ad
 var _arrow_count := 0   ## Bow only — how many arrows make up _arrow_stack (shown on the HUD)
 var _arrow_stack := 0.0   ## Bow only — damage banked by ARROW orbs, released by the next SHOOT orb
 var _rune_buffer: Array = []   ## Staff only — queued runes (Orb.Kind values), oldest first,
-                                 ## released/cleared by the next CAST orb
+								 ## released/cleared by the next CAST orb
 var _rune_buffer_t := 0.0      ## counts down to 0 while _rune_buffer isn't empty; see _process()
 var _sword_hits: Array[float] = []   ## Sword only — each banked hit's damage, newest last (getting hit takes the last one back)
 var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, dealt when the player lands
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
-                          ## target it without touching enemies/orbs
+						  ## target it without touching enemies/orbs
 var _over := false
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
@@ -141,7 +141,7 @@ var _weapon_kind := WeaponData.Kind.SWORD   ## the weapon style the fight is cur
 var _platform_mesh: MeshInstance3D            ## visible top of the arena's floor platform (see _build_platform())
 var _posts: Array[Node3D] = []                 ## chunky corner posts, one every POST_EVERY segments
 var _post_segment: Array[int] = []             ## which ring segment each post stands at (same order as _posts)
-                                                ## as _wall_meshes
+												## as _wall_meshes
 
 ## One horizontal probe from the fight's centre; the shortest distance to world
 ## geometry over the probe heights, or INF when nothing is within `reach`.
