@@ -60,9 +60,9 @@
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
+[ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
-[ext_resource type="Script" path="res://world/region_gate.gd" id="oz_gate"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -1415,7 +1415,9 @@ transform = Transform3D(-1.16058985e-07, 0, 3.2901123, 0, 0.071999975, 0, -2.655
 transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.6551201, 0, -1.4381537e-07, 12.643126, 2.9802322e-07, -35.12921)
 
 [node name="FieldGate" type="Area3D" parent="." unique_id=1900000010]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 34)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 47)
+collision_layer = 0
+collision_mask = 2
 script = ExtResource("oz_gate")
 target_level = "res://world/hub_field.tscn"
 target_spawn_id = &"from_chesburg"
