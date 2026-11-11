@@ -10,7 +10,7 @@ extends RefCounted
 ##   * Fish only notice / fight swimmers, land enemies only land players.
 ##   * A fight needs a real water column (MIN_FIGHT_DEPTH, surface to seabed).
 
-const MIN_FIGHT_DEPTH := 3.0      ## metres of water, surface to seabed, below which no fish fight starts
+const MIN_FIGHT_DEPTH := 4.0      ## metres of water, surface to seabed, below which no fish fight starts
 const SEABED_PROBE := 80.0        ## how far down the seabed is searched for
 const CEILING_GAP := 0.15         ## extra headroom (x STAND_HEIGHT) kept under the surface-jump threshold
 

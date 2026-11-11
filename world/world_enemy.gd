@@ -168,7 +168,7 @@ func _physics_process(delta: float) -> void:
 	_recover_t = maxf(0.0, _recover_t - delta)
 	_aggro_cd = maxf(0.0, _aggro_cd - delta)
 	if data.aquatic and _water == null:
-		_water = WaterVolume.over(global_position)   # the pool it was placed in
+		_water = WaterVolume.at(global_position)   # the pool it was placed in
 	if _player == null:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
 		if _player == null:
@@ -519,4 +519,4 @@ func _move_in_water(delta: float) -> void:
 
 ## Is the fish's body, with the surface margin, still inside the water at `pos`?
 func _inside_water(pos: Vector3) -> bool:
-	return _water == null or (_water.covers_xz(pos) and pos.y + 0.7 * data.size + FISH_SURFACE_MARGIN <= _water.surface_world_y())
+	return _water == null or _water.contains_point(pos + Vector3.UP * (0.7 * data.size + FISH_SURFACE_MARGIN))
