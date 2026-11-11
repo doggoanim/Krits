@@ -4,9 +4,9 @@ extends PlayerState
 func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.set_crouching(true)
 
-## A little bounce when standing back up normally — not when chaining into a
-## roll or falling off a ledge, where the uncrouch pose would just get
-## overridden by that state's own animation a frame later anyway.
+## A little bounce when standing back up normally — not when falling off a
+## ledge, where the uncrouch pose would just get overridden by that state's
+## own animation a frame later anyway.
 func exit(next: StringName) -> void:
 	if next == &"Ground":
 		player.visual.squash_stretch(player.visual.uncrouch_bounce_y, player.visual.uncrouch_bounce_xz)
@@ -19,9 +19,7 @@ func physics_update(delta: float) -> void:
 			p.start_jump(c.jump_velocity)
 			return
 		print("[JumpDebug] Crouch jump suppressed: no headroom (can_stand() false)")
-	if Input.is_action_just_pressed(&"roll_dive") and p.roll_cd <= 0.0:
-		machine.transition_to(&"Roll")
-		return
+	# No rolling out of a crouch: stand up first (release crouch), then roll.
 	if not Input.is_action_pressed(&"crouch_pound") and p.can_stand():
 		machine.transition_to(&"Ground")
 		return
