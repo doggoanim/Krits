@@ -33,15 +33,43 @@ func _ready() -> void:
 	_streaks.spread = 0.0
 	_streaks.gravity = Vector3.ZERO
 	_streaks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var box := BoxMesh.new()
-	box.size = Vector3(0.035, 1.6, 0.035)
+	# A thin quad turned along its travel direction, fading out toward both
+	# tips (so a streak has no hard ends) and fading in/out over its life (so
+	# it never pops into or out of existence).
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.07, 2.2)
+	var tip := Gradient.new()
+	tip.set_color(0, Color(1, 1, 1, 0))
+	tip.set_color(1, Color(1, 1, 1, 0))
+	tip.add_point(0.5, Color(1, 1, 1, 1))
+	var tex := GradientTexture2D.new()
+	tex.gradient = tip
+	tex.fill_from = Vector2(0.5, 0.0)
+	tex.fill_to = Vector2(0.5, 1.0)
+	tex.width = 8
+	tex.height = 64
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(1, 1, 1, 0.55)
-	mat.no_depth_test = false
-	box.material = mat
-	_streaks.mesh = box
+	mat.albedo_texture = tex
+	mat.vertex_color_use_as_albedo = true
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.billboard_keep_scale = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	quad.material = mat
+	_streaks.particle_flag_align_y = true
+	var life := Gradient.new()
+	life.set_color(0, Color(1, 1, 1, 0))
+	life.set_color(1, Color(1, 1, 1, 0))
+	life.add_point(0.2, Color(1, 1, 1, 0.75))
+	life.add_point(0.6, Color(1, 1, 1, 0.75))
+	_streaks.color_ramp = life
+	var shrink := Curve.new()
+	shrink.add_point(Vector2(0.0, 0.6))
+	shrink.add_point(Vector2(0.3, 1.0))
+	shrink.add_point(Vector2(1.0, 0.25))
+	_streaks.scale_amount_curve = shrink
+	_streaks.mesh = quad
 	add_child(_streaks)
 
 func _physics_process(delta: float) -> void:
