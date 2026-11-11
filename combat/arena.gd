@@ -899,9 +899,7 @@ func _end(victory: bool) -> void:
 	Events.player_landed.disconnect(_on_player_landed)
 	Events.player_died.disconnect(_on_player_died)
 	Events.player_hurt.disconnect(_on_player_hurt)
-	for c in get_children():
-		if c is Bullet:
-			c.queue_free()
+	_wind_down()
 	for o in orbs:
 		if is_instance_valid(o):
 			o.break_apart()   # any orbs still unclaimed break instead of just vanishing
@@ -918,6 +916,31 @@ func _end(victory: bool) -> void:
 	Events.arrows_changed.emit(0)
 	Events.encounter_ended.emit(self, victory)
 	finished.emit(victory)
+
+## Everything the fight left lying around fades out instead of blinking away
+## when the arena is freed: slime puddles stop hurting and dissolve, bullets
+## shrink to nothing, telegraphs fade, and any enemy still standing (the player
+## lost) pops into shards.
+func _wind_down() -> void:
+	for c in get_children():
+		if c is SlimePuddle:
+			(c as SlimePuddle).dissolve()
+		elif c is Telegraph:
+			(c as Telegraph).fade_out()
+		elif c is Bullet:
+			var b := c as Bullet
+			b.set_physics_process(false)
+			b.monitoring = false
+			var tw := b.create_tween()
+			tw.tween_property(b, "scale", Vector3.ONE * 0.02, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+			tw.tween_callback(b.queue_free)
+		elif c is Enemy and not (c as Enemy)._dying:
+			var e := c as Enemy
+			VFX.shatter(self, e.global_position + Vector3.UP * 0.6, e.data.color, 0.9)
+			e.set_physics_process(false)   # stops attacking and moving while it pops
+			var tw := e.create_tween()
+			tw.tween_property(e, "scale", Vector3.ONE * 0.02, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+			tw.tween_callback(e.queue_free)
 
 # ---------------------------------------------------------------- barrier geometry
 

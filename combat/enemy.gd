@@ -350,6 +350,7 @@ func take_damage(amount: float) -> void:
 	if hp <= 0.0:
 		_dying = true
 		_fx.clear_all()
+		_dissolve_puddles()   # its slime trail dies with it — no more damage from it
 		defeated.emit(self)
 		if _visual:
 			var death_len := _visual.play_death()
@@ -359,6 +360,13 @@ func take_damage(amount: float) -> void:
 		queue_free()
 
 # ---------------------------------------------------------------- slime trail
+
+func _dissolve_puddles() -> void:
+	if arena == null:
+		return
+	for c in arena.get_children():
+		if c is SlimePuddle and (c as SlimePuddle).source == self:
+			(c as SlimePuddle).dissolve()
 
 func _update_puddle_trail(delta: float) -> void:
 	if not armed or not data.leaves_puddle_trail:
@@ -381,6 +389,7 @@ func _spawn_puddle(pos: Vector3, radius: float) -> void:
 	p.damage = data.puddle_damage
 	p.tick_interval = data.puddle_tick_interval
 	p.lifetime = data.puddle_lifetime
+	p.source = self
 	arena.add_child(p)
 	var ground_pos := pos
 	ground_pos.y = arena.ground_height(pos)

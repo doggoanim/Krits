@@ -19,6 +19,8 @@ const GROUND_CLEARANCE := 0.08   ## lifts the flat quad above the ground it's dr
 @export var tick_interval := 0.9
 @export var lifetime := 5.0
 
+var source: Node   ## the enemy that left it; when that enemy dies the puddle dissolves with it
+var _dissolving := false
 var _player: Player
 var _tick_t := 0.0
 var _life_t := 0.0
@@ -90,6 +92,14 @@ func _on_body_exited(body: Node3D) -> void:
 		_player = null
 
 func _dissolve() -> void:
+	dissolve()
+
+## Shrinks away and stops hurting at once (the damage and slow end the instant
+## this is called, not when the shrink finishes). Safe to call repeatedly.
+func dissolve() -> void:
+	if _dissolving:
+		return
+	_dissolving = true
 	set_physics_process(false)
 	monitoring = false
 	if _player:
