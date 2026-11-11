@@ -71,7 +71,7 @@
 [sub_resource type="Resource" id="OzMood"]
 script = ExtResource("oz_mood")
 haze_color = Color(0.78, 0.88, 0.96, 1)
-haze_density = 0.012
+haze_density = 0.0025
 
 [sub_resource type="BoxMesh" id="BoxMesh_bf34x"]
 size = Vector3(10.715, 0.35, 12.595)
@@ -1427,7 +1427,6 @@ transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.655
 script = ExtResource("oz_streamer")
 
 [node name="EndlessWater" type="MeshInstance3D" parent="OpenWorld" unique_id=1900000002]
-material_override = SubResource("ShaderMaterial_qjukg")
 script = ExtResource("oz_water")
 surface_y = -0.84
 
@@ -1436,6 +1435,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -320)
 script = ExtResource("oz_zone")
 scene = ExtResource("oz_isle")
 mood = SubResource("OzMood")
-load_radius = 200.0
-unload_radius = 260.0
+load_radius = 150.0
+unload_radius = 200.0
 mood_radius = 150.0

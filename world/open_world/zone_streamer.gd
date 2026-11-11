@@ -7,9 +7,9 @@ extends Node
 ## Zones load without a loading screen. Interiors and dungeons stay
 ## door-swapped levels.
 
-## Haze density outside every zone's mood. Higher = the lake fades out sooner,
-## so the town reads as a small island. Negative keeps the level's own value.
-@export var base_haze_density := 0.012
+## Haze density outside every zone's mood. Negative keeps the level's own value.
+## (The lake's fade to the horizon is done by EndlessWater's own shader.)
+@export var base_haze_density := -1.0
 
 const CHECK_INTERVAL := 0.25
 const FOG_BLEND_SPEED := 1.5

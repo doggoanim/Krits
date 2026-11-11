@@ -16,6 +16,9 @@ func _ready() -> void:
 	plane.subdivide_width = 4
 	plane.subdivide_depth = 4
 	mesh = plane
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://world/open_world/endless_water.gdshader")
+	material_override = mat
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	extra_cull_margin = extent
 
