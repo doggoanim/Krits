@@ -10,11 +10,11 @@
 > What did you call me here for? -> info
 
 == info ==
-[sad][i]My[/i] old friend, [color=#a86f00]Mayor Cox[/color][/sad], from the [wave][color=#a86f00]Desert Village[/color][/wave] has told [i]me[/i] that her [whisper]little[/whisper] [color=#a86f00]village[/color] has been suffering from a month-long drought.
+[sad][i]My[/i] old friend, [color=#a86f00]Mayor Cox[/color][/sad], from the [wave][color=#a86f00]Desert Town[/color][/wave] has told [i]me[/i] that her [whisper]little[/whisper] [color=#a86f00]town[/color] has been suffering from a month-long drought.
 > So? -> info_2
 
 == info_2 ==
-It [shake]would[/shake] be great help [bounce]diplomatically[/bounce] if you can, deliver some of our [color=#1a5fb4]water spirits[/color] to their village to sell them.
+It [shake]would[/shake] be great help [bounce]diplomatically[/bounce] if you can, deliver some of our [color=#1a5fb4]water spirits[/color] to their town to sell them.
 > Wait, what spirits? -> water_spirit_info
 > Why me specifically? -> why_me_info
 
@@ -32,10 +32,10 @@ In [i]my[/i] well. [i]I[/i] have had them for a long time, [i]plenty[/i] in fact
 > Ughhhh, fine -> accepted [set water_quest_accepted]
 
 == accepted ==
-[give lantern] Splendid! Take this [color=#9a6b00]lantern[/color], jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Village[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
+[give lantern] Splendid! Take this [color=#9a6b00]lantern[/color], jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Town[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
 
 == reminder ==
-Still here? Jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Village[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
+Still here? Jump into the well and keep going down. The spirits are at the very bottom. Bring [color=#1a5fb4]them[/color] to the [wave][color=#a86f00]Desert Town[/color][/wave]'s [color=#a86f00]mayor[/color] and tell her [color=#9a6b00]200 gold[/color] each.
 
 == thanks ==
 The desert has water again, thanks to you. Chesburg is proud. Take a rest. You've earned it.
