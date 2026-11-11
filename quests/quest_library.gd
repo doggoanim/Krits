@@ -3,7 +3,7 @@ extends RefCounted
 ## Code-defined quest catalog (same spirit as ItemLibrary/AbilityLibrary).
 ## To add a quest: write a builder, list it in all_quests(), and add its
 ## texts to data/descriptions.cfg under [quests]:
-##   <id>_title, <id>_desc, <id>_obj1, <id>_obj2 ...
+##   <id>_title, <id>_desc
 ## Hooking it into the world:
 ##   - start it: set its `start_flag` from a dialogue (DialogueNode/Choice
 ##     `sets_flag`) or leave the flag empty to be active from the start.
@@ -86,9 +86,7 @@ static func _make(id: StringName, main := false) -> QuestData:
 	q.is_main = main
 	return q
 
-## Fills title/description/objective text from descriptions.cfg.
+## Fills title and description from descriptions.cfg.
 static func _texts(q: QuestData) -> void:
 	q.title = Descriptions.text("quests", StringName(String(q.id) + "_title"), String(q.id).capitalize())
 	q.description = Descriptions.text("quests", StringName(String(q.id) + "_desc"))
-	for i in q.objectives.size():
-		q.objectives[i].text = Descriptions.text("quests", StringName("%s_obj%d" % [q.id, i + 1]))

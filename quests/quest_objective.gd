@@ -10,7 +10,8 @@ extends Resource
 ##             (its `reached_<id>` flag).
 ##   COLLECT — the bag holds `amount` of item `target` (consumed on quest
 ##             completion when `consume` is set).
-## Display text lives in data/descriptions.cfg ([quests] <quest>_obj<n>).
+## Objectives have no display text: a quest's description (data/descriptions.cfg)
+## says what to do.
 
 enum Kind { FLAG, DEFEAT, REACH, COLLECT }
 
@@ -18,7 +19,6 @@ enum Kind { FLAG, DEFEAT, REACH, COLLECT }
 @export var target: StringName = &""
 @export var amount := 1          ## COLLECT only
 @export var consume := false     ## COLLECT only: take the items when the quest completes
-@export var text := ""           ## shown in the tracker; filled from descriptions.cfg
 
 static func make(k: Kind, tgt: StringName, amt := 1, consume_items := false) -> QuestObjective:
 	var o := QuestObjective.new()
