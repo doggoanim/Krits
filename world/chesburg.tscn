@@ -203,6 +203,9 @@ transform = Transform3D(10.200001, 0, 0, 0, 20.638798, 0, 0, 0, 6.4320006, -6.80
 [node name="rock_terrain9" parent="Terrain" unique_id=2091630497 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.7429996, 0, 0, 0, 7.2799997, 0, 0, 0, 3.34464, 34.657997, 6.0386243, 20.238266)
 
+[node name="rock_terrain19" parent="Terrain" unique_id=100327543 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.8971997, 0, 0, 0, 7.2799997, 0, 0, 0, 2.2124794, 38.657997, 7.238625, 25.738266)
+
 [node name="dirt_terrain" parent="Terrain" unique_id=1284299051 instance=ExtResource("27_2m3w5")]
 transform = Transform3D(5.077881, 0, 0, 0, 2.7, 0, 0, 0, 18.198689, 34.986988, 2.6, -15.7889595)
 
@@ -316,7 +319,7 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.0
 shape = SubResource("BoxShape3D_qie8l")
 
 [node name="breakable_floor" type="StaticBody3D" parent="Terrain" unique_id=1343628368]
-transform = Transform3D(-2.0799997, 7.976666e-09, 7.693204e-08, 1.4774449e-07, -1.9331798e-08, 0.715, 5.217668e-08, 0.64638, 4.5678398e-08, 0.46999788, -1.6250004, -93.0418)
+transform = Transform3D(-2.0799997, 9.572e-09, 7.693204e-08, 1.4774449e-07, -2.319816e-08, 0.715, 5.217668e-08, 0.77565604, 4.5678398e-08, 33.469997, 12.875, 25.6582)
 collision_layer = 129
 collision_mask = 129
 script = ExtResource("7_w45hh")

@@ -28,7 +28,7 @@ In [i]my[/i] well. [i]I[/i] have had them for a long time, [i]plenty[/i] in fact
 > But why me? -> why_me_info
 
 == rejected ==
-[shake]N-[pause=0.5]No?[/shake][pause=0.8] [angry]Listen here[/angry] young boy! This is why [shake][bounce]NOBODY[/bounce][/shake] in this [color=#a02020]town[/color] likes you. What [i]I[/i], am doing is [i]giving[/i] you an opportunity to prove [i]your[/i] worth to this [color=#a02020]town[/color].
+[shake]N-[pause=0.5]No?[/shake][pause=0.8] Listen [i]my[/i] dear! What [i]I[/i], am doing is [i]giving[/i] you an opportunity to prove [i]your[/i] worth to this [color=#a02020]town[/color].
 > Ughhhh, fine -> accepted [set water_quest_accepted]
 
 == accepted ==
