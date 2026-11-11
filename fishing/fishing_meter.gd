@@ -1,17 +1,20 @@
 class_name FishingMeter
 extends Control
-## The reel-in meter, drawn in the game's inked, hand-cut style: a cream paper
-## panel with a black outline, a watery track holding the catch zone (green,
+## The reel-in meter, drawn in the game's inked, hand-cut style: the same
+## hand-drawn button plate as the key hints (button_with_shadow.png) as its backing, a watery track holding the catch zone (green,
 ## outlined) and the darting fish (a little drawn fish that faces the way it
 ## swims), and a progress bar underneath that warms from red to green as the
 ## catch gets closer. FishingSession only feeds it numbers; all the looks live here.
 
-const PANEL_SIZE := Vector2(540.0, 92.0)
-const PAD := 16.0
+const PLATE_TEXTURE := preload("res://assets/ui/button_with_shadow.png")
+const PLATE_REGION := Rect2(153, 168, 1633, 775)   ## same crop as KeyHintPlate: the hand-drawn button
+const PANEL_SIZE := Vector2(560.0, 116.0)
+const PAD_X := 38.0                                ## keeps the contents inside the button's inked edge
+const PAD_TOP := 26.0
+const PAD_BOTTOM := 28.0
 const TRACK_HEIGHT := 34.0
 const PROGRESS_HEIGHT := 12.0
 const INK := Color(0.07, 0.07, 0.09)
-const PAPER := Color(1.0, 0.975, 0.92)
 const WATER := Color(0.55, 0.8, 0.92)
 const WATER_DEEP := Color(0.38, 0.65, 0.82)
 const ZONE := Color(0.45, 0.9, 0.5)
@@ -27,33 +30,29 @@ var fish_facing := 1.0    ## +1 swimming right, -1 left
 var progress := 0.3       ## 0..1
 var covered := false      ## is the zone on the fish right now?
 
-var _panel := StyleBoxFlat.new()
+var _plate: AtlasTexture
 var _t := 0.0
 
 func _init() -> void:
 	custom_minimum_size = PANEL_SIZE
 	size = PANEL_SIZE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.bg_color = PAPER
-	_panel.border_color = INK
-	_panel.set_border_width_all(4)
-	_panel.set_corner_radius_all(18)
-	_panel.shadow_color = Color(0.0, 0.0, 0.0, 0.3)
-	_panel.shadow_size = 6
-	_panel.shadow_offset = Vector2(0.0, 4.0)
+	_plate = AtlasTexture.new()
+	_plate.atlas = PLATE_TEXTURE
+	_plate.region = PLATE_REGION
 
 func _process(delta: float) -> void:
 	_t += delta
 	queue_redraw()
 
 func _track_rect() -> Rect2:
-	return Rect2(PAD, PAD - 2.0, PANEL_SIZE.x - PAD * 2.0, TRACK_HEIGHT)
+	return Rect2(PAD_X, PAD_TOP, PANEL_SIZE.x - PAD_X * 2.0, TRACK_HEIGHT)
 
 func _progress_rect() -> Rect2:
-	return Rect2(PAD, PANEL_SIZE.y - PAD - PROGRESS_HEIGHT + 2.0, PANEL_SIZE.x - PAD * 2.0, PROGRESS_HEIGHT)
+	return Rect2(PAD_X, PANEL_SIZE.y - PAD_BOTTOM - PROGRESS_HEIGHT, PANEL_SIZE.x - PAD_X * 2.0, PROGRESS_HEIGHT)
 
 func _draw() -> void:
-	draw_style_box(_panel, Rect2(Vector2.ZERO, PANEL_SIZE))
+	draw_texture_rect(_plate, Rect2(Vector2.ZERO, PANEL_SIZE), false)   # the game's hand-drawn button, as the backing
 	_draw_track()
 	_draw_progress()
 

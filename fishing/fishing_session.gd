@@ -24,7 +24,7 @@ const PROGRESS_GAIN := 0.3         ## per second while the zone covers the fish
 const PROGRESS_LOSS := 0.2         ## per second while it doesn't
 const HOOK_ACCEL := 3.2
 const HOOK_MAX_SPEED := 0.9
-const BAR_SIZE := Vector2(540.0, 92.0)   ## the meter's footprint (see FishingMeter.PANEL_SIZE)
+const BAR_SIZE := Vector2(560.0, 116.0)   ## the meter's footprint (see FishingMeter.PANEL_SIZE)
 
 var _player: Player
 var _water: WaterVolume
