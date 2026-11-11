@@ -427,7 +427,7 @@ transform = Transform3D(-2.0799997, 9.572e-09, 7.693204e-08, 1.4774449e-07, -2.3
 collision_layer = 129
 collision_mask = 129
 script = ExtResource("7_w45hh")
-block_id = &"hidden_chest_1"
+block_id = &"hidden_block_1"
 size = Vector3(3.5, 6, 1)
 material = SubResource("CellPlugMat")
 break_sound = ExtResource("9_tv1o7")
@@ -473,6 +473,9 @@ transform = Transform3D(-5.7719237e-08, 0, 0.70199984, 0, 0.05849998, 0, -1.3204
 
 [node name="nocol_rock_terrain17" parent="Terrain" unique_id=1575650712 instance=ExtResource("25_3y8fk")]
 transform = Transform3D(-1.5006998e-07, 0, 1.6847994, 0, 0.05849998, 0, -3.4332008, 0, -7.364492e-08, 26.447855, 18.76, 19.626665)
+
+[node name="nocol_rock_terrain20" parent="Terrain" unique_id=1382903783 instance=ExtResource("25_3y8fk")]
+transform = Transform3D(-2.7465603, 0, -1.4728982e-07, 0, 0.05849998, 0, 2.4011194e-07, 0, -1.6847993, 34.447853, 13.360001, 19.626665)
 
 [node name="nocol_rock_terrain18" parent="Terrain" unique_id=1612299469 instance=ExtResource("25_3y8fk")]
 transform = Transform3D(-7.503499e-08, 0, 2.5474167, 0, 0.058499973, 0, -1.7166003, 0, -1.1135111e-07, 20.447855, 18.76, 24.626665)
@@ -810,6 +813,21 @@ transform = Transform3D(-0.8660254, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.8
 
 [node name="rock_9" parent="Props/eyecandies" unique_id=1307831072 instance=ExtResource("10_jq25j")]
 transform = Transform3D(-0.8660254, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.8660254, 3.609131, 20.043484, 27.862457)
+
+[node name="rock_10" parent="Props/eyecandies" unique_id=834929639 instance=ExtResource("8_cx2cw")]
+transform = Transform3D(-0.34371778, 0, 0.30024052, 0, 0.3, 0, -0.19844559, 0, -0.52003175, 35.461563, 0.040588886, 24.791365)
+
+[node name="rock_11" parent="Props/eyecandies" unique_id=1596015206 instance=ExtResource("9_38blh")]
+transform = Transform3D(-0.34371778, 0, 0.30024052, 0, 0.3, 0, -0.19844559, 0, -0.52003175, 34.36442, 0.039752897, 25.306618)
+
+[node name="rock_13" parent="Props/eyecandies" unique_id=1698788028 instance=ExtResource("9_38blh")]
+transform = Transform3D(0.39328963, 0, 0.14040379, 0, 0.42000002, 0, -0.10538165, 0, 0.52399445, 32.86442, 0.039752897, 26.406618)
+
+[node name="rock_14" parent="Props/eyecandies" unique_id=1954760805 instance=ExtResource("9_38blh")]
+transform = Transform3D(0.30936593, 0, -0.6107408, 0, 0.42000002, 0, 0.53583735, 0, 0.35261124, 31.864422, 0.039752897, 24.806618)
+
+[node name="rock_12" parent="Props/eyecandies" unique_id=248008845 instance=ExtResource("10_jq25j")]
+transform = Transform3D(-0.34371778, 0, 0.30024052, 0, 0.3, 0, -0.19844559, 0, -0.52003175, 35.310677, 0.04146722, 26.755724)
 
 [node name="rock_6" parent="Props/eyecandies" unique_id=2106869582 instance=ExtResource("16_3y8fk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.739195, 0.64848197, -2.9766304)
