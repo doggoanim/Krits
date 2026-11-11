@@ -11,9 +11,6 @@ const FIELD_RADIUS := 260.0
 const GATE_DISTANCE := 230.0
 const GATES: Array = [
 	[&"chesburg", "Chesburg", 180.0, "res://world/chesburg.tscn", &"from_field"],
-	[&"north", "Northern Pass", 0.0, "", &"start"],
-	[&"east", "Eastern Woods", 90.0, "", &"start"],
-	[&"west", "Western Hills", 270.0, "", &"start"],
 ]
 const TREES: Array[PackedScene] = [
 	preload("res://assets/world/nature/tree_chesburg_1.glb"),
