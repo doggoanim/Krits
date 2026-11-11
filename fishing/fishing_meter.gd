@@ -16,9 +16,9 @@ const TRACK_HEIGHT := 34.0
 const PROGRESS_HEIGHT := 12.0
 const INK := Color(0.07, 0.07, 0.09)
 const WATER := Color(0.3, 0.82, 0.93)         ## the water's top colour (shallow_color in world/water/water.tscn)
-const RIPPLE_POINTS := 8
-const RIPPLE_LENGTH := 26.0   ## px, along the track
-const RIPPLE_WAVE := 3.0      ## px, how far it wiggles up and down
+const RIPPLE_POINTS := 18
+const RIPPLE_LENGTH := 76.0   ## px, along the track
+const RIPPLE_WAVE := 5.5      ## px, how far it wiggles up and down
 const WATER_DEEP := Color(0.22, 0.65, 0.78)    ## ripple lines: the same blue, a shade darker
 const ZONE := Color(0.569, 0.733, 0.306)        ## grass green (albedo_color in assets/materials/grass.tres)
 const ZONE_HIT := Color(0.69, 0.85, 0.4)       ## the same green, brighter while on the fish
@@ -95,9 +95,9 @@ func _draw_ripple(track: Rect2, x: float, y: float, phase: float) -> void:
 		if px < track.position.x + 6.0 or px > track.end.x - 6.0:
 			continue
 		var taper := sin(PI * float(k) / float(RIPPLE_POINTS - 1))   # ends stay on the line's own height
-		points.append(Vector2(px, y + sin(_t * 5.0 + phase * 1.7 + float(k) * 1.1) * RIPPLE_WAVE * taper))
+		points.append(Vector2(px, y + sin(_t * 6.0 + phase * 1.7 + float(k) * 0.75) * RIPPLE_WAVE * taper))
 	if points.size() >= 2:
-		draw_polyline(points, WATER_DEEP, 2.0)
+		draw_polyline(points, WATER_DEEP, 3.0, true)
 
 ## The fish is just the word "FISH", bobbing a little, in the game's font with an ink outline.
 func _draw_fish(center: Vector2) -> void:
