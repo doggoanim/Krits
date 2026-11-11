@@ -1,8 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://rervs2h3h4mm"]
 
-[ext_resource type="Script" path="res://tools/grip_lab.gd" id="1"]
-[ext_resource type="Resource" path="res://player/hand_grips.tres" id="2"]
+[ext_resource type="Script" uid="uid://cm211oj8sc7kt" path="res://tools/grip_lab.gd" id="1"]
+[ext_resource type="Resource" uid="uid://bu4hko5t14mwv" path="res://player/hand_grips.tres" id="2"]
 
-[node name="GripLab" type="Node3D"]
+[node name="GripLab" type="Node3D" unique_id=517076549]
 script = ExtResource("1")
 grips = ExtResource("2")

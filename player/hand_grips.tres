@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="HandGrips" format=3]
+[gd_resource type="Resource" script_class="HandGrips" format=3 uid="uid://bu4hko5t14mwv"]
 
-[ext_resource type="Script" path="res://player/hand_grips.gd" id="1"]
+[ext_resource type="Script" uid="uid://ct27serfljiod" path="res://player/hand_grips.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
-shield_offset = Vector3(0, -0.05, 0.1)
-shield_rotation_deg = Vector3(0, 90, 0)
-weapon_offset = Vector3(0, 0, 0)
-weapon_rotation_deg = Vector3(120, 90, 0)
+shield_offset = Vector3(-0.02, 0.325, 0.105)
+shield_rotation_deg = Vector3(-40.805, -8.69, 137.375)
+weapon_offset = Vector3(-0.025, 0.23, 0)
+weapon_rotation_deg = Vector3(-19.52, 92.315, -102.275)
