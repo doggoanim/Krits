@@ -607,7 +607,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.789513, 0.17931366, 57.50
 
 [node name="WaterVolume" type="Area3D" parent="Props/Water" unique_id=-1117962784]
 script = ExtResource("46_water_volume")
-size = Vector3(20, 3, 20)
+size = Vector3(20, 10, 20)
 
 [node name="lake_chesburg" parent="Props" unique_id=1685882827 instance=ExtResource("2_l8gsu")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -27.280123, 0.017999172, 0.9797595)
@@ -917,7 +917,7 @@ script = ExtResource("53_4t2cb")
 metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
 
 [node name="TestFish1" type="CharacterBody3D" parent="Enemies" unique_id=251097689]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0, 57)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, -4, 57)
 script = ExtResource("53_4t2cb")
 type = 3
 spawn_radius = 14.0
