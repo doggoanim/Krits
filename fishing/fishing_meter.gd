@@ -78,6 +78,14 @@ static func _hash(step: float, salt: float) -> float:
 ## A rounded box whose corners wander a little each redraw step, filled and
 ## inked. Replaces draw_style_box so the frame has the hand-drawn wobble.
 func _wobbly_box(rect: Rect2, fill: Color, radius: float, border := 0.0, salt := 0.0) -> void:
+	if rect.size.x < 1.0 or rect.size.y < 1.0:
+		return
+	# A box narrower than two corner radii (a nearly empty progress bar) would
+	# make the corners overlap into a polygon that can't be triangulated; shrink
+	# the corners, and the wobble with them, to fit.
+	var small := minf(rect.size.x, rect.size.y)
+	radius = minf(radius, small * 0.5)
+	var wobble := BOX_WOBBLE * minf(1.0, small / 14.0)
 	var step := floorf(_t * BOIL_RATE)
 	var pts := PackedVector2Array()
 	var centers := [
@@ -89,9 +97,14 @@ func _wobbly_box(rect: Rect2, fill: Color, radius: float, border := 0.0, salt :=
 	for c in 4:
 		for k in CORNER_STEPS + 1:
 			var ang := PI + (c + float(k) / CORNER_STEPS) * PI * 0.5
-			var wob := Vector2(_hash(step, salt + n * 1.3), _hash(step, salt + n * 1.3 + 50.0)) * BOX_WOBBLE
+			var wob := Vector2(_hash(step, salt + n * 1.3), _hash(step, salt + n * 1.3 + 50.0)) * wobble
 			pts.append(centers[c] + Vector2(cos(ang), sin(ang)) * radius + wob)
 			n += 1
+	if Geometry2D.triangulate_polygon(pts).is_empty():
+		draw_rect(rect, fill)   # the wobble tangled it up: fall back to a plain box this frame
+		if border > 0.0:
+			draw_rect(rect, INK, false, border)
+		return
 	draw_colored_polygon(pts, fill)
 	if border > 0.0:
 		var outline := pts.duplicate()
