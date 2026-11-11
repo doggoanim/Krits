@@ -15,10 +15,10 @@ const PAD_BOTTOM := 28.0
 const TRACK_HEIGHT := 34.0
 const PROGRESS_HEIGHT := 12.0
 const INK := Color(0.07, 0.07, 0.09)
-const WATER := Color(0.55, 0.8, 0.92)
-const WATER_DEEP := Color(0.38, 0.65, 0.82)
-const ZONE := Color(0.45, 0.9, 0.5)
-const ZONE_HIT := Color(0.65, 1.0, 0.55)
+const WATER := Color(0.3, 0.82, 0.93)         ## the water's top colour (shallow_color in world/water/water.tscn)
+const WATER_DEEP := Color(0.22, 0.65, 0.78)    ## ripple lines: the same blue, a shade darker
+const ZONE := Color(0.569, 0.733, 0.306)        ## grass green (albedo_color in assets/materials/grass.tres)
+const ZONE_HIT := Color(0.69, 0.85, 0.4)       ## the same green, brighter while on the fish
 const FISH_BODY := Color(1.0, 0.62, 0.2)
 const FISH_TEXT := "FISH"
 const FISH_FONT_SIZE := 24
@@ -99,5 +99,5 @@ func _draw_progress() -> void:
 	if frac > 0.02:
 		var fill := Rect2(r.position + Vector2(3.0, 3.0), Vector2((r.size.x - 6.0) * frac, r.size.y - 6.0))
 		var color := Color(0.95, 0.35, 0.3).lerp(Color(0.98, 0.85, 0.3), clampf(frac * 2.0, 0.0, 1.0))
-		color = color.lerp(Color(0.4, 0.85, 0.45), clampf(frac * 2.0 - 1.0, 0.0, 1.0))
+		color = color.lerp(ZONE, clampf(frac * 2.0 - 1.0, 0.0, 1.0))
 		draw_style_box(_rounded(color, 3), fill)
