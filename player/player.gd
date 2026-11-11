@@ -433,10 +433,11 @@ func safe_move_and_slide() -> void:
 		velocity = Vector3.ZERO
 	_try_step_up()
 	var pos_before := global_position
+	var intended := velocity   # move_and_slide() strips the into-wall part, so judge "trying to move" before it
 	move_and_slide()
 	if not velocity.is_finite():
 		velocity = Vector3.ZERO
-	_resolve_wedge(pos_before)
+	_resolve_wedge(pos_before, intended)
 
 ## A second, different safety net from the one above: a convex outside corner
 ## — e.g. a wall meeting a roof overhang's trim, especially if they're
@@ -458,11 +459,11 @@ const WEDGE_MOVE_EPSILON := 0.02 ## actual displacement below this (despite nonz
 const WEDGE_NUDGE_SPEED := 4.0
 var _wedge_t := 0.0
 
-func _resolve_wedge(pos_before: Vector3) -> void:
+func _resolve_wedge(pos_before: Vector3, intended: Vector3) -> void:
 	# Swimming into the lake bed or a bank is just pressing against it, not a
 	# wedge — "fixing" it nudged the swimmer upward along the surface normal,
 	# which read as rising on its own (worst when spamming dive on the bed).
-	if is_on_floor() or velocity.length() < WEDGE_MIN_SPEED or machine.current_name == &"Swim":
+	if is_on_floor() or intended.length() < WEDGE_MIN_SPEED or machine.current_name == &"Swim":
 		_wedge_t = 0.0
 		return
 	if global_position.distance_to(pos_before) > WEDGE_MOVE_EPSILON:
