@@ -265,7 +265,8 @@ func _physics_process(delta: float) -> void:
 	_update_auto_unstick(delta, on_floor)
 	if on_floor and not _was_on_floor:
 		can_dive = true
-		_pound_jumping = false
+		if velocity.y <= 0.0:   # a jump launched this very frame (pound-land combo) keeps its flag
+			_pound_jumping = false
 		# Only squash for a real fall, not a split-second floor-contact flicker
 		# (slopes/stairs/small bumps toggling is_on_floor() during plain walking).
 		if _air_t >= config.min_air_time_for_land_squash:
