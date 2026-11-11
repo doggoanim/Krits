@@ -138,11 +138,6 @@ func _ready() -> void:
 	# safe_margin (above) plus extra slide iterations gives move_and_slide()
 	# room to actually resolve both variants instead of freezing.
 	max_slides = 10
-	# Hitting a roof stops the rise and you drop, instead of sliding along its
-	# underside. Sliding is what drove the capsule into the crease of a V-shaped
-	# roof (two slopes converging) and jammed it there; with this a roof bonk is
-	# just a bonk, and there's nothing to wedge into in the first place.
-	slide_on_ceiling = false
 
 	_shape = CapsuleShape3D.new()
 	_shape.radius = RADIUS
