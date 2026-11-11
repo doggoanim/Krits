@@ -1,8 +1,6 @@
 [gd_scene format=3 uid="uid://ohysk81aypln"]
 
 [ext_resource type="Script" uid="uid://bchix0jpv46lx" path="res://addons/cyclops_level_builder/nodes/cyclops_block.gd" id="1_3nxol"]
-[ext_resource type="Script" path="res://world/well_atmosphere.gd" id="well_atmo_script"]
-[ext_resource type="Script" path="res://world/well_bats.gd" id="well_bats_script"]
 [ext_resource type="Script" uid="uid://u2kq7fluf2tu" path="res://addons/cyclops_level_builder/nodes/cyclops_blocks.gd" id="1_dxlgf"]
 [ext_resource type="Script" uid="uid://c5jpx1aoa7iso" path="res://addons/cyclops_level_builder/resources/data_vector_byte.gd" id="3_yugcs"]
 [ext_resource type="Script" uid="uid://dekcd1o0m0k3r" path="res://addons/cyclops_level_builder/resources/data_vector_float.gd" id="4_8grio"]
@@ -28,6 +26,8 @@
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="well_ambience_script"]
 [ext_resource type="AudioStream" uid="uid://jbaxxwgc2o27" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
+[ext_resource type="Script" uid="uid://dm1qdehj1rstx" path="res://world/well_atmosphere.gd" id="well_atmo_script"]
+[ext_resource type="Script" uid="uid://eaawxhybn36t" path="res://world/well_bats.gd" id="well_bats_script"]
 [ext_resource type="Script" uid="uid://d3tk6xu3wubgk" path="res://world/breakable_block.gd" id="well_breakable"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="well_chest"]
 [ext_resource type="Script" uid="uid://buuws64lmy323" path="res://world/glow_crystal.gd" id="well_crystal"]
@@ -37,19 +37,6 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
 [ext_resource type="Script" uid="uid://bv77sg604o5hi" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
-
-[sub_resource type="SphereMesh" id="Mesh_YuleBall"]
-radius = 0.28
-height = 0.56
-
-[sub_resource type="StandardMaterial3D" id="Mat_YuleBall"]
-albedo_color = Color(0.92, 0.22, 0.2, 1)
-emission_enabled = true
-emission = Color(0.9, 0.3, 0.2, 1)
-emission_energy_multiplier = 0.35
-
-[sub_resource type="SphereShape3D" id="Shape_YuleBall"]
-radius = 0.6
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -11358,6 +11345,19 @@ density = 0.04
 albedo = Color(0.55, 0.82, 0.9, 1)
 height_falloff = 1.4
 
+[sub_resource type="SphereShape3D" id="Shape_YuleBall"]
+radius = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_YuleBall"]
+albedo_color = Color(0.92, 0.22, 0.2, 1)
+emission_enabled = true
+emission = Color(0.9, 0.3, 0.2, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="SphereMesh" id="Mesh_YuleBall"]
+radius = 0.28
+height = 0.56
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sm61l"]
 albedo_color = Color(0.25512275, 0.2772886, 0.3437208, 1)
 albedo_texture = ExtResource("20_66osh")
@@ -12352,41 +12352,40 @@ spot_range = 14.0
 spot_angle = 18.0
 spot_angle_attenuation = 0.6
 
-[node name="Atmosphere" type="Node" parent="."]
+[node name="Atmosphere" type="Node" parent="." unique_id=1884471122]
 script = ExtResource("well_atmo_script")
 
-[node name="Bats" type="Node3D" parent="."]
+[node name="Bats" type="Node3D" parent="." unique_id=376407689]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.5, -0.3)
 script = ExtResource("well_bats_script")
 
-[node name="SpiritMotes" type="GPUParticles3D" parent="."]
+[node name="SpiritMotes" type="GPUParticles3D" parent="." unique_id=35003688]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.75, -21.5, -7.6)
 script = ExtResource("well_motes")
 area_size = Vector3(12, 6, 12)
 mote_count = 45
 color = Color(0.6, 1, 0.95, 0.85)
 glow_energy = 1.8
-mote_size = 0.05
 drift_speed = 0.14
 
-[node name="FloorMistSpirits" type="FogVolume" parent="."]
+[node name="FloorMistSpirits" type="FogVolume" parent="." unique_id=834659568]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47, -23, -10)
 size = Vector3(22, 3, 24)
 material = SubResource("FogMaterial_mist")
 
-[node name="YuleBall" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.3, 3.5)
+[node name="YuleBall" type="StaticBody3D" parent="." unique_id=989120316]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, -9.7, -39.5)
 script = ExtResource("well_pickup")
 item_id = &"yule_ball"
 pickup_id = &"yule_ball"
 prompt_text = "Press E to pick up"
 
-[node name="Collision" type="CollisionShape3D" parent="YuleBall"]
+[node name="Collision" type="CollisionShape3D" parent="YuleBall" unique_id=2105245992]
 shape = SubResource("Shape_YuleBall")
 
-[node name="Mesh" type="MeshInstance3D" parent="YuleBall"]
-mesh = SubResource("Mesh_YuleBall")
+[node name="Mesh" type="MeshInstance3D" parent="YuleBall" unique_id=311481444]
 material_override = SubResource("Mat_YuleBall")
+mesh = SubResource("Mesh_YuleBall")
 
 [node name="AccentLights" type="Node3D" parent="." unique_id=910000002]
 
@@ -12865,27 +12864,6 @@ script = ExtResource("27_odmq1")
 enemy_id = &"well_slime_1"
 spawn_radius = 12.0
 wander_radius = 2.5
-
-[node name="TestFish1" type="CharacterBody3D" parent="Enemies"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.5, -27.6, -14.0)
-script = ExtResource("27_odmq1")
-type = 3
-spawn_radius = 14.0
-wander_radius = 3.5
-
-[node name="TestFish2" type="CharacterBody3D" parent="Enemies"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.0, -28.2, -17.5)
-script = ExtResource("27_odmq1")
-type = 3
-spawn_radius = 14.0
-wander_radius = 3.5
-
-[node name="TestFish3" type="CharacterBody3D" parent="Enemies"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.5, -27.2, -10.5)
-script = ExtResource("27_odmq1")
-type = 3
-spawn_radius = 14.0
-wander_radius = 3.5
 
 [node name="Water" parent="." unique_id=691222566 instance=ExtResource("11_fhlm3")]
 transform = Transform3D(0.68999976, 0, 0, 0, 1, 0, 0, 0, 1, -45.789513, -24.820686, -14.09804)
