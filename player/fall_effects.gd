@@ -9,7 +9,9 @@ extends Node3D
 ## node as a whole, so it layers on top of the squash/stretch pops that act on
 ## the model inside it.
 
-@export var start_speed := 14.0        ## m/s downward before anything shows
+@export var start_speed := 26.0        ## m/s downward before anything shows
+@export var start_drop := 7.0          ## metres fallen before anything shows (a small hop or step never counts)
+@export var full_drop := 22.0          ## metres fallen for the full effect
 @export var full_stretch_y := 1.35     ## model height multiplier at terminal speed
 @export var full_stretch_xz := 0.85
 @export var stretch_follow := 10.0     ## how quickly the stretch eases in/out
@@ -78,7 +80,9 @@ func _physics_process(delta: float) -> void:
 	var target := 0.0
 	if _is_falling():
 		var top := maxf(_player.config.terminal_velocity - start_speed, 1.0)
-		target = clampf((-_player.velocity.y - start_speed) / top, 0.0, 1.0)
+		var by_speed := clampf((-_player.velocity.y - start_speed) / top, 0.0, 1.0)
+		var by_drop := clampf((_player.fall_drop() - start_drop) / maxf(full_drop - start_drop, 1.0), 0.0, 1.0)
+		target = minf(by_speed, by_drop)
 	_amount = lerpf(_amount, target, 1.0 - exp(-stretch_follow * delta))
 	if _amount < 0.01:
 		_amount = 0.0
