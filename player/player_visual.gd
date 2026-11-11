@@ -142,6 +142,12 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var pound_jump_stretch_xz := 0.62
 @export var pound_jump_stretch_time := 0.3
 @export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes
+@export var ceiling_squash_y := 0.72       ## head bonk on a roof (scaled by how hard you hit it)
+@export var ceiling_squash_xz := 1.25
+@export var ceiling_squash_time := 0.22
+@export var pound_ceiling_squash_y := 0.45 ## bonk after a ground-pound jump: much harder
+@export var pound_ceiling_squash_xz := 1.6
+@export var pound_ceiling_squash_time := 0.3
 
 var _squash_tween: Tween
 
@@ -467,6 +473,15 @@ func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+## Cosmetic head-bonk squash. `strength` 0..1 blends from no squash to the full
+## amount; `pound` uses the heavier ground-pound-jump numbers.
+func ceiling_squash(strength: float, pound := false) -> void:
+	var y := pound_ceiling_squash_y if pound else ceiling_squash_y
+	var xz := pound_ceiling_squash_xz if pound else ceiling_squash_xz
+	var t := pound_ceiling_squash_time if pound else ceiling_squash_time
+	var s := clampf(strength, 0.0, 1.0)
+	squash_stretch(lerpf(1.0, y, s), lerpf(1.0, xz, s), t)
 
 ## Eases the model to a stretched/squashed pose and HOLDS it (unlike
 ## squash_stretch(), which pops and springs back by itself). Release with

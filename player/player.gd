@@ -102,6 +102,9 @@ var _auto_stuck_pos: Vector3       ## see _update_auto_unstick()
 var _auto_stuck_t := 0.0
 var fall_peak_y := 0.0   ## highest point since the feet last touched ground — see fall_drop()
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
+var _pound_jumping := false   ## airborne from a ground-pound jump (heavier ceiling squash); cleared on landing
+const CEILING_SQUASH_MIN_SPEED := 2.0    ## upward speed (m/s) below which a roof touch doesn't squash
+const CEILING_SQUASH_FULL_SPEED := 9.0   ## upward speed that gives the full squash
 var _prev_facing_yaw := 0.0
 var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
 var _water_volumes: Array[WaterVolume] = []   ## every WaterVolume currently overlapping the player —
@@ -250,13 +253,17 @@ func _physics_process(delta: float) -> void:
 	_update_timers(delta)
 	_update_floor_snap()
 	_update_water()
+	var rise_speed := velocity.y   # before the move: sliding into a roof zeroes it
 	machine.physics_update(delta)
+	if is_on_ceiling() and rise_speed > CEILING_SQUASH_MIN_SPEED:
+		visual.ceiling_squash(rise_speed / CEILING_SQUASH_FULL_SPEED, _pound_jumping)
 	var on_floor := is_on_floor()
 	if on_floor:
 		_last_safe_position = global_position   ## see _unstick()
 	_update_auto_unstick(delta, on_floor)
 	if on_floor and not _was_on_floor:
 		can_dive = true
+		_pound_jumping = false
 		# Only squash for a real fall, not a split-second floor-contact flicker
 		# (slopes/stairs/small bumps toggling is_on_floor() during plain walking).
 		if _air_t >= config.min_air_time_for_land_squash:
@@ -1066,6 +1073,7 @@ func start_jump(vel: float, pound := false) -> void:
 	# side flip (or any other held pose) could look like the jump did
 	# nothing at all, even though it physically happened.
 	visual.cancel_hold()
+	_pound_jumping = pound
 	if pound:
 		visual.squash_stretch(visual.pound_jump_stretch_y, visual.pound_jump_stretch_xz,
 				visual.pound_jump_stretch_time)
