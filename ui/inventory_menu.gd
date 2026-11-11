@@ -58,6 +58,12 @@ func _ready() -> void:
 	Events.quests_changed.connect(_on_quests_changed)
 	_use_button.pressed.connect(_on_use_pressed)
 	_drop_button.pressed.connect(_drop_selected)
+	# The tabs and the Use/Drop buttons aren't under a FocusPop (only the slot
+	# grids are), so they get their click here. The shop's buttons already do.
+	for tab in _tabs:
+		tab.pressed.connect(UiSfx.click)
+	_use_button.pressed.connect(UiSfx.click)
+	_drop_button.pressed.connect(UiSfx.click)
 
 ## Sets the details text and scrolls it back to the top (long quest text scrolls).
 func _set_detail_text(text: String) -> void:
