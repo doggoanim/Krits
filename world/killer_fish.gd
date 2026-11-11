@@ -24,6 +24,7 @@ extends CharacterBody3D
 const SURFACE_MARGIN := 0.6              ## keeps its body this far under the surface
 const TURN_RATE := 14.0
 const KILL_DAMAGE := 1.0e9
+const RESPAWN_DELAY := 4.0               ## after a kill it vanishes, then reappears at its home spot
 const LEAP_ARC := 2.5                    ## how high it bounds when it clears the water
 const PREVIEW_GROUP_NAME := "KillerFishBody"
 
@@ -37,6 +38,7 @@ var _player: Player
 var _windup_t := 0.0
 var _wait := 0.0
 var _age := 0.0
+var _respawn_t := 0.0
 var _body: Node3D
 var _tail: Node3D
 
@@ -104,6 +106,12 @@ func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_age += delta
+	if _respawn_t > 0.0:
+		_respawn_t -= delta
+		if _respawn_t <= 0.0:
+			visible = true
+			_body.position.y = 0.0
+		return
 	if _water == null:
 		_water = _find_water()
 	if _player == null:
@@ -161,7 +169,11 @@ func _chase(delta: float) -> void:
 func _kill() -> void:
 	_player.hit(KILL_DAMAGE, true, global_position)
 	_mode = Mode.WANDER
+	global_position = _home
 	_dest = _home
+	velocity = Vector3.ZERO
+	visible = false
+	_respawn_t = RESPAWN_DELAY
 
 func _wander(delta: float) -> void:
 	if _wait > 0.0:
