@@ -197,6 +197,15 @@ func contains_point(pos: Vector3) -> bool:
 		return false
 	return local.y <= surface_y and local.y >= surface_y - size.y
 
+## True if `pos` is over this volume's footprint, whatever its height. Unlike
+## contains_point() this doesn't care about `size.y`, which some volumes leave
+## at (nearly) zero because only their surface matters (the chesburg lake).
+func covers_xz(pos: Vector3) -> bool:
+	var local := to_local(pos)
+	if radius > 0.0:
+		return Vector2(local.x, local.z).length() <= radius
+	return absf(local.x) <= size.x * 0.5 and absf(local.z) <= size.z * 0.5
+
 ## How submerged a body of `height`, standing with its feet at world Y
 ## `feet_y`, is in THIS volume — 0.0 (dry) to 1.0 (fully underwater). See
 ## Player.water_submersion(), which calls this with its own global_position.y

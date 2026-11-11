@@ -11,8 +11,10 @@ extends Node3D
 enum Phase { WAIT, BITE, REEL, DONE }
 
 const GROUP := &"fishing_session"
-const CAST_DISTANCES: Array[float] = [4.0, 5.5, 7.0, 3.0]   ## tried in this order in front of the player
-const MIN_WATER_DEPTH := 0.8       ## water needed under the bobber
+const CAST_NEAREST := 2.5          ## the line lands on the closest water between these distances in front of the player...
+const CAST_FARTHEST := 8.0
+const CAST_STEP := 0.5             ## ...checked at this spacing
+const MAX_SURFACE_DROP := 6.0      ## the water may be at most this far above/below the player's feet
 const WAIT_TIME := Vector2(2.0, 5.5)
 const BITE_WINDOW := 0.9
 const HAND_HEIGHT := 1.3
@@ -61,14 +63,17 @@ static func start(player: Player, tree: SceneTree) -> String:
 	session._begin(player, found["water"], found["spot"])
 	return ""
 
-## The first spot in front of the player where there's water deep enough to fish.
+## The nearest water in front of the player, any body of water: it only has to
+## be a WaterVolume whose footprint is there and whose surface is near the
+## player's own height (so a lake far below a cliff doesn't count).
 static func _find_water(player: Player) -> Dictionary:
-	for dist in CAST_DISTANCES:
+	var dist := CAST_NEAREST
+	while dist <= CAST_FARTHEST:
 		var p := player.global_position + player.facing * dist
 		for w in WaterVolume.active:
-			var probe := Vector3(p.x, w.surface_world_y() - MIN_WATER_DEPTH, p.z)
-			if w.contains_point(probe):
+			if w.covers_xz(p) and absf(w.surface_world_y() - player.global_position.y) <= MAX_SURFACE_DROP:
 				return {"water": w, "spot": Vector3(p.x, w.surface_world_y(), p.z)}
+		dist += CAST_STEP
 	return {}
 
 func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
