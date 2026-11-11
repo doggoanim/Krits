@@ -288,8 +288,14 @@ func play_intro() -> void:
 ## Awaited by EncounterManager before it frees the arena.
 func play_outro() -> void:
 	var tw := create_tween().set_parallel(true)
-	tw.tween_property(_platform_mesh, "scale", Vector3.ZERO, OUTRO_RING_TIME + 0.2) \
-			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	# The floor disc (with its solid chalk rim — the white line where floor meets
+	# wall) fades out while it shrinks, instead of shrinking to a blink.
+	tw.tween_property(_platform_mesh, "scale", Vector3.ONE * 0.02, OUTRO_RING_TIME + 0.4) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var platform_mat := _platform_mesh.material_override as ShaderMaterial
+	if platform_mat != null:
+		tw.tween_method(func(a: float) -> void: platform_mat.set_shader_parameter(&"chalk", Color(0.88, 0.88, 0.88, a)),
+				1.0, 0.0, OUTRO_RING_TIME + 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_method(_set_wall_growth, 1.0, 0.0, OUTRO_WALL_TIME) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)   # sinks smoothly, no snap at the end
 	for i in _ring_pieces.size():
