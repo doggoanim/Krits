@@ -130,7 +130,12 @@ func _build_grid() -> void:
 	FocusPop.attach_all(_grid, true)
 	if visible and not _offers.is_empty():
 		_focus_restored = true
-		(_grid.get_child(_selected) as Control).grab_focus.call_deferred()
+		_focus_if_alive.call_deferred(_grid.get_child(_selected) as Control)
+
+## Deferred focus that skips a slot rebuilt/removed in the meantime.
+func _focus_if_alive(c: Control) -> void:
+	if is_instance_valid(c) and c.is_inside_tree() and c.is_visible_in_tree():
+		c.grab_focus()
 
 func _on_slot_focused(index: int) -> void:
 	if index == _selected and _focus_restored:

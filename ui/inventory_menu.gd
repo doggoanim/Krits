@@ -185,11 +185,20 @@ func _clear_children(node: Node) -> void:
 		node.remove_child(c)
 		c.queue_free()
 
+## Grabs focus next frame, but only if the control is still in the scene by
+## then (the grid is rebuilt often, and a freed/removed slot can't take focus).
+func _focus_later(c: Control) -> void:
+	_focus_if_alive.call_deferred(c)
+
+func _focus_if_alive(c: Control) -> void:
+	if is_instance_valid(c) and c.is_inside_tree() and c.is_visible_in_tree():
+		c.grab_focus()
+
 func _focus_selected_slot(grid: GridContainer, index: int) -> void:
 	if grid.get_child_count() == 0:
 		return
 	var slot := grid.get_child(clampi(index, 0, grid.get_child_count() - 1)) as Control
-	slot.grab_focus.call_deferred()
+	_focus_later(slot)
 
 func _on_slot_focused(index: int) -> void:
 	_selected = index
@@ -367,10 +376,10 @@ func _focus_quest() -> void:
 	for b in _quest_list.get_children():
 		first = first if first else b as Control
 		if b.get_meta(GEAR_ID_META) == _selected_quest:
-			(b as Control).grab_focus()
+			_focus_if_alive(b as Control)
 			return
 	if first:
-		first.grab_focus()
+		_focus_if_alive(first)
 	else:
 		_show_no_quests()
 
@@ -445,10 +454,10 @@ func _focus_gear() -> void:
 		for b in list.get_children():
 			fallback = fallback if fallback else b
 			if b.get_meta(GEAR_ID_META) == _gear_focus:
-				b.grab_focus()
+				_focus_if_alive(b)
 				return
 	if fallback:
-		fallback.grab_focus()
+		_focus_if_alive(fallback)
 
 func _on_gear_focused(item: EquipmentData) -> void:
 	_gear_focus = item.id
