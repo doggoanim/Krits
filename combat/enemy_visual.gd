@@ -35,7 +35,7 @@ func setup(data: EnemyData) -> void:
 	_model.rotation.y = data.model_facing_offset
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	ModelUtil.fit_height(_model, data.model_height)
-	ModelUtil.apply_cel_shading(_model, _materials, {}, Callable(OutlineSystem, &"mark"))
+	ModelUtil.apply_cel_shading(_model, _materials, {}, Callable(OutlineSystem, &"mark_occludable"))
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	if _anim:

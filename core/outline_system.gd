@@ -35,6 +35,13 @@ extends Node
 ## does this for any rigged model via the outline_hook param of
 ## apply_cel_shading(). A model that should NOT be outlined (a cutscene
 ## prop, say) just never calls mark() — nothing else to opt out of.
+##
+## Seeing through walls: the silhouette pass ignores scene depth, so anything
+## marked with mark() keeps its outline even behind a wall — which is what we
+## want for the PLAYER (you never lose them), but not for NPCs and enemies,
+## which use mark_occludable() instead. Those meshes are tested a few times a
+## second with a ray from the camera; one that has world geometry in the way
+## simply drops out of the outline pass until it's visible again.
 
 const OUTLINE_LAYER_BIT := 1   ## 0-indexed render layer bit -> VisualInstance3D.layers value 2
 const OUTLINE_LAYER_MASK := 1 << OUTLINE_LAYER_BIT
@@ -52,6 +59,27 @@ var _source_cam: Camera3D   ## whatever camera follow() last pointed this at
 ## seen by both the main camera and this system's camera at once.
 static func mark(mi: VisualInstance3D) -> void:
 	mi.layers |= OUTLINE_LAYER_MASK
+
+const OCCLUDE_INTERVAL := 0.08   ## seconds between visibility tests; raycasts aren't free
+const OCCLUDE_TRIM := 0.15        ## the test ray stops this short of the mesh so grazing its own surroundings doesn't count
+
+## Meshes whose outline must respect walls: {mesh: MeshInstance3D, body: RID of
+## the character's own collider (never counts as an obstruction)}.
+static var _occludable: Array[Dictionary] = []
+var _occlude_t := 0.0
+
+## Like mark(), but the outline is hidden while something solid is between the
+## camera and the mesh (see the class doc) — for NPCs and enemies.
+static func mark_occludable(mi: MeshInstance3D) -> void:
+	mark(mi)
+	var body := RID()
+	var n: Node = mi
+	while n != null:
+		if n is CollisionObject3D:
+			body = (n as CollisionObject3D).get_rid()
+			break
+		n = n.get_parent()
+	_occludable.append({"mesh": mi, "body": body})
 
 func _ready() -> void:
 	_viewport = SubViewport.new()
@@ -107,3 +135,34 @@ func _process(_delta: float) -> void:
 	_cam.projection = _source_cam.projection
 	_cam.h_offset = _source_cam.h_offset
 	_cam.v_offset = _source_cam.v_offset
+	_update_occlusion(_delta)
+
+func _update_occlusion(delta: float) -> void:
+	_occlude_t -= delta
+	if _occlude_t > 0.0 or _occludable.is_empty():
+		return
+	_occlude_t = OCCLUDE_INTERVAL
+	var from := _source_cam.global_position
+	var space := _source_cam.get_world_3d().direct_space_state
+	for i in range(_occludable.size() - 1, -1, -1):
+		var entry := _occludable[i]
+		var mi := entry["mesh"] as MeshInstance3D
+		if not is_instance_valid(mi):
+			_occludable.remove_at(i)
+			continue
+		if not mi.is_visible_in_tree():
+			continue
+		var to := mi.global_transform * mi.get_aabb().get_center()
+		var dir := to - from
+		var dist := dir.length()
+		var blocked := false
+		if dist > OCCLUDE_TRIM + 0.1:
+			var query := PhysicsRayQueryParameters3D.create(from, from + dir / dist * (dist - OCCLUDE_TRIM), 1)   # world geometry only
+			var exclude: Array[RID] = [entry["body"]]
+			exclude.append_array(CutawayWall.active)   # those panels hide their own mesh but keep collision
+			query.exclude = exclude
+			blocked = not space.intersect_ray(query).is_empty()
+		if blocked:
+			mi.layers &= ~OUTLINE_LAYER_MASK
+		else:
+			mi.layers |= OUTLINE_LAYER_MASK

@@ -48,7 +48,7 @@ func _build_model() -> void:
 		return
 	add_child(node)
 	ModelUtil.fit_height(node, model_height)
-	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark"))
+	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark_occludable"))
 	var anim := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if anim == null:
 		return
