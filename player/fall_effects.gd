@@ -55,7 +55,7 @@ func _ready() -> void:
 	mat.albedo_texture = tex
 	mat.vertex_color_use_as_albedo = true
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	quad.material = mat
+	quad.surface_set_material(0, mat)
 	_streaks.particle_flag_align_y = true
 	var life := Gradient.new()
 	life.set_color(0, Color(1, 1, 1, 0))
