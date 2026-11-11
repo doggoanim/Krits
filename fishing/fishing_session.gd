@@ -8,7 +8,7 @@ extends Node3D
 ## The player is held still (Frozen) for the whole thing and released at the end,
 ## including when the level is swapped out from under the session.
 
-enum Phase { WAIT, BITE, REEL, DONE }
+enum Phase { WAIT, BITE, REEL, CELEBRATE, DONE }
 
 const GROUP := &"fishing_session"
 const CAST_NEAREST := 2.5          ## the line lands on the closest water between these distances in front of the player...
@@ -16,6 +16,12 @@ const CAST_FARTHEST := 8.0
 const CAST_STEP := 0.5             ## ...checked at this spacing
 const MAX_SURFACE_DROP := 6.0      ## the water may be at most this far above/below the player's feet
 const COVER_CHECK_HEIGHT := 6.0     ## how far above the surface to look for terrain covering the water
+const CAST_TIME := 0.35            ## the bobber's flight from the rod to the water
+const CAST_ARC := 1.6              ## how high it arcs
+const CATCH_ARC := 2.4             ## how high the landed fish leaps
+const CATCH_TIME := 0.7
+const RIPPLE_COLOR := Color(1.0, 1.0, 1.0, 0.7)
+const RUMBLE_INTERVAL := 0.16      ## while the zone is on the fish: a small camera tremble this often
 const WAIT_TIME := Vector2(2.0, 5.5)
 const BITE_WINDOW := 0.9
 const HAND_HEIGHT := 1.3
@@ -50,6 +56,9 @@ var _progress := PROGRESS_START
 var _ui: CanvasLayer
 var _meter: FishingMeter
 var _plate_tween: Tween
+var _cast_t := 0.0
+var _rumble_t := 0.0
+var _tension := 0.0           ## 0..1: how hard the line is pulled (0 slack/sagging, 1 taut)
 var _plate: KeyHintPlate
 
 ## Jump or the left mouse button: hooks the fish at the bite and reels after.
@@ -123,7 +132,7 @@ func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	player.face(toward)
 	Events.player_hurt.connect(_on_player_hurt)
 	_build_visuals()
-	_player.effects.burst_water_splash(_spot, true, false)   # the plop of the cast
+	_player.visual.squash_stretch(0.85, 1.12)   # the wind-up of the cast
 
 func _exit_tree() -> void:
 	_release()
@@ -138,7 +147,10 @@ func _process(delta: float) -> void:
 		return
 	_age += delta
 	_poll_click()
+	_advance_cast(delta)
 	_update_visuals()
+	if _phase == Phase.CELEBRATE:
+		return
 	if Input.is_action_just_pressed(&"crouch_pound"):
 		_end("You reel the line in.")
 		return
@@ -158,6 +170,9 @@ func _wait(delta: float) -> void:
 		_build_ui()   # the key plate appears with the bite
 		_player.effects.burst_water_splash(_spot, true, false)
 		_player.audio.play_water_splash(false)
+		_ripple(_spot, 2.6)
+		_shake(0.25)
+		_player.visual.squash_stretch(1.1, 0.92)
 
 func _bite(delta: float) -> void:
 	_timer -= delta
@@ -169,6 +184,11 @@ func _bite(delta: float) -> void:
 func _start_reel() -> void:
 	_phase = Phase.REEL
 	_build_bar()
+	HitStop.freeze(0.07)   # the yank of setting the hook
+	_shake(0.4)
+	_player.effects.burst_water_splash(_spot, true, true)
+	_ripple(_spot, 3.2)
+	_player.visual.squash_stretch(0.8, 1.15)
 	_fish_pos = 0.5
 	_fish_target = 0.5
 	_hook_pos = 0.5
@@ -194,10 +214,28 @@ func _reel(delta: float) -> void:
 	var covered := absf(_fish_pos - _hook_pos) <= half
 	_progress += (PROGRESS_GAIN if covered else -PROGRESS_LOSS) * delta
 	_update_ui(half, covered)
+	_tension = move_toward(_tension, 1.0 if covered else 0.2, delta * 4.0)
+	_reel_juice(delta, covered)
 	if _progress >= 1.0:
 		_land_catch()
 	elif _progress <= 0.0:
 		_end("The fish slipped the hook.")
+
+## Reeling feedback: the meter trembles while you're on the fish, flushes red
+## when you're about to lose it, the camera rumbles, and the water thrashes.
+func _reel_juice(delta: float, covered: bool) -> void:
+	if _meter != null:
+		var base := Vector2((BAR_SIZE.x - FishingMeter.PANEL_SIZE.x) * 0.5, 0.0)
+		var jitter := (2.5 if covered else 0.0) * Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
+		_meter.position = base + jitter
+		var danger := clampf(1.0 - _progress / 0.3, 0.0, 1.0) if not covered else 0.0
+		_meter.modulate = Color(1.0, 1.0 - 0.3 * danger, 1.0 - 0.4 * danger, _meter.modulate.a)
+	_rumble_t -= delta
+	if covered and _rumble_t <= 0.0:
+		_rumble_t = RUMBLE_INTERVAL
+		_shake(0.07)
+		if randf() < 0.5:
+			_player.effects.burst_water_splash(_spot + Vector3(randf_range(-0.4, 0.4), 0.0, randf_range(-0.4, 0.4)), true, false)
 
 func _land_catch() -> void:
 	var id: StringName = _catch["id"]
@@ -205,6 +243,56 @@ func _land_catch() -> void:
 	if not Game.inventory.can_fit(id, 1):
 		_end("Your bag is full: the fish swims off.")
 		return
+	_celebrate(id, item)
+
+## The payoff: freeze-frame, a big splash, the fish leaps out of the water in an
+## arc to over the player's head (a coloured stand-in in the item's colour),
+## the meter pops away, then the item is handed over.
+func _celebrate(id: StringName, item: ItemData) -> void:
+	_phase = Phase.CELEBRATE
+	HitStop.freeze(0.1)
+	_shake(0.5)
+	_player.audio.play_water_splash(true)
+	_player.effects.burst_water_splash(_spot, true, true)
+	_ripple(_spot, 4.0)
+	if is_instance_valid(_plate):
+		_plate.visible = false
+	_bobber.visible = false   # the fish (and the line with it) leave the water
+	_line.visible = false
+	if _meter != null:
+		_meter.pivot_offset = FishingMeter.PANEL_SIZE * 0.5
+		var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tw.tween_property(_meter, "scale", Vector2(1.25, 1.25), 0.25)
+		tw.tween_property(_meter, "modulate:a", 0.0, 0.25)
+	var fish := MeshInstance3D.new()
+	var body := CapsuleMesh.new()
+	body.radius = 0.12
+	body.height = 0.5
+	fish.mesh = body
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = item.color if item != null else Color(0.8, 0.85, 0.9)
+	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	fish.material_override = mat
+	add_child(fish)
+	var start := _spot
+	var end := _player.global_position + Vector3.UP * (Player.STAND_HEIGHT + 0.6)
+	var arc := func(t: float) -> void:
+		if not is_instance_valid(fish):
+			return
+		fish.global_position = start.lerp(end, t) + Vector3.UP * sin(t * PI) * CATCH_ARC
+		fish.rotation = Vector3(t * TAU * 2.0, 0.0, t * TAU)   # flips as it flies
+		var pop := 1.0 + 0.5 * sin(t * PI)
+		fish.scale = Vector3.ONE * pop
+	var flight := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	flight.tween_method(arc, 0.0, 1.0, CATCH_TIME)
+	await flight.finished
+	if not is_instance_valid(self) or _phase == Phase.DONE:
+		return
+	VFX.shatter(self, end, mat.albedo_color, 0.8)   # a burst of sparkle where it's caught
+	fish.queue_free()
+	_shake(0.3)
+	_player.visual.squash_stretch(1.2, 0.88)
 	ItemGet.give(id)
 	_end("Caught: %s!" % (item.display_name if item else String(id)))
 
@@ -260,20 +348,61 @@ func _build_visuals() -> void:
 	add_child(_line)
 	_line.global_transform = Transform3D.IDENTITY
 
+## Camera kick, if a rig is available.
+func _shake(amount: float) -> void:
+	if _player != null and _player.camera_rig != null:
+		_player.camera_rig.shake(amount)
+
+## Flies the bobber from the rod to the water at the start; when it lands:
+## splash, ripple, a little kick.
+func _advance_cast(delta: float) -> void:
+	if _cast_t >= 1.0:
+		return
+	_cast_t = minf(1.0, _cast_t + delta / CAST_TIME)
+	if _cast_t >= 1.0:
+		_player.effects.burst_water_splash(_spot, true, false)
+		_player.audio.play_water_splash(false)
+		_ripple(_spot, 2.2)
+		_shake(0.12)
+
+## An expanding, fading ring on the water surface.
+func _ripple(at: Vector3, final_scale: float) -> void:
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.45
+	torus.outer_radius = 0.5
+	ring.mesh = torus
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = RIPPLE_COLOR
+	ring.material_override = mat
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ring.scale = Vector3(0.3, 0.05, 0.3)
+	add_child(ring)
+	ring.global_position = at + Vector3.UP * 0.03
+	var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(ring, "scale", Vector3(final_scale, 0.05, final_scale), 0.7)
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.7)
+	tw.chain().tween_callback(ring.queue_free)
+
 func _update_visuals() -> void:
 	var bob := sin(_age * 3.0) * 0.03
 	if _phase == Phase.BITE:
 		bob = -0.12 + sin(_age * 30.0) * 0.04   # tugged under
 	elif _phase == Phase.REEL:
 		bob = sin(_age * 14.0) * 0.06
-	_bobber.global_position = _spot + Vector3.UP * (0.05 + bob)
 	var hand := _player.global_position + Vector3.UP * HAND_HEIGHT + _player.facing * 0.4
+	if _cast_t < 1.0:   # still in flight: an arc from the rod to the spot
+		_bobber.global_position = hand.lerp(_spot, _cast_t) + Vector3.UP * sin(_cast_t * PI) * CAST_ARC
+	else:
+		_bobber.global_position = _spot + Vector3.UP * (0.05 + bob)
 	var tip := _bobber.global_position
 	_line_mesh.clear_surfaces()
 	_line_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for i in 9:   # a gentle sag so it reads as a line, not a rod
 		var t := float(i) / 8.0
-		var p := hand.lerp(tip, t) + Vector3.DOWN * (sin(t * PI) * 0.35)
+		var p := hand.lerp(tip, t) + Vector3.DOWN * (sin(t * PI) * 0.35 * (1.0 - _tension * 0.9))
 		_line_mesh.surface_add_vertex(p)
 	_line_mesh.surface_end()
 
