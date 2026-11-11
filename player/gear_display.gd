@@ -28,6 +28,18 @@ extends Node3D
 @export_range(0.0, 1.0, 0.05) var animation_follow := 1.0
 @export var follow_bone: StringName = &"UpperTorso"
 @export var tilt_follow := 18.0   ## how quickly the shield eases into the torso's tilt
+@export_group("In Combat (held in hand)")
+## During a fight the shield is carried on the left forearm and the sword/bow
+## in the right hand, riding the animation, instead of floating behind. Offsets
+## are in metres from the bone's end (its hand), along that bone's own axes;
+## rotations are degrees. Tune these live in the inspector.
+@export var hold_in_combat := true
+@export var shield_hand_bone: StringName = &"LowerArm.L"
+@export var weapon_hand_bone: StringName = &"LowerArm.R"
+@export var shield_hand_offset := Vector3(0.0, -0.05, 0.1)
+@export var shield_hand_rotation_deg := Vector3(0.0, 90.0, 0.0)
+@export var weapon_hand_offset := Vector3(0.0, 0.0, 0.0)
+@export var weapon_hand_rotation_deg := Vector3(90.0, 0.0, 0.0)
 @export_group("Swing")
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
@@ -44,6 +56,10 @@ var _shield_id: StringName = &"?"
 var _weapon_id: StringName = &"?"
 ## Gear is hidden while the player is in one of these states (it would clip through a tumbling body).
 const HIDDEN_IN_STATES: Array[StringName] = [&"Roll"]
+var _shield_grip: Node3D   ## where the shield rides in combat (left forearm) — see _build_grips()
+var _weapon_grip: Node3D   ## ...and the weapon (right hand)
+var _in_hand := false
+var _grips_built := false
 var _skeleton: Skeleton3D
 var _bone := -1
 var _tilt := Quaternion.IDENTITY
@@ -76,7 +92,13 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null or _player.visual == null:
 		return
-	visible = not HIDDEN_IN_STATES.has(_player.machine.current_name)
+	var shown := not HIDDEN_IN_STATES.has(_player.machine.current_name)
+	visible = shown
+	if _shield_grip:
+		_shield_grip.visible = shown
+	if _weapon_grip:
+		_weapon_grip.visible = shown
+	_sync_hand_mode()
 	if _skeleton == null:
 		_find_bone()
 	var pose := _bone_pose_delta()
@@ -142,6 +164,59 @@ func _refresh() -> void:
 		# Swords/bows hang and swing from the shield; a staff floats rigidly beside it.
 		var staff := weapon != null and weapon.kind == WeaponData.Kind.STAFF
 		_weapon_model = _swap(_weapon_model, _staff_mount if staff else _weapon_pivot, weapon)
+	_place_models()
+
+# ---------------------------------------------------------------- in hand
+
+func _sync_hand_mode() -> void:
+	var want := hold_in_combat and Game.in_combat and _skeleton != null
+	if want and not _grips_built:
+		_grips_built = true
+		_build_grips()
+	if want != _in_hand:
+		_in_hand = want
+		_place_models()
+
+## Moves the worn models between their floating spots and the hand grips.
+## A staff always stays floating.
+func _place_models() -> void:
+	var shield_parent: Node3D = _shield_grip if _in_hand and _shield_grip else _anchor
+	_reparent(_shield_model, shield_parent)
+	var staff := Game.stats.equipped_weapon != null and Game.stats.equipped_weapon.kind == WeaponData.Kind.STAFF
+	var weapon_parent: Node3D = _staff_mount if staff else (_weapon_grip if _in_hand and _weapon_grip else _weapon_pivot)
+	_reparent(_weapon_model, weapon_parent)
+
+func _reparent(model: Node3D, parent: Node3D) -> void:
+	if model != null and is_instance_valid(model) and model.get_parent() != parent:
+		model.reparent(parent, false)
+
+## One BoneAttachment3D per hand, with a metre-scaled grip node at the end of
+## the bone (the skeleton is scaled to fit the character, so grips undo that).
+func _build_grips() -> void:
+	_shield_grip = _make_grip(shield_hand_bone, shield_hand_offset, shield_hand_rotation_deg)
+	_weapon_grip = _make_grip(weapon_hand_bone, weapon_hand_offset, weapon_hand_rotation_deg)
+
+func _make_grip(bone_name: StringName, offset: Vector3, rotation_deg: Vector3) -> Node3D:
+	var idx := _skeleton.find_bone(bone_name)
+	if idx < 0:
+		return null
+	var unit := maxf(_skeleton.global_basis.get_scale().x, 0.0001)
+	var att := BoneAttachment3D.new()
+	att.bone_name = bone_name
+	_skeleton.add_child(att)
+	var end := Node3D.new()
+	end.scale = Vector3.ONE / unit
+	var kids := _skeleton.get_bone_children(idx)
+	if not kids.is_empty():
+		end.position = Vector3(0.0, _skeleton.get_bone_rest(kids[0]).origin.length(), 0.0)
+	else:
+		end.position = Vector3.ZERO
+	att.add_child(end)
+	var grip := Node3D.new()
+	grip.position = offset
+	grip.rotation_degrees = rotation_deg
+	end.add_child(grip)
+	return grip
 
 ## Frees `old`, instances `item`'s model under `parent` (if it has one) with
 ## the item's scale/offset/tilt applied, and returns it (or null).
