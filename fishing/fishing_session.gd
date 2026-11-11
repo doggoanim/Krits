@@ -34,6 +34,8 @@ var _timer := 0.0
 var _age := 0.0
 var _catch: Dictionary = {}
 var _froze := false
+var _click_pressed := false
+var _click_was_down := true   ## true at the start so the click that cast the line can't also hook it
 var _bobber: MeshInstance3D
 var _line: MeshInstance3D
 var _line_mesh := ImmediateMesh.new()
@@ -49,6 +51,19 @@ var _ui: CanvasLayer
 var _ui_zone: ColorRect
 var _ui_fish: ColorRect
 var _ui_fill: ColorRect
+
+## Jump or the left mouse button: hooks the fish at the bite and reels after.
+func _hook_pressed() -> bool:
+	return Input.is_action_just_pressed(&"jump") or _click_pressed
+
+func _hook_held() -> bool:
+	return Input.is_action_pressed(&"jump") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+
+## Left-click "just pressed" for this frame, tracked by hand (there's no action for it).
+func _poll_click() -> void:
+	var down := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	_click_pressed = down and not _click_was_down
+	_click_was_down = down
 
 ## Starts a cast in front of the player. Returns "" on success, else why not.
 static func start(player: Player, tree: SceneTree) -> String:
@@ -122,6 +137,7 @@ func _process(delta: float) -> void:
 		_finish()
 		return
 	_age += delta
+	_poll_click()
 	_update_visuals()
 	if Input.is_action_just_pressed(&"crouch_pound"):
 		_end("You reel the line in.")
@@ -133,31 +149,32 @@ func _process(delta: float) -> void:
 
 func _wait(delta: float) -> void:
 	_timer -= delta
-	if Input.is_action_just_pressed(&"jump"):
+	if _hook_pressed():
 		_end("Pulled in too early.")
 	elif _timer <= 0.0:
 		_phase = Phase.BITE
 		_timer = BITE_WINDOW
 		Telegraph.exclaim(_bobber, 0.7)
+		_build_ui()   # the key plate appears with the bite
 		_player.effects.burst_water_splash(_spot, true, false)
 		_player.audio.play_water_splash(false)
 
 func _bite(delta: float) -> void:
 	_timer -= delta
-	if Input.is_action_just_pressed(&"jump"):
+	if _hook_pressed():
 		_start_reel()
 	elif _timer <= 0.0:
 		_end("It got away.")
 
 func _start_reel() -> void:
 	_phase = Phase.REEL
+	_build_bar()
 	_fish_pos = 0.5
 	_fish_target = 0.5
 	_hook_pos = 0.5
 	_hook_vel = 0.0
 	_progress = PROGRESS_START
 	_retarget = 0.0
-	_build_ui()
 
 func _reel(delta: float) -> void:
 	# The fish darts toward a random target, picking a new one every so often.
@@ -167,7 +184,7 @@ func _reel(delta: float) -> void:
 		_fish_target = randf()
 	_fish_pos = move_toward(_fish_pos, _fish_target, float(_catch["speed"]) * delta)
 	# Holding Jump slides the catch zone right; letting go lets it fall back left.
-	var held := Input.is_action_pressed(&"jump")
+	var held := _hook_held()
 	_hook_vel = clampf(_hook_vel + (HOOK_ACCEL if held else -HOOK_ACCEL) * delta, -HOOK_MAX_SPEED, HOOK_MAX_SPEED)
 	_hook_pos += _hook_vel * delta
 	if _hook_pos <= 0.0 or _hook_pos >= 1.0:
@@ -262,7 +279,15 @@ func _update_visuals() -> void:
 
 # ---------------------------------------------------------------- reel-in UI
 
+const PLATE_SCENE := preload("res://ui/widgets/key_hint_plate.tscn")
+
+var _box: Control
+
+## The key prompt: just the hand-drawn key plate (see KeyHintPlate) showing the
+## key that hooks and reels. Appears when the fish bites and stays for the reel.
 func _build_ui() -> void:
+	if _ui != null:
+		return
 	_ui = CanvasLayer.new()
 	_ui.layer = 15
 	add_child(_ui)
@@ -270,40 +295,40 @@ func _build_ui() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(root)
-	var box := Control.new()
-	box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	box.position = Vector2(-BAR_SIZE.x * 0.5, -230.0)
-	box.size = BAR_SIZE
-	root.add_child(box)
+	_box = Control.new()
+	_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_box.position = Vector2(-BAR_SIZE.x * 0.5, -250.0)
+	_box.size = BAR_SIZE
+	root.add_child(_box)
+	var plate := PLATE_SCENE.instantiate() as KeyHintPlate
+	_box.add_child(plate)
+	plate.set_key(InputSetup.key_label(Settings.get_binding(&"jump")))
+	plate.position = Vector2((BAR_SIZE.x - plate.custom_minimum_size.x) * 0.5, -plate.custom_minimum_size.y - 12.0)
+
+## The reel-in bar (catch zone, fish marker, progress), under the key plate.
+func _build_bar() -> void:
+	_build_ui()
 	var track := ColorRect.new()
 	track.color = Color(0.05, 0.1, 0.15, 0.8)
 	track.size = BAR_SIZE
-	box.add_child(track)
+	_box.add_child(track)
 	_ui_zone = ColorRect.new()
 	_ui_zone.color = Color(0.4, 0.9, 0.55, 0.7)
-	box.add_child(_ui_zone)
+	_box.add_child(_ui_zone)
 	_ui_fish = ColorRect.new()
 	_ui_fish.color = Color(1.0, 0.72, 0.25)
 	_ui_fish.size = Vector2(14.0, BAR_SIZE.y + 8.0)
-	box.add_child(_ui_fish)
+	_box.add_child(_ui_fish)
 	var fill_back := ColorRect.new()
 	fill_back.color = Color(0.05, 0.1, 0.15, 0.8)
 	fill_back.position = Vector2(0.0, BAR_SIZE.y + 10.0)
 	fill_back.size = Vector2(BAR_SIZE.x, 10.0)
-	box.add_child(fill_back)
+	_box.add_child(fill_back)
 	_ui_fill = ColorRect.new()
 	_ui_fill.color = Color(0.5, 0.85, 1.0)
 	_ui_fill.position = fill_back.position
 	_ui_fill.size = Vector2(0.0, 10.0)
-	box.add_child(_ui_fill)
-	var hint := Label.new()
-	hint.text = "Hold %s to reel — keep the green on the fish" % _key_text(&"jump")
-	hint.position = Vector2(0.0, BAR_SIZE.y + 26.0)
-	hint.size = Vector2(BAR_SIZE.x, 24.0)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	hint.add_theme_constant_override(&"outline_size", 6)
-	box.add_child(hint)
+	_box.add_child(_ui_fill)
 
 func _update_ui(half: float, covered: bool) -> void:
 	var zone_w := half * 2.0 * BAR_SIZE.x
@@ -312,7 +337,3 @@ func _update_ui(half: float, covered: bool) -> void:
 	_ui_zone.color = Color(0.4, 0.95, 0.55, 0.85) if covered else Color(0.4, 0.9, 0.55, 0.45)
 	_ui_fish.position = Vector2(_fish_pos * (BAR_SIZE.x - _ui_fish.size.x), -4.0)
 	_ui_fill.size.x = clampf(_progress, 0.0, 1.0) * BAR_SIZE.x
-
-static func _key_text(action: StringName) -> String:
-	var events := InputMap.action_get_events(action)
-	return events[0].as_text().get_slice(" (", 0) if not events.is_empty() else String(action)
