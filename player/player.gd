@@ -454,6 +454,7 @@ func safe_move_and_slide() -> void:
 ## there's no way to pre-tag "this corner might wedge someone," so a generic
 ## recovery is the only approach that covers corners we don't know about yet.
 const WEDGE_STUCK_TIME := 0.2    ## how long "not actually moving" must persist before it counts as wedged
+const WEDGE_CEILING_STUCK_TIME := 0.06   ## same, but pinned under a roof
 const WEDGE_MIN_SPEED := 0.5     ## below this, standing still is normal, not a sign of being stuck
 const WEDGE_MOVE_EPSILON := 0.02 ## actual displacement below this (despite nonzero velocity) counts as "stuck"
 const WEDGE_NUDGE_SPEED := 4.0
@@ -470,12 +471,17 @@ func _resolve_wedge(pos_before: Vector3, intended: Vector3) -> void:
 		_wedge_t = 0.0
 		return
 	_wedge_t += get_physics_process_delta_time()
-	if _wedge_t < WEDGE_STUCK_TIME:
+	# Jammed up into a V-shaped roof / roof crease: the slopes' normals mostly
+	# cancel sideways, so free it faster and bias the shove straight down.
+	var under_roof := is_on_ceiling()
+	if _wedge_t < (WEDGE_CEILING_STUCK_TIME if under_roof else WEDGE_STUCK_TIME):
 		return
 	_wedge_t = 0.0
 	var escape := Vector3.ZERO
 	for i in get_slide_collision_count():
 		escape += get_slide_collision(i).get_normal()
+	if under_roof:
+		escape += Vector3.DOWN
 	if escape.is_zero_approx():
 		escape = Vector3.UP
 	push_warning("Player wedged in a corner near %s — nudging free." % global_position)
