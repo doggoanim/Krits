@@ -39,7 +39,7 @@ extends Node3D
 @export var shield_hand_offset := Vector3(0.0, -0.05, 0.1)
 @export var shield_hand_rotation_deg := Vector3(0.0, 90.0, 0.0)
 @export var weapon_hand_offset := Vector3(0.0, 0.0, 0.0)
-@export var weapon_hand_rotation_deg := Vector3(90.0, 0.0, 0.0)
+@export var weapon_hand_rotation_deg := Vector3(120.0, 90.0, 0.0)
 @export_group("Swing")
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
