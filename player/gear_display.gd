@@ -42,6 +42,8 @@ var _shield_model: Node3D
 var _weapon_model: Node3D
 var _shield_id: StringName = &"?"
 var _weapon_id: StringName = &"?"
+## Gear is hidden while the player is in one of these states (it would clip through a tumbling body).
+const HIDDEN_IN_STATES: Array[StringName] = [&"Roll"]
 var _skeleton: Skeleton3D
 var _bone := -1
 var _tilt := Quaternion.IDENTITY
@@ -74,6 +76,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null or _player.visual == null:
 		return
+	visible = not HIDDEN_IN_STATES.has(_player.machine.current_name)
 	if _skeleton == null:
 		_find_bone()
 	var pose := _bone_pose_delta()
