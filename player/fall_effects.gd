@@ -71,6 +71,5 @@ func _update_streaks() -> void:
 	var speed := absf(_player.velocity.y) * 1.1
 	_streaks.initial_velocity_min = speed * 0.8
 	_streaks.initial_velocity_max = speed * 1.2
-	_streaks.amount_ratio = clampf(_amount * 1.4, 0.0, 1.0)
 	_streaks.scale_amount_min = 0.7 + _amount
 	_streaks.scale_amount_max = 1.0 + _amount * 1.5
