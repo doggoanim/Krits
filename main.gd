@@ -167,6 +167,7 @@ func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.fast_travel_requested.connect(_on_fast_travel_requested)
 	Events.level_travel_requested.connect(_on_level_travel_requested)
+	_setup_open_world(level)
 	CombatWarmup.start(self, cam.get_camera())   # pre-draws the combat visuals so the first fight doesn't stall
 	if starting_indoors:
 		var start_pos: Variant = _find_spawn_in(level, start_spawn_id)
@@ -245,10 +246,21 @@ func _swap_level(next_level: PackedScene, spawn_id: StringName) -> void:
 	var pos: Variant = _find_spawn_in(level, spawn_id)
 	player.teleport(pos if pos != null else level.global_position)
 	cam.global_position = player.global_position
+	_setup_open_world(level)
 	if Game.arrival_velocity != Vector3.ZERO:   # thrown out of the previous level (see EjectPit)
 		player.velocity = Game.arrival_velocity
 		Game.arrival_velocity = Vector3.ZERO
 		player.machine.transition_to(&"Air")
+
+## Open-world levels carry a ZoneStreamer (zones streamed by distance, haze
+## mood blending) and optionally an EndlessWater that follows the player. Both
+## need the player and Environment, which only Main has.
+func _setup_open_world(lvl: Node) -> void:
+	for n in lvl.find_children("*", "", true, false):
+		if n is ZoneStreamer:
+			(n as ZoneStreamer).setup(player, _env)
+		elif n is EndlessWater:
+			(n as EndlessWater).follow = player
 
 ## Scoped to `root` (the level that was just instantiated) rather than a
 ## global group lookup like _travel_to() above uses — right after a swap the
