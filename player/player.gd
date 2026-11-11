@@ -257,6 +257,7 @@ func _physics_process(delta: float) -> void:
 	machine.physics_update(delta)
 	if is_on_ceiling() and rise_speed > CEILING_SQUASH_MIN_SPEED:
 		visual.ceiling_squash(rise_speed / CEILING_SQUASH_FULL_SPEED, _pound_jumping)
+		audio.play_roll_bounce()   # the same bonk the roll wall-bounce uses
 	var on_floor := is_on_floor()
 	if on_floor:
 		_last_safe_position = global_position   ## see _unstick()
