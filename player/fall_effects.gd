@@ -38,8 +38,7 @@ func _ready() -> void:
 	# A thin quad turned along its travel direction, fading out toward both
 	# tips (so a streak has no hard ends) and fading in/out over its life (so
 	# it never pops into or out of existence).
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.07, 2.2)
+	var quad := _cross_mesh(0.07, 2.2)
 	var tip := Gradient.new()
 	tip.set_color(0, Color(1, 1, 1, 0))
 	tip.set_color(1, Color(1, 1, 1, 0))
@@ -55,8 +54,6 @@ func _ready() -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_texture = tex
 	mat.vertex_color_use_as_albedo = true
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.billboard_keep_scale = true
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	quad.material = mat
 	_streaks.particle_flag_align_y = true
@@ -73,6 +70,23 @@ func _ready() -> void:
 	_streaks.scale_amount_curve = shrink
 	_streaks.mesh = quad
 	add_child(_streaks)
+
+## Two thin quads crossed like an X, standing along Y. They're real geometry
+## in the world (not camera-facing sprites), so from any angle a streak reads
+## as a solid line of air rather than a flat card turned toward the lens.
+static func _cross_mesh(width: float, length: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var hw := width * 0.5
+	var hl := length * 0.5
+	for plane in 2:
+		var x := Vector3(hw, 0, 0) if plane == 0 else Vector3(0, 0, hw)
+		var corners := [-x + Vector3(0, -hl, 0), x + Vector3(0, -hl, 0), x + Vector3(0, hl, 0), -x + Vector3(0, hl, 0)]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for idx in [0, 1, 2, 0, 2, 3]:
+			st.set_uv(uvs[idx])
+			st.add_vertex(corners[idx])
+	return st.commit()
 
 func _physics_process(delta: float) -> void:
 	if _player == null or _player.visual == null:
