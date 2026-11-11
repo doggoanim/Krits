@@ -47,7 +47,9 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	if (water != null) != enemy.data.aquatic:
 		return
 	if water != null and not UnderwaterRules.deep_enough(player, water):
-		return   # too shallow for a submerged fight
+		_warn_shallow()
+		enemy.strike_player(player)   # it still nips you, so shallow water isn't a free pass
+		return
 	if Game.stats.equipped_weapon == null:
 		# Can't start a fight bare-handed: the enemy just hurts you instead.
 		_warn_unarmed()
@@ -58,7 +60,7 @@ func _on_touched(enemy: WorldEnemy) -> void:
 		var other := n as WorldEnemy
 		if other != enemy and other.is_awake() and other.data.aquatic == enemy.data.aquatic \
 				and other.global_position.distance_to(enemy.global_position) <= MERGE_DISTANCE \
-				and (water == null or WaterVolume.at(other.global_position) == water):
+				and (water == null or WaterVolume.over(other.global_position) == water):
 			group.append(other)
 	var roster: Array[EnemyData] = []
 	for w in group:
@@ -75,6 +77,12 @@ func _warn_unarmed() -> void:
 		return
 	_unarmed_notice_left = UNARMED_NOTICE_COOLDOWN
 	Events.notice.emit("You can't fight without a weapon.")
+
+func _warn_shallow() -> void:
+	if _unarmed_notice_left > 0.0:
+		return
+	_unarmed_notice_left = UNARMED_NOTICE_COOLDOWN
+	Events.notice.emit("The water is too shallow to fight in.")
 
 ## Full encounter. `world_enemies` are the overworld enemies taking part (may be empty, e.g. debug).
 ## `water` is set for an underwater fight (the player is swimming in it): the

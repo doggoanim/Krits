@@ -212,7 +212,7 @@ func _clip_to_water(ang: float, reach: float) -> float:
 	while r > FIT_MIN_RAY:
 		var p := global_position + dir * (r + FIT_MARGIN)
 		p.y = probe_y
-		if _water.contains_point(p):
+		if _water.covers_xz(p):
 			break
 		r -= WATER_CLIP_STEP
 	return maxf(r, FIT_MIN_RAY)
