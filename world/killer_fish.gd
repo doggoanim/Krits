@@ -2,11 +2,11 @@
 class_name KillerFish
 extends CharacterBody3D
 ## A fish that kills the player outright. It drifts around the water it was
-## placed in, and the moment it notices a SWIMMING player (not one wading or
-## standing on the shore) it winds up for a beat, then darts at them far faster
-## than they can swim; touching it is instant death. Get out of the water to
-## escape: it gives up as soon as you're not swimming, and it can't leave its
-## pool.
+## placed in. The moment the player touches that water at all (wading counts),
+## it is marked: after a sliver of warning it darts at them far faster than
+## they can swim, and it does not stop. Getting out of the water doesn't save
+## you — it leaps out of the pool and chases over land, straight through the
+## world (it has no collision at all) until it touches you: instant death.
 ##
 ## Place one: drop a node with this script inside a body of water (it finds the
 ## WaterVolume under it by itself). The body is built in code, so it also
@@ -15,8 +15,6 @@ extends CharacterBody3D
 
 @export var swim_speed := 3.5            ## idle drifting speed
 @export var chase_speed := 24.0          ## "extremely fast"
-@export var notice_radius := 14.0        ## how far away it spots a swimming player
-@export var give_up_radius := 24.0       ## ...and how far you must get before it loses you
 @export var windup := 0.4                ## seconds between spotting you and the dart — a sliver of warning
 @export var kill_radius := 1.0           ## touching distance (to the player's centre)
 @export var wander_radius := 6.0         ## how far from its start it drifts
@@ -26,6 +24,7 @@ extends CharacterBody3D
 const SURFACE_MARGIN := 0.6              ## keeps its body this far under the surface
 const TURN_RATE := 14.0
 const KILL_DAMAGE := 1.0e9
+const LEAP_ARC := 2.5                    ## how high it bounds when it clears the water
 const PREVIEW_GROUP_NAME := "KillerFishBody"
 
 enum Mode { WANDER, WINDUP, CHASE }
@@ -45,16 +44,10 @@ func _ready() -> void:
 	_build_body()
 	if Engine.is_editor_hint():
 		return
-	collision_layer = 1 << 2   # layer 3: enemy, like the other creatures
-	collision_mask = 1
-	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
+	collision_layer = 0   # no collision with anything: it passes through the world
+	collision_mask = 0
 	_home = global_position
 	_dest = _home
-	var shape := CollisionShape3D.new()
-	var sphere := SphereShape3D.new()
-	sphere.radius = body_length * 0.3
-	shape.shape = sphere
-	add_child(shape)
 
 # ---------------------------------------------------------------- the look
 
@@ -117,11 +110,13 @@ func _physics_process(delta: float) -> void:
 		_player = get_tree().get_first_node_in_group(&"player") as Player
 	if _player == null or _water == null:
 		return
-	var swimming := _player.machine.current_name == &"Swim" and _player.current_water() == _water   # swimming, not wading
+	if _player.dead:   # a fresh start: forget the grudge
+		_mode = Mode.WANDER
+		_dest = _home
 	match _mode:
 		Mode.WANDER:
 			_wander(delta)
-			if swimming and _dist_to_player() <= notice_radius and not _player.dead:
+			if _player.current_water() == _water:   # touched the water, however briefly
 				_mode = Mode.WINDUP
 				_windup_t = windup
 				Telegraph.exclaim(self, 1.0)
@@ -129,16 +124,10 @@ func _physics_process(delta: float) -> void:
 			_face_player(delta)
 			velocity = Vector3.ZERO
 			_windup_t -= delta
-			if not swimming or _player.dead:
-				_mode = Mode.WANDER
-			elif _windup_t <= 0.0:
+			if _windup_t <= 0.0:
 				_mode = Mode.CHASE
 		Mode.CHASE:
-			if not swimming or _player.dead or _dist_to_player() > give_up_radius:
-				_mode = Mode.WANDER
-				_dest = _home
-			else:
-				_chase(delta)
+			_chase(delta)
 	_wiggle()
 
 func _dist_to_player() -> float:
@@ -160,7 +149,12 @@ func _chase(delta: float) -> void:
 	_turn_toward(dir, delta)
 	# Never overshoot the player in a single step.
 	velocity = dir * minf(chase_speed, dist / maxf(delta, 0.0001))
-	_swim(delta)
+	global_position += velocity * delta   # straight through anything: no water limit, no collision
+	# Out of the pool it bounds along in an arc instead of sliding flat.
+	if not _water.covers_xz(global_position) or global_position.y > _water.surface_world_y() - SURFACE_MARGIN:
+		_body.position.y = absf(sin(_age * 9.0)) * LEAP_ARC * 0.3
+	else:
+		_body.position.y = 0.0
 	if _dist_to_player() <= kill_radius:
 		_kill()
 
@@ -207,7 +201,7 @@ func _swim(delta: float) -> void:
 			velocity.z = 0.0
 		else:
 			velocity = Vector3.ZERO
-	move_and_slide()
+	global_position += velocity * delta
 
 func _inside_water(pos: Vector3) -> bool:
 	return _water.covers_xz(pos) and pos.y + SURFACE_MARGIN <= _water.surface_world_y()
