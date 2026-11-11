@@ -37,6 +37,7 @@ var _water: WaterVolume
 var _spot := Vector3.ZERO
 var _phase := Phase.WAIT
 var _timer := 0.0
+const CAST_INPUT_DELAY := 0.7   ## seconds after casting before a press can pull the line in
 var _age := 0.0
 var _catch: Dictionary = {}
 var _froze := false
@@ -161,7 +162,9 @@ func _process(delta: float) -> void:
 
 func _wait(delta: float) -> void:
 	_timer -= delta
-	if _hook_pressed():
+	# Right after casting, a stray press (still mashing the cast key, a double click)
+	# must not yank the line straight back in.
+	if _age > CAST_INPUT_DELAY and _hook_pressed():
 		_end("Pulled in too early.")
 	elif _timer <= 0.0:
 		_phase = Phase.BITE
