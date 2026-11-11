@@ -1429,7 +1429,7 @@ script = ExtResource("oz_streamer")
 [node name="EndlessWater" type="MeshInstance3D" parent="OpenWorld" unique_id=1900000002]
 material_override = SubResource("ShaderMaterial_qjukg")
 script = ExtResource("oz_water")
-surface_y = 0.3
+surface_y = -0.84
 
 [node name="PlaceholderIsleZone" type="Node3D" parent="." unique_id=1900000003]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -320)

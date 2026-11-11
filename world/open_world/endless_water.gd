@@ -5,7 +5,7 @@ extends MeshInstance3D
 ## water keeps going until distance haze swallows it: from the shore there is
 ## no visible far bank, just lake fading into fog.
 
-@export var surface_y := 0.35
+@export var surface_y := -0.84   ## just under the town's own sea-level water (Props/Water, y -0.82) so the two never z-fight
 @export var extent := 1200.0
 @export var snap := 8.0
 @export var follow: Node3D
