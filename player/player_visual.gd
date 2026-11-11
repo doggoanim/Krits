@@ -145,9 +145,9 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var ceiling_squash_y := 0.72       ## head bonk on a roof (scaled by how hard you hit it)
 @export var ceiling_squash_xz := 1.25
 @export var ceiling_squash_time := 0.22
-@export var pound_ceiling_squash_y := 0.18 ## bonk after a ground-pound jump: much harder
-@export var pound_ceiling_squash_xz := 2.3
-@export var pound_ceiling_squash_time := 0.5
+@export var pound_ceiling_squash_y := 0.28 ## bonk after a ground-pound jump: much harder
+@export var pound_ceiling_squash_xz := 1.9
+@export var pound_ceiling_squash_time := 0.4
 
 var _squash_tween: Tween
 
