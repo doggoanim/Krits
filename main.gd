@@ -72,6 +72,7 @@ var player: Player
 var _respawning := false
 var _death_running := false
 var _death_cam_hold: Node3D   ## parks the camera at the spot of death
+var _death_overlay: DeathOverlay   ## draws the falling player over the iris's black
 const DEATH_FREEZE_WAIT := 0.45   ## frozen on the pose before the iris starts
 const DEATH_IRIS_RADIUS := 0.2    ## the gap left open around the player (screen heights)
 const DEATH_IRIS_TIME := 0.7
@@ -301,6 +302,10 @@ func _play_death_sequence() -> void:
 	var uv := cam3d.unproject_position(player.global_position + Vector3.UP * 0.9) / get_viewport().get_visible_rect().size
 	await LoadingScreen.instance.close_to(DEATH_IRIS_RADIUS, uv, DEATH_IRIS_TIME)
 	await get_tree().create_timer(DEATH_PRE_HOP_WAIT, true, false, true).timeout
+	if _death_overlay == null:
+		_death_overlay = DeathOverlay.new()
+		add_child(_death_overlay)
+	_death_overlay.show_player(player, cam3d)   # the fall stays visible over the black
 	player.death_hop()
 	await get_tree().create_timer(DEATH_HOP_TIME, true, false, true).timeout
 
@@ -314,6 +319,8 @@ func _respawn_after_death() -> void:
 	while _death_running:   # a fight's teardown can finish before the death sequence does
 		await get_tree().process_frame
 	await LoadingScreen.instance.run(func():
+		if _death_overlay != null:
+			_death_overlay.clear()   # fully covered now: the player goes back to being drawn normally
 		cam.target = player   # the camera was parked while the player fell away (see _play_death_sequence())
 		if is_instance_valid(_death_cam_hold):
 			_death_cam_hold.queue_free()
