@@ -24,7 +24,7 @@ const PROGRESS_GAIN := 0.3         ## per second while the zone covers the fish
 const PROGRESS_LOSS := 0.2         ## per second while it doesn't
 const HOOK_ACCEL := 3.2
 const HOOK_MAX_SPEED := 0.9
-const BAR_SIZE := Vector2(480.0, 26.0)
+const BAR_SIZE := Vector2(540.0, 92.0)   ## the meter's footprint (see FishingMeter.PANEL_SIZE)
 
 var _player: Player
 var _water: WaterVolume
@@ -48,9 +48,9 @@ var _hook_pos := 0.5
 var _hook_vel := 0.0
 var _progress := PROGRESS_START
 var _ui: CanvasLayer
-var _ui_zone: ColorRect
-var _ui_fish: ColorRect
-var _ui_fill: ColorRect
+var _meter: FishingMeter
+var _plate_tween: Tween
+var _plate: KeyHintPlate
 
 ## Jump or the left mouse button: hooks the fish at the bite and reels after.
 func _hook_pressed() -> bool:
@@ -301,39 +301,43 @@ func _build_ui() -> void:
 	_box.size = BAR_SIZE
 	root.add_child(_box)
 	var plate := PLATE_SCENE.instantiate() as KeyHintPlate
+	_plate = plate
 	_box.add_child(plate)
 	plate.set_key(InputSetup.key_label(Settings.get_binding(&"jump")))
 	plate.position = Vector2((BAR_SIZE.x - plate.custom_minimum_size.x) * 0.5, -plate.custom_minimum_size.y - 12.0)
+	# Pops in with the bite, then throbs until you hook it.
+	plate.pivot_offset = plate.custom_minimum_size * 0.5
+	plate.scale = Vector2(1.5, 1.5)
+	_plate_tween = create_tween()
+	_plate_tween.tween_property(plate, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_plate_tween.set_loops()
+	_plate_tween.tween_property(plate, "scale", Vector2(1.12, 1.12), 0.22)
+	_plate_tween.tween_property(plate, "scale", Vector2.ONE, 0.22)
 
-## The reel-in bar (catch zone, fish marker, progress), under the key plate.
+## The reel-in meter (see FishingMeter), under the key plate.
 func _build_bar() -> void:
 	_build_ui()
-	var track := ColorRect.new()
-	track.color = Color(0.05, 0.1, 0.15, 0.8)
-	track.size = BAR_SIZE
-	_box.add_child(track)
-	_ui_zone = ColorRect.new()
-	_ui_zone.color = Color(0.4, 0.9, 0.55, 0.7)
-	_box.add_child(_ui_zone)
-	_ui_fish = ColorRect.new()
-	_ui_fish.color = Color(1.0, 0.72, 0.25)
-	_ui_fish.size = Vector2(14.0, BAR_SIZE.y + 8.0)
-	_box.add_child(_ui_fish)
-	var fill_back := ColorRect.new()
-	fill_back.color = Color(0.05, 0.1, 0.15, 0.8)
-	fill_back.position = Vector2(0.0, BAR_SIZE.y + 10.0)
-	fill_back.size = Vector2(BAR_SIZE.x, 10.0)
-	_box.add_child(fill_back)
-	_ui_fill = ColorRect.new()
-	_ui_fill.color = Color(0.5, 0.85, 1.0)
-	_ui_fill.position = fill_back.position
-	_ui_fill.size = Vector2(0.0, 10.0)
-	_box.add_child(_ui_fill)
+	if _plate_tween != null:
+		_plate_tween.kill()   # stop the "press now" throb once you've hooked it
+		_plate_tween = null
+		_plate.scale = Vector2.ONE
+	_meter = FishingMeter.new()
+	_meter.position = Vector2((BAR_SIZE.x - FishingMeter.PANEL_SIZE.x) * 0.5, 0.0)
+	_box.add_child(_meter)
+	_meter.pivot_offset = FishingMeter.PANEL_SIZE * 0.5
+	_meter.scale = Vector2(0.6, 0.6)
+	_meter.modulate.a = 0.0
+	var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_meter, "scale", Vector2.ONE, 0.25)
+	tw.tween_property(_meter, "modulate:a", 1.0, 0.15)
 
 func _update_ui(half: float, covered: bool) -> void:
-	var zone_w := half * 2.0 * BAR_SIZE.x
-	_ui_zone.size = Vector2(zone_w, BAR_SIZE.y)
-	_ui_zone.position = Vector2(clampf(_hook_pos * BAR_SIZE.x - zone_w * 0.5, 0.0, BAR_SIZE.x - zone_w), 0.0)
-	_ui_zone.color = Color(0.4, 0.95, 0.55, 0.85) if covered else Color(0.4, 0.9, 0.55, 0.45)
-	_ui_fish.position = Vector2(_fish_pos * (BAR_SIZE.x - _ui_fish.size.x), -4.0)
-	_ui_fill.size.x = clampf(_progress, 0.0, 1.0) * BAR_SIZE.x
+	if _meter == null:
+		return
+	if absf(_fish_target - _fish_pos) > 0.002:
+		_meter.fish_facing = signf(_fish_target - _fish_pos)
+	_meter.fish_pos = _fish_pos
+	_meter.zone_pos = _hook_pos
+	_meter.zone_width = half * 2.0
+	_meter.progress = _progress
+	_meter.covered = covered
