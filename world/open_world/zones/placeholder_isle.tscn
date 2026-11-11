@@ -1,5 +1,10 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://world/spawnpoint.gd" id="spawn"]
+[ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/nature/tree_chesburg_1.glb" id="t1"]
+[ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/nature/tree_chesburg_3.glb" id="t3"]
+[ext_resource type="PackedScene" uid="uid://bkxlyousnd7ld" path="res://assets/world/nature/tree_chesburg_7.glb" id="t7"]
+
 [sub_resource type="CylinderMesh" id="Cyl"]
 top_radius = 24.0
 bottom_radius = 30.0
@@ -23,3 +28,17 @@ surface_material_override/0 = SubResource("Grass")
 
 [node name="Shape" type="CollisionShape3D" parent="Ground"]
 shape = SubResource("Shape")
+
+[node name="Dock" type="Area3D" parent="."]
+script = ExtResource("spawn")
+spawn_id = &"isle_landing"
+display_name = "Far Isle"
+
+[node name="Tree1" parent="." instance=ExtResource("t1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.4, -6)
+
+[node name="Tree2" parent="." instance=ExtResource("t3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0.4, 5)
+
+[node name="Tree3" parent="." instance=ExtResource("t7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.4, 12)
