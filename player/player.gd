@@ -1275,7 +1275,7 @@ func _begin_death(_from: Vector3) -> void:
 		face(camera_rig.get_camera().global_position - global_position)   # looking straight at the camera
 		camera_rig.shake(DEATH_SHAKE)
 	visual.play_menu_pose()
-	visual.show_hurt()
+	visual.hold_expression(&"hurt")          # hurt face for the whole death, no blinking back
 	HitStop.freeze(DEATH_FREEZE)
 
 ## The hop: up, then down and out through the floor (no collision any more).
@@ -1309,6 +1309,7 @@ func teleport(pos: Vector3) -> void:
 	collision_layer = 1 << 1                # undo death_hop()'s ghosting
 	collision_mask = 1 | (1 << 6)
 	visual.cancel_hold()                    # ...and the death pose
+	visual.release_expression()             # ...and the held hurt face
 	visual.set_lean(0.0, 0.0, 1.0, 1.0)
 	global_position = pos
 	velocity = Vector3.ZERO
