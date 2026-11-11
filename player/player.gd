@@ -1056,7 +1056,11 @@ func start_jump(vel: float, pound := false) -> void:
 	# side flip (or any other held pose) could look like the jump did
 	# nothing at all, even though it physically happened.
 	visual.cancel_hold()
-	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	if pound:
+		visual.squash_stretch(visual.pound_jump_stretch_y, visual.pound_jump_stretch_xz,
+				visual.pound_jump_stretch_time)
+	else:
+		visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
 	visual.roll_jump_start()
 	effects.burst_jump_dust()
 	audio.play_pound_jump() if pound else audio.play_jump()

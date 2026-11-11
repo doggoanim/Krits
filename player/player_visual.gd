@@ -133,6 +133,16 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var land_squash_xz := 1.3
 @export var uncrouch_bounce_y := 1.12   ## small stretchy "pop" when standing back up
 @export var uncrouch_bounce_xz := 0.94
+@export var pound_windup_squash_y := 0.72   ## crouching down to wind up a ground pound
+@export var pound_windup_squash_xz := 1.25
+@export var pound_fall_stretch_y := 1.45    ## held while plunging
+@export var pound_fall_stretch_xz := 0.82
+@export var pound_land_squash_y := 0.6      ## the slam hitting the ground
+@export var pound_land_squash_xz := 1.45
+@export var pound_land_squash_time := 0.28
+@export var pound_jump_stretch_y := 1.65    ## the high jump out of the slam
+@export var pound_jump_stretch_xz := 0.8
+@export var pound_jump_stretch_time := 0.24
 @export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes
 
 var _squash_tween: Tween
@@ -448,6 +458,23 @@ func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+## Eases the model to a stretched/squashed pose and HOLDS it (unlike
+## squash_stretch(), which pops and springs back by itself). Release with
+## relax_scale() — or just call squash_stretch(), which overrides it.
+func hold_squash_stretch(y_scale: float, xz_scale: float, duration: float) -> void:
+	if _squash_tween and _squash_tween.is_valid():
+		_squash_tween.kill()
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(_model, "scale", \
+		Vector3(_base_scale * xz_scale, _base_scale * y_scale, _base_scale * xz_scale), duration) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+func relax_scale(duration := 0.12) -> void:
+	if _squash_tween and _squash_tween.is_valid():
+		_squash_tween.kill()
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, duration)
 
 ## Smoothly lean this node toward `pitch` (forward/back, rad) and `bank` (side-to-
 ## side, rad). Call every physics frame with a target of 0 to relax back upright.

@@ -13,6 +13,12 @@ func enter(_prev: StringName, _msg: Dictionary = {}) -> void:
 	player.visual.cancel_hold()   # see RollState.enter()'s identical comment
 	player.visual.play(PlayerVisual.ANIM_POUND)
 	player.audio.play_pound_ready()
+	var v := player.visual
+	v.hold_squash_stretch(v.pound_windup_squash_y, v.pound_windup_squash_xz, player.config.pound_windup)
+
+func exit(next: StringName) -> void:
+	if next != &"PoundLand":   # PoundLand sets its own landing squash
+		player.visual.relax_scale()
 
 func physics_update(delta: float) -> void:
 	var p := player
@@ -31,6 +37,7 @@ func physics_update(delta: float) -> void:
 		if _t <= 0.0:
 			_slamming = true
 			p.velocity.y = -p.config.pound_speed
+			p.visual.hold_squash_stretch(p.visual.pound_fall_stretch_y, p.visual.pound_fall_stretch_xz, 0.08)
 		return
 	p.safe_move_and_slide()
 	if p.is_on_floor():
