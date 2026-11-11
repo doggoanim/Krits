@@ -145,9 +145,9 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var ceiling_squash_y := 0.72       ## head bonk on a roof (scaled by how hard you hit it)
 @export var ceiling_squash_xz := 1.25
 @export var ceiling_squash_time := 0.22
-@export var pound_ceiling_squash_y := 0.45 ## bonk after a ground-pound jump: much harder
-@export var pound_ceiling_squash_xz := 1.6
-@export var pound_ceiling_squash_time := 0.3
+@export var pound_ceiling_squash_y := 0.18 ## bonk after a ground-pound jump: much harder
+@export var pound_ceiling_squash_xz := 2.3
+@export var pound_ceiling_squash_time := 0.5
 
 var _squash_tween: Tween
 
@@ -480,7 +480,7 @@ func ceiling_squash(strength: float, pound := false) -> void:
 	var y := pound_ceiling_squash_y if pound else ceiling_squash_y
 	var xz := pound_ceiling_squash_xz if pound else ceiling_squash_xz
 	var t := pound_ceiling_squash_time if pound else ceiling_squash_time
-	var s := clampf(strength, 0.0, 1.0)
+	var s := 1.0 if pound else clampf(strength, 0.0, 1.0)   # a pound jump always slams in full
 	squash_stretch(lerpf(1.0, y, s), lerpf(1.0, xz, s), t)
 
 ## Eases the model to a stretched/squashed pose and HOLDS it (unlike
