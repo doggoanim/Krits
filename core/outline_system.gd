@@ -146,10 +146,11 @@ func _update_occlusion(delta: float) -> void:
 	var space := _source_cam.get_world_3d().direct_space_state
 	for i in range(_occludable.size() - 1, -1, -1):
 		var entry := _occludable[i]
-		var mi := entry["mesh"] as MeshInstance3D
-		if not is_instance_valid(mi):
+		var raw: Variant = entry["mesh"]
+		if not is_instance_valid(raw):   # checked before casting: casting a freed object is an error
 			_occludable.remove_at(i)
 			continue
+		var mi := raw as MeshInstance3D
 		if not mi.is_visible_in_tree():
 			continue
 		var to := mi.global_transform * mi.get_aabb().get_center()
