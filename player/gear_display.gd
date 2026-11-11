@@ -31,15 +31,12 @@ extends Node3D
 @export_group("In Combat (held in hand)")
 ## During a fight the shield is carried on the left forearm and the sword/bow
 ## in the right hand, riding the animation, instead of floating behind. Offsets
-## are in metres from the bone's end (its hand), along that bone's own axes;
-## rotations are degrees. Tune these live in the inspector.
+## are set in `grips` (player/hand_grips.tres) — tune them visually with
+## tools/grip_lab.tscn.
 @export var hold_in_combat := true
 @export var shield_hand_bone: StringName = &"LowerArm.L"
 @export var weapon_hand_bone: StringName = &"LowerArm.R"
-@export var shield_hand_offset := Vector3(0.0, -0.05, 0.1)
-@export var shield_hand_rotation_deg := Vector3(0.0, 90.0, 0.0)
-@export var weapon_hand_offset := Vector3(0.0, 0.0, 0.0)
-@export var weapon_hand_rotation_deg := Vector3(120.0, 90.0, 0.0)
+@export var grips: HandGrips = preload("res://player/hand_grips.tres")   ## tuned in tools/grip_lab.tscn
 @export_group("Swing")
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
@@ -193,8 +190,8 @@ func _reparent(model: Node3D, parent: Node3D) -> void:
 ## One BoneAttachment3D per hand, with a metre-scaled grip node at the end of
 ## the bone (the skeleton is scaled to fit the character, so grips undo that).
 func _build_grips() -> void:
-	_shield_grip = _make_grip(shield_hand_bone, shield_hand_offset, shield_hand_rotation_deg)
-	_weapon_grip = _make_grip(weapon_hand_bone, weapon_hand_offset, weapon_hand_rotation_deg)
+	_shield_grip = _make_grip(shield_hand_bone, grips.shield_offset, grips.shield_rotation_deg)
+	_weapon_grip = _make_grip(weapon_hand_bone, grips.weapon_offset, grips.weapon_rotation_deg)
 
 func _make_grip(bone_name: StringName, offset: Vector3, rotation_deg: Vector3) -> Node3D:
 	var idx := _skeleton.find_bone(bone_name)
