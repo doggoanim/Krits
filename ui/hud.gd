@@ -63,8 +63,23 @@ var _stamina_rest_x := 0.0   ## the stamina bar's resting x, read from the scene
 var _last_hp := 0.0
 var _last_shield := 0.0
 
+## -- HP bar juice ----------------------------------------------------------
+const GHOST_TINT := Color(1.0, 0.9, 0.55, 0.9)   ## the pale "just lost" chunk trailing the live fill
+const GHOST_HOLD := 0.45                          ## seconds the chunk waits before draining away
+const GHOST_DRAIN_SPEED := 0.9                    ## fraction of the bar per second once it drains
+const LOW_HP_FRACTION := 0.3
+const LOW_HP_PULSE_SPEED := 7.0
+const HEAL_FLASH_COLOR := Color(0.7, 1.6, 0.8)
+var _hp_ghost: TexturedSlantedBar
+var _ghost_hold_left := 0.0
+var _heal_tween: Tween
+var _low_hp_t := 0.0
+
 func _ready() -> void:
 	_hp_rest_pos = _hp_group.position
+	_hp_group.resized.connect(func() -> void: _hp_group.pivot_offset = _hp_group.size * 0.5)
+	_hp_group.pivot_offset = _hp_group.size * 0.5
+	_make_hp_ghost()
 	_stamina_rest_x = _stamina_fill.position.x
 
 	_last_hp = Game.stats.hp
@@ -82,8 +97,59 @@ func _ready() -> void:
 	_combo_plate.resized.connect(func() -> void: _combo_plate.pivot_offset = _combo_plate.size * 0.5)
 	_refresh()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_refresh()   # shield recharges every frame
+	_update_hp_ghost(delta)
+	_update_low_hp_pulse(delta)
+
+## A copy of the HP fill placed just behind it, tinted pale. When you take a
+## hit the live fill drops at once and this chunk stays, then slides down to
+## meet it, so the size of the hit reads at a glance.
+func _make_hp_ghost() -> void:
+	_hp_ghost = _hp_fill.duplicate() as TexturedSlantedBar
+	_hp_ghost.tint = GHOST_TINT
+	_hp_ghost.name = "HpGhost"
+	_hp_fill.get_parent().add_child(_hp_ghost)
+	_hp_fill.get_parent().move_child(_hp_ghost, _hp_fill.get_index())
+	_hp_ghost.max_value = Game.stats.max_hp()
+	_hp_ghost.value = Game.stats.hp
+
+func _update_hp_ghost(delta: float) -> void:
+	if _hp_ghost == null:
+		return
+	var hp := _hp_fill.value
+	_hp_ghost.max_value = _hp_fill.max_value
+	if _hp_ghost.value <= hp:
+		_hp_ghost.value = hp   # healing (or first frame): no trail, just match
+		_ghost_hold_left = GHOST_HOLD
+		return
+	if _ghost_hold_left > 0.0:
+		_ghost_hold_left -= delta
+		return
+	_hp_ghost.value = maxf(hp, _hp_ghost.value - _hp_ghost.max_value * GHOST_DRAIN_SPEED * delta)
+
+## Below LOW_HP_FRACTION the bar throbs like a heartbeat.
+func _update_low_hp_pulse(delta: float) -> void:
+	var frac := _hp_fill.value / maxf(_hp_fill.max_value, 1.0)
+	if frac > LOW_HP_FRACTION or frac <= 0.0:
+		_low_hp_t = 0.0
+		if _hp_group.scale != Vector2.ONE and not (_heal_tween and _heal_tween.is_valid()):
+			_hp_group.scale = Vector2.ONE
+		return
+	_low_hp_t += delta * LOW_HP_PULSE_SPEED
+	var beat := maxf(sin(_low_hp_t), 0.0)
+	_hp_group.scale = Vector2.ONE * (1.0 + 0.045 * beat * beat)
+
+## HP went up: the bar swells and flashes green-white.
+func _flash_heal() -> void:
+	if _heal_tween and _heal_tween.is_valid():
+		_heal_tween.kill()
+	_hp_group.scale = Vector2.ONE * 1.08
+	_hp_group.modulate = HEAL_FLASH_COLOR
+	_heal_tween = create_tween().set_parallel(true)
+	_heal_tween.tween_property(_hp_group, "scale", Vector2.ONE, 0.35) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_heal_tween.tween_property(_hp_group, "modulate", Color.WHITE, 0.4)
 
 func _refresh() -> void:
 	var s := Game.stats
@@ -228,6 +294,9 @@ func _on_player_damaged(hp: float, shield: float) -> void:
 	if hp < _last_hp or shield < _last_shield:
 		_punch_portrait()
 		_shake_hp_bar()
+		_ghost_hold_left = GHOST_HOLD
+	elif hp > _last_hp + 0.5:
+		_flash_heal()
 	_last_hp = hp
 	_last_shield = shield
 	_refresh()
