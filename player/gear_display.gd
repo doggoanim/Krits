@@ -100,7 +100,7 @@ func _physics_process(delta: float) -> void:
 		_find_bone()
 	var pose := _bone_pose_delta()
 	var want: Quaternion = Quaternion.IDENTITY.slerp(pose[1], animation_follow)
-	_tilt = _tilt.slerp(want, 1.0 - exp(-tilt_follow * delta))
+	_tilt = _tilt.slerp(want, 1.0 - exp(-tilt_follow * delta)).normalized()
 	var vel := _anchor.follow(_target_position() + pose[0] * animation_follow, _target_yaw(), delta, Basis(_tilt))
 	_update_swing(vel, delta)
 
@@ -125,10 +125,19 @@ func _bone_pose_delta() -> Array:
 	var pose := _skeleton.get_bone_global_pose(_bone)
 	var rest := _skeleton.get_bone_global_rest(_bone)
 	var sb := _skeleton.global_basis
+	# A degenerate (zero-scale / non-finite) bone or skeleton transform can't be
+	# normalised — and would spam "Vector3 cannot be normalized" every frame — so
+	# treat it as "no animation offset".
+	if not (pose.origin.is_finite() and rest.origin.is_finite() and sb.x.is_finite() and sb.y.is_finite() and sb.z.is_finite()) \
+			or sb.get_scale().x < 0.0001 or pose.basis.get_scale().x < 0.0001 or rest.basis.get_scale().x < 0.0001:
+		return [Vector3.ZERO, Quaternion.IDENTITY]
 	var offset := sb * (pose.origin - rest.origin)
 	var local_rot := (pose.basis.orthonormalized() * rest.basis.orthonormalized().inverse())
 	var world_rot := sb.orthonormalized() * local_rot * sb.orthonormalized().inverse()
-	return [offset, world_rot.get_rotation_quaternion()]
+	var q := world_rot.get_rotation_quaternion()
+	if not q.is_finite() or not offset.is_finite():
+		return [Vector3.ZERO, Quaternion.IDENTITY]
+	return [offset, q]
 
 func _target_yaw() -> float:
 	return _player.visual.global_rotation.y
