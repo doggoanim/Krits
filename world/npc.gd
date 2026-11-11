@@ -1,3 +1,4 @@
+@tool
 class_name NPC
 extends Interactable
 ## A talkable world actor: shows a floating prompt while the player is in
@@ -22,9 +23,17 @@ extends Interactable
 ## Optional rigged model (e.g. assets/npcs/Mayor_Arse.glb). When set it replaces
 ## the placeholder "Mesh" child, is scaled to `model_height` and loops
 ## `idle_animation` (empty = the model's first real clip).
-@export var model: PackedScene
-@export var model_height := 1.9
+@export var model: PackedScene:
+	set(v):
+		model = v
+		_refresh_editor_preview()
+@export var model_height := 1.9:
+	set(v):
+		model_height = v
+		_refresh_editor_preview()
 @export var idle_animation: StringName = &""
+
+const EDITOR_PREVIEW_NAME := "EditorModelPreview"
 
 var _rest_yaw := 0.0
 var _turn_tween: Tween
@@ -32,11 +41,50 @@ var _turn_tween: Tween
 var _script: DialogueScript   ## parsed from dialogue_file, if any
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		_refresh_editor_preview()
+		return
 	super()
 	if not dialogue_file.is_empty():
 		_script = DialogueParser.load_file(dialogue_file)
 	if model != null:
 		_build_model()
+
+## Editor only: shows `model` where the NPC stands so the scene reads like the
+## game does. The preview node has no owner (never saved into the scene) and
+## the placeholder "Mesh" is hidden while it's up, then un-hidden around saves
+## so the .tscn itself never changes.
+func _refresh_editor_preview() -> void:
+	if not Engine.is_editor_hint() or not is_inside_tree():
+		return
+	var old := get_node_or_null(EDITOR_PREVIEW_NAME)
+	if old != null:
+		remove_child(old)
+		old.queue_free()
+	var placeholder := get_node_or_null("Mesh") as Node3D
+	if model == null:
+		if placeholder != null:
+			placeholder.visible = true
+		return
+	var node := model.instantiate() as Node3D
+	if node == null:
+		return
+	node.name = EDITOR_PREVIEW_NAME
+	add_child(node)   # no owner on purpose: not saved
+	ModelUtil.fit_height(node, model_height)
+	if placeholder != null:
+		placeholder.visible = false
+
+func _notification(what: int) -> void:
+	if not Engine.is_editor_hint():
+		return
+	var placeholder := get_node_or_null("Mesh") as Node3D
+	if placeholder == null:
+		return
+	if what == NOTIFICATION_EDITOR_PRE_SAVE:
+		placeholder.visible = true
+	elif what == NOTIFICATION_EDITOR_POST_SAVE and model != null:
+		placeholder.visible = false
 
 ## Swaps the placeholder mesh for `model` and starts its idle loop.
 func _build_model() -> void:

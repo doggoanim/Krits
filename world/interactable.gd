@@ -1,3 +1,4 @@
+@tool
 class_name Interactable
 extends StaticBody3D
 ## Shared "show a floating prompt while the player's in range and able to
@@ -38,6 +39,8 @@ var _verb := ""
 var _prompting := false
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return   # @tool only so subclasses (NPC) can preview themselves in the editor
 	_area = Area3D.new()
 	_area.collision_layer = 0
 	_area.collision_mask = 1 << 1   # layer 2: player — see Player's own collision_layer
@@ -53,6 +56,8 @@ func _ready() -> void:
 	_verb = _verb_from(prompt_text)
 
 func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
 	_usable.erase(self)
 	if _choice == self:
 		_choice = null
@@ -75,6 +80,8 @@ func _on_body_exited(body: Node3D) -> void:
 		player = null
 
 func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	# Nothing is usable while a conversation is open (a door standing next to
 	# the speaker, say) — the dialogue owns the interact key — nor for a moment
 	# after it closes, so the prompt doesn't pop straight back.
@@ -119,6 +126,8 @@ static func _chosen() -> Interactable:
 ## Only the first usable Interactable listens, so one press moves the choice
 ## exactly once. (Arrow keys, not W/S: those are movement.)
 func _input(event: InputEvent) -> void:
+	if Engine.is_editor_hint():
+		return
 	if _usable.size() < 2 or _usable[0] != self:
 		return
 	var step := _scroll_step(event)
