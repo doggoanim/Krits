@@ -930,7 +930,7 @@ func _wind_down() -> void:
 		elif c is Bullet:
 			var b := c as Bullet
 			b.set_physics_process(false)
-			b.monitoring = false
+			b.set_deferred(&"monitoring", false)   # may run inside this bullet's own hit signal
 			var tw := b.create_tween()
 			tw.tween_property(b, "scale", Vector3.ONE * 0.02, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 			tw.tween_callback(b.queue_free)

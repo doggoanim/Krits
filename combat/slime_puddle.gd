@@ -101,7 +101,7 @@ func dissolve() -> void:
 		return
 	_dissolving = true
 	set_physics_process(false)
-	monitoring = false
+	set_deferred(&"monitoring", false)   # may be called from inside a physics signal
 	if _player:
 		_player.exit_slime_puddle()
 		_player = null
