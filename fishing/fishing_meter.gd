@@ -16,6 +16,11 @@ const TRACK_HEIGHT := 34.0
 const PROGRESS_HEIGHT := 12.0
 const INK := Color(0.07, 0.07, 0.09)
 const WATER := Color(0.3, 0.82, 0.93)         ## the water's top colour (shallow_color in world/water/water.tscn)
+const BOIL_RATE := 8.0        ## how many times per second the hand-drawn wobble "redraws"
+const BOX_WOBBLE := 1.6       ## px, how far the frame/box corners wander
+const PLATE_JITTER := 1.5     ## px, how far the backing plate shifts between redraws
+const PLATE_TURN := 0.008     ## rad, how far it rocks
+const CORNER_STEPS := 5
 const RIPPLE_POINTS := 18
 const RIPPLE_LENGTH := 76.0   ## px, along the track
 const RIPPLE_WAVE := 5.5      ## px, how far it wiggles up and down
@@ -56,9 +61,42 @@ func _progress_rect() -> Rect2:
 	return Rect2(PAD_X, PANEL_SIZE.y - PAD_BOTTOM - PROGRESS_HEIGHT, PANEL_SIZE.x - PAD_X * 2.0, PROGRESS_HEIGHT)
 
 func _draw() -> void:
+	# The backing shifts and rocks a hair every few frames (the same redrawn-by-hand
+	# "boil" as the arena's chalk), and every box below wobbles with it.
+	var step := floorf(_t * BOIL_RATE)
+	draw_set_transform_matrix(Transform2D(_hash(step, 91.0) * PLATE_TURN, PANEL_SIZE * 0.5 - Vector2(PANEL_SIZE * 0.5).rotated(_hash(step, 91.0) * PLATE_TURN) + Vector2(_hash(step, 7.0), _hash(step, 13.0)) * PLATE_JITTER))
 	draw_texture_rect(_plate, Rect2(Vector2.ZERO, PANEL_SIZE), false)   # the game's hand-drawn button, as the backing
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 	_draw_track()
 	_draw_progress()
+
+## Deterministic -1..1 noise from a step number and a salt: a different value
+## every redraw "step", but the same one for the whole step.
+static func _hash(step: float, salt: float) -> float:
+	return sin(step * 12.9898 + salt * 78.233) * 0.5 + sin(step * 4.1414 + salt * 11.135) * 0.5
+
+## A rounded box whose corners wander a little each redraw step, filled and
+## inked. Replaces draw_style_box so the frame has the hand-drawn wobble.
+func _wobbly_box(rect: Rect2, fill: Color, radius: float, border := 0.0, salt := 0.0) -> void:
+	var step := floorf(_t * BOIL_RATE)
+	var pts := PackedVector2Array()
+	var centers := [
+		rect.position + Vector2(radius, radius),
+		Vector2(rect.end.x - radius, rect.position.y + radius),
+		rect.end - Vector2(radius, radius),
+		Vector2(rect.position.x + radius, rect.end.y - radius)]
+	var n := 0
+	for c in 4:
+		for k in CORNER_STEPS + 1:
+			var ang := PI + (c + float(k) / CORNER_STEPS) * PI * 0.5
+			var wob := Vector2(_hash(step, salt + n * 1.3), _hash(step, salt + n * 1.3 + 50.0)) * BOX_WOBBLE
+			pts.append(centers[c] + Vector2(cos(ang), sin(ang)) * radius + wob)
+			n += 1
+	draw_colored_polygon(pts, fill)
+	if border > 0.0:
+		var outline := pts.duplicate()
+		outline.append(pts[0])
+		draw_polyline(outline, INK, border, true)
 
 func _rounded(color: Color, radius: int, border := 0, border_color := INK) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
@@ -71,7 +109,7 @@ func _rounded(color: Color, radius: int, border := 0, border_color := INK) -> St
 
 func _draw_track() -> void:
 	var r := _track_rect()
-	draw_style_box(_rounded(WATER, 12, 3), r)
+	_wobbly_box(r, WATER, 12.0, 3.0, 1.0)
 	# A few ripples so the track reads as water.
 	for i in 5:
 		var x := r.position.x + r.size.x * (0.1 + 0.2 * i) + fmod(_t * 12.0, 40.0) - 20.0
@@ -81,7 +119,7 @@ func _draw_track() -> void:
 	var zw := zone_width * r.size.x
 	var zx := clampf(r.position.x + zone_pos * r.size.x - zw * 0.5, r.position.x, r.end.x - zw)
 	var zone_rect := Rect2(zx, r.position.y + 3.0, zw, r.size.y - 6.0)
-	draw_style_box(_rounded(ZONE_HIT if covered else ZONE, 9, 3), zone_rect)
+	_wobbly_box(zone_rect, ZONE_HIT if covered else ZONE, 9.0, 3.0, 2.0)
 	# The fish, drawn on top.
 	var fx := r.position.x + FISH_HALF_LENGTH + 4.0 + fish_pos * (r.size.x - (FISH_HALF_LENGTH + 4.0) * 2.0)
 	_draw_fish(Vector2(fx, r.position.y + r.size.y * 0.5))
@@ -110,10 +148,10 @@ func _draw_fish(center: Vector2) -> void:
 
 func _draw_progress() -> void:
 	var r := _progress_rect()
-	draw_style_box(_rounded(Color(0.85, 0.82, 0.75), 6, 3), r)
+	_wobbly_box(r, Color(0.85, 0.82, 0.75), 6.0, 3.0, 3.0)
 	var frac := clampf(progress, 0.0, 1.0)
 	if frac > 0.02:
 		var fill := Rect2(r.position + Vector2(3.0, 3.0), Vector2((r.size.x - 6.0) * frac, r.size.y - 6.0))
 		var color := Color(0.95, 0.35, 0.3).lerp(Color(0.98, 0.85, 0.3), clampf(frac * 2.0, 0.0, 1.0))
 		color = color.lerp(ZONE, clampf(frac * 2.0 - 1.0, 0.0, 1.0))
-		draw_style_box(_rounded(color, 3), fill)
+		_wobbly_box(fill, color, 3.0, 0.0, 4.0)
