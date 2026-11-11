@@ -99,6 +99,7 @@ var _was_on_floor := true
 var _last_safe_position: Vector3   ## most recent on_floor() position — see _unstick()
 var _auto_stuck_pos: Vector3       ## see _update_auto_unstick()
 var _auto_stuck_t := 0.0
+var fall_peak_y := 0.0   ## highest point since the feet last touched ground — see fall_drop()
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _prev_facing_yaw := 0.0
 var _slime_overlaps := 0   ## count, not bool — several puddles can overlap at once
@@ -262,6 +263,7 @@ func _physics_process(delta: float) -> void:
 			effects.burst_land_dust()
 		Events.player_landed.emit()
 	_air_t = 0.0 if on_floor else _air_t + delta
+	fall_peak_y = global_position.y if on_floor else maxf(fall_peak_y, global_position.y)
 	_was_on_floor = on_floor
 	_update_lean(delta)
 
@@ -1034,6 +1036,11 @@ func _probe_wall(origin: Vector3, dir: Vector3, reach: float) -> Dictionary:
 
 ## Every jump is a fixed, snappy height — no variable height from holding the
 ## button, so the timing always feels the same regardless of how long jump is held.
+## How far (m) the player has dropped since their highest point in this
+## airtime — what makes a ground pound after a long fall hit harder.
+func fall_drop() -> float:
+	return maxf(fall_peak_y - global_position.y, 0.0)
+
 ## `pound` plays the dedicated ground_pound_jump.wav instead of the plain
 ## jump.wav — PoundLandState's high-jump-out-of-recovery combo is the only
 ## caller that passes it.

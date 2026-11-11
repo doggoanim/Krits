@@ -45,4 +45,4 @@ func physics_update(delta: float) -> void:
 			p.velocity.y = -p.config.pound_speed
 			return
 		p.pound_landed_frame = Engine.get_physics_frames()
-		machine.transition_to(&"PoundLand", {"jump_queued": _jump_queued})
+		machine.transition_to(&"PoundLand", {"jump_queued": _jump_queued, "drop": p.fall_drop()})
