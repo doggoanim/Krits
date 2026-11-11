@@ -40,14 +40,6 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	if world_root != null and world_root.is_in_group(&"interior_level") \
 			and not world_root.is_in_group(&"combat_allowed"):
 		return   # no fights indoors, unless the level opts in (a dungeon)
-	# The medium is decided here, once, and never changes mid-fight: a swimmer
-	# fights fish, anyone else fights land enemies (see UnderwaterRules). An
-	# enemy of the other medium just doesn't start a fight.
-	var water := UnderwaterRules.swim_water(player)
-	if (water != null) != enemy.data.aquatic:
-		return
-	if water != null and not UnderwaterRules.deep_enough(player, water):
-		return   # too shallow for a submerged fight
 	if Game.stats.equipped_weapon == null:
 		# Can't start a fight bare-handed: the enemy just hurts you instead.
 		_warn_unarmed()
@@ -56,14 +48,13 @@ func _on_touched(enemy: WorldEnemy) -> void:
 	var group: Array[WorldEnemy] = [enemy]
 	for n in get_tree().get_nodes_in_group(&"world_enemies"):
 		var other := n as WorldEnemy
-		if other != enemy and other.is_awake() and other.data.aquatic == enemy.data.aquatic \
-				and other.global_position.distance_to(enemy.global_position) <= MERGE_DISTANCE \
-				and (water == null or WaterVolume.at(other.global_position) == water):
+		if other != enemy and other.is_awake() and \
+				other.global_position.distance_to(enemy.global_position) <= MERGE_DISTANCE:
 			group.append(other)
 	var roster: Array[EnemyData] = []
 	for w in group:
 		roster.append(w.data)
-	begin_encounter(roster, group, water)
+	begin_encounter(roster, group)
 
 const UNARMED_NOTICE_COOLDOWN := 8.0
 var _unarmed_notice_left := 0.0
@@ -77,9 +68,7 @@ func _warn_unarmed() -> void:
 	Events.notice.emit("You can't fight without a weapon.")
 
 ## Full encounter. `world_enemies` are the overworld enemies taking part (may be empty, e.g. debug).
-## `water` is set for an underwater fight (the player is swimming in it): the
-## arena is then a submerged dome on the seabed and the player keeps swimming.
-func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] = [], water: WaterVolume = null) -> void:
+func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] = []) -> void:
 	if busy:
 		return
 	busy = true
@@ -96,12 +85,9 @@ func begin_encounter(roster: Array[EnemyData], world_enemies: Array[WorldEnemy] 
 	var arena := Arena.new()
 	active_arena = arena
 	get_parent().add_child(arena)
-	var origin := player.global_position
-	if water != null:
-		origin.y = UnderwaterRules.seabed_y(player, origin)   # the arena's floor is the seabed under the player
-	arena.begin(player, origin, roster, water)
+	arena.begin(player, player.global_position, roster)
 	await arena.play_intro()   # ground ring sweeps in, then the walls grow up (see Arena)
-	player.machine.transition_to(&"Swim" if water != null else &"Ground")
+	player.machine.transition_to(&"Ground")
 	Game.input_locked = false
 	arena.start_fight()
 

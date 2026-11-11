@@ -64,15 +64,6 @@ const LAND_HITSTOP_PER_HIT := 0.015   ## ...plus this per orb in the combo...
 const LAND_HITSTOP_MAX := 0.22        ## ...up to this cap
 const INTRO_DELAY := 1.0       ## enemies hold fire for this long after the reveal
 
-## ---- underwater fights (see begin()'s `water` parameter, UnderwaterRules) ----
-const WATER_ORB_HEIGHT := Vector2(2.2, 4.0)   ## orb heights above the seabed; the top is also capped to fit under the water ceiling
-const WATER_ORB_DROP_HEIGHT := 2.5            ## orbs ease in from this far above (the surface is close)
-const WATER_ENEMY_HEIGHT := Vector2(1.2, 3.5) ## fish spawn this far above the seabed
-const SEABED_TOUCH := 0.4         ## feet within this of the seabed = touching it (releases the sword combo)
-const SEABED_LIFT := 1.0          ## ...but only after having been this far above it since the last release
-const WATER_CLIP_STEP := 0.5      ## step used when pulling the dome in from a shore
-const WATER_BUBBLE_COUNT := 40
-
 ## ---- weapon-specific orb behavior (see _on_orb_hit()/_spawn_orbs()) ----
 const BOW_ARROW_WEIGHT := 0.6   ## vs. BOW_SHOOT_WEIGHT when randomly picking each orb's
 const BOW_SHOOT_WEIGHT := 0.4   ## kind — weighted more toward arrows since a shoot orb
@@ -107,7 +98,6 @@ const SPAWN_CLEARANCE_LIFT := 0.4  ## see is_spot_clear()
 
 ## ---- reveal sequence (see play_intro()) ----
 const WALL_SHADER := preload("res://combat/arena_wall.gdshader")
-const BUBBLE_WALL_SHADER := preload("res://combat/arena_bubble_wall.gdshader")   # the barrier when the fight is underwater
 const PLATFORM_SHADER := preload("res://combat/arena_platform.gdshader")
 const POST_EVERY := 4           ## a post at every Nth wall segment
 const POST_HEIGHT := 2.2
@@ -145,9 +135,6 @@ var _sword_banked := 0.0   ## Sword only — damage from airborne orb hits, deal
 var stage_root: Node3D   ## holds only the barrier wall, so WorldDissolver can
                           ## target it without touching enemies/orbs
 var _over := false
-var _water: WaterVolume            ## set when the fight is underwater: submerged dome, swim controls, seabed releases
-var swim_top := 0.0                ## underwater: world Y of the invisible ceiling that keeps the fight submerged
-var _sea_lifted := false           ## underwater: has the player left the seabed since the last release?
 var _wall_meshes: Array[MeshInstance3D] = []   ## one per wall segment — see play_intro()
 var _ring_pieces: Array[MeshInstance3D] = []   ## one per ground-ring segment, same order/angle
 var _weapon_kind := WeaponData.Kind.SWORD   ## the weapon style the fight is currently set up for — see _on_stats_changed()
@@ -185,8 +172,6 @@ func _fit_shape(wanted: float) -> void:
 		var d := _probe(Vector3(cos(ang), 0.0, sin(ang)), wanted + FIT_MARGIN + 1.5)
 		open[i] = 1 if d == INF else 0
 		raw[i] = wanted if d == INF else clampf(d - FIT_MARGIN, FIT_MIN_RAY, wanted)
-		if _water != null:
-			raw[i] = _clip_to_water(ang, raw[i])
 	# A doorway or a gap between pillars would otherwise leak a spike down the
 	# corridor: blend each ray with its neighbours, but never grow past what was measured.
 	_profile.resize(FIT_RAYS)
@@ -202,20 +187,6 @@ func _fit_shape(wanted: float) -> void:
 		total += r
 		_max_reach = maxf(_max_reach, r)
 	radius = total / FIT_RAYS
-
-## Underwater: pulls a ray's reach in until its end point is still inside the
-## water, so the dome never spreads out over a shore or past the pool's edge.
-func _clip_to_water(ang: float, reach: float) -> float:
-	var dir := Vector3(cos(ang), 0.0, sin(ang))
-	var probe_y := _water.surface_world_y() - 0.5
-	var r := reach
-	while r > FIT_MIN_RAY:
-		var p := global_position + dir * (r + FIT_MARGIN)
-		p.y = probe_y
-		if _water.contains_point(p):
-			break
-		r -= WATER_CLIP_STEP
-	return maxf(r, FIT_MIN_RAY)
 
 ## Barrier distance from the arena origin in direction `ang` (radians, atan2(z, x)).
 func boundary_radius_at(ang: float) -> float:
@@ -233,19 +204,6 @@ func clamp_inside(flat: Vector3, factor := 1.0) -> Vector3:
 static func radius_for(enemy_count: int) -> float:
 	return minf(MAX_RADIUS, BASE_RADIUS + RADIUS_PER_ENEMY * maxi(0, enemy_count - 1))
 
-## Underwater there is no "landing": touching the seabed after being up in the
-## water is the release (the combo ends and, for the sword, the banked damage
-## lands), the same rule the tutorial teaches on land.
-func _physics_process(_delta: float) -> void:
-	if _water == null or _over or not is_instance_valid(player) or player.dead:
-		return
-	var above := player.global_position.y - ground_height(player.global_position)
-	if above > SEABED_LIFT:
-		_sea_lifted = true
-	elif above <= SEABED_TOUCH and _sea_lifted:
-		_sea_lifted = false
-		_on_player_landed()
-
 ## Ticks the rune buffer's own idle timeout — stalling too long after
 ## queueing a rune clears it, same spirit as a jump buffer/coyote window
 ## expiring, so Staff can't just be planned out indefinitely mid-fight.
@@ -259,21 +217,12 @@ func _process(delta: float) -> void:
 ## `origin` is the fight's centre, normally the player's own feet where the
 ## encounter was triggered. The player is never moved — the barrier simply
 ## rises around wherever they already are.
-##
-## `water` (optional): the fight is underwater in that volume. `origin` is then
-## the seabed under the player, so the arena's flat floor *is* the seabed and
-## everything (orbs, fish, the dome) is measured up from it.
-func begin(p: Player, origin: Vector3, roster: Array[EnemyData], water: WaterVolume = null) -> void:
+func begin(p: Player, origin: Vector3, roster: Array[EnemyData]) -> void:
 	add_to_group(&"arena")   # abilities (Shockwave) look the live fight up by group
 	player = p
-	_water = water
 	global_position = origin
-	if _water != null:
-		swim_top = UnderwaterRules.swim_ceiling_y(_water, p)
 	_fit_shape(radius_for(roster.size()))
 	_build_barrier()
-	if _water != null:
-		_build_water_extras()
 	_spawn_orbs(ORBS_BASE + ORBS_PER_ENEMY * roster.size())
 	for d in roster:
 		_spawn_enemy(d)
@@ -415,17 +364,6 @@ func random_point(fraction := 1.0, clear_radius := 0.0, clear_height := 0.0) -> 
 ## overlaps no world geometry or arena wall — i.e. something could spawn
 ## there without starting inside a rock, house or the barrier. Lifted a
 ## little off the floor so the ground itself (slopes included) doesn't count.
-## Underwater: a point in open water within `fraction` of the dome's radius, at
-## a random height between WATER_ENEMY_HEIGHT above the seabed and under the ceiling.
-func random_swim_point(fraction := 1.0) -> Vector3:
-	var pos := random_point(fraction)
-	var top := swim_top - global_position.y - 1.0
-	pos.y = global_position.y + randf_range(WATER_ENEMY_HEIGHT.x, maxf(WATER_ENEMY_HEIGHT.x, minf(WATER_ENEMY_HEIGHT.y, top)))
-	return pos
-
-func is_underwater() -> bool:
-	return _water != null
-
 func is_spot_clear(pos: Vector3, radius: float, height: float) -> bool:
 	var shape := CapsuleShape3D.new()
 	shape.radius = radius * 0.9
@@ -452,11 +390,6 @@ func _spawn_enemy(d: EnemyData) -> void:
 	# The placeholder sphere's pivot is at its own center, so it needs lifting
 	# to sit on the ground; an animated model's origin is at its feet (same
 	# convention as the player), so it needs no extra lift at all.
-	if d.aquatic and _water != null:
-		e.global_position = random_swim_point(0.6)   # fish hang in open water, not on the floor
-		e.defeated.connect(_on_enemy_defeated)
-		enemies.append(e)
-		return
 	var pos := random_point(0.6, Enemy.body_radius(d), Enemy.body_height(d))
 	pos.y += Enemy.feet_offset(d) + 0.05
 	e.global_position = pos
@@ -477,7 +410,7 @@ func _spawn_orbs(count: int) -> void:
 		targets.append(pos)
 		o.hit.connect(_on_orb_hit)
 		orbs.append(o)
-		o.drop_in(pos, WATER_ORB_DROP_HEIGHT if _water != null else ORB_DROP_HEIGHT, ORB_DROP_TIME, i * ORB_DROP_STAGGER)
+		o.drop_in(pos, ORB_DROP_HEIGHT, ORB_DROP_TIME, i * ORB_DROP_STAGGER)
 
 ## What kind each of `count` freshly-spawned orbs should be, picked purely by
 ## the currently equipped weapon — Sword spawns all plain orbs (today's
@@ -537,10 +470,7 @@ func _free_orb_position(existing: Array[Vector3]) -> Vector3:
 	var fallback_d := -1.0
 	for _i in ORB_SPAWN_TRIES:   # best-candidate sampling keeps orbs spread out
 		var pos := random_point(0.9)
-		var heights := ORB_HEIGHT
-		if _water != null:   # keep underwater orbs inside the submerged column, under the ceiling
-			heights = Vector2(WATER_ORB_HEIGHT.x, maxf(WATER_ORB_HEIGHT.x, minf(WATER_ORB_HEIGHT.y, swim_top - global_position.y - 1.0)))
-		pos.y += randf_range(heights.x, heights.y)   # float above whatever ground is under it
+		pos.y += randf_range(ORB_HEIGHT.x, ORB_HEIGHT.y)   # float above whatever ground is under it
 		var nearest := INF
 		for t in existing:
 			nearest = minf(nearest, t.distance_to(pos))
@@ -597,10 +527,9 @@ func _handle_sword_hit(orb: Orb) -> void:
 	_sword_hits.append(dmg)
 	# A ground pound into the orb nudges you toward the nearest other orb.
 	var pounding := _is_pounding()
-	var next_orb := _nearest_active_orb(orb, Orb.Kind.PLAIN) if (pounding or _water != null) else null   # underwater the current always points at the next orb
-	_bounce_player(combo, next_orb.global_position if next_orb else null, SWORD_POUND_ASSIST,
+	var next_orb := _nearest_active_orb(orb, Orb.Kind.PLAIN) if pounding else null
+	player.bounce_off_orb(combo, next_orb.global_position if next_orb else null, SWORD_POUND_ASSIST,
 			SWORD_POUND_LIFT if pounding else 1.0, SWORD_POUND_MAX_SPEED)
-	_sea_lifted = false
 	Events.orb_hit.emit(combo, dmg)
 	Events.combo_changed.emit(combo)
 	_respawn_orb_later(orb)
@@ -639,16 +568,6 @@ func _deal_hit(base_damage: float, hits: int, pounded: bool, kind: WeaponData.Ki
 	if hits > 1 or pounded:
 		HitStop.freeze(minf(LAND_HITSTOP_BASE + LAND_HITSTOP_PER_HIT * hits, LAND_HITSTOP_MAX) * (1.6 if pounded else 1.0))
 
-## The kick an orb hit gives the player. On land that's the usual bounce (see
-## Player.bounce_off_orb()); underwater there is nothing to bounce off, so it
-## becomes a short current toward the next orb (Player.swim_off_orb()).
-func _bounce_player(combo_count: int, toward: Variant = null, assist := Player.ORB_ARC_ASSIST,
-		lift := 1.0, max_speed := Player.ORB_ARC_MAX_SPEED) -> void:
-	if _water != null:
-		player.swim_off_orb(combo_count, toward)
-	else:
-		player.bounce_off_orb(combo_count, toward, assist, lift, max_speed)
-
 ## True while the player is ground-pounding (windup or slam) — the bow and
 ## staff release on orb contact, so "pound into the orb" means touching it
 ## in this state.
@@ -671,11 +590,11 @@ func _handle_bow_hit(orb: Orb) -> void:
 		var next_orb := _nearest_active_orb(orb, Orb.Kind.ARROW)
 		if next_orb == null:
 			next_orb = _nearest_active_orb(orb, Orb.Kind.SHOOT)
-		_bounce_player(_arrow_count, next_orb.global_position if next_orb else null)
+		player.bounce_off_orb(_arrow_count, next_orb.global_position if next_orb else null)
 		_respawn_orb_later(orb)
 		return
 	if _arrow_stack <= 0.0:
-		_bounce_player(1)   # a whiff — nothing was stacked to release
+		player.bounce_off_orb(1)   # a whiff — nothing was stacked to release
 		_respawn_orb_later(orb)
 		return
 	combo += 1
@@ -761,7 +680,7 @@ func _handle_staff_hit(orb: Orb) -> void:
 	var next_orb := _nearest_active_orb(orb, orb.kind)
 	if next_orb == null:
 		next_orb = _nearest_active_orb(orb, Orb.Kind.CAST)
-	_bounce_player(_rune_buffer.size(), next_orb.global_position if next_orb else null)
+	player.bounce_off_orb(_rune_buffer.size(), next_orb.global_position if next_orb else null)
 	_respawn_orb_later(orb)
 
 ## The rune timer ran out: the most recently queued rune fizzles away (no
@@ -804,7 +723,7 @@ func _overload_staff(orb: Orb) -> void:
 ## the buffer.
 func _cast_rune_buffer(orb: Orb) -> void:
 	if _rune_buffer.is_empty():
-		_bounce_player(1)   # nothing queued — a whiff, same as Bow's empty shoot
+		player.bounce_off_orb(1)   # nothing queued — a whiff, same as Bow's empty shoot
 		_respawn_orb_later(orb)
 		return
 	var runes := _rune_buffer.size()
@@ -872,7 +791,7 @@ func _publish_runes() -> void:
 ## orb_hit events, and schedule the orb's respawn.
 func _resolve_hit(orb: Orb, dmg: float, combo_for_feedback: int, hits: int) -> void:
 	var pounded := _is_pounding()   # read before the bounce changes state
-	_bounce_player(combo_for_feedback)
+	player.bounce_off_orb(combo_for_feedback)
 	# Combo events go out BEFORE the damage: if this blow finishes the last
 	# enemy, _end() resets the combo to 0 inside the damage loop, and that
 	# reset must be the last word (and must not wipe the damage plate).
@@ -1075,52 +994,6 @@ func _outline_point(profile: PackedFloat32Array, i: int) -> Vector3:
 	var ang := TAU * float(i % FIT_RAYS) / FIT_RAYS
 	return Vector3(cos(ang), 0.0, sin(ang)) * profile[i % FIT_RAYS]
 
-## Underwater only: an invisible ceiling just under the waterline (so the fight
-## has no surface to escape to and the camera stays submerged) plus drifting
-## bubbles inside the dome.
-func _build_water_extras() -> void:
-	var half := _max_reach + 4.0
-	var ceiling := StaticBody3D.new()
-	ceiling.name = "WaterCeiling"
-	ceiling.collision_layer = WALL_LAYER
-	var cs := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = Vector3(half * 2.0, 1.0, half * 2.0)
-	cs.shape = box
-	ceiling.add_child(cs)
-	add_child(ceiling)
-	ceiling.global_position = Vector3(global_position.x, swim_top + 0.5, global_position.z)
-
-	var bubbles := GPUParticles3D.new()
-	bubbles.name = "Bubbles"
-	bubbles.amount = WATER_BUBBLE_COUNT
-	bubbles.lifetime = 4.0
-	bubbles.local_coords = false
-	bubbles.visibility_aabb = AABB(Vector3(-half, -2.0, -half), Vector3(half * 2.0, 14.0, half * 2.0))
-	var mat := ParticleProcessMaterial.new()
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	mat.emission_box_extents = Vector3(radius * 0.8, 0.2, radius * 0.8)
-	mat.direction = Vector3.UP
-	mat.spread = 12.0
-	mat.initial_velocity_min = 0.5
-	mat.initial_velocity_max = 1.2
-	mat.gravity = Vector3.ZERO
-	mat.scale_min = 0.5
-	mat.scale_max = 1.2
-	bubbles.process_material = mat
-	var bubble_mesh := SphereMesh.new()
-	bubble_mesh.radius = 0.06
-	bubble_mesh.height = 0.12
-	var bubble_mat := StandardMaterial3D.new()
-	bubble_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	bubble_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	bubble_mat.albedo_color = Color(0.8, 0.95, 1.0, 0.45)
-	bubble_mesh.material = bubble_mat
-	bubbles.draw_pass_1 = bubble_mesh
-	add_child(bubbles)
-	bubbles.position = Vector3(0.0, 0.3, 0.0)
-	bubbles.emitting = true
-
 ## A solid disc under the whole arena (world layer, so ground_height() and
 ## the player's floor all see it) so a fight over a gap, a cliff edge or the
 ## water's edge never drops the player — its top sits level with the arena's
@@ -1241,7 +1114,7 @@ func _mesh(size: Vector3, col: Color, emit: float, translucent: bool) -> MeshIns
 		mat.emission_energy_multiplier = emit
 	if translucent:
 		var wall_mat := ShaderMaterial.new()
-		wall_mat.shader = BUBBLE_WALL_SHADER if _water != null else WALL_SHADER
+		wall_mat.shader = WALL_SHADER
 		wall_mat.set_shader_parameter(&"wall_height", size.y)
 		wall_mat.set_shader_parameter(&"chalk", col)
 		mi.material_override = wall_mat

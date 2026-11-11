@@ -1142,25 +1142,6 @@ func bounce_off_orb(combo := 1, toward: Variant = null, assist := ORB_ARC_ASSIST
 	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
 
-## Underwater, an orb hit doesn't launch you (there is no gravity to arc
-## through): it kicks up a short current that carries you toward the next
-## orb. SwimState adds it on top of normal swim input, so steering still works.
-const SWIM_CURRENT_SPEED := 12.0    ## initial speed of that current, m/s
-const SWIM_CURRENT_DECAY := 36.0    ## m/s lost per second: it fades in about a third of a second
-const SWIM_ATTACK_HOLD := 0.35      ## how long the attack pose is held after an orb hit
-var swim_current := Vector3.ZERO    ## transient push, consumed by SwimState
-
-## The underwater counterpart of bounce_off_orb(): same attack pose and sound,
-## but the "bounce" is a current toward `toward` (or a gentle lift if there is
-## no next orb).
-func swim_off_orb(combo := 1, toward: Variant = null, strength := SWIM_CURRENT_SPEED) -> void:
-	var dir := Vector3.UP * 0.35
-	if toward is Vector3:
-		dir = ((toward as Vector3) - (global_position + Vector3.UP * (STAND_HEIGHT * 0.5))).normalized()
-	swim_current = dir * strength
-	visual.play_random_attack(SWIM_ATTACK_HOLD)
-	audio.play_orb_attack(combo)
-
 const ORB_ARC_ASSIST := 0.35      ## fraction of the full arc to the target that a bounce actually pushes you along — a nudge, not autopilot
 const ORB_ARC_MAX_SPEED := 8.0    ## horizontal speed cap for that nudge
 
