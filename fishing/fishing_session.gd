@@ -207,10 +207,15 @@ func _reel(delta: float) -> void:
 	var held := _hook_held()
 	_hook_vel = clampf(_hook_vel + (HOOK_ACCEL if held else -HOOK_ACCEL) * delta, -HOOK_MAX_SPEED, HOOK_MAX_SPEED)
 	_hook_pos += _hook_vel * delta
-	if _hook_pos <= 0.0 or _hook_pos >= 1.0:
-		_hook_pos = clampf(_hook_pos, 0.0, 1.0)
-		_hook_vel = 0.0
+	# The zone is drawn inside the track, so its CENTRE can only travel between
+	# half a zone-width from each end — clamping to 0..1 instead left it
+	# "moving" while already drawn against the wall, so it felt stuck there.
 	var half := float(_catch["zone"]) * 0.5
+	var lo := half
+	var hi := 1.0 - half
+	if _hook_pos <= lo or _hook_pos >= hi:
+		_hook_pos = clampf(_hook_pos, lo, hi)
+		_hook_vel = 0.0
 	var covered := absf(_fish_pos - _hook_pos) <= half
 	_progress += (PROGRESS_GAIN if covered else -PROGRESS_LOSS) * delta
 	_update_ui(half, covered)
