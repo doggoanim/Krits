@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
 [ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
-[ext_resource type="Script" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Script" uid="uid://cw6em46qlfo02" path="res://world/well_entrance.gd" id="1_well_entrance"]
 [ext_resource type="PackedScene" uid="uid://bqxxfugls4puo" path="res://assets/world/terrain/grass_terrain.glb" id="2_256to"]
@@ -58,6 +57,7 @@
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="53_4t2cb"]
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
+[ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
@@ -226,6 +226,9 @@ transform = Transform3D(9.792002, 0, 0, 0, 0.8255516, 0, 0, 0, 6.4320006, 4.1999
 [node name="rock_terrain28" parent="Terrain" unique_id=971271687 instance=ExtResource("26_lybmh")]
 transform = Transform3D(3.9168005, 0, 0, 0, 0.8255516, 0, 0, 0, 9.905281, -12.800001, 21.38, 29.224993)
 
+[node name="rock_terrain41" parent="Terrain" unique_id=1956298680 instance=ExtResource("26_lybmh")]
+transform = Transform3D(3.9168005, 0, 0, 0, 0.8255516, 0, 0, 0, 3.9621122, 3.1999989, 22.38, 36.22499)
+
 [node name="rock_terrain32" parent="Terrain" unique_id=464087394 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.6707378e-08, 0, -2.9715843, 0, 0.8255516, 0, 3.9168005, 0, 3.543579e-08, -17.662018, 23.856655, 29.224993)
 
@@ -233,7 +236,7 @@ transform = Transform3D(4.6707378e-08, 0, -2.9715843, 0, 0.8255516, 0, 3.9168005
 transform = Transform3D(4.6707378e-08, 0, -2.9715843, 0, 0.8255516, 0, 3.9168005, 0, 3.543579e-08, -17.662018, 23.856655, 29.224993)
 
 [node name="rock_terrain35" parent="Terrain" unique_id=1263462543 instance=ExtResource("26_lybmh")]
-transform = Transform3D(1.868295e-08, 0, -2.9715843, 0, 0.4127758, 0, 1.5667201, 0, 3.543579e-08, -17.662018, 29.635515, 26.09155)
+transform = Transform3D(1.868295e-08, 0, -2.9715843, 0, 0.4127758, 0, 1.5667201, 0, 3.543579e-08, -17.662018, 28.735516, 26.09155)
 
 [node name="rock_terrain34" parent="Terrain" unique_id=1874414171 instance=ExtResource("26_lybmh")]
 transform = Transform3D(0, -9.844604e-09, -2.9715843, 3.9168005, -3.6086007e-08, 0, -1.7120878e-07, -0.8255516, 3.543579e-08, -17.662018, 28.24952, 32.316242)
@@ -1146,9 +1149,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.540747, 0.6118926, 31.145
 script = ExtResource("53_4t2cb")
 metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
 
-[node name="KillerFish" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.9, 0.5, 1.4)
+[node name="KillerFish" type="CharacterBody3D" parent="." unique_id=987934053]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.9, -3.5, 1.4)
 script = ExtResource("killer_fish_script")
+notice_radius = 100.0
+color = Color(0, 0, 0, 1)
 
 [node name="Scatter" type="Node3D" parent="." unique_id=920000001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -10)
