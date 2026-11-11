@@ -15,6 +15,7 @@ const CAST_NEAREST := 2.5          ## the line lands on the closest water betwee
 const CAST_FARTHEST := 8.0
 const CAST_STEP := 0.5             ## ...checked at this spacing
 const MAX_SURFACE_DROP := 6.0      ## the water may be at most this far above/below the player's feet
+const COVER_CHECK_HEIGHT := 6.0     ## how far above the surface to look for terrain covering the water
 const WAIT_TIME := Vector2(2.0, 5.5)
 const BITE_WINDOW := 0.9
 const HAND_HEIGHT := 1.3
@@ -72,9 +73,26 @@ static func _find_water(player: Player) -> Dictionary:
 		var p := player.global_position + player.facing * dist
 		for w in WaterVolume.active:
 			if w.covers_xz(p) and absf(w.surface_world_y() - player.global_position.y) <= MAX_SURFACE_DROP:
-				return {"water": w, "spot": Vector3(p.x, w.surface_world_y(), p.z)}
+				var spot := Vector3(p.x, w.surface_world_y(), p.z)
+				if _is_open_water(player, spot):
+					return {"water": w, "spot": spot}
 		dist += CAST_STEP
 	return {}
+
+## Water volumes can run through terrain, so a spot inside one isn't always
+## visible water. It is only fishable if nothing solid covers it from above and
+## nothing solid is in the way of the line from the player's hand.
+static func _is_open_water(player: Player, spot: Vector3) -> bool:
+	var space := player.get_world_3d().direct_space_state
+	var exclude: Array[RID] = [player.get_rid()]
+	var cover := PhysicsRayQueryParameters3D.create(spot + Vector3.UP * COVER_CHECK_HEIGHT, spot + Vector3.UP * 0.05, 1)
+	cover.exclude = exclude
+	if not space.intersect_ray(cover).is_empty():
+		return false   # terrain sits over this part of the water
+	var hand := player.global_position + Vector3.UP * HAND_HEIGHT
+	var sight := PhysicsRayQueryParameters3D.create(hand, spot + Vector3.UP * 0.1, 1)
+	sight.exclude = exclude
+	return space.intersect_ray(sight).is_empty()
 
 func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	add_to_group(GROUP)
