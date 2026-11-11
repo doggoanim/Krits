@@ -22,6 +22,13 @@ extends Node3D
 @export var staff_tilt_deg := 22.0   ## how far a floating staff leans toward the player's right
 @export var follow_speed := 90.0   ## how tightly the gear tracks the player (higher = less lag)
 @export var turn_speed := 20.0     ## same, for turning to match the player's facing
+@export_group("Animation Follow")
+## How much the shield follows the character's animated torso (crouching,
+## rolling, diving, leaning) instead of just the plain capsule position. 0 = off.
+@export_range(0.0, 1.0, 0.05) var animation_follow := 1.0
+@export var follow_bone: StringName = &"UpperTorso"
+@export var tilt_follow := 18.0   ## how quickly the shield eases into the torso's tilt
+@export_group("Swing")
 @export var swing_strength := 0.06     ## radians of weapon swing per m/s of anchor speed
 @export var swing_max := 0.7           ## radians
 @export var swing_follow := 12.0       ## spring stiffness (higher = snappier)
@@ -35,6 +42,9 @@ var _shield_model: Node3D
 var _weapon_model: Node3D
 var _shield_id: StringName = &"?"
 var _weapon_id: StringName = &"?"
+var _skeleton: Skeleton3D
+var _bone := -1
+var _tilt := Quaternion.IDENTITY
 var _pendulum := PendulumSwing.new()   ## the weapon's swing (see PendulumSwing)
 
 func _ready() -> void:
@@ -55,6 +65,7 @@ func _ready() -> void:
 	_staff_mount.name = "StaffMount"
 	_staff_mount.rotation_degrees.z = -staff_tilt_deg   # -Z roll leans the top toward +X, the player's right
 	_anchor.add_child(_staff_mount)
+	_find_bone()
 	Events.stats_changed.connect(_refresh)
 	_place_weapon_pivot()
 	_refresh()
@@ -63,10 +74,39 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null or _player.visual == null:
 		return
-	var vel := _anchor.follow(_target_position(), _target_yaw(), delta)
+	if _skeleton == null:
+		_find_bone()
+	var pose := _bone_pose_delta()
+	var want: Quaternion = Quaternion.IDENTITY.slerp(pose[1], animation_follow)
+	_tilt = _tilt.slerp(want, 1.0 - exp(-tilt_follow * delta))
+	var vel := _anchor.follow(_target_position() + pose[0] * animation_follow, _target_yaw(), delta, Basis(_tilt))
 	_update_swing(vel, delta)
 
 # ---------------------------------------------------------------- follow
+
+func _find_bone() -> void:
+	var model := _player.visual.get_model() if _player and _player.visual else null
+	if model == null:
+		return
+	_skeleton = model.find_child("Skeleton3D", true, false) as Skeleton3D
+	if _skeleton != null:
+		_bone = _skeleton.find_bone(follow_bone)
+		if _bone < 0:
+			_skeleton = null
+
+## How far the animation has moved/turned the torso from its rest pose, in
+## world terms: [Vector3 offset, Quaternion rotation]. Identity when there is
+## no skeleton, so the shield just keeps its plain position.
+func _bone_pose_delta() -> Array:
+	if _skeleton == null or _bone < 0 or not is_instance_valid(_skeleton):
+		return [Vector3.ZERO, Quaternion.IDENTITY]
+	var pose := _skeleton.get_bone_global_pose(_bone)
+	var rest := _skeleton.get_bone_global_rest(_bone)
+	var sb := _skeleton.global_basis
+	var offset := sb * (pose.origin - rest.origin)
+	var local_rot := (pose.basis.orthonormalized() * rest.basis.orthonormalized().inverse())
+	var world_rot := sb.orthonormalized() * local_rot * sb.orthonormalized().inverse()
+	return [offset, world_rot.get_rotation_quaternion()]
 
 func _target_yaw() -> float:
 	return _player.visual.global_rotation.y
