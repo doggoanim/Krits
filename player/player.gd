@@ -59,6 +59,7 @@ const JUMP_FLOOR_SNAP := 0.0
 
 var camera_rig: CameraRig
 var visual: PlayerVisual
+var _death_hopping := false   ## true once death_hop() has launched the body (see _dead_physics())
 var swim_pitch := 0.0   ## body tilt (radians, negative = nose down) while swimming diagonally — see SwimState
 var gear: GearDisplay   ## floating shield + weapon behind the player
 var effects: PlayerEffects
@@ -1279,13 +1280,17 @@ func _begin_death(_from: Vector3) -> void:
 
 ## The hop: up, then down and out through the floor (no collision any more).
 func death_hop() -> void:
+	_death_hopping = true
 	collision_layer = 0
 	collision_mask = 0
 	velocity = Vector3.UP * DEATH_HOP_VELOCITY
 
-## While dead the state machine is off, but the body still falls and slides to
-## a stop like anything else — otherwise it would hang in mid-air.
+## While dead the state machine is off and the body just stays put (no falling,
+## no sliding) until death_hop() launches it: then it arcs up and drops away.
 func _dead_physics(delta: float) -> void:
+	if not _death_hopping:
+		velocity = Vector3.ZERO
+		return
 	velocity.y = maxf(velocity.y - DEATH_GRAVITY * delta, -config.terminal_velocity)
 	if is_on_floor():
 		velocity.x = move_toward(velocity.x, 0.0, 25.0 * delta)
@@ -1300,6 +1305,7 @@ func enter_cinematic() -> void:
 	machine.transition_to(&"Frozen")
 
 func teleport(pos: Vector3) -> void:
+	_death_hopping = false
 	collision_layer = 1 << 1                # undo death_hop()'s ghosting
 	collision_mask = 1 | (1 << 6)
 	visual.cancel_hold()                    # ...and the death pose
