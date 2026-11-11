@@ -70,6 +70,13 @@ const INTRO_LINE := "That bell calls for me, specifically, but at this hour?"
 
 var player: Player
 var _respawning := false
+var _death_running := false
+var _death_cam_hold: Node3D   ## parks the camera at the spot of death
+const DEATH_FREEZE_WAIT := 0.45   ## frozen on the pose before the iris starts
+const DEATH_IRIS_RADIUS := 0.2    ## the gap left open around the player (screen heights)
+const DEATH_IRIS_TIME := 0.7
+const DEATH_PRE_HOP_WAIT := 0.4   ## beat in the iris before the hop
+const DEATH_HOP_TIME := 1.4       ## up and down, until the player has dropped out of the gap
 var _current_env_config: EnvironmentConfig   ## the look last applied, so Graphics options can re-apply it
 var _bell: BellCall   ## the town bell calling the player to the mayor's house — see world/bell_call.gd
 var _gold_lost := 0   ## filled in while the iris is closed, announced after it opens
@@ -274,9 +281,28 @@ func _on_encounter_returned(player_defeated: bool) -> void:
 ## once the arena has wrapped up; anywhere else we do it ourselves.
 func _on_player_died() -> void:
 	Music.force_muffle = true
-	await get_tree().create_timer(2.5, true, false, true).timeout   # real time
+	_death_running = true
+	await _play_death_sequence()
+	_death_running = false
 	if player.dead and not encounters.busy:
 		_respawn_after_death()
+
+## Super Mario death: a beat frozen on the pose, the iris closes in on the
+## player but stops short leaving a gap, the player hops up and drops out, and
+## only then does the iris finish shutting (that part is _respawn_after_death()).
+## All in real time — the hit-stop freeze would otherwise stretch the waits.
+func _play_death_sequence() -> void:
+	_death_cam_hold = Node3D.new()   # the camera stays where it was while the player falls away
+	add_child(_death_cam_hold)
+	_death_cam_hold.global_position = player.global_position
+	cam.target = _death_cam_hold
+	await get_tree().create_timer(DEATH_FREEZE_WAIT, true, false, true).timeout
+	var cam3d := cam.get_camera()
+	var uv := cam3d.unproject_position(player.global_position + Vector3.UP * 0.9) / get_viewport().get_visible_rect().size
+	await LoadingScreen.instance.close_to(DEATH_IRIS_RADIUS, uv, DEATH_IRIS_TIME)
+	await get_tree().create_timer(DEATH_PRE_HOP_WAIT, true, false, true).timeout
+	player.death_hop()
+	await get_tree().create_timer(DEATH_HOP_TIME, true, false, true).timeout
 
 ## Iris wipe, then — while the screen is fully covered — lose some gold, heal
 ## and put the player back at the last spawnpoint.
@@ -285,7 +311,12 @@ func _respawn_after_death() -> void:
 		return
 	_respawning = true
 	Game.input_locked = true
+	while _death_running:   # a fight's teardown can finish before the death sequence does
+		await get_tree().process_frame
 	await LoadingScreen.instance.run(func():
+		cam.target = player   # the camera was parked while the player fell away (see _play_death_sequence())
+		if is_instance_valid(_death_cam_hold):
+			_death_cam_hold.queue_free()
 		_gold_lost = Game.stats.lose_gold(PlayerStats.DEATH_GOLD_LOSS)
 		Game.stats.full_heal()
 		if not _respawn_in_dungeon():

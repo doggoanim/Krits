@@ -413,6 +413,17 @@ func is_holding_anim(anim_name: StringName) -> bool:
 ## any — for a move that should always take over right away regardless of
 ## what was playing before (air dive, say), rather than waiting out someone
 ## else's hold or silently failing to play at all (see play()'s hold guard).
+## The main menu's pose ("Main Menu" clip, looped) — held until cancel_hold().
+## Used by the death sequence.
+func play_menu_pose() -> void:
+	if _anim == null:
+		return
+	for clip in _anim.get_animation_list():
+		if String(clip).to_lower().replace("_", "").replace("-", "").replace(" ", "").contains("menu"):
+			_anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+			play_hold(clip, 9999.0, 1.0, true, 0.05)
+			return
+
 func cancel_hold() -> void:
 	_hold_t = 0.0
 

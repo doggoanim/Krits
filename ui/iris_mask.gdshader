@@ -13,11 +13,14 @@ shader_type canvas_item;
 /// idea of the real aspect ratio on its own.
 uniform float radius : hint_range(0.0, 1.5) = 1.3;
 uniform vec2 aspect = vec2(1.0, 1.0);
+// Where the hole is centred, in UV (0.5, 0.5 = screen centre). The death wipe
+// closes in on the player instead of the middle of the screen.
+uniform vec2 center = vec2(0.5, 0.5);
 // A hard edge reads as a jagged circle at screen resolution.
 uniform float edge_softness : hint_range(0.0, 0.1) = 0.015;
 
 void fragment() {
-	vec2 centered = (UV - vec2(0.5)) * aspect;
+	vec2 centered = (UV - center) * aspect;
 	float dist = length(centered);
 	float alpha = smoothstep(radius - edge_softness, radius, dist);
 	COLOR = vec4(0.0, 0.0, 0.0, alpha);

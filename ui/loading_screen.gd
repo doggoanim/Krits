@@ -33,6 +33,7 @@ static var instance: LoadingScreen
 
 @onready var _iris: ColorRect = %Iris
 var _mat: ShaderMaterial
+var _partial_radius := -1.0   ## >= 0 while close_to() has left the iris part-way shut
 var _held := false          ## the screen is being kept black by hold() until release()
 var _in_scene_change := false
 
@@ -60,12 +61,25 @@ func _update_aspect() -> void:
 ## is never actually seen happening.
 func run(swap: Callable) -> void:
 	visible = true
-	await _animate_radius(MAX_RADIUS, 0.0)
+	# If close_to() already shut the iris part-way (the death wipe), carry on from there.
+	var from := _partial_radius if _partial_radius >= 0.0 else MAX_RADIUS
+	_partial_radius = -1.0
+	await _animate_radius(from, 0.0)
 	await get_tree().create_timer(HOLD_TIME).timeout
 	await swap.call()
 	await get_tree().create_timer(HOLD_TIME).timeout
+	_mat.set_shader_parameter(&"center", Vector2(0.5, 0.5))   # fully shut: recentre before reopening
 	await _animate_radius(0.0, MAX_RADIUS)
 	visible = false
+
+## Closes the iris only part-way, onto `center_uv` (screen UV), and stops with a
+## gap of `radius` still open — the Mario-style death wipe. The next run()
+## carries on from this radius to fully shut.
+func close_to(radius: float, center_uv: Vector2, time := IRIS_TIME) -> void:
+	_mat.set_shader_parameter(&"center", center_uv)
+	visible = true
+	_partial_radius = radius
+	await _animate_radius(MAX_RADIUS, radius, time)
 
 ## Keeps the screen black until release(), even across a go_to_scene() reveal —
 ## for an opening scene that wants to start in the dark (call it from the new
@@ -115,9 +129,9 @@ func go_to_scene(path: String, on_fail := Callable()) -> void:
 	await _animate_radius(0.0, MAX_RADIUS)
 	visible = false
 
-func _animate_radius(from: float, to: float) -> void:
+func _animate_radius(from: float, to: float, time := IRIS_TIME) -> void:
 	_mat.set_shader_parameter(&"radius", from)
 	var tween := create_tween()
-	tween.tween_method(func(r: float) -> void: _mat.set_shader_parameter(&"radius", r), from, to, IRIS_TIME) \
+	tween.tween_method(func(r: float) -> void: _mat.set_shader_parameter(&"radius", r), from, to, time) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished

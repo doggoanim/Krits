@@ -1247,38 +1247,35 @@ func set_crouching(c: bool) -> void:
 	_shape.height = h
 	_shape_node.position.y = h * 0.5
 
-## ---- death sequence (no text, just motion): a big slow-motion beat while the
-## player is knocked up and back, tumbles over and ends up lying on their back.
-## Main then wipes to the last spawnpoint (see Main._respawn_after_death()).
-const DEATH_POP := 7.5          ## upward knock
-const DEATH_PUSH := 5.5         ## horizontal knock, away from whatever hit them
+## ---- death sequence, Super Mario style (see Main._play_death_sequence()):
+## everything freezes for a beat on the hurt face, striking the main menu pose
+## and looking straight at the camera; the iris closes in on the player but
+## stops with a gap; then the player hops up and drops out of the world
+## (death_hop()) before the iris finishes shutting and the respawn happens.
+const DEATH_HOP_VELOCITY := 11.0   ## the hop up before falling away
 const DEATH_GRAVITY := 26.0
-const DEATH_SLOWMO_SCALE := 0.25
-const DEATH_SLOWMO_HOLD := 1.1  ## real seconds at slow speed...
-const DEATH_SLOWMO_FADE := 0.6  ## ...then eased back to normal
-const DEATH_TUMBLE_TIME := 0.9
-const DEATH_SHAKE := 1.0
+const DEATH_FREEZE := 0.4          ## real seconds of freeze on the pose
+const DEATH_SHAKE := 0.4
 
-var _death_tween: Tween
-
-func _begin_death(from: Vector3) -> void:
+func _begin_death(_from: Vector3) -> void:
 	dead = true
-	var away := global_position - from if from != Vector3.INF else -facing
-	away.y = 0.0
-	away = away.normalized() if away.length() > 0.01 else -facing
-	velocity = away * DEATH_PUSH + Vector3.UP * DEATH_POP
+	velocity = Vector3.ZERO
 	set_crouching(false)
 	visual.cancel_hold()
-	visual.play(PlayerVisual.ANIM_FALLING)
-	visual.show_hurt()
-	# Flip over backwards and end up lying down (-450° == -90°).
-	if _death_tween:
-		_death_tween.kill()
-	_death_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_death_tween.tween_property(visual, "rotation:x", -TAU - PI * 0.5, DEATH_TUMBLE_TIME)
+	visual.rotation.x = 0.0
+	visual.rotation.z = 0.0
 	if camera_rig:
+		face(camera_rig.get_camera().global_position - global_position)   # looking straight at the camera
 		camera_rig.shake(DEATH_SHAKE)
-	HitStop.finisher(DEATH_SLOWMO_HOLD, DEATH_SLOWMO_FADE, DEATH_SLOWMO_SCALE)
+	visual.play_menu_pose()
+	visual.show_hurt()
+	HitStop.freeze(DEATH_FREEZE)
+
+## The hop: up, then down and out through the floor (no collision any more).
+func death_hop() -> void:
+	collision_layer = 0
+	collision_mask = 0
+	velocity = Vector3.UP * DEATH_HOP_VELOCITY
 
 ## While dead the state machine is off, but the body still falls and slides to
 ## a stop like anything else — otherwise it would hang in mid-air.
@@ -1297,9 +1294,10 @@ func enter_cinematic() -> void:
 	machine.transition_to(&"Frozen")
 
 func teleport(pos: Vector3) -> void:
-	if _death_tween:
-		_death_tween.kill()
-	visual.set_lean(0.0, 0.0, 1.0, 1.0)   # undo the death tumble
+	collision_layer = 1 << 1                # undo death_hop()'s ghosting
+	collision_mask = 1 | (1 << 6)
+	visual.cancel_hold()                    # ...and the death pose
+	visual.set_lean(0.0, 0.0, 1.0, 1.0)
 	global_position = pos
 	velocity = Vector3.ZERO
 	dead = false
