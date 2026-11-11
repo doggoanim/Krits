@@ -400,15 +400,9 @@ func _on_quest_focused(q: QuestData) -> void:
 	var done := Game.quests.is_complete(q.id)
 	_detail_name.text = q.title
 	_detail_kind.text = "Completed" if done else ("Main quest" if q.is_main else "Side quest")
-	var text := q.description
-	text += "\n\n"
-	for o in q.objectives:
-		var p := o.progress()
-		var mark := "☑" if o.is_done() else "☐"
-		var count := "  (%d/%d)" % [int(p["have"]), int(p["need"])] if int(p["need"]) > 1 else ""
-		text += "%s %s%s\n" % [mark, o.text, count]
+	var text := q.description   # the description carries the current step; no separate objective checklist
 	if q.reward_gold > 0 or not q.reward_items.is_empty():
-		text += "\nReward:"
+		text += "\n\nReward:"
 		if q.reward_gold > 0:
 			text += " %dg" % q.reward_gold
 		for item_id: StringName in q.reward_items:
