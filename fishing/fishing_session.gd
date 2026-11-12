@@ -310,7 +310,7 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 	_shake(0.3)
 	_player.visual.squash_stretch(1.2, 0.88)
 	ItemGet.give(id)
-	_end("Caught: %s!" % (item.display_name if item else String(id)))
+	_end("Caught: %s!\n%s" % [item.display_name if item else String(id), FishCatalog.rarity_text(id)])   # name, then its rarity under it
 
 func _on_player_hurt(_from: Vector3) -> void:
 	_end("")

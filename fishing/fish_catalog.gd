@@ -33,3 +33,20 @@ static func roll() -> Dictionary:
 		if pick <= 0.0:
 			return f
 	return FISH[0]
+
+## How rare a fish is, as the N in "1 in N" (its share of the total catch
+## weight, rounded to a whole number; at least 1).
+static func odds(id: StringName) -> int:
+	var total := 0.0
+	var weight := 0.0
+	for f in FISH:
+		total += float(f["weight"])
+		if f["id"] == id:
+			weight = float(f["weight"])
+	if weight <= 0.0:
+		return 1
+	return maxi(1, roundi(total / weight))
+
+## "1 in 4" — shown under the fish's name when it is caught.
+static func rarity_text(id: StringName) -> String:
+	return "1 in %d" % odds(id)
