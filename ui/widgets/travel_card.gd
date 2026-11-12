@@ -1,20 +1,35 @@
 class_name TravelCard
 extends Button
-## One destination on the fast travel screen: a card with a crystal icon, the
-## place's name and a status line. Built entirely from setup() so TravelMenu
-## only has to say what each card is.
+## One destination on the fast travel screen, drawn like the rest of the hand-
+## made UI: a wobbly-outlined paper plate (the same button art as the menus),
+## a hand-inked crystal, and black marker text. Built entirely from setup() so
+## TravelMenu only has to say what each card is.
 ##
-##   AVAILABLE  glowing crystal, selectable
-##   HERE       the checkpoint you're standing at (not selectable)
-##   LOCKED     not discovered yet: a hollow outline and "???"
+##   AVAILABLE  inked crystal, selectable (warm yellow when picked)
+##   HERE       the checkpoint you're standing at (green, not selectable)
+##   LOCKED     not discovered yet: a dashed outline and "???"
 
 enum State { AVAILABLE, HERE, LOCKED }
 
-const CARD_SIZE := Vector2(210, 270)
-const ICON_HEIGHT := 120.0
-const CRYSTAL_COLOR := Color(0.35, 0.95, 1.0)
-const HERE_COLOR := Color(0.55, 1.0, 0.7)
-const LOCKED_COLOR := Color(0.5, 0.55, 0.68)
+const CARD_SIZE := Vector2(300, 400)
+const ICON_HEIGHT := 190.0
+const PLATE_MARGIN := 60.0
+const CONTENT_MARGIN := 28.0
+const TILTS := [-2.0, 1.4, -0.9, 2.0]   ## degrees; each card sits a touch crooked, like the pause menu's buttons
+
+const PLATES: Array[Texture2D] = [
+	preload("res://assets/ui/button_1.png"),
+	preload("res://assets/ui/button_2.png"),
+	preload("res://assets/ui/button_3.png"),
+]
+const TINT_IDLE := Color.WHITE
+const TINT_PICKED := Color(1.0, 0.92, 0.5)
+const TINT_HERE := Color(0.72, 1.0, 0.8)
+const TINT_LOCKED := Color(0.8, 0.82, 0.88)
+
+const CRYSTAL_FILL := Color(0.6, 0.93, 1.0)
+const HERE_FILL := Color(0.62, 1.0, 0.72)
+const LOCKED_FILL := Color(0.92, 0.93, 0.96)
 
 var spawn_id: StringName
 var state := State.AVAILABLE
@@ -24,17 +39,20 @@ func setup(number: int, place: String, subtitle: String, card_state: State) -> v
 	custom_minimum_size = CARD_SIZE
 	disabled = state != State.AVAILABLE
 	focus_mode = Control.FOCUS_ALL if state == State.AVAILABLE else Control.FOCUS_NONE
-	_apply_styles()
+	rotation_degrees = TILTS[number % TILTS.size()]
+	resized.connect(func(): pivot_offset = size * 0.5)
+	_apply_styles(number)
 
 	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 16)
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, int(CONTENT_MARGIN))
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 4)
 	add_child(box)
 
-	box.add_child(_label("%02d" % number, 15, Color(1, 1, 1, 0.35), HORIZONTAL_ALIGNMENT_LEFT))
+	box.add_child(_label("No. %d" % number, 26, 0.45, HORIZONTAL_ALIGNMENT_LEFT))
 	var icon := _Icon.new()
 	icon.state = state
+	icon.ink_seed = number * 7919
 	icon.custom_minimum_size.y = ICON_HEIGHT
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(icon)
@@ -43,11 +61,10 @@ func setup(number: int, place: String, subtitle: String, card_state: State) -> v
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(spacer)
 
-	var name_color := Color.WHITE if state != TravelCard.State.LOCKED else Color(1, 1, 1, 0.4)
-	box.add_child(_label(place if state != TravelCard.State.LOCKED else "???", 24, name_color))
-	if subtitle != "" and state != TravelCard.State.LOCKED:
-		box.add_child(_label(subtitle, 15, Color(1, 1, 1, 0.55)))
-	box.add_child(_label(_status_text(), 15, _status_color()))
+	box.add_child(_label(place if state != State.LOCKED else "???", 44, 1.0))
+	if subtitle != "" and state != State.LOCKED:
+		box.add_child(_label(subtitle, 24, 0.6))
+	box.add_child(_label(_status_text(), 26, 0.7 if state == State.AVAILABLE else 0.55))
 
 func _status_text() -> String:
 	match state:
@@ -55,76 +72,88 @@ func _status_text() -> String:
 		State.LOCKED: return "Undiscovered"
 	return "Checkpoint"
 
-func _status_color() -> Color:
-	match state:
-		State.HERE: return HERE_COLOR
-		State.LOCKED: return Color(1, 1, 1, 0.3)
-	return CRYSTAL_COLOR
-
-func _label(text: String, size: int, color: Color, align := HORIZONTAL_ALIGNMENT_CENTER) -> Label:
+func _label(text: String, size: int, alpha: float, align := HORIZONTAL_ALIGNMENT_CENTER) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.horizontal_alignment = align
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_color", Color(Ink.INK, alpha))
 	return l
 
 # ------------------------------------------------------------------- styling
 
-func _box(bg: Color, border: Color, border_width: int) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = bg
-	sb.border_color = border
-	sb.set_border_width_all(border_width)
-	sb.set_corner_radius_all(16)
-	sb.shadow_color = Color(0, 0, 0, 0.4)
-	sb.shadow_size = 10
-	sb.shadow_offset = Vector2(0, 5)
+func _plate(texture: Texture2D, tint: Color) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = texture
+	sb.modulate_color = tint
+	sb.set_texture_margin_all(PLATE_MARGIN)
+	sb.set_content_margin_all(CONTENT_MARGIN)
 	return sb
 
-func _apply_styles() -> void:
-	var idle := _box(Color(0.07, 0.09, 0.15, 0.94), Color(0.3, 0.4, 0.55, 0.55), 2)
-	# Hover and focus share the same look — hovering takes focus anyway (see
+func _apply_styles(number: int) -> void:
+	var idle := _plate(PLATES[number % PLATES.size()], TINT_IDLE)
+	# Hover and focus share one look — hovering takes focus anyway (see
 	# FocusPop), and a local hover style is what FocusPop shows on focus.
-	var picked := _box(Color(0.1, 0.2, 0.28, 0.97), CRYSTAL_COLOR, 3)
-	var here := _box(Color(0.07, 0.17, 0.14, 0.94), HERE_COLOR.darkened(0.3), 2)
-	var locked := _box(Color(0.05, 0.06, 0.1, 0.8), Color(0.25, 0.3, 0.4, 0.35), 2)
+	var picked := _plate(PLATES[(number + 1) % PLATES.size()], TINT_PICKED)
 	add_theme_stylebox_override("normal", idle)
 	add_theme_stylebox_override("hover", picked)
 	add_theme_stylebox_override("focus", picked)
 	add_theme_stylebox_override("pressed", picked)
 	add_theme_stylebox_override("hover_pressed", picked)
-	add_theme_stylebox_override("disabled", here if state == State.HERE else locked)
+	add_theme_stylebox_override("disabled", _plate(PLATES[number % PLATES.size()],
+			TINT_HERE if state == State.HERE else TINT_LOCKED))
 
-## The crystal drawn on the card; floats gently and glows when it can be picked.
+## The crystal, drawn in ink: a wobbly black outline over a flat colour fill,
+## a couple of facet strokes and twinkling sparkles. The line "boils" a little
+## (re-wobbles a few times a second) like stop-motion; a locked one is a dashed
+## outline with a question mark.
 class _Icon extends Control:
+	const BOIL_FPS := 6.0
+	const LINE := 5.0
+
 	var state := TravelCard.State.AVAILABLE
+	var ink_seed := 1
 
 	func _process(_delta: float) -> void:
 		if state != TravelCard.State.LOCKED:
 			queue_redraw()
 
 	func _draw() -> void:
-		var tint := TravelCard.LOCKED_COLOR
-		if state == TravelCard.State.AVAILABLE:
-			tint = TravelCard.CRYSTAL_COLOR
-		elif state == TravelCard.State.HERE:
-			tint = TravelCard.HERE_COLOR
-		var bob := sin(Time.get_ticks_msec() * 0.003) * 4.0 if state != TravelCard.State.LOCKED else 0.0
+		var step := int(Time.get_ticks_msec() / 1000.0 * BOIL_FPS) if state != TravelCard.State.LOCKED else 0
+		var s := ink_seed + step * 31
+		var bob := sin(Time.get_ticks_msec() * 0.003) * 5.0 if state != TravelCard.State.LOCKED else 0.0
 		var c := Vector2(size.x * 0.5, size.y * 0.5 + bob)
-		var top := c + Vector2(0, -50)
-		var right := c + Vector2(32, -4)
-		var bottom := c + Vector2(0, 40)
-		var left := c + Vector2(-32, -4)
+		var top := c + Vector2(0, -80)
+		var right := c + Vector2(52, -6)
+		var bottom := c + Vector2(0, 66)
+		var left := c + Vector2(-52, -6)
+		var shape := PackedVector2Array([top, right, bottom, left])
 		if state == TravelCard.State.LOCKED:
-			var outline := PackedVector2Array([top, right, bottom, left, top])
-			draw_polyline(outline, Color(tint, 0.5), 2.0)
+			_draw_dashed(Ink.wobble(Ink.closed(shape), s, 1.4, 6))
+			var font := ThemeDB.fallback_font
+			draw_string(font, c + Vector2(-14, 24), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 72, Color(Ink.INK, 0.4))
 			return
-		for i in 4:   # soft glow behind
-			draw_circle(c, 30.0 + i * 12.0, Color(tint, 0.07))
-		draw_colored_polygon(PackedVector2Array([top, c, bottom, left]), tint.darkened(0.25))
-		draw_colored_polygon(PackedVector2Array([top, right, bottom, c]), tint)
-		draw_line(top, bottom, Color(1, 1, 1, 0.5), 1.5)
-		draw_line(left, right, Color(1, 1, 1, 0.25), 1.0)
+		var fill := TravelCard.HERE_FILL if state == TravelCard.State.HERE else TravelCard.CRYSTAL_FILL
+		draw_colored_polygon(shape, fill)
+		draw_colored_polygon(PackedVector2Array([top, c, bottom, left]), fill.darkened(0.12))   # shaded left half
+		draw_polyline(Ink.wobble(Ink.closed(shape), s, 1.6, 4), Ink.INK, LINE, true)
+		draw_polyline(Ink.wobble(PackedVector2Array([top, bottom]), s + 1, 1.4, 4), Ink.INK, LINE * 0.7, true)
+		draw_polyline(Ink.wobble(PackedVector2Array([left, c + Vector2(0, 8), right]), s + 2, 1.4, 3), Ink.INK, LINE * 0.6, true)
+		if state == TravelCard.State.AVAILABLE:
+			_draw_sparkle(c + Vector2(76, -62), 15.0, s + 3)
+			_draw_sparkle(c + Vector2(-80, 30), 10.0, s + 4)
+
+	func _draw_sparkle(at: Vector2, r: float, s: int) -> void:
+		r *= 0.75 + 0.25 * sin(Time.get_ticks_msec() * 0.006 + at.x)   # twinkle
+		var h := Ink.wobble(PackedVector2Array([at + Vector2(-r, 0), at + Vector2(r, 0)]), s, 0.8, 2)
+		var v := Ink.wobble(PackedVector2Array([at + Vector2(0, -r), at + Vector2(0, r)]), s + 1, 0.8, 2)
+		draw_polyline(h, Ink.INK, 4.0, true)
+		draw_polyline(v, Ink.INK, 4.0, true)
+
+	func _draw_dashed(line: PackedVector2Array) -> void:
+		var i := 0
+		while i < line.size() - 1:
+			draw_line(line[i], line[i + 1], Color(Ink.INK, 0.45), 4.0, true)
+			i += 2

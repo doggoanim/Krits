@@ -4,10 +4,13 @@ extends MenuBase
 ## in the current level (undiscovered ones show as locked silhouettes). Opens
 ## only while standing at a checkpoint — see can_open().
 
-const TITLE_SIZE := 44
-const CARD_GAP := 22
+const TITLE_SIZE := 100
+const SUBTITLE_SIZE := 36
+const HEADING_OUTLINE := 14       ## black marker outline on the white heading text, like a sticker
+const CARD_GAP := 36
 const SCREEN_MARGIN := 160.0      ## horizontal space kept free of the card row
-const ROW_PADDING := 24.0         ## room around the cards so a focused (grown) card isn't clipped
+const ROW_PADDING := 44.0         ## room around the cards so a tilted / focused (grown) card isn't clipped
+const KEY_PLATE := preload("res://ui/widgets/key_hint_plate.tscn")
 const FADE_TIME := 0.2
 const CARD_STAGGER := 0.05
 
@@ -19,7 +22,7 @@ func _ready() -> void:
 	super._ready()
 	instance = self
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation", 26)
+	content.add_theme_constant_override("separation", 14)
 
 func _exit_tree() -> void:
 	if instance == self:
@@ -43,21 +46,39 @@ func refresh() -> void:
 	for c in content.get_children():
 		content.remove_child(c)
 		c.queue_free()
-	content.add_child(_heading("Fast Travel", TITLE_SIZE, Color.WHITE))
-	content.add_child(_heading("Choose a checkpoint", 18, Color(1, 1, 1, 0.55)))
+	content.add_child(_heading("Fast Travel", TITLE_SIZE))
+	var squiggle := InkSquiggle.new()
+	squiggle.custom_minimum_size = Vector2(520, 28)
+	squiggle.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.add_child(squiggle)
+	content.add_child(_heading("Choose a checkpoint", SUBTITLE_SIZE, 8))
 	var cards := _build_cards()
 	content.add_child(_card_row(cards))
-	content.add_child(_heading("[Esc] Close", 16, Color(1, 1, 1, 0.4)))
+	content.add_child(_close_hint())
 	FocusPop.attach_all(self, true)
 	_focus_first_available.call_deferred(cards)
 
-func _heading(text: String, size: int, color: Color) -> Label:
+## White text with a thick black outline, the menus' sticker-style heading.
+func _heading(text: String, size: int, outline := HEADING_OUTLINE) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_color", Color.WHITE)
+	l.add_theme_color_override("font_outline_color", Ink.INK)
+	l.add_theme_constant_override("outline_size", outline)
 	return l
+
+## "[Esc] Close" with the hand-drawn key plate.
+func _close_hint() -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 14)
+	var plate := KEY_PLATE.instantiate() as KeyHintPlate
+	row.add_child(plate)
+	plate.set_key("Esc")
+	row.add_child(_heading("Close", 32, 8))
+	return row
 
 func _build_cards() -> Array[TravelCard]:
 	var here := Spawnpoint.occupied(get_tree())
@@ -113,9 +134,9 @@ func _on_card_pressed(card: TravelCard) -> void:
 ## Whole screen fades up, the cards a beat after one another. Tweens run in
 ## pause mode PROCESS because the tree is paused while this menu is open.
 func _play_intro() -> void:
-	modulate.a = 0.0
+	content.modulate.a = 0.0   # not self: the frosted backdrop is drawn by this node's own panel
 	create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) \
-			.tween_property(self, "modulate:a", 1.0, FADE_TIME)
+			.tween_property(content, "modulate:a", 1.0, FADE_TIME)
 	var i := 0
 	for c in find_children("*", "TravelCard", true, false):
 		var card := c as TravelCard
