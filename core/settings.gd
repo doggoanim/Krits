@@ -50,6 +50,7 @@ const DEFAULTS := {
 	&"controls/invert_y": false,
 	&"controls/bindings": {},
 	&"accessibility/screen_shake": true,
+	&"accessibility/wobbly_text": true,       ## slight hand-drawn wobble on all UI text (core/text_wobble.gd)
 	&"accessibility/telegraphs": true,        ## show the ground attack telegraphs (circle / aim line); the "!" always shows
 	&"accessibility/hitstop": 1.0,            ## multiplier on hit-stop freeze time (0 = off)
 	&"accessibility/text_speed": 1.0,         ## multiplier on dialogue typewriter speed
