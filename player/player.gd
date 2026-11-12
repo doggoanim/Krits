@@ -1208,12 +1208,8 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 		bounce_time: float, allow_grounded := false, vertical_only := false) -> bool:
 	if (is_on_floor() and not allow_grounded) or not is_on_wall() or prev_hvel.length() < config.wall_min_speed:
 		return false
-	var n := get_wall_normal()
-	n.y = 0.0
-	if n.length() < 0.1:
-		return false
-	n = n.normalized()
-	if (-prev_hvel.normalized()).dot(n) < 0.35:
+	var n := _impact_wall_normal(prev_hvel)
+	if n == Vector3.ZERO:
 		return false
 	if vertical_only:
 		velocity = Vector3.ZERO
@@ -1255,6 +1251,30 @@ func try_wall_bounce(prev_hvel: Vector3, regrants_dive: bool, bounce_anim: Strin
 		jump_buffer_t = 0.0
 	machine.transition_to(&"Air")
 	return true
+
+## The wall normal a hard hit should bounce off: of every wall touched this
+## move, the one facing most squarely into `prev_hvel` (must clear the same
+## 0.35 head-on threshold as before), or ZERO if none does. get_wall_normal()
+## alone only reports the LAST wall touched, which in a corner is the second
+## wall you slid into — often nearly parallel to your travel — so a dive
+## straight into a corner failed the head-on check and just stopped.
+func _impact_wall_normal(prev_hvel: Vector3) -> Vector3:
+	var heading := -prev_hvel.normalized()
+	var best := Vector3.ZERO
+	var best_dot := 0.35
+	for i in get_slide_collision_count():
+		var n := get_slide_collision(i).get_normal()
+		if n.y > 0.7 or n.y < -0.7:
+			continue   # floor/ceiling, not a wall
+		n.y = 0.0
+		if n.length() < 0.1:
+			continue
+		n = n.normalized()
+		var d := heading.dot(n)
+		if d >= best_dot:
+			best_dot = d
+			best = n
+	return best
 
 ## Collision only — shrinks the capsule to CROUCH_HEIGHT. Several states use
 ## the smaller capsule for reasons that have nothing to do with the crouch
