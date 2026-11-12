@@ -257,6 +257,9 @@ transform = Transform3D(36.72, 0, 0, 0, 49.367317, 0, 0, 0, 12.864001, -49.80000
 [node name="rock_terrain62" parent="Terrain" unique_id=804713345 instance=ExtResource("26_lybmh")]
 transform = Transform3D(22.032001, 0, 0, 0, 54.304047, 0, 0, 0, 10.291202, 42.199997, 28.101618, 88.3624)
 
+[node name="Cube" parent="Terrain/rock_terrain62" index="0" unique_id=714825217]
+cast_shadow = 0
+
 [node name="rock_terrain83" parent="Terrain" unique_id=1389358921 instance=ExtResource("26_lybmh")]
 transform = Transform3D(46.2672, 0, 0, 0, 68.423096, 0, 0, 0, 10.291202, -0.80000305, 28.101618, 126.3624)
 
@@ -1865,3 +1868,5 @@ spawn_id = &"from_field"
 
 [node name="nocol_dirt_terrain" parent="." unique_id=472464163 instance=ExtResource("10_a5ueg")]
 transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
+
+[editable path="Terrain/rock_terrain62"]

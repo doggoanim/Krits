@@ -1,37 +1,34 @@
 [gd_resource type="Resource" script_class="EnvironmentConfig" format=3 uid="uid://cxq5uev4mffcc"]
 
 [ext_resource type="CompressedTexture3D" uid="uid://dhupkpgmtg20t" path="res://assets/luts/pastry_wonderland_lut.png" id="1_q3pbs"]
-[ext_resource type="Shader" path="res://shading/sky_painted.gdshader" id="2_sky"]
 [ext_resource type="Script" uid="uid://d2qvr17ggn6bb" path="res://world/environment_config.gd" id="1_v032n"]
+[ext_resource type="Shader" uid="uid://vxehx522mref" path="res://shading/sky_painted.gdshader" id="2_sky"]
 
 [sub_resource type="FastNoiseLite" id="Noise_clouds"]
 noise_type = 3
 frequency = 0.012
-fractal_type = 1
 fractal_octaves = 4
 
 [sub_resource type="NoiseTexture2D" id="NoiseTex_clouds"]
-width = 512
-height = 512
-seamless = true
 noise = SubResource("Noise_clouds")
+seamless = true
 
 [resource]
 script = ExtResource("1_v032n")
 sun_color = Color(1, 0.93, 0.78, 1)
 sun_energy = 1.2
-lantern_boost = 0.3
-ambient_color = Color(0.76, 0.84, 1, 1)
-ambient_energy = 0.7
+sun_shadow_blur = 0.0
 sky_shader = ExtResource("2_sky")
 sky_shader_params = {
 &"noise_tex": SubResource("NoiseTex_clouds")
 }
-sun_shadow_blur = 0.8
+ambient_energy = 0.7
+ambient_color = Color(0.76, 0.84, 1, 1)
+haze_enabled = true
+haze_density = 0.0025
 volumetric_fog_enabled = true
+lantern_boost = 0.3
 brightness = 0.83
 contrast = 1.15
 saturation = 1.0
 color_correction_lut = ExtResource("1_q3pbs")
-haze_enabled = true
-haze_density = 0.0025
