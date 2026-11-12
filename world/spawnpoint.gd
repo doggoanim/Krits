@@ -32,6 +32,7 @@ func _ready() -> void:
 	_crystal = CheckpointCrystal.new()
 	add_child(_crystal)
 	_build_label()
+	add_child(CheckpointInteract.new())   # "[E] travel" prompt — see CheckpointInteract
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	Events.spawnpoint_activated.connect(func(_id): _refresh())

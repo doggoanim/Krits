@@ -11,15 +11,19 @@ const ROW_PADDING := 24.0         ## room around the cards so a focused (grown) 
 const FADE_TIME := 0.2
 const CARD_STAGGER := 0.05
 
-var is_in_combat := func() -> bool: return false
+static var instance: TravelMenu   ## opened by a CheckpointInteract (no hotkey)
 
-func _init() -> void:
-	toggle_action = &"menu_travel"
+var is_in_combat := func() -> bool: return false
 
 func _ready() -> void:
 	super._ready()
+	instance = self
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation", 26)
+
+func _exit_tree() -> void:
+	if instance == self:
+		instance = null
 
 func can_open() -> bool:
 	if is_in_combat.call():

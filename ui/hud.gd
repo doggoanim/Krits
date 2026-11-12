@@ -166,9 +166,7 @@ func _refresh() -> void:
 	# label it sat next to now shows gold instead.
 	_xp.visible = false
 	_level.visible = false   # gold / HP / shield text removed — the bars say it (gold is in the inventory)
-	_hint.text = "[%s] Inventory   [%s] Travel" % [
-		InputSetup.key_label(Settings.get_binding(&"menu_inventory")),
-		InputSetup.key_label(Settings.get_binding(&"menu_travel"))]
+	_hint.text = "[%s] Inventory" % InputSetup.key_label(Settings.get_binding(&"menu_inventory"))
 
 ## The bow shows how many arrows are stacked, in the combo plate's place.
 func _on_arrows(n: int) -> void:

@@ -17,7 +17,6 @@ const BINDINGS := {
 	&"interact": {"label": "Interact", "key": KEY_E},
 	&"lantern_toggle": {"label": "Toggle Lantern", "key": KEY_F},
 	&"menu_inventory": {"label": "Inventory", "key": KEY_TAB},
-	&"menu_travel": {"label": "Travel Menu", "key": KEY_M},
 	&"hotbar_1": {"label": "Hotbar 1", "key": KEY_1},
 	&"hotbar_2": {"label": "Hotbar 2", "key": KEY_2},
 	&"hotbar_3": {"label": "Hotbar 3", "key": KEY_3},
