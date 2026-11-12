@@ -3,37 +3,27 @@ class_name CheckpointCrystal
 extends Node3D
 ## (@tool so a checkpoint shows up in the editor viewport.)
 ## The look of a Spawnpoint (checkpoint), in a stylized hand-painted style: a
-## mossy boulder cluster around a pedestal, small crystals growing from it, a
-## big faceted crystal floating above with a few shards circling it, a painted
-## rune circle on the ground and a soft glow. Pure visuals — Spawnpoint owns
-## the logic and just drives this with set_unlocked() / set_active() / flash().
+## big faceted crystal floating in the air with a few shards circling it, a
+## soft glow and a few drifting motes — nothing on the ground. Pure visuals —
+## Spawnpoint owns the logic and just drives this with set_unlocked() /
+## set_active() / flash().
 ##
 ##   locked   dull grey-blue crystal, barely glowing, drifting slowly
-##   unlocked cyan crystal, glowing, lighting its surroundings, spinning
+##   unlocked berry-blue crystal, glowing, lighting its surroundings, spinning
 ##   active   (player standing at it) brighter still: travel is available
 ##   flash    one-off burst of light + sparks + a scale pop on activation
 ##
-## Shapes come from LowPoly, the crystal's painted look from
-## shading/painted_crystal.gdshader, the ground circle from
-## shading/painted_rune_ring.gdshader, and the stones use the project's toon
-## shader with a painted noise texture and moss/stone vertex colours.
+## Shapes come from LowPoly, the painted look from shading/painted_crystal.gdshader.
 
 const CRYSTAL_SHADER: Shader = preload("res://shading/painted_crystal.gdshader")
-const RUNE_SHADER: Shader = preload("res://shading/painted_rune_ring.gdshader")
-const TOON_SHADER: Shader = preload("res://shading/toon_double_sided.gdshader")
 
 const LOCKED_COLOR := Color(0.5, 0.55, 0.7)
 const UNLOCKED_COLOR := Color8(0, 138, 255)   ## the blueberry bush's berry blue (#008AFF, from its palette texture)
-const STONE_COLOR := Color(0.66, 0.63, 0.6)
-const MOSS_COLOR := Color(0.48, 0.66, 0.34)
 
 const FLOAT_HEIGHT := 1.9
 const BOB_AMPLITUDE := 0.12
 const SHARD_COUNT := 3
 const SHARD_ORBIT_RADIUS := 0.85
-const BOULDER_COUNT := 5
-const GROUND_CRYSTAL_COUNT := 3
-const RUNE_RING_SIZE := 3.4        ## quad edge in metres; the painted ring sits at ~0.8 of its half-size
 const GLOW_SIZE := 3.4
 
 const WAKE_SPEED := 1.5     ## locked <-> unlocked blend, per second
@@ -42,7 +32,6 @@ const FLASH_DECAY := 1.6
 
 @export var light_range := 7.0
 
-static var _stone_material: ShaderMaterial   ## shared by every checkpoint
 static var _glow_texture: GradientTexture2D
 
 var _unlocked := false
@@ -55,7 +44,6 @@ var _t := 0.0
 var _core: Node3D
 var _orbit: Node3D
 var _crystal_mat: ShaderMaterial
-var _rune_mat: ShaderMaterial
 var _glow_mat: StandardMaterial3D
 var _light: OmniLight3D
 var _burst: CPUParticles3D
@@ -64,9 +52,6 @@ var _motes: CPUParticles3D
 func _ready() -> void:
 	_crystal_mat = ShaderMaterial.new()
 	_crystal_mat.shader = CRYSTAL_SHADER
-	_build_stones()
-	_build_rune_ring()
-	_build_ground_crystals()
 	_build_core()
 	_build_shards()
 	_build_glow()
@@ -109,65 +94,6 @@ func _mesh_instance(mesh: Mesh, mat: Material, pos := Vector3.ZERO) -> MeshInsta
 	mi.position = pos
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
-
-static func _get_stone_material() -> ShaderMaterial:
-	if _stone_material == null:
-		# A soft painted blotchiness so the stone isn't one flat colour.
-		var noise := FastNoiseLite.new()
-		noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-		noise.frequency = 0.03
-		var ramp := Gradient.new()
-		ramp.set_color(0, Color(0.74, 0.72, 0.7))
-		ramp.set_color(1, Color.WHITE)
-		var tex := NoiseTexture2D.new()
-		tex.noise = noise
-		tex.color_ramp = ramp
-		tex.seamless = true
-		tex.width = 128
-		tex.height = 128
-		_stone_material = ShaderMaterial.new()
-		_stone_material.shader = TOON_SHADER
-		_stone_material.set_shader_parameter(&"albedo_texture", tex)
-		_stone_material.set_shader_parameter(&"use_vertex_color", true)
-		_stone_material.set_shader_parameter(&"rim_strength", 0.0)
-	return _stone_material
-
-## A flat pedestal stone in the middle and a ring of chunky boulders around it.
-func _build_stones() -> void:
-	var mat := _get_stone_material()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = _seed()
-	var pedestal := LowPoly.boulder(0.62, 0.42, STONE_COLOR, MOSS_COLOR, 8, 3, rng.randi(), 0.5)
-	add_child(_mesh_instance(pedestal, mat, Vector3(0.0, -0.04, 0.0)))
-	for i in BOULDER_COUNT:
-		var a := TAU * (float(i) + rng.randf_range(-0.2, 0.2)) / BOULDER_COUNT
-		var dist := rng.randf_range(0.78, 0.98)
-		var r := rng.randf_range(0.26, 0.42)
-		var boulder := LowPoly.boulder(r, r * rng.randf_range(0.7, 1.1), STONE_COLOR, MOSS_COLOR,
-				7, 3, rng.randi())
-		var mi := _mesh_instance(boulder, mat, Vector3(cos(a) * dist, -0.05, sin(a) * dist))
-		mi.rotation.y = rng.randf() * TAU
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-		add_child(mi)
-
-func _build_rune_ring() -> void:
-	_rune_mat = ShaderMaterial.new()
-	_rune_mat.shader = RUNE_SHADER
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * RUNE_RING_SIZE
-	quad.orientation = PlaneMesh.FACE_Y
-	add_child(_mesh_instance(quad, _rune_mat, Vector3(0.0, 0.05, 0.0)))
-
-## A few small crystals leaning out of the pedestal.
-func _build_ground_crystals() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = _seed() + 17
-	for i in GROUND_CRYSTAL_COUNT:
-		var a := TAU * float(i) / GROUND_CRYSTAL_COUNT + rng.randf_range(-0.4, 0.4)
-		var mesh := LowPoly.crystal(0.09, rng.randf_range(0.16, 0.3), 0.16, 0.0, 5, rng.randi())
-		var mi := _mesh_instance(mesh, _crystal_mat, Vector3(cos(a) * 0.42, 0.34, sin(a) * 0.42))
-		mi.rotation = Vector3(sin(a) * 0.35, rng.randf() * TAU, -cos(a) * 0.35)
-		add_child(mi)
 
 func _build_core() -> void:
 	_core = Node3D.new()
@@ -291,8 +217,6 @@ func _apply() -> void:
 	var shimmer := 0.12 * sin(_t * 3.0) * _awake
 	_crystal_mat.set_shader_parameter(&"tint", tint)
 	_crystal_mat.set_shader_parameter(&"glow", lerpf(0.2, 1.0, _awake) + 0.5 * _active_blend + 2.0 * _flash + shimmer)
-	_rune_mat.set_shader_parameter(&"color", tint)
-	_rune_mat.set_shader_parameter(&"amount", lerpf(0.25, 1.0, _awake) + 0.7 * _active_blend + 1.5 * _flash)
 
 	var halo := lerpf(0.12, 0.5, _awake) + 0.3 * _active_blend + 0.6 * _flash
 	_glow_mat.albedo_color = Color(tint, clampf(halo, 0.0, 1.0))

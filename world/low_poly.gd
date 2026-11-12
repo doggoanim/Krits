@@ -1,7 +1,7 @@
 class_name LowPoly
 extends RefCounted
 ## Builders for flat-shaded, slightly irregular meshes — chunky hand-modelled
-## stones and crystals instead of smooth primitives. Every face gets its own
+## crystals instead of smooth primitives. Every face gets its own
 ## normal (so facets read as flat planes), a vertex colour, and planar UVs.
 ## The same `seed_value` always gives the same shape.
 
@@ -33,48 +33,6 @@ static func crystal(radius: float, body: float, tip_top: float, tip_bottom: floa
 		_quad(st, waist[i], waist[j], shoulder[j], shoulder[i], centre, color)
 		_tri(st, shoulder[i], shoulder[j], top, centre, color)
 	return st.commit()
-
-## A squat rounded stone sitting on y = 0: `rings` bands up to a rounded top.
-## Faces pointing mostly up take `moss`, the rest `stone` (with a little
-## per-face variation) — baked in as vertex colour for a painted look.
-static func boulder(radius: float, height: float, stone: Color, moss: Color,
-		sides := 7, rings := 3, seed_value := 1, moss_slope := 0.6) -> ArrayMesh:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value
-	var grid: Array = []   # grid[k][i] = Vector3, k = 0 (base) .. rings (just under the apex)
-	for k in rings:
-		var t := float(k) / rings
-		var ring_r := radius * cos(t * PI * 0.5 * 0.92)
-		var ring_y := height * sin(t * PI * 0.5)
-		var row: Array[Vector3] = []
-		for i in sides:
-			var a := TAU * float(i) / sides + rng.randf_range(-0.18, 0.18) + t * 0.3
-			var r := ring_r * rng.randf_range(0.86, 1.12)
-			row.append(Vector3(cos(a) * r, ring_y + rng.randf_range(-0.04, 0.05) * height, sin(a) * r))
-		grid.append(row)
-	var apex := Vector3(rng.randf_range(-0.05, 0.05) * radius, height, rng.randf_range(-0.05, 0.05) * radius)
-	var centre := Vector3(0.0, height * 0.4, 0.0)
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for k in rings - 1:
-		for i in sides:
-			var j := (i + 1) % sides
-			var q := [grid[k][i], grid[k][j], grid[k + 1][j], grid[k + 1][i]]
-			_quad(st, q[0], q[1], q[2], q[3], centre, _paint(q, centre, stone, moss, moss_slope, rng))
-	var last: Array = grid[rings - 1]
-	for i in sides:
-		var j := (i + 1) % sides
-		var t3 := [last[i], last[j], apex]
-		_tri(st, t3[0], t3[1], t3[2], centre, _paint(t3, centre, stone, moss, moss_slope, rng))
-	return st.commit()
-
-## Face colour: moss on upward faces, stone elsewhere, each nudged a little.
-static func _paint(pts: Array, centre: Vector3, stone: Color, moss: Color, moss_slope: float,
-		rng: RandomNumberGenerator) -> Color:
-	var n := _face_normal(pts[0], pts[1], pts[2], centre)
-	var base := moss if n.y > moss_slope else stone
-	var v := rng.randf_range(0.9, 1.08)
-	return Color(base.r * v, base.g * v, base.b * v, 1.0)
 
 ## Outward-facing normal of triangle (a, b, c) for a body centred on `centre`.
 ## Godot treats clockwise winding as front, so (c - a) x (b - a) points out of
