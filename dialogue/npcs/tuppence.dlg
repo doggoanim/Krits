@@ -1,0 +1,29 @@
+# Mrs. Tuppence — Chesburg's cat lady; her cat Biscuit is missing. Format: dialogue/dialogue_parser.gd
+@speaker Mrs. Tuppence
+@when tuppence_got_cat -> after
+@when cat_found -> found
+@when tuppence_quest_accepted -> reminder
+
+== offer ==
+Oh, thank goodness, a friendly face! Have you seen a cat? Orange, round, [i]very[/i] sure of himself. Answers to "Biscuit", though he's never once answered.
+He slipped out yesterday morning and hasn't come home. My knees won't carry me around the whole town, but yours look [bounce]splendid[/bounce].
+Would you look for him? He leaves little... [i]traces[/i] wherever he goes.
+> I'll find Biscuit. -> accepted [set tuppence_quest_accepted]
+> Sorry, I'm busy. -> no
+
+== no ==
+Oh. Well. If you see an orange loaf with legs, [whisper]do let me know.[/whisper]
+
+== accepted ==
+Bless you, dear! Cats leave clues like crumbs. Orange fur on a fence, muddy paws near the well, something nicked from the baker's... Look where a cat would look.
+
+== reminder ==
+Any word of Biscuit? Try the places a cat likes: fur on the fences by the road, paw prints near the well, and whatever he's stolen from Marta's kitchen.
+> Not yet, I'm still looking.
+
+== found ==
+Is that — oh, [bounce]Biscuit![/bounce] He's been trotting behind you this whole time! [shake]You wicked, wicked boy.[/shake]
+Thank you, dear. Truly. Here, take this. He'll be sulking by the stove all week, [whisper]but he's home.[/whisper] [set tuppence_got_cat]
+
+== after ==
+Biscuit hasn't left the cushion since. Thank you again, dear.

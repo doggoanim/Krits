@@ -1,0 +1,9 @@
+# A bitten jelly bun at the bakery (The Missing Cat). Format: dialogue/dialogue_parser.gd
+@when cat_clue_3 -> again
+
+== offer ==
+A jelly bun with a neat little bite out of it, and a few orange hairs stuck in the jam. [set cat_clue_3]
+Marta's going to be [shake]furious[/shake]. The thief is probably full and sleepy by now. Somewhere sunny, and high up...
+
+== again ==
+Half a jelly bun. The thief clearly had a great time.

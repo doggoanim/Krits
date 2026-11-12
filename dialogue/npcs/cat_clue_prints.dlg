@@ -1,0 +1,9 @@
+# Muddy paw prints near the well (The Missing Cat). Format: dialogue/dialogue_parser.gd
+@when cat_clue_2 -> again
+
+== offer ==
+Muddy paw prints, fresh and round, trotting away from the well. [set cat_clue_2]
+Whoever made them was in no hurry at all.
+
+== again ==
+The paw prints still lead off toward town.

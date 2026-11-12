@@ -17,7 +17,7 @@
   guard asks the player to check them. Follow a trail of glowing waypoints to find out
   what they are (fireflies, or spirits escaped from the well). Reuses the motes/glow/fog
   work. Needs a decision on time of day (check whether a day cycle exists).
-- Others suggested but not chosen: The Missing Cat (clue-hunting), Escort to the Gate,
+- Others suggested but not chosen: Escort to the Gate,
   The Slime Elder (first mini boss), The Thirsty Traveller (give up a spirit or not),
   Mayor Arse's Complaint (comedy chain), Wanted: Dry Socks (swim retrieval),
   The Bell Ringer (mystery), Bounty Board (repeatable jobs).

@@ -1,0 +1,15 @@
+# Biscuit, found at last (The Missing Cat). Format: dialogue/dialogue_parser.gd
+@speaker Biscuit
+
+== offer ==
+Mrrrow.
+Biscuit looks at you, then at your shoes, then at you again. [whisper]...Mrp.[/whisper]
+> Pick him up. -> carried [set cat_found]
+> Leave him be. -> leave
+
+== carried ==
+Biscuit goes limp as a loaf of bread in your arms. [i]Purrrr.[/i]
+Time to take him home.
+
+== leave ==
+Mrrp. [i]He yawns and licks a paw.[/i]
