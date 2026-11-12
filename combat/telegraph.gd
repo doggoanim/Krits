@@ -24,7 +24,7 @@ static func _warnings_enabled() -> bool:
 
 ## A "!" that pops above `enemy` and frees itself.
 static func exclaim(enemy: Node3D, height: float) -> void:
-	var label := Label3D.new()
+	var label := GameFont.apply(Label3D.new())
 	label.text = "!"
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true

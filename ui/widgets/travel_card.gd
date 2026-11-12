@@ -132,7 +132,7 @@ class _Icon extends Control:
 		var shape := PackedVector2Array([top, right, bottom, left])
 		if state == TravelCard.State.LOCKED:
 			_draw_dashed(Ink.wobble(Ink.closed(shape), s, 1.4, 6))
-			var font := ThemeDB.fallback_font
+			var font := get_theme_default_font()
 			draw_string(font, c + Vector2(-14, 24), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 72, Color(Ink.INK, 0.4))
 			return
 		var fill := TravelCard.HERE_FILL if state == TravelCard.State.HERE else TravelCard.CRYSTAL_FILL

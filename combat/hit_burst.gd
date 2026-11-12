@@ -25,7 +25,7 @@ func _play(damage: float, power: float) -> void:
 	get_tree().create_timer(LIFETIME + 0.1).timeout.connect(queue_free)
 
 func _add_number(damage: float, power: float) -> void:
-	var label := Label3D.new()
+	var label := GameFont.apply(Label3D.new())
 	var whole := is_equal_approx(damage, roundf(damage))
 	label.text = ("%d" if whole else "%.1f") % damage
 	if _bonus:
