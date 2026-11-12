@@ -13,7 +13,8 @@ global uniform float water_detail;   // Graphics setting: 0 turns off sparkle an
 // reading the depth buffer to see what's underneath each pixel; flag it
 // if you want that added as a second pass.
 
-uniform sampler2D albedo_texture : source_color;   // optional — leave empty for the flat toon-color look
+uniform sampler2D albedo_texture : source_color, repeat_enable, filter_linear_mipmap;   // optional — leave empty for the flat toon-color look. repeat_enable: tiling and scrolling past UV 0..1 must wrap, not smear the edge pixels
+uniform vec2 uv_tiling = vec2(1.0);   // texture repeats per mesh UV span; raise it on a big plane so the texture keeps the same detail as on a small pond (plane size / 20)
 uniform vec2 uv_scroll_speed = vec2(0.05, 0.03);   // UV units/sec, only matters if a texture is set
 uniform vec4 shallow_color : source_color = vec4(0.4, 0.8, 0.85, 0.65);
 uniform vec4 deep_color : source_color = vec4(0.05, 0.25, 0.45, 0.9);
@@ -99,7 +100,7 @@ void fragment() {
 	// Texture is optional: an unset sampler2D defaults to solid white, so
 	// this multiply is a no-op (leaves the flat toon-color look untouched)
 	// until you actually assign one.
-	vec2 scrolled_uv = UV + (TIME - time_offset) * uv_scroll_speed;
+	vec2 scrolled_uv = UV * uv_tiling + (TIME - time_offset) * uv_scroll_speed;
 	vec4 tex = texture(albedo_texture, scrolled_uv);
 	color *= mix(vec3(1.0), tex.rgb, texture_strength);
 	alpha *= mix(1.0, tex.a, texture_strength);

@@ -89,7 +89,8 @@ albedo_texture = ExtResource("8_2qclh")
 render_priority = 0
 shader = ExtResource("18_water2_shader")
 shader_parameter/albedo_texture = ExtResource("30_lcfa2")
-shader_parameter/uv_scroll_speed = Vector2(0.05, 0.03)
+shader_parameter/uv_scroll_speed = Vector2(0, 0)
+shader_parameter/uv_tiling = Vector2(7.5, 7.5)
 shader_parameter/shallow_color = Color(0.3019608, 0.81960785, 0.92941177, 0.78039217)
 shader_parameter/deep_color = Color(0.08, 0.47, 0.84, 0.92)
 shader_parameter/wave_height = 0.08
@@ -97,7 +98,7 @@ shader_parameter/wave_scale = 1.3
 shader_parameter/wave_speed = 0.1
 shader_parameter/fresnel_power = 3.0
 shader_parameter/color_bands = 3.0
-shader_parameter/sparkle_strength = 0.3
+shader_parameter/sparkle_strength = 1.0
 shader_parameter/sparkle_density = 40.0
 shader_parameter/sparkle_speed = 2.5
 shader_parameter/sparkle_color = Color(1, 1, 0.95, 1)
@@ -113,8 +114,8 @@ shader_parameter/line_speed = 0.35
 [sub_resource type="PlaneMesh" id="PlaneMesh_7686p"]
 material = SubResource("ShaderMaterial_water")
 size = Vector2(150, 150)
-subdivide_width = 20
-subdivide_depth = 20
+subdivide_width = 150
+subdivide_depth = 150
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qjukg"]
 render_priority = 0
