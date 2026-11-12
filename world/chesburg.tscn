@@ -251,8 +251,14 @@ transform = Transform3D(20.400002, 0, 0, 0, 13.759198, 0, 0, 0, 6.4320006, 23.19
 [node name="rock_terrain60" parent="Terrain" unique_id=1561079309 instance=ExtResource("26_lybmh")]
 transform = Transform3D(36.72, 0, 0, 0, 37.974857, 0, 0, 0, 6.4320006, 23.199999, 21.569942, 85.3624)
 
+[node name="Cube" parent="Terrain/rock_terrain60" index="0" unique_id=795425564]
+cast_shadow = 0
+
 [node name="rock_terrain61" parent="Terrain" unique_id=518805253 instance=ExtResource("26_lybmh")]
 transform = Transform3D(36.72, 0, 0, 0, 49.367317, 0, 0, 0, 12.864001, -49.800003, 26.126926, 88.3624)
+
+[node name="Cube" parent="Terrain/rock_terrain61" index="0" unique_id=423946139]
+cast_shadow = 0
 
 [node name="rock_terrain62" parent="Terrain" unique_id=804713345 instance=ExtResource("26_lybmh")]
 transform = Transform3D(22.032001, 0, 0, 0, 54.304047, 0, 0, 0, 10.291202, 42.199997, 28.101618, 88.3624)
@@ -263,74 +269,146 @@ cast_shadow = 0
 [node name="rock_terrain83" parent="Terrain" unique_id=1389358921 instance=ExtResource("26_lybmh")]
 transform = Transform3D(46.2672, 0, 0, 0, 68.423096, 0, 0, 0, 10.291202, -0.80000305, 28.101618, 126.3624)
 
+[node name="Cube" parent="Terrain/rock_terrain83" index="0" unique_id=947876999]
+cast_shadow = 0
+
 [node name="rock_terrain84" parent="Terrain" unique_id=1844308624 instance=ExtResource("26_lybmh")]
 transform = Transform3D(23.1336, 0, 0, 0, 49.264633, 0, 0, 0, 10.291202, -111.8, 83.101616, 126.3624)
+
+[node name="Cube" parent="Terrain/rock_terrain84" index="0" unique_id=1497871144]
+cast_shadow = 0
 
 [node name="rock_terrain63" parent="Terrain" unique_id=675644466 instance=ExtResource("26_lybmh")]
 transform = Transform3D(11.016001, 0, 0, 0, 38.012833, 0, 0, 0, 5.145601, 74.2, 21.585133, 75.3624)
 
+[node name="Cube" parent="Terrain/rock_terrain63" index="0" unique_id=203694312]
+cast_shadow = 0
+
 [node name="rock_terrain64" parent="Terrain" unique_id=1537048824 instance=ExtResource("26_lybmh")]
 transform = Transform3D(5.2876806, 0, 0, 0, 36.112198, 0, 0, 0, 13.378562, 78.2, 23.26976, 57.362396)
+
+[node name="Cube" parent="Terrain/rock_terrain64" index="0" unique_id=255555737]
+cast_shadow = 0
 
 [node name="rock_terrain65" parent="Terrain" unique_id=1479679219 instance=ExtResource("26_lybmh")]
 transform = Transform3D(5.2876806, 0, 0, 0, 36.112198, 0, 0, 0, 13.378562, 78.2, 20.824879, 30.362396)
 
+[node name="Cube" parent="Terrain/rock_terrain65" index="0" unique_id=1863673106]
+cast_shadow = 0
+
 [node name="rock_terrain66" parent="Terrain" unique_id=1720265395 instance=ExtResource("26_lybmh")]
 transform = Transform3D(8.989058, 0, 0, 0, 54.168297, 0, 0, 0, 13.378562, 78.2, 20.824879, 4.3623962)
+
+[node name="Cube" parent="Terrain/rock_terrain66" index="0" unique_id=1250797845]
+cast_shadow = 0
 
 [node name="rock_terrain67" parent="Terrain" unique_id=675502362 instance=ExtResource("26_lybmh")]
 transform = Transform3D(8.989058, 0, 0, 0, 27.084148, 0, 0, 0, 13.378562, 86.2, 7.8248787, -22.637604)
 
+[node name="Cube" parent="Terrain/rock_terrain67" index="0" unique_id=302142728]
+cast_shadow = 0
+
 [node name="rock_terrain80" parent="Terrain" unique_id=396816796 instance=ExtResource("26_lybmh")]
 transform = Transform3D(8.989058, 0, 0, 0, 51.18904, 0, 0, 0, 41.473545, 113.2, 22.824879, -22.637604)
+
+[node name="Cube" parent="Terrain/rock_terrain80" index="0" unique_id=885310972]
+cast_shadow = 0
 
 [node name="rock_terrain81" parent="Terrain" unique_id=1181115675 instance=ExtResource("26_lybmh")]
 transform = Transform3D(8.989058, 0, 0, 0, 71.66466, 0, 0, 0, 24.884129, 113.2, 45.82488, 49.362396)
 
+[node name="Cube" parent="Terrain/rock_terrain81" index="0" unique_id=1351527726]
+cast_shadow = 0
+
 [node name="rock_terrain82" parent="Terrain" unique_id=1659402979 instance=ExtResource("26_lybmh")]
 transform = Transform3D(2.3265395, 0, -24.036222, 0, 35.832333, 0, 8.682763, 0, 6.440487, 113.2, 45.82488, 101.3624)
+
+[node name="Cube" parent="Terrain/rock_terrain82" index="0" unique_id=224551738]
+cast_shadow = 0
 
 [node name="rock_terrain68" parent="Terrain" unique_id=1063723317 instance=ExtResource("26_lybmh")]
 transform = Transform3D(14.382492, 0, 0, 0, 48.751465, 0, 0, 0, 18.729986, 86.2, 7.8248787, -54.637604)
 
+[node name="Cube" parent="Terrain/rock_terrain68" index="0" unique_id=1189709946]
+cast_shadow = 0
+
 [node name="rock_terrain69" parent="Terrain" unique_id=689254749 instance=ExtResource("26_lybmh")]
 transform = Transform3D(14.382492, 0, 0, 0, 34.126026, 0, 0, 0, 18.729986, 65.2, 7.8248787, -81.6376)
+
+[node name="Cube" parent="Terrain/rock_terrain69" index="0" unique_id=561060838]
+cast_shadow = 0
 
 [node name="rock_terrain70" parent="Terrain" unique_id=1224368902 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 18.729986, 0, 58.014248, 0, -14.382491, 0, -8.1871366e-07, 33.199997, 26.824879, -81.6376)
 
+[node name="Cube" parent="Terrain/rock_terrain70" index="0" unique_id=180521324]
+cast_shadow = 0
+
 [node name="rock_terrain71" parent="Terrain" unique_id=1911281141 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 18.729986, 0, 34.80855, 0, -14.382491, 0, -8.1871366e-07, 0.19999695, 22.824879, -79.6376)
+
+[node name="Cube" parent="Terrain/rock_terrain71" index="0" unique_id=284570285]
+cast_shadow = 0
 
 [node name="rock_terrain72" parent="Terrain" unique_id=1517068226 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 18.729986, 0, 20.885132, 0, -14.382491, 0, -8.1871366e-07, -35.800003, 4.8248787, -72.6376)
 
+[node name="Cube" parent="Terrain/rock_terrain72" index="0" unique_id=1031247021]
+cast_shadow = 0
+
 [node name="rock_terrain73" parent="Terrain" unique_id=383291812 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 18.729986, 0, 45.111885, 0, -14.382491, 0, -8.1871366e-07, -72.8, 13.824879, -68.6376)
+
+[node name="Cube" parent="Terrain/rock_terrain73" index="0" unique_id=998017869]
+cast_shadow = 0
 
 [node name="rock_terrain78" parent="Terrain" unique_id=654074698 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-9.430181e-07, 0, 29.967978, 0, 94.734955, 0, -21.573736, 0, -1.3099419e-06, -44.800003, 13.824879, -113.6376)
 
+[node name="Cube" parent="Terrain/rock_terrain78" index="0" unique_id=250013383]
+cast_shadow = 0
+
 [node name="rock_terrain79" parent="Terrain" unique_id=1841276075 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-9.430181e-07, 0, 47.948765, 0, 66.31447, 0, -21.573736, 0, -2.0959071e-06, 85.2, 13.824879, -111.6376)
+
+[node name="Cube" parent="Terrain/rock_terrain79" index="0" unique_id=616819858]
+cast_shadow = 0
 
 [node name="rock_terrain74" parent="Terrain" unique_id=1026203111 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 13.110991, 0, 31.57832, 0, -14.382491, 0, -5.7309956e-07, -72.8, 13.824879, -40.637604)
 
+[node name="Cube" parent="Terrain/rock_terrain74" index="0" unique_id=294804716]
+cast_shadow = 0
+
 [node name="rock_terrain75" parent="Terrain" unique_id=1266427457 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 13.110991, 0, 37.893986, 0, -14.382491, 0, -5.7309956e-07, -72.8, 13.824879, 62.362396)
+
+[node name="Cube" parent="Terrain/rock_terrain75" index="0" unique_id=1283364967]
+cast_shadow = 0
 
 [node name="rock_terrain85" parent="Terrain" unique_id=2011753548 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-1.005886e-06, 0, 13.110991, 0, 60.63038, 0, -23.011986, 0, -5.7309956e-07, -106.8, 13.824879, 50.362396)
 
+[node name="Cube" parent="Terrain/rock_terrain85" index="0" unique_id=1011648019]
+cast_shadow = 0
+
 [node name="rock_terrain86" parent="Terrain" unique_id=542203462 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-1.005886e-06, 0, 13.110991, 0, 60.63038, 0, -23.011986, 0, -5.7309956e-07, -106.8, 22.824879, -53.637604)
+
+[node name="Cube" parent="Terrain/rock_terrain86" index="0" unique_id=226938843]
+cast_shadow = 0
 
 [node name="rock_terrain76" parent="Terrain" unique_id=1382454047 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 13.110991, 0, 15.157594, 0, -14.382491, 0, -5.7309956e-07, -71.8, 2.8248787, 35.362396)
 
+[node name="Cube" parent="Terrain/rock_terrain76" index="0" unique_id=1875651415]
+cast_shadow = 0
+
 [node name="rock_terrain77" parent="Terrain" unique_id=101384968 instance=ExtResource("26_lybmh")]
 transform = Transform3D(-6.286787e-07, 0, 13.110991, 0, 15.157594, 0, -14.382491, 0, -5.7309956e-07, -69.8, 2.8248787, -27.637604)
+
+[node name="Cube" parent="Terrain/rock_terrain77" index="0" unique_id=1314302567]
+cast_shadow = 0
 
 [node name="rock_terrain43" parent="Terrain" unique_id=1497631030 instance=ExtResource("26_lybmh")]
 transform = Transform3D(8.0325, 0, 0, 0, 8.255519, 0, 0, 0, 6.4320006, -38.000008, 5.1244802, 34.3624)
