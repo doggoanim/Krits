@@ -27,7 +27,7 @@ const TINT_PICKED := Color(1.0, 0.92, 0.5)
 const TINT_HERE := Color(0.72, 1.0, 0.8)
 const TINT_LOCKED := Color(0.8, 0.82, 0.88)
 
-const CRYSTAL_FILL := Color(0.6, 0.93, 1.0)
+const CRYSTAL_FILL := CheckpointCrystal.UNLOCKED_COLOR   ## same blue as the checkpoint crystal itself
 const HERE_FILL := Color(0.62, 1.0, 0.72)
 const LOCKED_FILL := Color(0.92, 0.93, 0.96)
 

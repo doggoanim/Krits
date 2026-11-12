@@ -23,7 +23,7 @@ const RUNE_SHADER: Shader = preload("res://shading/painted_rune_ring.gdshader")
 const TOON_SHADER: Shader = preload("res://shading/toon_double_sided.gdshader")
 
 const LOCKED_COLOR := Color(0.5, 0.55, 0.7)
-const UNLOCKED_COLOR := Color(0.35, 0.95, 1.0)
+const UNLOCKED_COLOR := Color8(0, 138, 255)   ## the blueberry bush's berry blue (#008AFF, from its palette texture)
 const STONE_COLOR := Color(0.66, 0.63, 0.6)
 const MOSS_COLOR := Color(0.48, 0.66, 0.34)
 
