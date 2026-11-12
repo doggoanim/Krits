@@ -1,9 +1,14 @@
+@tool
 class_name Spawnpoint
 extends Area3D
 ## Checkpoint + fast-travel node. Touch it once to unlock; it heals and saves.
 
 @export var spawn_id: StringName = &"start"
-@export var display_name := "Start"
+@export var display_name := "Start":
+	set(v):
+		display_name = v
+		if _label != null:
+			_label.text = v
 @export var region_name := ""   ## small subtitle on the fast travel card (optional)
 
 const LABEL_HEIGHT := 3.6
@@ -25,6 +30,14 @@ static func occupied(tree: SceneTree) -> Spawnpoint:
 	return null
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		# Editor preview only: the crystal and name, in their discovered look. No
+		# trigger, no game state (the Game/Events autoloads don't run here).
+		_crystal = CheckpointCrystal.new()
+		add_child(_crystal)
+		_crystal.set_unlocked(true, false)
+		_build_label()
+		return
 	add_to_group(&"spawnpoints")
 	collision_layer = 1 << 5
 	collision_mask = 1 << 1

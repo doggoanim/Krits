@@ -1,5 +1,7 @@
+@tool
 class_name CheckpointCrystal
 extends Node3D
+## (@tool so a checkpoint shows up in the editor viewport.)
 ## The look of a Spawnpoint (checkpoint): a stone plinth with a floating
 ## crystal. Pure visuals — Spawnpoint owns the logic and just drives this with
 ## set_unlocked() / set_active() / flash().
