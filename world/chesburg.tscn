@@ -60,8 +60,8 @@
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
-[ext_resource type="Script" path="res://world/quest_prop.gd" id="quest_prop_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
+[ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
@@ -89,8 +89,8 @@ albedo_texture = ExtResource("8_2qclh")
 render_priority = 0
 shader = ExtResource("18_water2_shader")
 shader_parameter/albedo_texture = ExtResource("30_lcfa2")
-shader_parameter/uv_scroll_speed = Vector2(0, 0)
 shader_parameter/uv_tiling = Vector2(7.5, 7.5)
+shader_parameter/uv_scroll_speed = Vector2(0, 0)
 shader_parameter/shallow_color = Color(0.3019608, 0.81960785, 0.92941177, 0.78039217)
 shader_parameter/deep_color = Color(0.08, 0.47, 0.84, 0.92)
 shader_parameter/wave_height = 0.08
@@ -121,6 +121,7 @@ subdivide_depth = 150
 render_priority = 0
 shader = ExtResource("18_water2_shader")
 shader_parameter/albedo_texture = ExtResource("30_lcfa2")
+shader_parameter/uv_tiling = Vector2(1, 1)
 shader_parameter/uv_scroll_speed = Vector2(0, 0)
 shader_parameter/shallow_color = Color(0.3, 0.82, 0.93, 0.78)
 shader_parameter/deep_color = Color(0.08, 0.47, 0.84, 0.92)
@@ -1598,70 +1599,69 @@ shape = SubResource("Shape_YuleBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="Tuppence" type="StaticBody3D" parent="NPCs"]
+[node name="Tuppence" type="StaticBody3D" parent="NPCs" unique_id=1693845074]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 12)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/tuppence.dlg"
 head_height = 1.5
 
-[node name="Collision" type="CollisionShape3D" parent="NPCs/Tuppence"]
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Tuppence" unique_id=1055373293]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_YuleBody")
 
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Tuppence"]
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Tuppence" unique_id=156224868]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="CatClueFur" type="StaticBody3D" parent="NPCs"]
+[node name="CatClueFur" type="StaticBody3D" parent="NPCs" unique_id=1636745183]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0, 1.2)
 script = ExtResource("quest_prop_script")
-dialogue_file = "res://dialogue/npcs/cat_clue_fur.dlg"
 kind = 1
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
 done_flag = &"cat_clue_1"
+dialogue_file = "res://dialogue/npcs/cat_clue_fur.dlg"
 
-[node name="CatCluePrints" type="StaticBody3D" parent="NPCs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8, 0, -3.0)
+[node name="CatCluePrints" type="StaticBody3D" parent="NPCs" unique_id=674298881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8, 0, -3)
 script = ExtResource("quest_prop_script")
-dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 kind = 2
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
 done_flag = &"cat_clue_2"
+dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 
-[node name="CatClueBun" type="StaticBody3D" parent="NPCs"]
+[node name="CatClueBun" type="StaticBody3D" parent="NPCs" unique_id=107272031]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.6, 0, 12.8)
 script = ExtResource("quest_prop_script")
-dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 kind = 3
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
 done_flag = &"cat_clue_3"
+dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 
-[node name="Biscuit" type="StaticBody3D" parent="NPCs"]
+[node name="Biscuit" type="StaticBody3D" parent="NPCs" unique_id=1388985992]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 5.3, -1.5)
 script = ExtResource("quest_prop_script")
-dialogue_file = "res://dialogue/npcs/biscuit.dlg"
 kind = 4
 show_when = Array[StringName]([&"cat_clue_1", &"cat_clue_2", &"cat_clue_3"])
 hide_when = &"cat_found"
+dialogue_file = "res://dialogue/npcs/biscuit.dlg"
 
-[node name="BiscuitHome" type="StaticBody3D" parent="NPCs"]
+[node name="BiscuitHome" type="StaticBody3D" parent="NPCs" unique_id=1346034375]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.8, 0, 12.8)
 script = ExtResource("quest_prop_script")
-dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 kind = 4
 show_when = Array[StringName]([&"tuppence_got_cat"])
+dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 
-[node name="Fenn" type="StaticBody3D" parent="NPCs"]
+[node name="Fenn" type="StaticBody3D" parent="NPCs" unique_id=681767458]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -12)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/fenn.dlg"
-head_height = 1.6
 
-[node name="Collision" type="CollisionShape3D" parent="NPCs/Fenn"]
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Fenn" unique_id=405079515]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_YuleBody")
 
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Fenn"]
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Fenn" unique_id=7189073]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
