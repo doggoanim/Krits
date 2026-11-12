@@ -2,7 +2,7 @@
 class_name CheckpointCrystal
 extends Node3D
 ## (@tool so a checkpoint shows up in the editor viewport.)
-## The look of a Spawnpoint (checkpoint), in a stylized hand-painted style: a
+## The look of a Spawnpoint (checkpoint): a
 ## big faceted crystal floating in the air with a few shards circling it, a
 ## soft glow and a few drifting motes — nothing on the ground. Pure visuals —
 ## Spawnpoint owns the logic and just drives this with set_unlocked() /
@@ -13,9 +13,12 @@ extends Node3D
 ##   active   (player standing at it) brighter still: travel is available
 ##   flash    one-off burst of light + sparks + a scale pop on activation
 ##
-## Shapes come from LowPoly, the painted look from shading/painted_crystal.gdshader.
+## Cartoony and cel-shaded: clean faceted shapes (LowPoly), hard tone bands and a
+## glint (shading/cel_crystal.gdshader), a black ink outline
+## (shading/cel_outline.gdshader) and a flat ringed halo.
 
-const CRYSTAL_SHADER: Shader = preload("res://shading/painted_crystal.gdshader")
+const CEL_SHADER: Shader = preload("res://shading/cel_crystal.gdshader")
+const OUTLINE_SHADER: Shader = preload("res://shading/cel_outline.gdshader")
 
 const LOCKED_COLOR := Color(0.5, 0.55, 0.7)
 const UNLOCKED_COLOR := Color8(0, 138, 255)   ## the blueberry bush's berry blue (#008AFF, from its palette texture)
@@ -25,6 +28,8 @@ const BOB_AMPLITUDE := 0.12
 const SHARD_COUNT := 3
 const SHARD_ORBIT_RADIUS := 0.85
 const GLOW_SIZE := 3.4
+const CORE_OUTLINE := 0.045
+const SHARD_OUTLINE := 0.018
 
 const WAKE_SPEED := 1.5     ## locked <-> unlocked blend, per second
 const ACTIVE_SPEED := 4.0
@@ -43,15 +48,13 @@ var _t := 0.0
 
 var _core: Node3D
 var _orbit: Node3D
-var _crystal_mat: ShaderMaterial
+var _crystal_mats: Array[ShaderMaterial] = []   ## the core's and the shards' (they differ only in outline width)
 var _glow_mat: StandardMaterial3D
 var _light: OmniLight3D
 var _burst: CPUParticles3D
 var _motes: CPUParticles3D
 
 func _ready() -> void:
-	_crystal_mat = ShaderMaterial.new()
-	_crystal_mat.shader = CRYSTAL_SHADER
 	_build_core()
 	_build_shards()
 	_build_glow()
@@ -95,23 +98,36 @@ func _mesh_instance(mesh: Mesh, mat: Material, pos := Vector3.ZERO) -> MeshInsta
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
 
+## One cel material + its outline pass. `centre_y`: the middle of the mesh
+## along its axis, which the outline grows outward from.
+func _make_cel_material(outline_width: float, centre_y: float) -> ShaderMaterial:
+	var outline := ShaderMaterial.new()
+	outline.shader = OUTLINE_SHADER
+	outline.set_shader_parameter(&"width", outline_width)
+	outline.set_shader_parameter(&"center_y", centre_y)
+	var mat := ShaderMaterial.new()
+	mat.shader = CEL_SHADER
+	mat.next_pass = outline
+	_crystal_mats.append(mat)
+	return mat
+
 func _build_core() -> void:
 	_core = Node3D.new()
 	_core.position.y = FLOAT_HEIGHT
 	add_child(_core)
-	var mesh := LowPoly.crystal(0.3, 0.55, 0.5, 0.45, 6, _seed() + 3)
-	_core.add_child(_mesh_instance(mesh, _crystal_mat, Vector3(0.0, -0.27, 0.0)))
+	const BODY := 0.45
+	var mesh := LowPoly.crystal(0.34, BODY, 0.5, 0.42, 6, _seed() + 3, Color.WHITE, 0.0)
+	_core.add_child(_mesh_instance(mesh, _make_cel_material(CORE_OUTLINE, BODY * 0.5), Vector3(0.0, -BODY * 0.5, 0.0)))
 
 func _build_shards() -> void:
 	_orbit = Node3D.new()
 	_orbit.position.y = FLOAT_HEIGHT
 	add_child(_orbit)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = _seed() + 29
+	var mat := _make_cel_material(SHARD_OUTLINE, 0.05)
 	for i in SHARD_COUNT:
 		var a := TAU * float(i) / SHARD_COUNT
-		var mesh := LowPoly.crystal(0.06, 0.08, 0.14, 0.08, 4, rng.randi())
-		var mi := _mesh_instance(mesh, _crystal_mat,
+		var mesh := LowPoly.crystal(0.07, 0.1, 0.16, 0.1, 4, 1, Color.WHITE, 0.0)
+		var mi := _mesh_instance(mesh, mat,
 				Vector3(cos(a), 0.0, sin(a)) * SHARD_ORBIT_RADIUS + Vector3.UP * sin(a * 2.0) * 0.2)
 		mi.rotation = Vector3(0.0, a, deg_to_rad(20.0))
 		_orbit.add_child(mi)
@@ -120,8 +136,10 @@ func _build_shards() -> void:
 func _build_glow() -> void:
 	if _glow_texture == null:
 		var g := Gradient.new()
-		g.offsets = PackedFloat32Array([0.0, 0.3, 1.0])
-		g.colors = PackedColorArray([Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.22), Color(1, 1, 1, 0.0)])
+		# Hard-edged concentric rings (no smooth falloff) — a flat, drawn halo.
+		g.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+		g.offsets = PackedFloat32Array([0.0, 0.34, 0.62, 0.82])
+		g.colors = PackedColorArray([Color(1, 1, 1, 0.55), Color(1, 1, 1, 0.28), Color(1, 1, 1, 0.12), Color(1, 1, 1, 0.0)])
 		_glow_texture = GradientTexture2D.new()
 		_glow_texture.gradient = g
 		_glow_texture.fill = GradientTexture2D.FILL_RADIAL
@@ -215,8 +233,10 @@ func _apply() -> void:
 
 	var tint := LOCKED_COLOR.lerp(UNLOCKED_COLOR, _awake)
 	var shimmer := 0.12 * sin(_t * 3.0) * _awake
-	_crystal_mat.set_shader_parameter(&"tint", tint)
-	_crystal_mat.set_shader_parameter(&"glow", lerpf(0.2, 1.0, _awake) + 0.5 * _active_blend + 2.0 * _flash + shimmer)
+	var glow_amount := lerpf(0.2, 1.0, _awake) + 0.5 * _active_blend + 2.0 * _flash + shimmer
+	for m in _crystal_mats:
+		m.set_shader_parameter(&"tint", tint)
+		m.set_shader_parameter(&"glow", glow_amount)
 
 	var halo := lerpf(0.12, 0.5, _awake) + 0.3 * _active_blend + 0.6 * _flash
 	_glow_mat.albedo_color = Color(tint, clampf(halo, 0.0, 1.0))

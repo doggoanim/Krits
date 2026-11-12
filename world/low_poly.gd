@@ -9,21 +9,22 @@ const UV_SCALE := 0.6
 
 ## A faceted crystal standing on its base: pointed bottom, a `sides`-sided
 ## shaft `body` tall that tapers a little, and a pointed top. Origin = the
-## widest ring (the "waist"), +Y up.
+## widest ring (the "waist"), +Y up. `irregular` scales how uneven the hand-
+## made shape is: 1 = chunky and lopsided, 0 = perfectly clean and symmetric.
 static func crystal(radius: float, body: float, tip_top: float, tip_bottom: float,
-		sides := 6, seed_value := 1, color := Color.WHITE) -> ArrayMesh:
+		sides := 6, seed_value := 1, color := Color.WHITE, irregular := 1.0) -> ArrayMesh:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var waist: Array[Vector3] = []
 	var shoulder: Array[Vector3] = []
 	for i in sides:
-		var a := TAU * float(i) / sides + rng.randf_range(-0.12, 0.12)
-		var r0 := radius * rng.randf_range(0.88, 1.08)
-		var r1 := radius * 0.82 * rng.randf_range(0.9, 1.08)
+		var a := TAU * float(i) / sides + rng.randf_range(-0.12, 0.12) * irregular
+		var r0 := radius * lerpf(1.0, rng.randf_range(0.88, 1.08), irregular)
+		var r1 := radius * 0.82 * lerpf(1.0, rng.randf_range(0.9, 1.08), irregular)
 		waist.append(Vector3(cos(a) * r0, 0.0, sin(a) * r0))
-		shoulder.append(Vector3(cos(a + 0.15) * r1, body * rng.randf_range(0.92, 1.08), sin(a + 0.15) * r1))
-	var top := Vector3(rng.randf_range(-0.04, 0.04), body + tip_top, rng.randf_range(-0.04, 0.04))
-	var bottom := Vector3(rng.randf_range(-0.03, 0.03), -tip_bottom, rng.randf_range(-0.03, 0.03))
+		shoulder.append(Vector3(cos(a + 0.15 * irregular) * r1, body * lerpf(1.0, rng.randf_range(0.92, 1.08), irregular), sin(a + 0.15 * irregular) * r1))
+	var top := Vector3(rng.randf_range(-0.04, 0.04) * irregular, body + tip_top, rng.randf_range(-0.04, 0.04) * irregular)
+	var bottom := Vector3(rng.randf_range(-0.03, 0.03) * irregular, -tip_bottom, rng.randf_range(-0.03, 0.03) * irregular)
 	var centre := Vector3(0.0, body * 0.5, 0.0)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
