@@ -51,8 +51,8 @@ var _shield_model: Node3D
 var _weapon_model: Node3D
 var _shield_id: StringName = &"?"
 var _weapon_id: StringName = &"?"
-## Gear is hidden while the player is in one of these states (it would clip through a tumbling body).
-const HIDDEN_IN_STATES: Array[StringName] = [&"Roll"]
+## Gear is hidden while the player is in one of these states (it would clip through a tumbling body, or float above the water while swimming).
+const HIDDEN_IN_STATES: Array[StringName] = [&"Roll", &"Swim"]
 var _shield_grip: Node3D   ## where the shield rides in combat (left forearm) — see _build_grips()
 var _weapon_grip: Node3D   ## ...and the weapon (right hand)
 var _in_hand := false
