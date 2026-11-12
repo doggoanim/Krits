@@ -1695,7 +1695,7 @@ mesh = SubResource("Mesh_HikerPack")
 [node name="StartSpawn" type="Area3D" parent="Spawnpoints" unique_id=1738210625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 14)
 script = ExtResource("1_spawn")
-display_name = "Town Square"
+display_name = "Chesburg"
 
 [node name="OverlookSpawn" type="Area3D" parent="Spawnpoints" unique_id=1205227977]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.5436, 5.2576275, 0)
