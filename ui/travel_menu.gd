@@ -54,7 +54,7 @@ func refresh() -> void:
 	content.add_child(_heading("Choose a checkpoint", SUBTITLE_SIZE, 8))
 	var cards := _build_cards()
 	content.add_child(_card_row(cards))
-	content.add_child(_close_hint())
+	_add_close_hint()
 	FocusPop.attach_all(self, true)
 	_focus_first_available.call_deferred(cards)
 
@@ -70,15 +70,15 @@ func _heading(text: String, size: int, outline := HEADING_OUTLINE) -> Label:
 	return l
 
 ## "[Esc] Close" with the hand-drawn key plate.
-func _close_hint() -> Control:
+func _add_close_hint() -> void:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 14)
+	content.add_child(row)   # into the tree first: the plate's @onready label only exists once it's inside
 	var plate := KEY_PLATE.instantiate() as KeyHintPlate
 	row.add_child(plate)
 	plate.set_key("Esc")
 	row.add_child(_heading("Close", 32, 8))
-	return row
 
 func _build_cards() -> Array[TravelCard]:
 	var here := Spawnpoint.occupied(get_tree())
