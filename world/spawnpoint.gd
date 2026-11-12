@@ -72,7 +72,7 @@ func _build_trigger() -> void:
 	add_child(cs)
 
 func _build_label() -> void:
-	_label = GameFont.apply(Label3D.new())
+	_label = Label3D.new()
 	_label.text = display_name
 	_label.position.y = LABEL_HEIGHT
 	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED

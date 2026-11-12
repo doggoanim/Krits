@@ -46,7 +46,7 @@ import/blender/enabled=false
 
 [gui]
 
-theme/custom_font="res://assets/fonts/handwriting.tres"
+theme/custom_font="res://assets/fonts/zyzol/Zyzol.otf"
 
 [layer_names]
 

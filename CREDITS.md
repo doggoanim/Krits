@@ -32,7 +32,6 @@ Made with [Godot Engine](https://godotengine.org) — MIT License,
 | Font | Author | License |
 |------|--------|---------|
 | Zyzol (`assets/fonts/zyzol`) | Szymon Furjan ([furjandesign.com](https://www.furjandesign.com)) | SIL Open Font License 1.1 (`OFL.txt` alongside the font) |
-| Patrick Hand (`assets/fonts/patrick_hand`) — the game's handwriting font | Patrick Wagesreiter | SIL Open Font License 1.1 (`OFL.txt` alongside the font) |
 | Super Whales (`assets/fonts/super_whales`) | *add author and license* | *add license* |
 
 ## Audio

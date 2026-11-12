@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://b3cttm02b486s"]
 
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="gate"]
-[ext_resource type="FontVariation" path="res://assets/fonts/handwriting.tres" id="handwriting_font"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="spawn"]
 [ext_resource type="PackedScene" uid="uid://bfbpaevs3oe6f" path="res://assets/world/nature/tree_chesburg_1.glb" id="t1"]
 [ext_resource type="PackedScene" uid="uid://c43welks1se8g" path="res://assets/world/nature/tree_chesburg_3.glb" id="t3"]
@@ -92,7 +91,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, 0)
 pixel_size = 0.012
 billboard = 1
 text = "Chesburg"
-font = ExtResource("handwriting_font")
 font_size = 96
 outline_size = 24
 
