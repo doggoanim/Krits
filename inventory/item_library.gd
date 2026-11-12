@@ -42,6 +42,30 @@ static func silver_trout() -> ItemData:
 static func golden_koi() -> ItemData:
 	return _make(&"golden_koi", ItemData.Category.MATERIAL, Color(1.0, 0.8, 0.3), 0, 140)
 
+static func bluegill() -> ItemData:
+	return _make(&"bluegill", ItemData.Category.MATERIAL, Color(0.4, 0.6, 0.9), 0, 8)
+
+static func carp() -> ItemData:
+	return _make(&"carp", ItemData.Category.MATERIAL, Color(0.75, 0.6, 0.35), 0, 12)
+
+static func catfish() -> ItemData:
+	return _make(&"catfish", ItemData.Category.MATERIAL, Color(0.5, 0.45, 0.4), 0, 28)
+
+static func pike() -> ItemData:
+	return _make(&"pike", ItemData.Category.MATERIAL, Color(0.45, 0.65, 0.45), 0, 40)
+
+static func rainbow_trout() -> ItemData:
+	return _make(&"rainbow_trout", ItemData.Category.MATERIAL, Color(0.9, 0.55, 0.8), 0, 55)
+
+static func lantern_eel() -> ItemData:
+	return _make(&"lantern_eel", ItemData.Category.MATERIAL, Color(0.5, 0.95, 0.9), 0, 90)
+
+static func moon_puffer() -> ItemData:
+	return _make(&"moon_puffer", ItemData.Category.MATERIAL, Color(0.85, 0.85, 1.0), 0, 120)
+
+static func old_sturgeon() -> ItemData:
+	return _make(&"old_sturgeon", ItemData.Category.MATERIAL, Color(0.45, 0.55, 0.5), 0, 220)
+
 # ---------------------------------------------------------------- key items
 static func key() -> ItemData:
 	var i := _make(&"key", ItemData.Category.KEY,
@@ -82,7 +106,8 @@ static func lantern() -> ItemData:
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi()]
+	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi(),
+		bluegill(), carp(), catfish(), pike(), rainbow_trout(), lantern_eel(), moon_puffer(), old_sturgeon()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():
