@@ -1,0 +1,30 @@
+# Fenn — an old fisherman by the lake who wants perch for his stew. Format: dialogue/dialogue_parser.gd
+@speaker Fenn
+@when fenn_got_fish -> after
+@when fenn_quest_accepted -> reminder
+
+== offer ==
+Quiet, quiet! You'll spook them. ...Too late. They've gone.
+Forty years I've fished this lake, and today my back says [i]no[/i]. And I promised the whole street my famous perch stew.
+You've got a rod arm, haven't you? Stand at the water's edge, face the lake, and cast your line. [whisper]Wait for the bobber to dip, then reel.[/whisper]
+Three [color=#6fa84a]perch[/color] is all I need. Plump little green ones. Will you?
+> Three perch. Easy. -> accepted [set fenn_quest_accepted]
+> Not today. -> no
+
+== no ==
+Hmph. My stew pot is going to be very lonely.
+
+== accepted ==
+Ha! A friend of the fish! Mind you, the lake sends minnows first. Be patient, [wave]the perch come to those who wait[/wave].
+
+== reminder ==
+Got my three [color=#6fa84a]perch[/color] yet? Cast from the water's edge. Minnows don't count, I'm afraid.
+> Here, three perch. -> thanks [item perch 3] [set fenn_got_fish]
+> Still fishing.
+
+== thanks ==
+[bounce]Look at those beauties![/bounce] Plump as a mayor. The whole street will be at my door tonight.
+Here, for your trouble. And a secret: they say a [color=#d9a21b]golden koi[/color] swims out there, once in a blue moon. [whisper]If you ever land it, keep it. Or sell it. Nobody'd blame you.[/whisper]
+
+== after ==
+Best stew in Chesburg, thanks to you. If you see a flash of gold in that lake, [i]you didn't hear it from me.[/i]

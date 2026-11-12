@@ -91,8 +91,23 @@ static func missing_cat() -> QuestData:
 	_texts(q)
 	return q
 
+## Side quest: Fenn, an old fisherman by the lake, needs three perch for his
+## stew. Teaches fishing (cast from the water's edge); perch are a 30% catch.
+static func fenns_stew() -> QuestData:
+	var q := _make(&"fenns_stew")
+	q.start_flag = &"fenn_quest_accepted"
+	q.objectives = [
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"fenn_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.COLLECT, &"perch", 3, true),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"fenn_got_fish"),
+	]
+	q.reward_gold = 100
+	q.reward_items = {&"health_potion": 2}
+	_texts(q)
+	return q
+
 static func all_quests() -> Array[QuestData]:
-	return [water_for_the_desert(), yules_ball(), goo_for_marta(), overgrown_ledges(), missing_cat()]
+	return [water_for_the_desert(), yules_ball(), goo_for_marta(), overgrown_ledges(), missing_cat(), fenns_stew()]
 
 static func by_id(id: StringName) -> QuestData:
 	for q in all_quests():

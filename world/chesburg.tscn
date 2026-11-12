@@ -1650,6 +1650,20 @@ dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 kind = 4
 show_when = Array[StringName]([&"tuppence_got_cat"])
 
+[node name="Fenn" type="StaticBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -12)
+script = ExtResource("yule_npc_script")
+dialogue_file = "res://dialogue/npcs/fenn.dlg"
+head_height = 1.6
+
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Fenn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_YuleBody")
+
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Fenn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("Mesh_ShopBody")
+
 [node name="OvergrownLedges" type="Node3D" parent="." unique_id=1249404075]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 20)
 
