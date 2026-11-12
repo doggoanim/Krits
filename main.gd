@@ -49,6 +49,9 @@ const INTRO_LINE := "That bell calls for me, specifically, but at this hour?"
 ## itself. Interiors are silent until they get a track of their own — see
 ## Music (core/music_player.gd) for the actual looping playback.
 @export var outdoor_music: AudioStream = preload("res://sounds/Music/chesburg.ogg")
+## Same theme, battle mix: Music keeps both playing in sync and crossfades
+## to this one while Game.in_combat is true (and back when the fight ends).
+@export var outdoor_battle_music: AudioStream = preload("res://sounds/Music/chesburg_battle.ogg")
 
 ## Footstep sound sets, one per FootstepSurfaces.Surface (see
 ## core/footstep_surfaces.gd for how a surface is detected underfoot).
@@ -522,4 +525,4 @@ func _apply_level_music(lvl: Node) -> void:
 	if lvl.is_in_group(INTERIOR_GROUP):
 		Music.stop()
 	else:
-		Music.play(outdoor_music)
+		Music.play(outdoor_music, outdoor_battle_music)
