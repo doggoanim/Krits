@@ -7,7 +7,7 @@ extends Interactable
 
 func _init() -> void:
 	prompt_text = "Press E to travel"
-	prompt_height = 2.6
+	prompt_height = 3.0
 	interact_radius = Spawnpoint.TRIGGER_RADIUS   # inside the checkpoint area, so TravelMenu.can_open() agrees
 	collision_layer = 0
 	collision_mask = 0
