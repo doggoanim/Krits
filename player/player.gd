@@ -1306,6 +1306,10 @@ func _begin_death(_from: Vector3) -> void:
 		machine.transition_to(&"Air")
 	effects.update_water_foam(null, 0.0)
 	set_crouching(false)
+	# The state machine stops while dead, so the active move's exit() never runs:
+	# switch off what Roll / Dive / LongJump left running (the ghost trail, the roll loop).
+	speed_trail.set_active(false)
+	audio.set_rolling(false)
 	visual.cancel_hold()
 	visual.rotation.x = 0.0
 	visual.rotation.z = 0.0
