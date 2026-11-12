@@ -6,6 +6,16 @@ extends Area3D
 @export var display_name := "Start"
 
 var _mat := StandardMaterial3D.new()
+var _player_inside := false   ## the player is standing in this point's area right now
+
+## The spawnpoint the player is currently standing at, or null. Fast travel is
+## only allowed from one (see TravelMenu.can_open()).
+static func occupied(tree: SceneTree) -> Spawnpoint:
+	for n in tree.get_nodes_in_group(&"spawnpoints"):
+		var sp := n as Spawnpoint
+		if sp != null and sp._player_inside:
+			return sp
+	return null
 
 func _ready() -> void:
 	add_to_group(&"spawnpoints")
@@ -36,7 +46,11 @@ func _ready() -> void:
 
 	body_entered.connect(func(b: Node3D):
 		if b is Player:
+			_player_inside = true
 			activate())
+	body_exited.connect(func(b: Node3D):
+		if b is Player:
+			_player_inside = false)
 	Events.spawnpoint_activated.connect(func(_id): _refresh())
 	_refresh()
 

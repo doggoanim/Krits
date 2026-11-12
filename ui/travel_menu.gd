@@ -10,6 +10,9 @@ func can_open() -> bool:
 	if is_in_combat.call():
 		Events.notice.emit("Can't fast travel during a fight.")
 		return false
+	if Spawnpoint.occupied(get_tree()) == null:
+		Events.notice.emit("You can only fast travel from a spawnpoint.")
+		return false
 	return true
 
 func refresh() -> void:
