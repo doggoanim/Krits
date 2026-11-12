@@ -11,10 +11,10 @@ extends Button
 
 enum State { AVAILABLE, HERE, LOCKED }
 
-const CARD_SIZE := Vector2(300, 400)
+const CARD_SIZE := Vector2(320, 480)
 const ICON_HEIGHT := 190.0
 const PLATE_MARGIN := 60.0
-const CONTENT_MARGIN := 28.0
+const CONTENT_MARGIN := 52.0   ## the plate's inked outline and rounded corners sit well inside its rect, so keep text clear of them
 const TILTS := [-2.0, 1.4, -0.9, 2.0]   ## degrees; each card sits a touch crooked, like the pause menu's buttons
 
 const PLATES: Array[Texture2D] = [
@@ -49,7 +49,7 @@ func setup(number: int, place: String, subtitle: String, card_state: State) -> v
 	box.add_theme_constant_override("separation", 4)
 	add_child(box)
 
-	box.add_child(_label("No. %d" % number, 26, 0.45, HORIZONTAL_ALIGNMENT_LEFT))
+	box.add_child(_label("No. %d" % number, 24, 0.45, HORIZONTAL_ALIGNMENT_LEFT))
 	var icon := _Icon.new()
 	icon.state = state
 	icon.ink_seed = number * 7919
@@ -61,10 +61,10 @@ func setup(number: int, place: String, subtitle: String, card_state: State) -> v
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(spacer)
 
-	box.add_child(_label(place if state != State.LOCKED else "???", 44, 1.0))
+	box.add_child(_label(place if state != State.LOCKED else "???", 40, 1.0))
 	if subtitle != "" and state != State.LOCKED:
-		box.add_child(_label(subtitle, 24, 0.6))
-	box.add_child(_label(_status_text(), 26, 0.7 if state == State.AVAILABLE else 0.55))
+		box.add_child(_label(subtitle, 22, 0.6))
+	box.add_child(_label(_status_text(), 24, 0.7 if state == State.AVAILABLE else 0.55))
 
 func _status_text() -> String:
 	match state:
