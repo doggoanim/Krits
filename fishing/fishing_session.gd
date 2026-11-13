@@ -297,7 +297,7 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 		tw.tween_property(_meter, "scale", Vector2(1.25, 1.25), 0.25)
 		tw.tween_property(_meter, "modulate:a", 0.0, 0.25)
 	var fish_color := item.color if item != null else Color(0.8, 0.85, 0.9)
-	var fish := FishModel.build(fish_color)
+	var fish := FishModel.build(id, fish_color)
 	var fish_length := minf(FishCatalog.length_of(id, _size), CATCH_MAX_LENGTH)   # a colossal one still fits the screen
 	add_child(fish)
 	var start := _spot

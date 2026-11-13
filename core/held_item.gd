@@ -67,7 +67,7 @@ func _start(item: ItemData, size: float) -> String:
 
 func _spawn_prop(item: ItemData) -> void:
 	_prop = Node3D.new()
-	var fish := FishModel.build(item.color)
+	var fish := FishModel.build(item.id, item.color)
 	fish.scale = Vector3.ONE * _length
 	_prop.add_child(fish)
 	_player.add_child(_prop)
