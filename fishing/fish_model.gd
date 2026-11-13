@@ -62,7 +62,7 @@ static func build(id: StringName, color: Color) -> Node3D:
 
 	# --- tail: two lobes
 	var tail_x := -len_b * 0.5
-	for lobe in [-1.0, 1.0]:
+	for lobe: float in [-1.0, 1.0]:
 		var c := _cone(root, fin, Vector3(tail_x - 0.1, lobe * 0.06, 0.0), 0.075, 0.26, Vector3(1.0, 1.0, 0.3))
 		c.rotation_degrees.z = -90.0 + lobe * 26.0
 	# --- dorsal fin (a run of them for "long_fin")
@@ -73,12 +73,12 @@ static func build(id: StringName, color: Color) -> Node3D:
 		var d := _cone(root, fin, Vector3(x, h * 0.5 * ratio + 0.03, 0.0), 0.05 if dorsal > 1 else 0.09, 0.15 + 0.02 * float(i % 2), Vector3(1.0, 1.0, 0.25))
 		d.rotation_degrees.z = 14.0
 	# --- pectoral fins
-	for side in [-1.0, 1.0]:
+	for side: float in [-1.0, 1.0]:
 		var p := _ball(root, fin, Vector3(len_b * 0.15, -h * 0.2, side * w * 0.52), Vector3(0.15, 0.04, 0.09))
 		p.rotation_degrees = Vector3(0.0, side * -20.0, side * 18.0)
 	# --- eyes
 	var eye_r := 0.085 if "big_eyes" in extras else 0.058
-	for side in [-1.0, 1.0]:
+	for side: float in [-1.0, 1.0]:
 		var ex := len_b * 0.3
 		var ez := side * w * 0.42
 		_ball(root, Color.WHITE, Vector3(ex, h * 0.14, ez), Vector3.ONE * eye_r * 2.0)
@@ -98,7 +98,7 @@ static func _pattern(root: Node3D, pattern: String, accent: Color, len_b: float,
 			_ball(root, accent, Vector3(0.0, h * 0.02, 0.0), Vector3(len_b * 0.78, h * 0.2, w * 1.03))
 			_ball(root, accent.lerp(Color(0.4, 0.8, 1.0), 0.6), Vector3(0.0, h * 0.2, 0.0), Vector3(len_b * 0.74, h * 0.07, w * 1.02))
 		"bands":    # tall thin dark bands
-			for x in [-0.2, -0.03, 0.14]:
+			for x: float in [-0.2, -0.03, 0.14]:
 				var r := _ratio(x, len_b)
 				_ball(root, accent, Vector3(x, 0.0, 0.0), Vector3(0.05, h * r * 1.02, w * r * 1.04))
 		"spots":
@@ -106,7 +106,7 @@ static func _pattern(root: Node3D, pattern: String, accent: Color, len_b: float,
 					Vector2(0.15, 0.0), Vector2(-0.02, -0.02), Vector2(-0.16, 0.0)]
 			for s: Vector2 in spots:
 				var r := _ratio(s.x, len_b)
-				for side in [-1.0, 1.0]:
+				for side: float in [-1.0, 1.0]:
 					_ball(root, accent, Vector3(s.x, s.y * h * 2.0, side * w * 0.5 * r), Vector3(0.045, 0.045, 0.02))
 		"patches":  # koi: big pale and dark blotches along the back
 			var blots := [Vector3(0.18, 0.0, 0.18), Vector3(-0.05, 0.0, 0.22), Vector3(-0.22, 0.0, 0.16)]
@@ -116,7 +116,7 @@ static func _pattern(root: Node3D, pattern: String, accent: Color, len_b: float,
 				var r := _ratio(b.x, len_b)
 				_ball(root, colors[i], Vector3(b.x, h * 0.42 * r, 0.0), Vector3(b.z, h * 0.12, w * 0.7 * r))
 		"ear_spot": # bluegill's dark gill spot
-			for side in [-1.0, 1.0]:
+			for side: float in [-1.0, 1.0]:
 				_ball(root, accent, Vector3(len_b * 0.2, h * 0.02, side * w * 0.48), Vector3(0.09, 0.09, 0.03))
 
 static func _ratio(x: float, len_b: float) -> float:
@@ -127,7 +127,7 @@ static func _ratio(x: float, len_b: float) -> float:
 static func _extra(root: Node3D, extra: String, color: Color, fin: Color, len_b: float, h: float, w: float) -> void:
 	match extra:
 		"whiskers":
-			for side in [-1.0, 1.0]:
+			for side: float in [-1.0, 1.0]:
 				for j in 2:
 					var wk := _cone(root, INK, Vector3(len_b * 0.5 + 0.05, -h * 0.18 - 0.03 * float(j), side * (w * 0.2 + 0.03 * float(j))), 0.012, 0.16)
 					wk.rotation_degrees = Vector3(0.0, side * -35.0, -90.0)   # apex forward along +X, swept sideways
