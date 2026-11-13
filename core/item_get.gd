@@ -49,10 +49,11 @@ func _exit_tree() -> void:
 	_restore()
 
 ## Gives the player `count` of `id`. Important items play the fanfare (see the
-## class doc); everything else just goes in the bag.
-static func give(id: StringName, count := 1, done := Callable()) -> void:
+## class doc); everything else just goes in the bag. `size`: the size multiplier
+## of a sized item such as a fish (see FishCatalog.roll_size()).
+static func give(id: StringName, count := 1, done := Callable(), size := 1.0) -> void:
 	var item := ItemLibrary.by_id(id)
-	var grant := func() -> void: Game.inventory.add(id, count)
+	var grant := func() -> void: Game.inventory.add(id, count, size)
 	if instance == null or item == null or not item.important \
 			or not Game.inventory.can_fit(id, count):
 		grant.call()

@@ -9,7 +9,8 @@ signal changed
 
 const BASE_SLOTS := 10
 
-## Each entry: {"id": StringName, "count": int}. Compact (no empty gaps) and
+## Each entry: {"id": StringName, "count": int} (+ "sizes": Array of float, one
+## per item, for ItemData.sized items like fish). Compact (no empty gaps) and
 ## kept in the order items arrived.
 var stacks: Array[Dictionary] = []
 var backpack_id: StringName = &""
@@ -37,8 +38,11 @@ func has(id: StringName, amount := 1) -> bool:
 func free_slots() -> int:
 	return capacity() - stacks.size()
 
+var _hold_cursor: Dictionary = {}   ## id -> which of a stack's sizes the next "hold up" shows (cycles through them)
+
 ## Adds up to `amount` of `id`; returns how many did NOT fit (0 = all stored).
-func add(id: StringName, amount := 1) -> int:
+## `size` is the size multiplier of the new item(s) if the item is `sized` (fish).
+func add(id: StringName, amount := 1, size := 1.0) -> int:
 	var item := ItemLibrary.by_id(id)
 	if item == null or amount <= 0:
 		return amount
@@ -54,10 +58,13 @@ func add(id: StringName, amount := 1) -> int:
 		if s["id"] == id and s["count"] < item.max_stack:
 			var put := mini(left, item.max_stack - s["count"])
 			s["count"] += put
+			_push_sizes(s, item, put, size)
 			left -= put
 	while left > 0 and stacks.size() < capacity():
 		var put := mini(left, item.max_stack)
-		stacks.append({"id": id, "count": put})
+		var stack := {"id": id, "count": put}
+		_push_sizes(stack, item, put, size)
+		stacks.append(stack)
 		left -= put
 	var stored := amount - left
 	if stored > 0:
@@ -66,6 +73,37 @@ func add(id: StringName, amount := 1) -> int:
 	if left > 0:
 		Events.inventory_full.emit(id)
 	return left
+
+func _push_sizes(stack: Dictionary, item: ItemData, n: int, size: float) -> void:
+	if not item.sized:
+		return
+	var sizes: Array = stack.get("sizes", [])
+	for i in n:
+		sizes.append(size)
+	stack["sizes"] = sizes
+
+## The individual sizes in stack `index` (empty for an item that has none).
+func sizes_at(index: int) -> Array:
+	if index < 0 or index >= stacks.size():
+		return []
+	var sizes: Array = stacks[index].get("sizes", [])
+	while sizes.size() < stacks[index]["count"] and ItemLibrary.by_id(stacks[index]["id"]).sized:
+		sizes.append(1.0)   # an older save that predates sizes
+	stacks[index]["sizes"] = sizes
+	return sizes
+
+## The size of the next fish to hold up from stack `index`: cycles through the
+## stack so each press shows a different one.
+func next_hold_size(index: int) -> float:
+	var sizes := sizes_at(index)
+	if sizes.is_empty():
+		return 1.0
+	var id: StringName = stacks[index]["id"]
+	var i := int(_hold_cursor.get(id, -1)) + 1
+	if i >= sizes.size():
+		i = 0
+	_hold_cursor[id] = i
+	return float(sizes[i])
 
 ## True if `amount` of `id` would fit right now (room in existing stacks +
 ## empty slots).
@@ -108,6 +146,9 @@ func remove_at(index: int, amount := 1) -> int:
 		return 0
 	var take := mini(amount, stacks[index]["count"])
 	stacks[index]["count"] -= take
+	var sizes: Array = stacks[index].get("sizes", [])
+	for i in mini(take, sizes.size()):
+		sizes.pop_back()   # the newest ones go first
 	if stacks[index]["count"] <= 0:
 		stacks.remove_at(index)
 	changed.emit()
@@ -139,7 +180,12 @@ func use(index: int) -> String:
 	if index < 0 or index >= stacks.size():
 		return ""
 	var item := ItemLibrary.by_id(stacks[index]["id"])
-	if item == null or not item.is_usable():
+	if item == null:
+		return ""
+	if item.holdable:
+		var problem := HeldItem.start(item, next_hold_size(index))
+		return problem if problem != "" else "Holding up the %s." % item.display_name
+	if not item.is_usable():
 		return ""
 	var stats := Game.stats
 	var needs_hp := item.heal_hp > 0.0 and stats.hp < stats.max_hp()
@@ -170,7 +216,11 @@ func buy_backpack(bag: BackpackData) -> bool:
 func to_dict() -> Dictionary:
 	return {
 		"backpack": String(backpack_id),
-		"stacks": stacks.map(func(s): return {"id": String(s["id"]), "count": s["count"]}),
+		"stacks": stacks.map(func(s):
+			var d := {"id": String(s["id"]), "count": s["count"]}
+			if s.has("sizes"):
+				d["sizes"] = s["sizes"].duplicate()
+			return d),
 		"key_items": key_items.keys().map(func(k): return {"id": String(k), "count": int(key_items[k])}),
 	}
 
@@ -186,7 +236,10 @@ func from_dict(d: Dictionary) -> void:
 		if item.category == ItemData.Category.KEY:   # an older save kept keys in the bag
 			key_items[id] = int(key_items.get(id, 0)) + int(raw.get("count", 1))
 		elif stacks.size() < capacity():
-			stacks.append({"id": id, "count": int(raw.get("count", 1))})
+			var stack := {"id": id, "count": int(raw.get("count", 1))}
+			if item.sized:
+				stack["sizes"] = Array(raw.get("sizes", []))
+			stacks.append(stack)
 	for raw in d.get("key_items", []):
 		var id := LegacyIds.fix(StringName(raw.get("id", "")))
 		if ItemLibrary.by_id(id) != null:

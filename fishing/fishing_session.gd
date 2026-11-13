@@ -20,6 +20,7 @@ const CAST_TIME := 0.35            ## the bobber's flight from the rod to the wa
 const CAST_ARC := 1.6              ## how high it arcs
 const CATCH_ARC := 2.4             ## how high the landed fish leaps
 const CATCH_TIME := 0.7
+const CATCH_MAX_LENGTH := 3.0     ## the leaping fish is drawn at most this long, however huge the catch
 const RIPPLE_COLOR := Color(1.0, 1.0, 1.0, 0.7)
 const RUMBLE_INTERVAL := 0.16      ## while the zone is on the fish: a small camera tremble this often
 const WAIT_TIME := Vector2(2.0, 5.5)
@@ -40,6 +41,7 @@ var _timer := 0.0
 const CAST_INPUT_DELAY := 0.7   ## seconds after casting before a press can pull the line in
 var _age := 0.0
 var _catch: Dictionary = {}
+var _size := 1.0              ## how big this particular fish is (FishCatalog.roll_size())
 var _froze := false
 var _click_pressed := false
 var _click_was_down := true   ## true at the start so the click that cast the line can't also hook it
@@ -126,6 +128,7 @@ func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	_water = water
 	_spot = spot
 	_catch = FishCatalog.roll()
+	_size = FishCatalog.roll_size()
 	_timer = randf_range(WAIT_TIME.x, WAIT_TIME.y)
 	player.enter_cinematic()
 	_froze = true
@@ -280,16 +283,9 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 		var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 		tw.tween_property(_meter, "scale", Vector2(1.25, 1.25), 0.25)
 		tw.tween_property(_meter, "modulate:a", 0.0, 0.25)
-	var fish := MeshInstance3D.new()
-	var body := CapsuleMesh.new()
-	body.radius = 0.12
-	body.height = 0.5
-	fish.mesh = body
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = item.color if item != null else Color(0.8, 0.85, 0.9)
-	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	fish.material_override = mat
+	var fish_color := item.color if item != null else Color(0.8, 0.85, 0.9)
+	var fish := FishModel.build(fish_color)
+	var fish_length := minf(FishCatalog.length_of(id, _size), CATCH_MAX_LENGTH)   # a colossal one still fits the screen
 	add_child(fish)
 	var start := _spot
 	var end := _player.global_position + Vector3.UP * (Player.STAND_HEIGHT + 0.6)
@@ -299,18 +295,21 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 		fish.global_position = start.lerp(end, t) + Vector3.UP * sin(t * PI) * CATCH_ARC
 		fish.rotation = Vector3(t * TAU * 2.0, 0.0, t * TAU)   # flips as it flies
 		var pop := 1.0 + 0.5 * sin(t * PI)
-		fish.scale = Vector3.ONE * pop
+		fish.scale = Vector3.ONE * pop * fish_length
 	var flight := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	flight.tween_method(arc, 0.0, 1.0, CATCH_TIME)
 	await flight.finished
 	if not is_instance_valid(self) or _phase == Phase.DONE:
 		return
-	VFX.shatter(self, end, mat.albedo_color, 0.8)   # a burst of sparkle where it's caught
+	VFX.shatter(self, end, fish_color, 0.8)   # a burst of sparkle where it's caught
 	fish.queue_free()
 	_shake(0.3)
 	_player.visual.squash_stretch(1.2, 0.88)
-	ItemGet.give(id)
-	_end("Caught: %s!\n%s" % [item.display_name if item else String(id), FishCatalog.rarity_text(id)])   # name, then its rarity under it
+	ItemGet.give(id, 1, Callable(), _size)
+	var size_word := FishCatalog.size_word(_size)
+	var title := ("%s %s" % [size_word, item.display_name] if size_word != "" else item.display_name) if item else String(id)
+	# name (with its size word), then its rarity and length under it
+	_end("Caught: %s!\n%s · %s" % [title, FishCatalog.rarity_text(id), FishCatalog.length_text(id, _size)])
 
 func _on_player_hurt(_from: Vector3) -> void:
 	_end("")

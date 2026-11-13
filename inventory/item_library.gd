@@ -145,6 +145,9 @@ static func _make(id: StringName, cat: ItemData.Category,
 	i.color = color
 	i.buy_price = buy
 	i.sell_price = sell
+	if FishCatalog.is_fish(id):
+		i.sized = true
+		i.holdable = true
 	var path := ICON_DIR + String(id) + ".png"
 	if USE_ICON_FILES and ResourceLoader.exists(path):
 		i.icon = load(path)

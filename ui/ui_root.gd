@@ -29,5 +29,6 @@ func _ready() -> void:
 	add_child(SAVE_INDICATOR_SCENE.instantiate())   # "Saving..." badge — see SaveIndicator
 	add_child(FPS_COUNTER_SCRIPT.new())   # optional small FPS readout, top-right — see FpsCounter
 	add_child(TUTORIAL_POPUP_SCRIPT.new())   # pausing "[key] to ..." cards — see TutorialPopup
+	add_child(HeldItem.new())   # "Hold up" for fish — the item-get pose with no fanfare, see HeldItem
 	add_child(ItemGet.new())   # the Zelda-style "You got the ..." fanfare for important items — see ItemGet
 	add_child(DialogueBox.create())   # the one shared conversation UI — see DialogueBox

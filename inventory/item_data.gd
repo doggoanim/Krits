@@ -16,6 +16,8 @@ enum Category { CONSUMABLE, MATERIAL, KEY }
 @export var icon: Texture2D               ## optional; slots fall back to a coloured initial
 @export var color := Color(0.8, 0.8, 0.8) ## tint for the fallback icon
 @export var important := false            ## story-level item: getting it plays the held-up "item get" fanfare (see ItemGet)
+@export var sized := false                ## every one has its own random size (fish); the bag remembers it per fish — see Inventory
+@export var holdable := false             ## "Hold up" in the bag plays the item-get pose with it (only the pose) — see HeldItem
 @export var model: PackedScene            ## what the player holds up in that fanfare; falls back to the icon, then a glowing orb
 
 @export_group("Consumable effect")

@@ -229,12 +229,15 @@ func _update_item_details() -> void:
 	_detail_name.text = item.display_name
 	_detail_kind.text = "%s   x%d" % [item.category_name(), stacks[_selected]["count"]]
 	var text := item.description
+	var sizes := Game.inventory.sizes_at(_selected)
+	if not sizes.is_empty():
+		text += "\n\nBiggest: %s   Smallest: %s" % [FishCatalog.length_text(item.id, sizes.max()), FishCatalog.length_text(item.id, sizes.min())]
 	if item.sell_price > 0:
 		text += "\n\nSells for %dg." % item.sell_price
 	_set_detail_text(text)
-	_use_button.text = "Use"
+	_use_button.text = "Hold up" if item.holdable else "Use"
 	_use_button.disabled = false
-	_use_button.visible = item.is_usable()
+	_use_button.visible = item.is_usable() or item.holdable
 	_drop_button.visible = item.can_drop()
 	_drop_button.text = "Drop 1"
 	if item.is_usable():
@@ -260,6 +263,8 @@ func _use_selected() -> void:
 	var msg := Game.inventory.use(_selected)
 	refresh()
 	_message.text = msg
+	if HeldItem.is_holding():
+		close()   # back to the game so you can see the fish
 
 func _drop_selected() -> void:
 	if _selected >= Game.inventory.stacks.size():
