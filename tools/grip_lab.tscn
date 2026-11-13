@@ -6,4 +6,5 @@
 [node name="GripLab" type="Node3D" unique_id=517076549]
 script = ExtResource("1")
 grips = ExtResource("2")
-weapon = "staff"
+weapon = "fishing_rod"
+pose = "fishing_reeling"

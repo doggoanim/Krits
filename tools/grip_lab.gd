@@ -5,12 +5,14 @@ extends Node3D
 ## pick a pose, then change `grips` (shield/weapon offset + rotation) in the
 ## inspector and watch the sword and shield move on the character live. Save
 ## the scene (Ctrl+S): the values are stored in player/hand_grips.tres, which
-## the game reads. Nothing here runs in the game.
+## the game reads (shield, sword, bow, staff and the fishing rod, with the fishing
+## poses to check it against). Nothing here runs in the game.
 
 const KRITS := preload("res://assets/player/Krits.glb")
 const SWORD := preload("res://assets/equipments/sword_wooden.glb")
 const BOW := preload("res://assets/equipments/bow_wooden.glb")
 const STAFF := preload("res://assets/equipments/staff_apprentice.glb")
+const ROD := preload("res://assets/equipments/fishing_rod.glb")
 const SHIELD := preload("res://assets/equipments/shield_wooden.glb")
 const SWORD_SCALE := 0.3
 const SWORD_OFFSET := Vector3(0.0, 0.1, 0.0)
@@ -25,12 +27,12 @@ const SHIELD_BONE := &"LowerArm.L"
 const WEAPON_BONE := &"LowerArm.R"
 
 @export var grips: HandGrips
-## Which weapon is shown in the right hand; the grip fields for that weapon are the ones that apply.
-@export_enum("sword", "bow", "staff") var weapon := "sword":
+## Which weapon (or the fishing rod) is shown in the right hand; the grip fields for that item are the ones that apply.
+@export_enum("sword", "bow", "staff", "fishing_rod") var weapon := "sword":
 	set(v):
 		weapon = v
 		_show_weapon()
-@export_enum("idle", "run", "attack1", "attack2", "attack3", "crouch_idle", "falling", "ground_pound", "ground_pound_land") var pose := "idle":
+@export_enum("idle", "run", "attack1", "attack2", "attack3", "crouch_idle", "falling", "ground_pound", "ground_pound_land", "fishing_waiting", "fishing_reeling", "fishing_reeled_successful", "fishing_reeled_failed", "fishing_reeled_empty") var pose := "idle":
 	set(v):
 		pose = v
 		_play()
@@ -69,6 +71,11 @@ func _process(_delta: float) -> void:
 		"staff":
 			_weapon_grip.position = grips.staff_offset
 			_weapon_grip.rotation_degrees = grips.staff_rotation_deg
+		"fishing_rod":
+			_weapon_grip.position = grips.rod_offset
+			_weapon_grip.rotation_degrees = grips.rod_rotation_deg
+			for c in _weapon_grip.get_children():
+				(c as Node3D).scale = Vector3.ONE * grips.rod_scale   # rod_scale is live too
 		_:
 			_weapon_grip.position = grips.weapon_offset
 			_weapon_grip.rotation_degrees = grips.weapon_rotation_deg
@@ -87,6 +94,11 @@ func _show_weapon() -> void:
 		scene = BOW
 		scl = BOW_SCALE
 		off = BOW_OFFSET
+		rot = Vector3.ZERO
+	elif weapon == "fishing_rod":
+		scene = ROD
+		scl = grips.rod_scale if grips != null else 0.4
+		off = Vector3.ZERO
 		rot = Vector3.ZERO
 	elif weapon == "staff":
 		scene = STAFF
