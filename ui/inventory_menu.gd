@@ -211,9 +211,11 @@ func _on_slot_focused(index: int) -> void:
 	_message.text = ""
 	_update_item_details()
 
+## Clicking a slot only selects it; Use / Hold up is the button below the details.
 func _on_slot_pressed(index: int) -> void:
 	_selected = index
-	_use_selected()
+	_message.text = ""
+	_update_item_details()
 
 func _update_item_details() -> void:
 	var stacks := Game.inventory.stacks
