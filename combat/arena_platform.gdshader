@@ -17,13 +17,13 @@ uniform float side_depth = 2.0;     // how far down the side edge fades out
 varying vec3 wpos;
 varying vec3 lpos;
 varying float facing_up;
-varying float edge_dist;   // distance to the floor's edge, baked into COLOR.r by the arena
+varying float edge_dist;   // distance to the floor's edge, baked into UV.x by the arena
 
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	lpos = VERTEX;
 	facing_up = step(0.5, NORMAL.y);
-	edge_dist = COLOR.r;
+	edge_dist = UV.x;
 }
 
 void fragment() {

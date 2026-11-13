@@ -1046,18 +1046,20 @@ func _build_platform() -> void:
 		var cs := CollisionShape3D.new()
 		cs.shape = shape
 		body.add_child(cs)
-		# Visible top: COLOR.r carries the distance to the floor's edge for the rim band.
+		# Visible top: UV.x carries the distance to the floor's edge for the rim band.
+		# (Not COLOR: vertex colours are 8-bit and clamp to 1.0, which turned most
+		# of the floor into the solid rim band.)
 		var edge_d := (_floor_profile[i] + _floor_profile[(i + 1) % FIT_RAYS]) * 0.5
 		st.set_normal(Vector3.UP)
-		st.set_color(Color(edge_d, 0.0, 0.0))
+		st.set_uv(Vector2(edge_d, 0.0))
 		st.add_vertex(Vector3(0.0, 1.0, 0.0))
-		st.set_color(Color(0.0, 0.0, 0.0))
+		st.set_uv(Vector2.ZERO)
 		st.add_vertex(a + Vector3.UP)
 		st.add_vertex(b + Vector3.UP)
 		# Side skirt, from the top edge down to the bottom of the slab.
 		var out_n := ((a + b) * 0.5).normalized()
 		st.set_normal(out_n)
-		st.set_color(Color(0.0, 0.0, 0.0))
+		st.set_uv(Vector2.ZERO)
 		st.add_vertex(a + Vector3.UP)
 		st.add_vertex(a + Vector3.DOWN)
 		st.add_vertex(b + Vector3.UP)
