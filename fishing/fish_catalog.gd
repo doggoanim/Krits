@@ -62,7 +62,7 @@ const SIZE_SMALL := 0.7
 const SIZE_NORMAL_MAX := 1.45
 const SIZE_BIG_MAX := 2.5
 const SIZE_HUGE_MAX := 4.0    ## above this: Colossal (up to SIZE_MAX)
-const SIZE_MAX := 8.0
+const SIZE_MAX := 12.0
 
 ## The size multiplier of a fresh catch: ~80% are normal (about 0.7-1.45x),
 ## the rest spread over tiny / small / big / huge / colossal.
