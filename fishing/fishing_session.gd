@@ -5,6 +5,9 @@ extends Node3D
 ##   BITE  "!" — press Jump within BITE_WINDOW or it gets away
 ##   REEL  a small tug-of-war: hold Jump to slide the catch zone right, let go and
 ##         it drifts left; keep the zone on the fish to fill the bar
+## The rod (FishingRod) is in the player's hand and the player's fishing clips
+## play: fishing_waiting while waiting/biting, fishing_reeling while reeling,
+## then fishing_reeled_successful / _failed / _empty as the cast ends.
 ## The player is held still (Frozen) for the whole thing and released at the end,
 ## including when the level is swapped out from under the session.
 
@@ -19,6 +22,11 @@ const COVER_CHECK_HEIGHT := 6.0     ## how far above the surface to look for ter
 const CAST_TIME := 0.35            ## the bobber's flight from the rod to the water
 const CAST_ARC := 1.6              ## how high it arcs
 const CATCH_ARC := 2.4             ## how high the landed fish leaps
+const OUTRO_LENGTH := {          ## seconds each finishing clip plays before the player is released
+	PlayerVisual.ANIM_FISH_SUCCESS: 1.0,
+	PlayerVisual.ANIM_FISH_FAIL: 1.25,
+	PlayerVisual.ANIM_FISH_EMPTY: 0.75,
+}
 const CATCH_TIME := 0.7
 const CATCH_MAX_LENGTH := 3.0     ## the leaping fish is drawn at most this long, however huge the catch
 const RIPPLE_COLOR := Color(1.0, 1.0, 1.0, 0.7)
@@ -63,6 +71,7 @@ var _cast_t := 0.0
 var _rumble_t := 0.0
 var _tension := 0.0           ## 0..1: how hard the line is pulled (0 slack/sagging, 1 taut)
 var _plate: KeyHintPlate
+var _rod: FishingRod
 var _sfx := FishingSfx.new()
 
 ## Jump or the left mouse button: hooks the fish at the bite and reels after.
@@ -136,6 +145,8 @@ func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	toward.y = 0.0
 	player.face(toward)
 	Events.player_hurt.connect(_on_player_hurt)
+	_rod = FishingRod.equip(player)
+	_pose(PlayerVisual.ANIM_FISH_WAIT)
 	_build_visuals()
 	_sfx.world = get_parent()
 	add_child(_sfx)
@@ -160,7 +171,7 @@ func _process(delta: float) -> void:
 	if _phase == Phase.CELEBRATE:
 		return
 	if Input.is_action_just_pressed(&"crouch_pound"):
-		_end("You reel the line in.")
+		_end("You reel the line in.", PlayerVisual.ANIM_FISH_EMPTY)
 		return
 	match _phase:
 		Phase.WAIT: _wait(delta)
@@ -172,7 +183,7 @@ func _wait(delta: float) -> void:
 	# Right after casting, a stray press (still mashing the cast key, a double click)
 	# must not yank the line straight back in.
 	if _age > CAST_INPUT_DELAY and _hook_pressed():
-		_end("Pulled in too early.")
+		_end("Pulled in too early.", PlayerVisual.ANIM_FISH_EMPTY)
 	elif _timer <= 0.0:
 		_phase = Phase.BITE
 		_timer = BITE_WINDOW
@@ -190,10 +201,11 @@ func _bite(delta: float) -> void:
 	if _hook_pressed():
 		_start_reel()
 	elif _timer <= 0.0:
-		_end("It got away.")
+		_end("It got away.", PlayerVisual.ANIM_FISH_EMPTY)
 
 func _start_reel() -> void:
 	_phase = Phase.REEL
+	_pose(PlayerVisual.ANIM_FISH_REEL)
 	_build_bar()
 	_sfx.start_reel_loop()
 	HitStop.freeze(0.07)   # the yank of setting the hook
@@ -237,7 +249,7 @@ func _reel(delta: float) -> void:
 	if _progress >= 1.0:
 		_land_catch()
 	elif _progress <= 0.0:
-		_end("The fish slipped the hook.")
+		_end("The fish slipped the hook.", PlayerVisual.ANIM_FISH_FAIL)
 
 ## Reeling feedback: the meter trembles while you're on the fish, flushes red
 ## when you're about to lose it, the camera rumbles, and the water thrashes.
@@ -259,7 +271,7 @@ func _land_catch() -> void:
 	var id: StringName = _catch["id"]
 	var item := ItemLibrary.by_id(id)
 	if not Game.inventory.can_fit(id, 1):
-		_end("Your bag is full: the fish swims off.")
+		_end("Your bag is full: the fish swims off.", PlayerVisual.ANIM_FISH_FAIL)
 		return
 	_celebrate(id, item)
 
@@ -268,6 +280,7 @@ func _land_catch() -> void:
 ## the meter pops away, then the item is handed over.
 func _celebrate(id: StringName, item: ItemData) -> void:
 	_phase = Phase.CELEBRATE
+	_pose(PlayerVisual.ANIM_FISH_SUCCESS)
 	_sfx.stop_reel_loop()
 	HitStop.freeze(0.1)
 	_shake(0.5)
@@ -309,18 +322,42 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 	var size_word := FishCatalog.size_word(_size)
 	var title := ("%s %s" % [size_word, item.display_name] if size_word != "" else item.display_name) if item else String(id)
 	# name (with its size word), then its rarity and length under it
-	_end("Caught: %s!\n%s · %s" % [title, FishCatalog.rarity_text(id), FishCatalog.length_text(id, _size)])
+	_end("Caught: %s!\n%s · %s" % [title, FishCatalog.rarity_text(id), FishCatalog.length_text(id, _size)], &"", OUTRO_LENGTH[PlayerVisual.ANIM_FISH_SUCCESS] - CATCH_TIME)   # let the landing clip finish
 
 func _on_player_hurt(_from: Vector3) -> void:
 	_end("")
 
-## Ends the cast with a message (empty = none).
-func _end(message: String) -> void:
+## Ends the cast with a message (empty = none). `outro`: a finishing clip to
+## play first (the player stays put for its length); `extra_wait`: a further
+## pause before the player is released (the landing clip is already playing).
+func _end(message: String, outro := &"", extra_wait := 0.0) -> void:
 	if _phase != Phase.CELEBRATE and _phase != Phase.DONE and message != "":
 		_sfx.reel_in(_spot)   # the line comes back in empty
 	if message != "":
 		Events.notice.emit(message)
+	var wait := extra_wait
+	if outro != &"" and is_instance_valid(_player) and not _player.dead and _phase != Phase.DONE:
+		_phase = Phase.CELEBRATE   # no more input or minigame while it plays
+		_sfx.stop_reel_loop()
+		_bobber.visible = false
+		_line.visible = false
+		if is_instance_valid(_plate):
+			_plate.visible = false
+		if is_instance_valid(_meter):
+			_meter.visible = false
+		_pose(outro, float(OUTRO_LENGTH.get(outro, 1.0)))
+		wait = float(OUTRO_LENGTH.get(outro, 1.0))
+	if wait > 0.0:
+		await get_tree().create_timer(wait).timeout
+		if not is_instance_valid(self) or _phase == Phase.DONE:
+			return
 	_finish()
+
+## Plays one of the fishing clips on the player and keeps it there (`duration`
+## seconds; the default holds until the cast ends).
+func _pose(anim: StringName, duration := 600.0) -> void:
+	if is_instance_valid(_player):
+		_player.visual.play_hold(anim, duration, 1.0, true, 0.12)
 
 func _finish() -> void:
 	if _phase == Phase.DONE:
@@ -333,6 +370,11 @@ func _finish() -> void:
 func _release() -> void:
 	if Events.player_hurt.is_connected(_on_player_hurt):
 		Events.player_hurt.disconnect(_on_player_hurt)
+	if _rod != null:
+		_rod.release()
+		_rod = null
+	if _froze and is_instance_valid(_player):
+		_player.visual.cancel_hold()   # back to the normal idle/run clips
 	if _froze and is_instance_valid(_player) and _player.machine.current_name == &"Frozen":
 		_player.machine.transition_to(&"Ground")
 	_froze = false
@@ -411,6 +453,8 @@ func _update_visuals() -> void:
 	elif _phase == Phase.REEL:
 		bob = sin(_age * 14.0) * 0.06
 	var hand := _player.global_position + Vector3.UP * HAND_HEIGHT + _player.facing * 0.4
+	if _rod != null:
+		hand = _rod.tip_position()   # the line leaves the rod's tip
 	if _cast_t < 1.0:   # still in flight: an arc from the rod to the spot
 		_bobber.global_position = hand.lerp(_spot, _cast_t) + Vector3.UP * sin(_cast_t * PI) * CAST_ARC
 	else:

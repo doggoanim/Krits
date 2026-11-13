@@ -19,6 +19,11 @@ const ANIM_JUMP_START_VARIANTS: Array[StringName] = [&"jump_start1", &"jump_star
 ## play_random_attack()).
 const ANIM_ATTACK_VARIANTS: Array[StringName] = [&"attack1", &"attack2", &"attack3"]
 const ANIM_GET_ITEM := &"Getting_Item"   ## arms raised, holding a new treasure up — see ItemGet
+const ANIM_FISH_WAIT := &"fishing_waiting"            ## rod out, line in the water, waiting for a bite — see FishingSession
+const ANIM_FISH_REEL := &"fishing_reeling"            ## fighting the fish (loops)
+const ANIM_FISH_SUCCESS := &"fishing_reeled_successful"   ## the fish is landed
+const ANIM_FISH_FAIL := &"fishing_reeled_failed"      ## it slipped the hook
+const ANIM_FISH_EMPTY := &"fishing_reeled_empty"      ## line pulled in with nothing on it
 const ANIM_FALLING := &"falling"
 const ANIM_ROLL := &"roll"
 const ANIM_DIVE := &"air_dive"
@@ -161,7 +166,7 @@ var _squash_tween: Tween
 ## ground_pound, ...) is meant to play exactly once and hold its last frame.
 const LOOPING_ANIMS := [ANIM_IDLE, ANIM_RUN, ANIM_ROLL, ANIM_CROUCH_IDLE, ANIM_CROUCH_WALK, ANIM_FALLING,
 	ANIM_CLIMB_IDLE, ANIM_CLIMB_UP, ANIM_CLIMB_DOWN, ANIM_CLIMB_LEFT, ANIM_CLIMB_RIGHT,
-	ANIM_SWIM, ANIM_SWIM_IDLE, ANIM_SWIM_VERTICAL]
+	ANIM_SWIM, ANIM_SWIM_IDLE, ANIM_SWIM_VERTICAL, ANIM_FISH_WAIT, ANIM_FISH_REEL]
 
 func _ready() -> void:
 	_model = MODEL_SCENE.instantiate()

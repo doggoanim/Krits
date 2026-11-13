@@ -207,26 +207,7 @@ func _build_grips() -> void:
 	_weapon_grip = _make_grip(weapon_hand_bone, grips.weapon_offset, grips.weapon_rotation_deg)
 
 func _make_grip(bone_name: StringName, offset: Vector3, rotation_deg: Vector3) -> Node3D:
-	var idx := _skeleton.find_bone(bone_name)
-	if idx < 0:
-		return null
-	var unit := maxf(_skeleton.global_basis.get_scale().x, 0.0001)
-	var att := BoneAttachment3D.new()
-	att.bone_name = bone_name
-	_skeleton.add_child(att)
-	var end := Node3D.new()
-	end.scale = Vector3.ONE / unit
-	var kids := _skeleton.get_bone_children(idx)
-	if not kids.is_empty():
-		end.position = Vector3(0.0, _skeleton.get_bone_rest(kids[0]).origin.length(), 0.0)
-	else:
-		end.position = Vector3.ZERO
-	att.add_child(end)
-	var grip := Node3D.new()
-	grip.position = offset
-	grip.rotation_degrees = rotation_deg
-	end.add_child(grip)
-	return grip
+	return HandGrips.make_grip(_skeleton, bone_name, offset, rotation_deg)
 
 ## Frees `old`, instances `item`'s model under `parent` (if it has one) with
 ## the item's scale/offset/tilt applied, and returns it (or null).
