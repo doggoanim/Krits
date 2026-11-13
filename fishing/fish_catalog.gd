@@ -99,10 +99,9 @@ static func base_length(id: StringName) -> float:
 static func length_of(id: StringName, size: float) -> float:
 	return base_length(id) * size
 
-## "12 cm" / "1.4 m".
+## "12 cm", "480 cm" — always centimetres.
 static func length_text(id: StringName, size: float) -> String:
-	var m := length_of(id, size)
-	return "%d cm" % maxi(1, roundi(m * 100.0)) if m < 1.0 else "%.1f m" % m
+	return "%d cm" % maxi(1, roundi(length_of(id, size) * 100.0))
 
 static func is_fish(id: StringName) -> bool:
 	for f in FISH:
