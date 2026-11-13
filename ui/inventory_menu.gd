@@ -307,8 +307,16 @@ var _pick_index := 0            ## which of them is chosen
 
 ## "Size:  <  12 cm  >" — choose which fish of the stack "Hold up" shows.
 func _set_size_picker(item: ItemData, sizes: Array) -> void:
-	_pick_sizes = sizes.duplicate()
-	_pick_sizes.sort()
+	var ordered := sizes.duplicate()
+	ordered.sort()
+	# Skip repeats: fish that read the same (same length text) are one choice.
+	_pick_sizes = []
+	var seen := {}
+	for size in ordered:
+		var key := FishCatalog.length_text(item.id, float(size))
+		if not seen.has(key):
+			seen[key] = true
+			_pick_sizes.append(size)
 	_pick_index = clampi(_pick_index, 0, _pick_sizes.size() - 1)
 	_assign_label.text = "Hold up which one?"
 	_assign_label.visible = true
