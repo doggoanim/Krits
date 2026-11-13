@@ -207,12 +207,16 @@ func _focus_selected_slot(grid: GridContainer, index: int) -> void:
 	_focus_later(slot)
 
 func _on_slot_focused(index: int) -> void:
+	if index != _selected:
+		_pick_index = 0
 	_selected = index
 	_message.text = ""
 	_update_item_details()
 
 ## Clicking a slot only selects it; Use / Hold up is the button below the details.
 func _on_slot_pressed(index: int) -> void:
+	if index != _selected:
+		_pick_index = 0
 	_selected = index
 	_message.text = ""
 	_update_item_details()
@@ -244,6 +248,8 @@ func _update_item_details() -> void:
 	_drop_button.text = "Drop 1"
 	if item.is_usable():
 		_set_assign(item.id, [3, 4, 5])
+	elif not sizes.is_empty():
+		_set_size_picker(item, sizes)
 
 var _gear_selected: EquipmentData   ## the gear entry currently focused on the Gear page
 
@@ -262,7 +268,12 @@ func _on_use_pressed() -> void:
 func _use_selected() -> void:
 	if _selected >= Game.inventory.stacks.size():
 		return
-	var msg := Game.inventory.use(_selected)
+	var item := ItemLibrary.by_id(Game.inventory.stacks[_selected]["id"])
+	var msg := ""
+	if item != null and item.holdable and not _pick_sizes.is_empty():
+		msg = Game.inventory.hold(_selected, float(_pick_sizes[clampi(_pick_index, 0, _pick_sizes.size() - 1)]))
+	else:
+		msg = Game.inventory.use(_selected)
 	refresh()
 	_message.text = msg
 	if HeldItem.is_holding():
@@ -280,10 +291,47 @@ func _drop_selected() -> void:
 
 # ---------------------------------------------------------------- hotbar assignment
 
+var _pick_sizes: Array = []     ## the focused fish stack's sizes, smallest first (what "Hold up" can show)
+var _pick_index := 0            ## which of them is chosen
+
+## "Size:  <  12 cm  >" — choose which fish of the stack "Hold up" shows.
+func _set_size_picker(item: ItemData, sizes: Array) -> void:
+	_pick_sizes = sizes.duplicate()
+	_pick_sizes.sort()
+	_pick_index = clampi(_pick_index, 0, _pick_sizes.size() - 1)
+	_assign_label.text = "Hold up which one?"
+	_assign_label.visible = true
+	_clear_children(_assign_row)
+	var prev := Button.new()
+	prev.text = "<"
+	var value := Label.new()
+	var next := Button.new()
+	next.text = ">"
+	for b in [prev, next]:
+		b.add_theme_font_size_override(&"font_size", 40)
+	value.add_theme_font_size_override(&"font_size", 40)
+	value.add_theme_color_override(&"font_color", Color(0, 0, 0, 0.85))
+	value.custom_minimum_size.x = 380
+	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var update_label := func() -> void:
+		var size := float(_pick_sizes[_pick_index])
+		var word := FishCatalog.size_word(size)
+		value.text = "%s%s" % [word + "  " if word != "" else "", FishCatalog.length_text(item.id, size)]
+		prev.disabled = _pick_index <= 0
+		next.disabled = _pick_index >= _pick_sizes.size() - 1
+	prev.pressed.connect(func(): _pick_index -= 1; update_label.call())
+	next.pressed.connect(func(): _pick_index += 1; update_label.call())
+	_assign_row.add_child(prev)
+	_assign_row.add_child(value)
+	_assign_row.add_child(next)
+	update_label.call()
+	FocusPop.attach_all(_assign_row, true)
+
 var _assign_id: StringName = &""   ## what the number keys would assign right now (see _input())
 var _assign_slots: Array = []
 
 func _clear_assign() -> void:
+	_pick_sizes = []
 	_assign_id = &""
 	_assign_slots = []
 	_assign_label.visible = false
@@ -293,6 +341,7 @@ func _clear_assign() -> void:
 ## if it's already on the bar.
 func _set_assign(id: StringName, slots: Array) -> void:
 	_clear_children(_assign_row)
+	_assign_label.text = "Hotbar slot (click or press its key):"
 	_assign_label.visible = true
 	_assign_id = id
 	_assign_slots = slots

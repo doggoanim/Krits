@@ -92,6 +92,16 @@ func sizes_at(index: int) -> Array:
 	stacks[index]["sizes"] = sizes
 	return sizes
 
+## Holds up one item of stack `index` at `size` (see HeldItem). Returns a short message.
+func hold(index: int, size: float) -> String:
+	if index < 0 or index >= stacks.size():
+		return ""
+	var item := ItemLibrary.by_id(stacks[index]["id"])
+	if item == null or not item.holdable:
+		return ""
+	var problem := HeldItem.start(item, size)
+	return problem if problem != "" else "Holding up the %s." % item.display_name
+
 ## The size of the next fish to hold up from stack `index`: cycles through the
 ## stack so each press shows a different one.
 func next_hold_size(index: int) -> float:
@@ -183,8 +193,7 @@ func use(index: int) -> String:
 	if item == null:
 		return ""
 	if item.holdable:
-		var problem := HeldItem.start(item, next_hold_size(index))
-		return problem if problem != "" else "Holding up the %s." % item.display_name
+		return hold(index, next_hold_size(index))
 	if not item.is_usable():
 		return ""
 	var stats := Game.stats
