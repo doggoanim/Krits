@@ -62,7 +62,7 @@ const SIZE_SMALL := 0.7
 const SIZE_NORMAL_MAX := 1.45
 const SIZE_BIG_MAX := 2.5
 const SIZE_HUGE_MAX := 4.0    ## above this: Colossal (up to SIZE_MAX)
-const SIZE_MAX := 6.0
+const SIZE_MAX := 15.0
 
 ## The size multiplier of a fresh catch: ~80% are normal (about 0.7-1.45x),
 ## the rest spread over tiny / small / big / huge / colossal.
@@ -78,7 +78,7 @@ static func roll_size() -> float:
 		return randf_range(SIZE_NORMAL_MAX, SIZE_BIG_MAX)
 	if r < 0.99:
 		return randf_range(SIZE_BIG_MAX, SIZE_HUGE_MAX)
-	return randf_range(SIZE_HUGE_MAX, SIZE_MAX)
+	return lerpf(SIZE_HUGE_MAX, SIZE_MAX, pow(randf(), 2.0))   # skewed low: a true maximum is very rare
 
 ## "Tiny", "Colossal"... or "" for an ordinary-sized fish.
 static func size_word(size: float) -> String:
