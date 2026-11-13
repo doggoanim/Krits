@@ -57,7 +57,7 @@ func _ready() -> void:
 		_tabs[i].pressed.connect(_show_page.bind(i))
 	Events.quests_changed.connect(_on_quests_changed)
 	_use_button.pressed.connect(_on_use_pressed)
-	_drop_button.pressed.connect(_drop_selected)
+	_drop_button.pressed.connect(_discard_selected)
 	# The tabs and the Use/Drop buttons aren't under a FocusPop (only the slot
 	# grids are), so they get their click here. The shop's buttons already do.
 	for tab in _tabs:
@@ -86,6 +86,8 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event.is_action_pressed(toggle_action):
+		if is_instance_valid(_prompt):
+			_prompt.queue_free()
 		close()
 		get_viewport().set_input_as_handled()
 		return
@@ -245,7 +247,7 @@ func _update_item_details() -> void:
 	_use_button.disabled = false
 	_use_button.visible = item.is_usable() or item.holdable
 	_drop_button.visible = item.can_drop()
-	_drop_button.text = "Drop 1"
+	_drop_button.text = "Discard"
 	if item.is_usable():
 		_set_assign(item.id, [3, 4, 5])
 	elif not sizes.is_empty():
@@ -279,15 +281,24 @@ func _use_selected() -> void:
 	if HeldItem.is_holding():
 		close()   # back to the game so you can see the fish
 
-func _drop_selected() -> void:
-	if _selected >= Game.inventory.stacks.size():
+var _prompt: DiscardPrompt
+
+## Asks first (with a how-many slider for a stack of more than one), then throws away.
+func _discard_selected() -> void:
+	if is_instance_valid(_prompt) or _selected >= Game.inventory.stacks.size():
 		return
-	var item := ItemLibrary.by_id(Game.inventory.stacks[_selected]["id"])
+	var index := _selected
+	var stack := Game.inventory.stacks[index]
+	var item := ItemLibrary.by_id(stack["id"])
 	if item == null or not item.can_drop():
 		return
-	Game.inventory.remove_at(_selected, 1)
-	refresh()
-	_message.text = "Dropped %s." % item.display_name
+	_prompt = DiscardPrompt.create(item.display_name, int(stack["count"]))
+	add_child(_prompt)
+	_prompt.confirmed.connect(func(amount: int):
+		Game.inventory.remove_at(index, amount)
+		refresh()
+		_message.text = "Discarded %s." % (item.display_name if amount == 1 else "%d %s" % [amount, item.display_name]))
+	_prompt.cancelled.connect(func(): _focus_selected_slot(_grid, _selected))
 
 # ---------------------------------------------------------------- hotbar assignment
 

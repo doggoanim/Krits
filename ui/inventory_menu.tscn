@@ -382,7 +382,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 40
-text = "Drop 1"
+text = "Discard"
 
 [node name="AssignLabel" type="Label" parent="Margin/Content/Body/DetailsHolder/Details/Column"]
 unique_name_in_owner = true
