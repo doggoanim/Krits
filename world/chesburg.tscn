@@ -1717,7 +1717,6 @@ metadata/_custom_type_script = "uid://clp3wyeg4gtqe"
 [node name="KillerFish" type="CharacterBody3D" parent="Enemies" unique_id=987934053]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.9, -3.5, 1.4)
 script = ExtResource("killer_fish_script")
-color = Color(0, 0, 0, 1)
 
 [node name="Scatter" type="Node3D" parent="." unique_id=920000001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -10)

@@ -1,7 +1,7 @@
 @tool
 class_name KillerFish
 extends CharacterBody3D
-## A fish that kills the player outright. It drifts around the water it was
+## An eldritch fish-thing that kills the player outright. It drifts around the water it was
 ## placed in. The moment the player touches that water at all (wading counts),
 ## it is marked: after a sliver of warning it darts at them far faster than
 ## they can swim, and it does not stop. Getting out of the water doesn't save
@@ -19,7 +19,7 @@ extends CharacterBody3D
 @export var kill_radius := 1.0           ## touching distance (to the player's centre)
 @export var wander_radius := 6.0         ## how far from its start it drifts
 @export var body_length := 1.8
-@export var color := Color(0.75, 0.1, 0.12)
+@export var color := Color(0.26, 0.1, 0.32)   ## the flesh tone of the creature (see EldritchBody)
 
 const SURFACE_MARGIN := 0.6              ## keeps its body this far under the surface
 const TURN_RATE := 14.0
@@ -39,8 +39,7 @@ var _windup_t := 0.0
 var _wait := 0.0
 var _age := 0.0
 var _respawn_t := 0.0
-var _body: Node3D
-var _tail: Node3D
+var _body: EldritchBody
 
 func _ready() -> void:
 	_build_body()
@@ -53,52 +52,15 @@ func _ready() -> void:
 
 # ---------------------------------------------------------------- the look
 
-## A capsule body lying along its swim direction (-Z), a tail fin behind it,
-## two white eyes. Built every time (editor included) and never given an
-## owner, so it isn't saved into the scene.
+## The eldritch look (EldritchBody) lying along the swim direction (-Z). Built
+## every time (editor included) and never given an owner, so it isn't saved
+## into the scene.
 func _build_body() -> void:
 	if _body != null:
 		return
-	_body = Node3D.new()
+	_body = EldritchBody.create(body_length, color)
 	_body.name = PREVIEW_GROUP_NAME
 	add_child(_body)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	var capsule := CapsuleMesh.new()
-	capsule.radius = body_length * 0.2
-	capsule.height = body_length
-	var mi := MeshInstance3D.new()
-	mi.mesh = capsule
-	mi.material_override = mat
-	mi.rotation_degrees.x = 90.0
-	_body.add_child(mi)
-	_tail = Node3D.new()
-	_tail.position = Vector3(0.0, 0.0, body_length * 0.5)
-	_body.add_child(_tail)
-	var fin := CylinderMesh.new()
-	fin.top_radius = 0.0
-	fin.bottom_radius = body_length * 0.22
-	fin.height = body_length * 0.4
-	var fin_mi := MeshInstance3D.new()
-	fin_mi.mesh = fin
-	fin_mi.material_override = mat
-	fin_mi.rotation_degrees.x = -90.0
-	fin_mi.position = Vector3(0.0, 0.0, body_length * 0.2)
-	_tail.add_child(fin_mi)
-	var eye_mat := StandardMaterial3D.new()
-	eye_mat.albedo_color = Color.WHITE
-	eye_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	for side in [-1.0, 1.0]:
-		var eye := MeshInstance3D.new()
-		var ball := SphereMesh.new()
-		ball.radius = body_length * 0.06
-		ball.height = body_length * 0.12
-		eye.mesh = ball
-		eye.material_override = eye_mat
-		eye.position = Vector3(side * body_length * 0.15, body_length * 0.08, -body_length * 0.32)
-		_body.add_child(eye)
 
 # ---------------------------------------------------------------- behaviour
 
@@ -232,8 +194,11 @@ func _turn_toward(dir: Vector3, delta: float) -> void:
 	var current := global_transform.basis.get_rotation_quaternion()
 	global_transform.basis = Basis(current.slerp(target, minf(1.0, TURN_RATE * delta)))
 
+## Tentacles and eye follow the mood: calm while drifting, frantic once hunting.
 func _wiggle() -> void:
-	if _tail == null:
+	if _body == null:
 		return
-	var rate := 14.0 if _mode == Mode.CHASE else 5.0
-	_tail.rotation.y = sin(_age * rate) * 0.45
+	match _mode:
+		Mode.CHASE: _body.set_agitation(1.0)
+		Mode.WINDUP: _body.set_agitation(0.6)
+		_: _body.set_agitation(0.0)
