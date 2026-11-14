@@ -147,14 +147,14 @@ const SLIME_TINT_STRENGTH := 0.6
 ## The launch stretches the UPPER body first (chest and head lift away from the
 ## hips at once, no wind-up), then the legs lengthen to follow, then everything settles — see
 ## jump_launch() and SquashModifier. Amounts are fractions of body height.
-@export var jump_spine_lead := 1.0             ## how far the upper body lifts, instantly, at the launch
-@export var jump_leg_follow := 0.7             ## how much the legs lengthen as they catch up
+@export var jump_spine_lead := 0.45            ## how far the upper body lifts, instantly, at the launch
+@export var jump_leg_follow := 0.3             ## how much the legs lengthen as they catch up
 @export var jump_leg_delay := 0.12             ## seconds the legs trail behind the upper body
 @export var jump_settle_time := 0.65           ## back to normal proportions
-@export var jump_squash_spine := -0.2          ## after the stretch the upper body compresses past normal by this much (the squash)
-@export var jump_squash_legs := -0.13
-@export var jump_squash_xz := 1.15             ## ...and the model bulges wider while compressed
-@export var jump_launch_xz := 0.7              ## slightly thinner while stretched
+@export var jump_squash_spine := -0.12         ## after the stretch the upper body compresses past normal by this much (the squash)
+@export var jump_squash_legs := -0.08
+@export var jump_squash_xz := 1.08            ## ...and the model bulges wider while compressed
+@export var jump_launch_xz := 0.85             ## slightly thinner while stretched
 @export var apex_squash_y := 0.92           ## a gentle settle at the top of a jump, as it turns to fall
 @export var apex_squash_xz := 1.06
 @export var apex_squash_time := 0.2
