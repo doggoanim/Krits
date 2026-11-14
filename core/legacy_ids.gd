@@ -12,6 +12,7 @@ const MAP := {
 	&"shield_tonic": &"shield_restore",
 	&"old_key": &"key",
 	&"hunter_bow": &"wooden_bow",
+	&"super_jump": &"air_step",
 }
 
 static func fix(id: StringName) -> StringName:

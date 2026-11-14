@@ -16,11 +16,11 @@ static func activate(ability: AbilityData, player: Player, tree: SceneTree) -> S
 		AbilityData.Effect.GUARD:
 			player.invuln = maxf(player.invuln, ability.duration)
 			player.visual.flash(ability.duration)
-		AbilityData.Effect.SUPER_JUMP:
+		AbilityData.Effect.AIR_STEP:
 			var state := player.machine.current_name
 			if state != &"Ground" and state != &"Air" and state != &"Crouch":
 				return "Can't do that right now."
-			player.start_jump(ability.amount)
+			player.start_jump(player.config.jump_velocity)   # exactly a normal jump, from wherever you are
 		AbilityData.Effect.SHOCKWAVE:
 			var arena := tree.get_first_node_in_group(&"arena") as Arena
 			if arena == null:

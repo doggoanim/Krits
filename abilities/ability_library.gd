@@ -18,10 +18,11 @@ static func heal() -> AbilityData:
 	a.stamina_cost = 40.0
 	return a
 
-static func super_jump() -> AbilityData:
-	var a := _make(&"super_jump",
-		AbilityData.Effect.SUPER_JUMP, 4.0, 0, Color(0.5, 0.85, 1.0))
-	a.amount = 26.0
+## A jump off thin air, as high as a normal jump (the runner uses the player's
+## own jump velocity, so it follows any tuning of it) — usable mid-air.
+static func air_step() -> AbilityData:
+	var a := _make(&"air_step",
+		AbilityData.Effect.AIR_STEP, 4.0, 0, Color(0.5, 0.85, 1.0))
 	a.stamina_cost = 20.0
 	return a
 
@@ -54,13 +55,14 @@ static func fishing() -> AbilityData:
 		AbilityData.Effect.FISH, 0.0, 0, Color(0.45, 0.8, 0.95))
 
 static func all_abilities() -> Array[AbilityData]:
-	return [heal(), super_jump(), guard_up(), shockwave(), orb_stack(), fishing()]
+	return [heal(), air_step(), guard_up(), shockwave(), orb_stack(), fishing()]
 
 ## A new game starts with fishing; the rest are learned from shops or the story.
 static func starting() -> Array[AbilityData]:
 	return [fishing()]
 
 static func by_id(id: StringName) -> AbilityData:
+	id = LegacyIds.fix(id)   # saves from before a rename
 	for a in all_abilities():
 		if a.id == id:
 			return a
