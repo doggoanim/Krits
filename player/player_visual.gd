@@ -524,6 +524,12 @@ func jump_launch() -> void:
 
 const SQUASH_MODIFIER := preload("res://player/squash_modifier.gd")   # preloaded (not by class name) so it works before the editor has rescanned global classes
 
+## True while a jump's launch stretch is still settling back to normal. Other
+## pops (the apex squash) wait for it: they set the model's scale instantly, which
+## showed as a jerk when they cut into the settle.
+func is_launch_settling() -> bool:
+	return _jump_tween != null and _jump_tween.is_valid() and _jump_tween.is_running()
+
 ## Adds the SquashModifier to the character's skeleton.
 func _install_squash_modifier() -> void:
 	var skeleton := _model.find_child("Skeleton3D", true, false) as Skeleton3D

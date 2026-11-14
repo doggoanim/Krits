@@ -33,7 +33,8 @@ func _arc_squash_stretch() -> void:
 		_fall_stretched = false   # the launch's own squash already reset the scale
 	if _rising and p.velocity.y <= 0.0 and not _apex_done:
 		_apex_done = true
-		v.squash_stretch(v.apex_squash_y, v.apex_squash_xz, v.apex_squash_time)
+		if not v.is_launch_settling():   # cutting into the launch settle made it jerk
+			v.squash_stretch(v.apex_squash_y, v.apex_squash_xz, v.apex_squash_time)
 	_rising = p.velocity.y > 0.0
 	if not _fall_stretched and p.velocity.y < -v.fall_stretch_speed:
 		_fall_stretched = true
