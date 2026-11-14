@@ -14,7 +14,7 @@ const UPPER_BONE := &"UpperTorso"
 const HEAD_BONE := &"Head"
 const LEG_BONES: Array[StringName] = [&"UpperLeg.L", &"UpperLeg.R"]
 
-var visual: PlayerVisual
+var visual: Node   ## the PlayerVisual (untyped so the two scripts never depend on each other at parse time)
 
 var _upper := -1
 var _legs: Array[int] = []
@@ -25,8 +25,8 @@ func _resolve(skeleton: Skeleton3D) -> void:
 	_resolved = true
 	_upper = skeleton.find_bone(UPPER_BONE)
 	_legs.clear()
-	for name in LEG_BONES:
-		var i := skeleton.find_bone(name)
+	for bone_name in LEG_BONES:
+		var i := skeleton.find_bone(bone_name)
 		if i >= 0:
 			_legs.append(i)
 	var head := skeleton.find_bone(HEAD_BONE)
@@ -38,11 +38,11 @@ func _process_modification() -> void:
 		return
 	if not _resolved:
 		_resolve(skeleton)
-	var spine := visual.spine_stretch
+	var spine: float = visual.spine_stretch
 	if _upper >= 0 and _height > 0.0 and absf(spine) > 0.0001:
 		skeleton.set_bone_pose_position(_upper,
 				skeleton.get_bone_pose_position(_upper) + Vector3(0.0, spine * _height, 0.0))
-	var legs := visual.leg_stretch
+	var legs: float = visual.leg_stretch
 	if absf(legs) > 0.0001:
 		for i in _legs:
 			skeleton.set_bone_pose_scale(i, skeleton.get_bone_pose_scale(i) * Vector3(1.0, 1.0 + legs, 1.0))

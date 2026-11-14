@@ -531,14 +531,16 @@ func jump_launch() -> void:
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, jump_settle_time) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
+const SQUASH_MODIFIER := preload("res://player/squash_modifier.gd")   # preloaded (not by class name) so it works before the editor has rescanned global classes
+
 ## Adds the SquashModifier to the character's skeleton.
 func _install_squash_modifier() -> void:
 	var skeleton := _model.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skeleton == null:
 		return
-	var mod := SquashModifier.new()
+	var mod := SQUASH_MODIFIER.new() as SkeletonModifier3D
 	mod.name = "SquashModifier"
-	mod.visual = self
+	mod.set("visual", self)
 	skeleton.add_child(mod)
 
 ## Cosmetic head-bonk squash. `strength` 0..1 blends from no squash to the full
