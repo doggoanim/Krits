@@ -72,6 +72,7 @@ var machine: StateMachine
 var facing := Vector3.FORWARD
 var can_dive := true
 var dead := false
+var gored := false   ## the body was blown apart (see gore_death()): it stays invisible until teleport()
 var coyote := 0.0
 var jump_buffer_t := 0.0
 var invuln := 0.0
@@ -1320,6 +1321,23 @@ func _begin_death(_from: Vector3) -> void:
 	visual.hold_expression(&"hurt")          # hurt face for the whole death, no blinking back
 	HitStop.freeze(DEATH_FREEZE)
 
+## Blown to bits (the killer fish): the body vanishes into a GoreBurst instead of
+## falling over. Call right after the fatal hit(); cleared by teleport().
+func gore_death(from: Vector3, water_surface_y := NAN) -> void:
+	if gored:
+		return
+	gored = true
+	var chest := global_position + Vector3.UP * (STAND_HEIGHT * 0.5)
+	var away := chest - from
+	away.y = 0.0
+	visual.visible = false
+	ground_shadow.visible = false
+	ground_shadow.set_physics_process(false)
+	var world: Node = get_parent() if get_parent() != null else self
+	GoreBurst.spawn(world, chest, away, water_surface_y)
+	if camera_rig:
+		camera_rig.shake(DEATH_SHAKE * 2.0)
+
 ## The hop: up, then down and out through the floor (no collision any more).
 func death_hop() -> void:
 	_death_hopping = true
@@ -1347,6 +1365,10 @@ func enter_cinematic() -> void:
 	machine.transition_to(&"Frozen")
 
 func teleport(pos: Vector3) -> void:
+	if gored:
+		gored = false
+		visual.visible = true
+		ground_shadow.set_physics_process(true)
 	_death_hopping = false
 	collision_layer = 1 << 1                # undo death_hop()'s ghosting
 	collision_mask = 1 | (1 << 6)

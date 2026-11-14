@@ -362,3 +362,6 @@ restores them after, so whatever look you set here carries into combat too.
 - `abilities/`: `AbilityData` (effect, cooldown, stamina cost, price), `AbilityLibrary` (catalog: Heal, Air Step, Guard Up, Shockwave, Orb Stack; each spends stamina, see `PlayerStats`), `AbilityRunner.activate()` does the effect.
 - `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; learn new abilities in shops.
 - `ui/widgets/hotbar_bar.tscn`: the HUD strip (cooldown wipe, item counts); a display-only copy sits at the bottom of the inventory screen.
+
+### Killer-fish gore
+When the killer fish catches the player, the body bursts (`Player.gore_death()` → `world/gore_burst.gd`): blood spray and mist, flying chunks of meat, bone and outfit scraps that bounce and leave splats, a stain spreading on the water, a red flash. The fish lingers 1.8 s over the remains (`KillerFish.FEAST_TIME`). Tune counts and colors via the constants at the top of `GoreBurst`. Other deaths are unchanged.

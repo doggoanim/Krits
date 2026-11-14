@@ -89,7 +89,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null or _player.visual == null:
 		return
-	var shown := not HIDDEN_IN_STATES.has(_player.machine.current_name)
+	var shown := not HIDDEN_IN_STATES.has(_player.machine.current_name) and not _player.gored
 	visible = shown
 	if _shield_grip:
 		_shield_grip.visible = shown
