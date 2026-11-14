@@ -144,13 +144,10 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var pound_jump_stretch_y := 2.1    ## the high jump out of the slam
 @export var pound_jump_stretch_xz := 0.62
 @export var pound_jump_stretch_time := 0.3
-## Take-off stretches the UPPER body first (chest and head lift away from the
-## hips), then the legs lengthen to follow, then everything settles — see
+## The launch stretches the UPPER body first (chest and head lift away from the
+## hips at once, no wind-up), then the legs lengthen to follow, then everything settles — see
 ## jump_launch() and SquashModifier. Amounts are fractions of body height.
-@export var jump_anticipation_spine := -0.07   ## the instant of take-off: pressed down first (legs bending)...
-@export var jump_anticipation_xz := 1.12
-@export var jump_anticipation_time := 0.05     ## ...then the upper body shoots up in this long
-@export var jump_spine_lead := 0.16            ## how far the upper body lifts at the peak of the launch
+@export var jump_spine_lead := 0.16            ## how far the upper body lifts, instantly, at the launch
 @export var jump_leg_follow := 0.14            ## how much the legs lengthen as they catch up
 @export var jump_leg_delay := 0.05             ## seconds the legs trail behind the upper body
 @export var jump_settle_time := 0.24           ## back to normal proportions
@@ -499,35 +496,29 @@ func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-## A jump's take-off, upper body first: pressed down for an instant, the chest
-## and head shoot up away from the hips, the legs lengthen a beat later to catch
-## up, then everything settles back. (The whole-model scale only thins/bulges a
-## little; the stretch itself is in the proportions, see SquashModifier.)
+## A jump's launch, upper body first and with no wind-up (it has to feel snappy):
+## the chest and head are thrown up away from the hips on the very first frame,
+## the legs lengthen a beat later to catch up, then everything settles back. (The
+## whole-model scale only thins a little; the stretch itself is in the
+## proportions, see SquashModifier.)
 func jump_launch() -> void:
 	if _squash_tween and _squash_tween.is_valid():
 		_squash_tween.kill()
 	if _jump_tween and _jump_tween.is_valid():
 		_jump_tween.kill()
-	spine_stretch = jump_anticipation_spine
-	leg_stretch = jump_anticipation_spine * 0.6
-	_model.scale = Vector3(_base_scale * jump_anticipation_xz, _base_scale, _base_scale * jump_anticipation_xz)
-	var up := jump_anticipation_time
-	var lag := jump_leg_delay
+	spine_stretch = jump_spine_lead
+	leg_stretch = 0.0
+	_model.scale = Vector3(_base_scale * jump_launch_xz, _base_scale, _base_scale * jump_launch_xz)
 	_jump_tween = create_tween().set_parallel(true)
-	# upper body: shoots up, then eases home
-	_jump_tween.tween_property(self, "spine_stretch", jump_spine_lead, up) \
-			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# upper body: eases home from the stretched pose
 	_jump_tween.tween_property(self, "spine_stretch", 0.0, jump_settle_time) \
-			.set_delay(up).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	# legs: a beat behind
-	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, up) \
-			.set_delay(lag).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_jump_tween.tween_property(self, "leg_stretch", 0.0, jump_settle_time) \
-			.set_delay(lag + up).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	# whole model: thins while stretched, then back to normal
-	_squash_tween = create_tween()
-	_squash_tween.tween_property(_model, "scale", Vector3(_base_scale * jump_launch_xz, _base_scale, _base_scale * jump_launch_xz), up) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# legs: a beat behind, stretching as the upper body comes back
+	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, jump_leg_delay) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_jump_tween.tween_property(self, "leg_stretch", 0.0, jump_settle_time) \
+			.set_delay(jump_leg_delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, jump_settle_time) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
