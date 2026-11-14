@@ -146,6 +146,15 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var pound_jump_stretch_y := 2.1    ## the high jump out of the slam
 @export var pound_jump_stretch_xz := 0.62
 @export var pound_jump_stretch_time := 0.3
+@export var jump_anticipation_y := 0.8     ## the instant of take-off: a quick squash first (legs bending)...
+@export var jump_anticipation_xz := 1.2
+@export var jump_anticipation_time := 0.06  ## ...then it stretches up to jump_stretch_* in this long
+@export var apex_squash_y := 0.92           ## a gentle settle at the top of a jump, as it turns to fall
+@export var apex_squash_xz := 1.06
+@export var apex_squash_time := 0.2
+@export var fall_stretch_y := 1.12          ## held while falling fast
+@export var fall_stretch_xz := 0.95
+@export var fall_stretch_speed := 13.0      ## m/s downward before the fall stretch starts
 @export var squash_stretch_time := 0.16   ## how long the spring-back to normal takes
 @export var ceiling_squash_y := 0.72       ## head bonk on a roof (scaled by how hard you hit it)
 @export var ceiling_squash_xz := 1.25
@@ -478,6 +487,19 @@ func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+## A jump's take-off: squashed for an instant (anticipation), springing up to the
+## stretched launch pose, then settling back to normal.
+func jump_launch() -> void:
+	if _squash_tween and _squash_tween.is_valid():
+		_squash_tween.kill()
+	_model.scale = Vector3(_base_scale * jump_anticipation_xz, _base_scale * jump_anticipation_y, _base_scale * jump_anticipation_xz)
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(_model, "scale",
+			Vector3(_base_scale * jump_stretch_xz, _base_scale * jump_stretch_y, _base_scale * jump_stretch_xz),
+			jump_anticipation_time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, squash_stretch_time) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 ## Cosmetic head-bonk squash. `strength` 0..1 blends from no squash to the full
 ## amount; `pound` uses the heavier ground-pound-jump numbers.

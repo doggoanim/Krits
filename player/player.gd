@@ -1088,7 +1088,7 @@ func start_jump(vel: float, pound := false) -> void:
 		visual.squash_stretch(visual.pound_jump_stretch_y, visual.pound_jump_stretch_xz,
 				visual.pound_jump_stretch_time)
 	else:
-		visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+		visual.jump_launch()
 	visual.roll_jump_start()
 	effects.burst_jump_dust()
 	audio.play_pound_jump() if pound else audio.play_jump()
@@ -1144,7 +1144,7 @@ func jump_off_wall(away: Vector3) -> void:
 	can_dive = true
 	wall_climb_cd = WALL_CLIMB_REGRAB_COOLDOWN
 	visual.cancel_hold()
-	visual.squash_stretch(visual.jump_stretch_y, visual.jump_stretch_xz)
+	visual.jump_launch()
 	visual.roll_jump_start()
 	effects.burst_jump_dust()
 	audio.play_jump()
