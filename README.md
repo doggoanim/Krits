@@ -365,3 +365,4 @@ restores them after, so whatever look you set here carries into combat too.
 
 ### Killer-fish gore
 When the killer fish catches the player, the body bursts (`Player.gore_death()` → `world/gore_burst.gd`): blood spray and mist, flying chunks of meat, bone and outfit scraps that bounce and leave splats, a stain spreading on the water, a red flash. The fish lingers 1.8 s over the remains (`KillerFish.FEAST_TIME`). Tune counts and colors via the constants at the top of `GoreBurst`. Other deaths are unchanged.
+Enemies burst the same way when defeated (`Enemy._burst_on_death()`), scaled by their `size` and with scraps in their own color; this replaces their death animation. Tune with `Enemy.GORE_SIZE_PER_UNIT`.

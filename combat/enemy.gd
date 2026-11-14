@@ -9,6 +9,8 @@ extends CharacterBody3D
 
 signal defeated(enemy: Enemy)
 
+const GORE_SIZE_PER_UNIT := 0.6   ## gore size = this x the enemy's size (clamped 0.35 to 1.2)
+
 var data: EnemyData
 var hp := 1.0
 var arena: Arena
@@ -352,12 +354,28 @@ func take_damage(amount: float) -> void:
 		_fx.clear_all()
 		_dissolve_puddles()   # its slime trail dies with it — no more damage from it
 		defeated.emit(self)
+		if _burst_on_death():
+			return
 		if _visual:
 			var death_len := _visual.play_death()
 			if death_len > 0.0:
 				get_tree().create_timer(death_len, false).timeout.connect(queue_free)
 				return
 		queue_free()
+
+## Enemies burst into gore instead of playing their death animation (see GoreBurst).
+## Returns true when it did, and the enemy is gone.
+func _burst_on_death() -> bool:
+	var parent := get_parent()
+	if parent == null:
+		return false
+	var chest := global_position + Vector3.UP * 0.7
+	var away := chest - (arena.global_position if arena != null else chest)
+	away.y = 0.0
+	var size := clampf(GORE_SIZE_PER_UNIT * data.size, 0.35, 1.2)
+	GoreBurst.spawn(parent, chest, away, NAN, size, data.color)
+	queue_free()
+	return true
 
 # ---------------------------------------------------------------- slime trail
 

@@ -29,12 +29,18 @@ static var _splat_texture: Texture2D
 static var _splats: Array = []   # untyped: entries can be freed behind our back
 
 var _surface_y := NAN
+var _size := 1.0              ## 1 = player-sized; smaller for small things
+var _scrap_color := CLOTH
 
 ## `at`: where the body was (its middle). `away`: the direction the blood sprays
 ## mostly toward (from the killer toward the victim). `surface_y`: the water's
 ## surface height if this happens over water (a stain spreads there), else NAN.
-static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN) -> GoreBurst:
+## `size`: scales the amount, reach and chunk size (1 = the player). `scrap_color`:
+## the color of the cloth/shell scraps (the victim's outfit or body color).
+static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN, size := 1.0, scrap_color := CLOTH) -> GoreBurst:
 	var g := GoreBurst.new()
+	g._size = size
+	g._scrap_color = scrap_color
 	g._surface_y = surface_y
 	g.add_to_group(GROUP)
 	parent.add_child(g)
@@ -63,11 +69,11 @@ func _unshaded(color: Color, texture: Texture2D = null) -> StandardMaterial3D:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return m
 
-func _drop_emitter(amount: int, lifetime: float, color: Color, size: float) -> CPUParticles3D:
+func _drop_emitter(amount_base: int, lifetime: float, color: Color, size: float) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.one_shot = true
 	p.explosiveness = 1.0
-	p.amount = amount
+	p.amount = maxi(int(amount_base * _size), 8)
 	p.lifetime = lifetime
 	p.emitting = false
 	p.local_coords = false
@@ -141,6 +147,7 @@ func _flash() -> void:
 	light.light_energy = 6.0
 	light.shadow_enabled = false
 	add_child(light)
+	light.omni_range *= _size
 	var tw := create_tween()
 	tw.tween_property(light, "light_energy", 0.0, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(light.queue_free)
@@ -148,9 +155,9 @@ func _flash() -> void:
 # ------------------------------------------------------------------- chunks
 
 func _gibs(away: Vector3) -> void:
-	for i in GIB_COUNT:
+	for i in maxi(int(GIB_COUNT * _size), 4):
 		var gib := Gib.new()
-		gib.setup(i, away, _surface_y)
+		gib.setup(i, away, _surface_y, _size, _scrap_color)
 		add_child(gib)
 		gib.top_level = true
 		gib.global_position = global_position + Vector3(randf_range(-0.2, 0.2), randf_range(-0.3, 0.3), randf_range(-0.2, 0.2))
@@ -166,7 +173,7 @@ class Gib extends Node3D:
 	var _age := 0.0
 	var _drip: CPUParticles3D
 
-	func setup(index: int, away: Vector3, surface_y: float) -> void:
+	func setup(index: int, away: Vector3, surface_y: float, size: float, scrap_color: Color) -> void:
 		_surface_y = surface_y
 		var lateral := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0))
 		_vel = (away * randf_range(2.0, 7.0) + lateral * randf_range(1.0, 4.0)) + Vector3.UP * randf_range(5.0, 11.0)
@@ -186,7 +193,7 @@ class Gib extends Node3D:
 				var scrap := BoxMesh.new()
 				scrap.size = Vector3(0.28, 0.03, 0.22)
 				mesh_instance.mesh = scrap
-				color = GoreBurst.CLOTH
+				color = scrap_color
 			_:   # a lump of meat
 				var lump := SphereMesh.new()
 				lump.radius = randf_range(0.1, 0.2)
@@ -198,6 +205,7 @@ class Gib extends Node3D:
 				color = GoreBurst.MEAT[randi() % GoreBurst.MEAT.size()]
 		var mat := ShaderMaterial.new()
 		mat.shader = GoreBurst.TOON
+		mesh_instance.scale *= size
 		mat.set_shader_parameter(&"albedo_texture", ModelUtil.white_texture())
 		mat.set_shader_parameter(&"albedo_color", color)
 		mat.set_shader_parameter(&"rim_strength", 0.0)
@@ -316,11 +324,11 @@ func _splash_down() -> void:
 	var hit := space.intersect_ray(query)
 	if hit.is_empty():
 		return
-	splat(get_parent(), hit["position"], hit["normal"], 2.6)
+	splat(get_parent(), hit["position"], hit["normal"], 2.6 * _size)
 	for i in 7:
 		var a := TAU * float(i) / 7.0 + randf() * 0.6
-		var p: Vector3 = hit["position"] + Vector3(cos(a), 0.0, sin(a)) * randf_range(0.6, 1.8)
-		splat(get_parent(), p, hit["normal"], randf_range(0.5, 1.3))
+		var p: Vector3 = hit["position"] + Vector3(cos(a), 0.0, sin(a)) * randf_range(0.6, 1.8) * _size
+		splat(get_parent(), p, hit["normal"], randf_range(0.5, 1.3) * _size)
 
 ## Over water: a red stain spreads across the surface and slowly fades.
 func _water_stain() -> void:
@@ -343,7 +351,7 @@ func _water_stain() -> void:
 			Vector3(global_position.x, _surface_y + 0.05, global_position.z))
 	mi.scale = Vector3.ONE * 0.5
 	var tw := create_tween().set_parallel(true)
-	tw.tween_property(mi, "scale", Vector3.ONE * 7.0, 3.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(mi, "scale", Vector3.ONE * 7.0 * _size, 3.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(mat, "albedo_color:a", 0.0, 10.0).set_delay(3.0)
 	tw.chain().tween_callback(mi.queue_free)
 
