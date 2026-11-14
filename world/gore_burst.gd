@@ -26,7 +26,7 @@ const GROUND_MASK := 1
 const GROUP := &"gore"
 
 static var _splat_texture: Texture2D
-static var _splats: Array[MeshInstance3D] = []
+static var _splats: Array = []   # untyped: entries can be freed behind our back
 
 var _surface_y := NAN
 
