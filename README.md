@@ -359,6 +359,6 @@ restores them after, so whatever look you set here carries into combat too.
 - A quest starts when its `start_flag` is set (empty = from the start of the game) and its `requires_quest` is done. `QuestTrigger` (`world/`) sets `reached_<place_id>` when the player walks in. Active quests are listed in the inventory's Quests tab, main first (there is no on-screen tracker).
 
 ### Hotbar & abilities
-- `abilities/`: `AbilityData` (effect, cooldown, stamina cost, price), `AbilityLibrary` (catalog: Heal, Super Jump, Guard Up, Shockwave, Orb Stack; each spends stamina, see `PlayerStats`), `AbilityRunner.activate()` does the effect.
+- `abilities/`: `AbilityData` (effect, cooldown, stamina cost, price), `AbilityLibrary` (catalog: Heal, Air Step, Guard Up, Shockwave, Orb Stack; each spends stamina, see `PlayerStats`), `AbilityRunner.activate()` does the effect.
 - `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; learn new abilities in shops.
 - `ui/widgets/hotbar_bar.tscn`: the HUD strip (cooldown wipe, item counts); a display-only copy sits at the bottom of the inventory screen.

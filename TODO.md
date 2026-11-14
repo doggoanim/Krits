@@ -2,7 +2,7 @@
 
 ## Story and progression
 - **Where abilities come from.** New games start with no abilities, and Heal and
-  Super Jump (price 0, so no shop sells them) can't be learned anywhere yet.
+  Air Step (price 0, so no shop sells them) can't be learned anywhere yet.
   Decide the source for each: shop price, quest reward or story moment. Also add
   a way for dialogue/quests to teach an ability (`Hotbar.learn(id)` exists).
 - **Where the first gear comes from.** New games start with no armor, shield or

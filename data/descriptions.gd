@@ -21,5 +21,5 @@ static func text(section: String, id: StringName, fallback := "") -> String:
 	if value != "":
 		return value
 	if fallback == "" and section == "names":
-		return String(id).capitalize()   # never show a blank name ("super_jump" -> "Super Jump")
+		return String(id).capitalize()   # never show a blank name ("air_step" -> "Air Step")
 	return fallback
