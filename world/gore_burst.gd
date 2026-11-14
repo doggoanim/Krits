@@ -270,7 +270,7 @@ class Gib extends Node3D:
 static func clear_all(tree: SceneTree) -> void:
 	for n in tree.get_nodes_in_group(GROUP):
 		n.queue_free()
-	for splat_node in _splats:
+	for splat_node in _splats:   # untyped loop var: entries may already be freed
 		if is_instance_valid(splat_node):
 			splat_node.queue_free()
 	_splats.clear()
@@ -301,7 +301,7 @@ static func splat(parent: Node, at: Vector3, normal: Vector3, size: float) -> vo
 	mi.global_transform = Transform3D(basis, at + up * 0.025)
 	_splats.append(mi)
 	while _splats.size() > MAX_SPLATS:
-		var old: MeshInstance3D = _splats.pop_front()
+		var old = _splats.pop_front()   # untyped: it may already be freed (a typed var errors on that)
 		if is_instance_valid(old):
 			old.queue_free()
 	var tw := mi.create_tween()
