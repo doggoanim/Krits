@@ -23,6 +23,7 @@ const GIB_LIFETIME := 14.0
 const SPLAT_LIFETIME := 18.0
 const MAX_SPLATS := 70
 const GROUND_MASK := 1
+const GROUP := &"gore"
 
 static var _splat_texture: Texture2D
 static var _splats: Array[MeshInstance3D] = []
@@ -35,6 +36,7 @@ var _surface_y := NAN
 static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN) -> GoreBurst:
 	var g := GoreBurst.new()
 	g._surface_y = surface_y
+	g.add_to_group(GROUP)
 	parent.add_child(g)
 	g.global_position = at
 	g._explode(away.normalized() if away.length() > 0.01 else Vector3.UP)
@@ -263,6 +265,15 @@ class Gib extends Node3D:
 		return space.intersect_ray(query)
 
 # --------------------------------------------------------------------- stains
+
+## Removes every burst, chunk, splat and stain at once (on respawn).
+static func clear_all(tree: SceneTree) -> void:
+	for n in tree.get_nodes_in_group(GROUP):
+		n.queue_free()
+	for splat_node in _splats:
+		if is_instance_valid(splat_node):
+			splat_node.queue_free()
+	_splats.clear()
 
 ## A blood splat on a surface (a flat, irregular red blotch that fades).
 static func splat(parent: Node, at: Vector3, normal: Vector3, size: float) -> void:

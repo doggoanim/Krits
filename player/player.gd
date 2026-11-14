@@ -1367,6 +1367,7 @@ func enter_cinematic() -> void:
 func teleport(pos: Vector3) -> void:
 	if gored:
 		gored = false
+		GoreBurst.clear_all(get_tree())
 		visual.visible = true
 		ground_shadow.set_physics_process(true)
 	_death_hopping = false
