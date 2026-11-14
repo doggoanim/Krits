@@ -151,6 +151,9 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var jump_leg_follow := 0.7             ## how much the legs lengthen as they catch up
 @export var jump_leg_delay := 0.12             ## seconds the legs trail behind the upper body
 @export var jump_settle_time := 0.45           ## back to normal proportions
+@export var jump_squash_spine := -0.3          ## after the stretch the upper body compresses past normal by this much (the squash)
+@export var jump_squash_legs := -0.2
+@export var jump_squash_xz := 1.25             ## ...and the model bulges wider while compressed
 @export var jump_launch_xz := 0.7              ## slightly thinner while stretched
 @export var apex_squash_y := 0.92           ## a gentle settle at the top of a jump, as it turns to fall
 @export var apex_squash_xz := 1.06
@@ -509,26 +512,36 @@ func jump_launch() -> void:
 	spine_stretch = jump_spine_lead
 	leg_stretch = 0.0
 	_model.scale = Vector3(_base_scale * jump_launch_xz, _base_scale, _base_scale * jump_launch_xz)
+	var squash_t := jump_settle_time * 0.45   # stretched -> compressed
+	var rest_t := jump_settle_time * 0.55     # compressed -> normal (with the overshoot's spring)
+	var lag := jump_leg_delay
 	_jump_tween = create_tween().set_parallel(true)
-	# upper body: eases home from the stretched pose
-	_jump_tween.tween_property(self, "spine_stretch", 0.0, jump_settle_time) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	# legs: a beat behind, stretching as the upper body comes back
-	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, jump_leg_delay) \
+	# upper body: stretched, then it compresses past normal, then springs home
+	_jump_tween.tween_property(self, "spine_stretch", jump_squash_spine, squash_t) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_jump_tween.tween_property(self, "spine_stretch", 0.0, rest_t) \
+			.set_delay(squash_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# legs: a beat behind — lengthen, then compress too, then home
+	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, lag) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_jump_tween.tween_property(self, "leg_stretch", 0.0, jump_settle_time) \
-			.set_delay(jump_leg_delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_jump_tween.tween_property(self, "leg_stretch", jump_squash_legs, squash_t) \
+			.set_delay(lag).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_jump_tween.tween_property(self, "leg_stretch", 0.0, rest_t) \
+			.set_delay(lag + squash_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# whole model: thin while stretched, bulges while compressed, then normal
 	_squash_tween = create_tween()
-	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, jump_settle_time) \
+	_squash_tween.tween_property(_model, "scale", Vector3(_base_scale * jump_squash_xz, _base_scale, _base_scale * jump_squash_xz), squash_t) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, rest_t) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-
-const SQUASH_MODIFIER := preload("res://player/squash_modifier.gd")   # preloaded (not by class name) so it works before the editor has rescanned global classes
 
 ## True while a jump's launch stretch is still settling back to normal. Other
 ## pops (the apex squash) wait for it: they set the model's scale instantly, which
 ## showed as a jerk when they cut into the settle.
 func is_launch_settling() -> bool:
 	return _jump_tween != null and _jump_tween.is_valid() and _jump_tween.is_running()
+
+const SQUASH_MODIFIER := preload("res://player/squash_modifier.gd")   # preloaded (not by class name) so it works before the editor has rescanned global classes
 
 ## Adds the SquashModifier to the character's skeleton.
 func _install_squash_modifier() -> void:
