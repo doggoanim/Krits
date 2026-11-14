@@ -373,7 +373,8 @@ func _burst_on_death() -> bool:
 	var away := chest - (arena.global_position if arena != null else chest)
 	away.y = 0.0
 	var size := clampf(GORE_SIZE_PER_UNIT * data.size, 0.35, 1.2)
-	GoreBurst.spawn(parent, chest, away, NAN, size, data.color)
+	var blood := data.gore_color if data.gore_color.a > 0.0 else GoreBurst.BLOOD
+	GoreBurst.spawn(parent, chest, away, NAN, size, data.color, blood)
 	queue_free()
 	return true
 

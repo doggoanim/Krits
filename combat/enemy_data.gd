@@ -12,6 +12,8 @@ extends Resource
 ## when those are enabled below (so one field covers both looks).
 @export var color := Color(0.8, 0.2, 0.2)
 @export var size := 1.0
+## The color of its gore (blood, chunks, splats) when it bursts on death. Fully transparent = the default red.
+@export var gore_color := Color(0.0, 0.0, 0.0, 0.0)
 @export var patterns: Array[BulletPattern] = []
 @export var drops: Array[ItemDrop] = []   ## rolled when this enemy is defeated; collected when the fight is won
 

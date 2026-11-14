@@ -21,6 +21,7 @@ static func green_slime() -> EnemyData:
 	d.max_hp = 10.0
 	d.gold = 20
 	d.color = Color(0x5A / 255.0, 0x8B / 255.0, 0x2F / 255.0)   # also the puddle/slime-ball tint
+	d.gore_color = Color(0.4, 0.85, 0.15)   # green slime goo instead of blood
 	d.model = GREEN_SLIME_MODEL
 	d.model_height = 1.1
 	# Clip names baked into green_slime.glb: Idle, Moving, Death, leap_ready, leap, shoot.

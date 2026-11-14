@@ -31,14 +31,20 @@ static var _splats: Array = []   # untyped: entries can be freed behind our back
 var _surface_y := NAN
 var _size := 1.0              ## 1 = player-sized; smaller for small things
 var _scrap_color := CLOTH
+var _blood := BLOOD           ## the liquid's color (green for slimes...)
+var _blood_dark := BLOOD_DARK
+var _meat: Array[Color] = MEAT
+var _bone := BONE
 
 ## `at`: where the body was (its middle). `away`: the direction the blood sprays
 ## mostly toward (from the killer toward the victim). `surface_y`: the water's
 ## surface height if this happens over water (a stain spreads there), else NAN.
+## `blood`: the liquid's color; anything but the default red also tints the chunks.
 ## `size`: scales the amount, reach and chunk size (1 = the player). `scrap_color`:
 ## the color of the cloth/shell scraps (the victim's outfit or body color).
-static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN, size := 1.0, scrap_color := CLOTH) -> GoreBurst:
+static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN, size := 1.0, scrap_color := CLOTH, blood: Color = BLOOD) -> GoreBurst:
 	var g := GoreBurst.new()
+	g._set_blood(blood)
 	g._size = size
 	g._scrap_color = scrap_color
 	g._surface_y = surface_y
@@ -47,6 +53,14 @@ static func spawn(parent: Node, at: Vector3, away: Vector3, surface_y := NAN, si
 	g.global_position = at
 	g._explode(away.normalized() if away.length() > 0.01 else Vector3.UP)
 	return g
+
+func _set_blood(blood: Color) -> void:
+	if blood.is_equal_approx(BLOOD):
+		return
+	_blood = blood
+	_blood_dark = blood.darkened(0.45)
+	_bone = blood.lightened(0.6)
+	_meat = [blood, blood.lightened(0.3), blood.darkened(0.25), blood.lightened(0.55)]
 
 func _explode(away: Vector3) -> void:
 	_flash()
@@ -89,7 +103,7 @@ func _drop_emitter(amount_base: int, lifetime: float, color: Color, size: float)
 
 ## The fountain: a fan of fast droplets, mostly away from the killer and up.
 func _spray(away: Vector3) -> void:
-	for layer in [[110, 1.5, BLOOD, 0.16, 5.0, 13.0], [70, 1.1, BLOOD_DARK, 0.24, 3.0, 9.0]]:
+	for layer in [[110, 1.5, _blood, 0.16, 5.0, 13.0], [70, 1.1, _blood_dark, 0.24, 3.0, 9.0]]:
 		var p := _drop_emitter(layer[0], layer[1], layer[2], layer[3])
 		p.direction = (away + Vector3.UP * 0.9).normalized()
 		p.spread = 62.0
@@ -100,7 +114,7 @@ func _spray(away: Vector3) -> void:
 		p.scale_amount_max = 1.7
 		p.emitting = true
 	# a second, upward geyser
-	var up := _drop_emitter(60, 1.4, BLOOD, 0.14)
+	var up := _drop_emitter(60, 1.4, _blood, 0.14)
 	up.direction = Vector3.UP
 	up.spread = 22.0
 	up.initial_velocity_min = 7.0
@@ -118,7 +132,7 @@ func _mist() -> void:
 	p.emitting = false
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * 1.4
-	var mat := _unshaded(Color(0.75, 0.02, 0.06, 0.8), SMOKE_TEXTURE)
+	var mat := _unshaded(Color(_blood.r, _blood.g, _blood.b, 0.8), SMOKE_TEXTURE)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	mat.vertex_color_use_as_albedo = true
 	p.mesh = quad
@@ -142,7 +156,7 @@ func _mist() -> void:
 
 func _flash() -> void:
 	var light := OmniLight3D.new()
-	light.light_color = Color(1.0, 0.1, 0.1)
+	light.light_color = _blood.lightened(0.2)
 	light.omni_range = 9.0
 	light.light_energy = 6.0
 	light.shadow_enabled = false
@@ -157,7 +171,7 @@ func _flash() -> void:
 func _gibs(away: Vector3) -> void:
 	for i in maxi(int(GIB_COUNT * _size), 4):
 		var gib := Gib.new()
-		gib.setup(i, away, _surface_y, _size, _scrap_color)
+		gib.setup(i, away, _surface_y, _size, _scrap_color, self)
 		add_child(gib)
 		gib.top_level = true
 		gib.global_position = global_position + Vector3(randf_range(-0.2, 0.2), randf_range(-0.3, 0.3), randf_range(-0.2, 0.2))
@@ -172,8 +186,10 @@ class Gib extends Node3D:
 	var _bounces := 0
 	var _age := 0.0
 	var _drip: CPUParticles3D
+	var _burst: GoreBurst
 
-	func setup(index: int, away: Vector3, surface_y: float, size: float, scrap_color: Color) -> void:
+	func setup(index: int, away: Vector3, surface_y: float, size: float, scrap_color: Color, burst: GoreBurst) -> void:
+		_burst = burst
 		_surface_y = surface_y
 		var lateral := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0))
 		_vel = (away * randf_range(2.0, 7.0) + lateral * randf_range(1.0, 4.0)) + Vector3.UP * randf_range(5.0, 11.0)
@@ -188,7 +204,7 @@ class Gib extends Node3D:
 				bone.bottom_radius = 0.04
 				bone.height = randf_range(0.3, 0.5)
 				mesh_instance.mesh = bone
-				color = GoreBurst.BONE
+				color = burst._bone
 			4:   # a scrap of the outfit
 				var scrap := BoxMesh.new()
 				scrap.size = Vector3(0.28, 0.03, 0.22)
@@ -202,7 +218,7 @@ class Gib extends Node3D:
 				lump.rings = 4
 				mesh_instance.mesh = lump
 				mesh_instance.scale = Vector3(randf_range(0.8, 1.5), randf_range(0.6, 1.0), randf_range(0.8, 1.3))
-				color = GoreBurst.MEAT[randi() % GoreBurst.MEAT.size()]
+				color = burst._meat[randi() % burst._meat.size()]
 		var mat := ShaderMaterial.new()
 		mat.shader = GoreBurst.TOON
 		mesh_instance.scale *= size
@@ -221,7 +237,7 @@ class Gib extends Node3D:
 			q.size = Vector2.ONE * 0.1
 			var dm := StandardMaterial3D.new()
 			dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			dm.albedo_color = GoreBurst.BLOOD
+			dm.albedo_color = burst._blood
 			dm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 			_drip.mesh = q
 			_drip.material_override = dm
@@ -259,7 +275,7 @@ class Gib extends Node3D:
 		global_position = hit["position"] + hit["normal"] * 0.05
 		_bounces += 1
 		if not in_water:
-			GoreBurst.splat(get_parent(), hit["position"], hit["normal"], randf_range(0.5, 1.2))
+			GoreBurst.splat(get_parent(), hit["position"], hit["normal"], randf_range(0.5, 1.2), _burst._blood, _burst._blood_dark)
 		_vel = _vel.bounce(hit["normal"]) * 0.35
 		_spin *= 0.5
 		if _vel.length() < 1.5 or _bounces >= 4:
@@ -288,7 +304,7 @@ static func clear_all(tree: SceneTree) -> void:
 	_splats.clear()
 
 ## A blood splat on a surface (a flat, irregular red blotch that fades).
-static func splat(parent: Node, at: Vector3, normal: Vector3, size: float) -> void:
+static func splat(parent: Node, at: Vector3, normal: Vector3, size: float, blood: Color = BLOOD, blood_dark: Color = BLOOD_DARK) -> void:
 	if parent == null or not parent.is_inside_tree():
 		return
 	if _splat_texture == null:
@@ -301,7 +317,7 @@ static func splat(parent: Node, at: Vector3, normal: Vector3, size: float) -> vo
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_texture = _splat_texture
-	mat.albedo_color = BLOOD.lerp(BLOOD_DARK, randf() * 0.7)
+	mat.albedo_color = blood.lerp(blood_dark, randf() * 0.7)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -328,11 +344,11 @@ func _splash_down() -> void:
 	var hit := space.intersect_ray(query)
 	if hit.is_empty():
 		return
-	splat(get_parent(), hit["position"], hit["normal"], 2.6 * _size)
+	splat(get_parent(), hit["position"], hit["normal"], 2.6 * _size, _blood, _blood_dark)
 	for i in 7:
 		var a := TAU * float(i) / 7.0 + randf() * 0.6
 		var p: Vector3 = hit["position"] + Vector3(cos(a), 0.0, sin(a)) * randf_range(0.6, 1.8) * _size
-		splat(get_parent(), p, hit["normal"], randf_range(0.5, 1.3) * _size)
+		splat(get_parent(), p, hit["normal"], randf_range(0.5, 1.3) * _size, _blood, _blood_dark)
 
 ## Over water: a red stain spreads across the surface and slowly fades.
 func _water_stain() -> void:
@@ -345,7 +361,7 @@ func _water_stain() -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_texture = _splat_texture if _splat_texture != null else (_make_splat_texture())
 	_splat_texture = mat.albedo_texture
-	mat.albedo_color = Color(BLOOD.r, BLOOD.g, BLOOD.b, 0.75)
+	mat.albedo_color = Color(_blood.r, _blood.g, _blood.b, 0.75)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
