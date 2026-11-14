@@ -132,8 +132,6 @@ const SLIME_TINT_STRENGTH := 0.6
 ## skeleton), independent of whatever animation clip is playing, so they
 ## layer on top of jump_start/falling/idle/etc. instead of replacing them.
 @export_group("Squash & Stretch")
-@export var jump_stretch_y := 1.4      ## taller/thinner at the instant of launch
-@export var jump_stretch_xz := 0.88
 @export var land_squash_y := 0.78       ## shorter/wider at the instant of landing impact
 @export var land_squash_xz := 1.3
 @export var uncrouch_bounce_y := 1.12   ## small stretchy "pop" when standing back up
@@ -146,9 +144,17 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var pound_jump_stretch_y := 2.1    ## the high jump out of the slam
 @export var pound_jump_stretch_xz := 0.62
 @export var pound_jump_stretch_time := 0.3
-@export var jump_anticipation_y := 0.8     ## the instant of take-off: a quick squash first (legs bending)...
-@export var jump_anticipation_xz := 1.2
-@export var jump_anticipation_time := 0.06  ## ...then it stretches up to jump_stretch_* in this long
+## Take-off stretches the UPPER body first (chest and head lift away from the
+## hips), then the legs lengthen to follow, then everything settles — see
+## jump_launch() and SquashModifier. Amounts are fractions of body height.
+@export var jump_anticipation_spine := -0.07   ## the instant of take-off: pressed down first (legs bending)...
+@export var jump_anticipation_xz := 1.12
+@export var jump_anticipation_time := 0.05     ## ...then the upper body shoots up in this long
+@export var jump_spine_lead := 0.16            ## how far the upper body lifts at the peak of the launch
+@export var jump_leg_follow := 0.14            ## how much the legs lengthen as they catch up
+@export var jump_leg_delay := 0.05             ## seconds the legs trail behind the upper body
+@export var jump_settle_time := 0.24           ## back to normal proportions
+@export var jump_launch_xz := 0.94             ## slightly thinner while stretched
 @export var apex_squash_y := 0.92           ## a gentle settle at the top of a jump, as it turns to fall
 @export var apex_squash_xz := 1.06
 @export var apex_squash_time := 0.2
@@ -163,6 +169,10 @@ const SLIME_TINT_STRENGTH := 0.6
 @export var pound_ceiling_squash_xz := 1.9
 @export var pound_ceiling_squash_time := 0.4
 
+## Proportion offsets applied by SquashModifier (see there); 0 = normal.
+var spine_stretch := 0.0
+var leg_stretch := 0.0
+var _jump_tween: Tween
 var _squash_tween: Tween
 
 ## Clips meant to play on repeat for as long as their state lasts, rather than
@@ -193,6 +203,7 @@ func _ready() -> void:
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
+	_install_squash_modifier()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
 	else:
@@ -488,18 +499,47 @@ func squash_stretch(y_scale: float, xz_scale: float, duration := -1.0) -> void:
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, dur) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-## A jump's take-off: squashed for an instant (anticipation), springing up to the
-## stretched launch pose, then settling back to normal.
+## A jump's take-off, upper body first: pressed down for an instant, the chest
+## and head shoot up away from the hips, the legs lengthen a beat later to catch
+## up, then everything settles back. (The whole-model scale only thins/bulges a
+## little; the stretch itself is in the proportions, see SquashModifier.)
 func jump_launch() -> void:
 	if _squash_tween and _squash_tween.is_valid():
 		_squash_tween.kill()
-	_model.scale = Vector3(_base_scale * jump_anticipation_xz, _base_scale * jump_anticipation_y, _base_scale * jump_anticipation_xz)
+	if _jump_tween and _jump_tween.is_valid():
+		_jump_tween.kill()
+	spine_stretch = jump_anticipation_spine
+	leg_stretch = jump_anticipation_spine * 0.6
+	_model.scale = Vector3(_base_scale * jump_anticipation_xz, _base_scale, _base_scale * jump_anticipation_xz)
+	var up := jump_anticipation_time
+	var lag := jump_leg_delay
+	_jump_tween = create_tween().set_parallel(true)
+	# upper body: shoots up, then eases home
+	_jump_tween.tween_property(self, "spine_stretch", jump_spine_lead, up) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_jump_tween.tween_property(self, "spine_stretch", 0.0, jump_settle_time) \
+			.set_delay(up).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# legs: a beat behind
+	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, up) \
+			.set_delay(lag).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_jump_tween.tween_property(self, "leg_stretch", 0.0, jump_settle_time) \
+			.set_delay(lag + up).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# whole model: thins while stretched, then back to normal
 	_squash_tween = create_tween()
-	_squash_tween.tween_property(_model, "scale",
-			Vector3(_base_scale * jump_stretch_xz, _base_scale * jump_stretch_y, _base_scale * jump_stretch_xz),
-			jump_anticipation_time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, squash_stretch_time) \
+	_squash_tween.tween_property(_model, "scale", Vector3(_base_scale * jump_launch_xz, _base_scale, _base_scale * jump_launch_xz), up) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, jump_settle_time) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+## Adds the SquashModifier to the character's skeleton.
+func _install_squash_modifier() -> void:
+	var skeleton := _model.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skeleton == null:
+		return
+	var mod := SquashModifier.new()
+	mod.name = "SquashModifier"
+	mod.visual = self
+	skeleton.add_child(mod)
 
 ## Cosmetic head-bonk squash. `strength` 0..1 blends from no squash to the full
 ## amount; `pound` uses the heavier ground-pound-jump numbers.
