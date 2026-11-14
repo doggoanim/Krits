@@ -139,8 +139,7 @@ func _chase(delta: float) -> void:
 
 func _kill() -> void:
 	_player.hit(KILL_DAMAGE, true, global_position)
-	if _player.dead:
-		_player.gore_death(global_position, _water.surface_world_y())
+	if _player.gored:   # (every death gores unless the option is off)
 		_mode = Mode.WANDER
 		velocity = Vector3.ZERO
 		_feast_t = FEAST_TIME   # stays and thrashes over the remains first

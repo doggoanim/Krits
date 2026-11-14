@@ -274,6 +274,10 @@ class Gib extends Node3D:
 
 # --------------------------------------------------------------------- stains
 
+## The Accessibility option: when off, deaths use their plain animations.
+static func enabled() -> bool:
+	return bool(Settings.get_value(&"accessibility/gore"))
+
 ## Removes every burst, chunk, splat and stain at once (on respawn).
 static func clear_all(tree: SceneTree) -> void:
 	for n in tree.get_nodes_in_group(GROUP):

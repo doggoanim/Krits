@@ -367,7 +367,7 @@ func take_damage(amount: float) -> void:
 ## Returns true when it did, and the enemy is gone.
 func _burst_on_death() -> bool:
 	var parent := get_parent()
-	if parent == null:
+	if parent == null or not GoreBurst.enabled():
 		return false
 	var chest := global_position + Vector3.UP * 0.7
 	var away := chest - (arena.global_position if arena != null else chest)

@@ -1297,7 +1297,7 @@ const DEATH_GRAVITY := 26.0
 const DEATH_FREEZE := 0.4          ## real seconds of freeze on the pose
 const DEATH_SHAKE := 0.4
 
-func _begin_death(_from: Vector3) -> void:
+func _begin_death(from: Vector3) -> void:
 	dead = true
 	velocity = Vector3.ZERO
 	# Dying mid-swim: leave the swim state properly (floating motion mode, bubbles,
@@ -1320,6 +1320,9 @@ func _begin_death(_from: Vector3) -> void:
 	visual.play_menu_pose()
 	visual.hold_expression(&"hurt")          # hurt face for the whole death, no blinking back
 	HitStop.freeze(DEATH_FREEZE)
+	if GoreBurst.enabled():   # every death bursts (Accessibility > Gore turns it off)
+		var water := current_water()
+		gore_death(from, water.surface_world_y() if water != null else NAN)
 
 ## Blown to bits (the killer fish): the body vanishes into a GoreBurst instead of
 ## falling over. Call right after the fatal hit(); cleared by teleport().
