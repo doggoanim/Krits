@@ -512,15 +512,15 @@ func jump_launch() -> void:
 	_jump_tween = create_tween().set_parallel(true)
 	# upper body: eases home from the stretched pose
 	_jump_tween.tween_property(self, "spine_stretch", 0.0, jump_settle_time) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	# legs: a beat behind, stretching as the upper body comes back
 	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, jump_leg_delay) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_jump_tween.tween_property(self, "leg_stretch", 0.0, jump_settle_time) \
-			.set_delay(jump_leg_delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_delay(jump_leg_delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, jump_settle_time) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 const SQUASH_MODIFIER := preload("res://player/squash_modifier.gd")   # preloaded (not by class name) so it works before the editor has rescanned global classes
 
