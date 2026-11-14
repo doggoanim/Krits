@@ -149,7 +149,7 @@ const SLIME_TINT_STRENGTH := 0.6
 ## jump_launch() and SquashModifier. Amounts are fractions of body height.
 @export var jump_spine_lead := 0.3             ## how far the upper body lifts, instantly, at the launch
 @export var jump_leg_follow := 0.25            ## how much the legs lengthen as they catch up
-@export var jump_leg_delay := 0.05             ## seconds the legs trail behind the upper body
+@export var jump_leg_delay := 0.12             ## seconds the legs trail behind the upper body
 @export var jump_settle_time := 0.3            ## back to normal proportions
 @export var jump_launch_xz := 0.9              ## slightly thinner while stretched
 @export var apex_squash_y := 0.92           ## a gentle settle at the top of a jump, as it turns to fall
