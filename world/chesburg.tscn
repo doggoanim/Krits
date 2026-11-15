@@ -1798,6 +1798,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.1, 6, -8.8)
 script = ExtResource("quest_prop_script")
 kind = 1
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
+hide_when = &"tuppence_got_cat"
 done_flag = &"cat_clue_1"
 dialogue_file = "res://dialogue/npcs/cat_clue_fur.dlg"
 
@@ -1806,6 +1807,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8, 0, -3)
 script = ExtResource("quest_prop_script")
 kind = 2
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
+hide_when = &"tuppence_got_cat"
 done_flag = &"cat_clue_2"
 dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 
@@ -1814,6 +1816,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.6, 8, -17.2)
 script = ExtResource("quest_prop_script")
 kind = 3
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
+hide_when = &"tuppence_got_cat"
 done_flag = &"cat_clue_3"
 dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 
