@@ -39,8 +39,7 @@ const DEFAULTS := {
 	&"graphics/shadows": true,          ## sun and light shadows
 	&"graphics/ssao": true,             ## ambient occlusion
 	&"graphics/volumetric_fog": true,   ## fog and light shafts, where a level uses them (the well does)
-	&"graphics/water_detail": true,     ## water sparkle and wave lines
-	&"graphics/water_foam": true,       ## toon foam ring around the player at the waterline (see PlayerEffects.update_water_foam())
+	&"graphics/water_detail": true,     ## water sparkle and wave lines, and the player's foam ring at the waterline
 	&"audio/master": 1.0,
 	&"audio/music": 1.0,
 	&"audio/sfx": 1.0,
