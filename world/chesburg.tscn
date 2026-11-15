@@ -1614,7 +1614,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
 [node name="CatClueFur" type="StaticBody3D" parent="NPCs" unique_id=1636745183]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0, 1.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.1, 6, -8.8)
 script = ExtResource("quest_prop_script")
 kind = 1
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
@@ -1630,7 +1630,7 @@ done_flag = &"cat_clue_2"
 dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 
 [node name="CatClueBun" type="StaticBody3D" parent="NPCs" unique_id=107272031]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.6, 0, 12.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.6, 8, -17.2)
 script = ExtResource("quest_prop_script")
 kind = 3
 show_when = Array[StringName]([&"tuppence_quest_accepted"])
@@ -1638,7 +1638,7 @@ done_flag = &"cat_clue_3"
 dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 
 [node name="Biscuit" type="StaticBody3D" parent="NPCs" unique_id=1388985992]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 5.3, -1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 11.900001, -17.5)
 script = ExtResource("quest_prop_script")
 kind = 4
 show_when = Array[StringName]([&"cat_clue_1", &"cat_clue_2", &"cat_clue_3"])
