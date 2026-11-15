@@ -174,6 +174,9 @@ func _apply_volumes() -> void:
 		AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(v, 0.0001)))
 
 func _apply_window_mode() -> void:
+	if DisplayServer.get_name() == "embedded":   # the editor's Embed Game panel: it owns the window, so nothing here can apply
+		push_warning("Settings: window mode can't change while the game is embedded in the editor (turn off Embed Game on Next Play, or run an export).")
+		return
 	match int(_values[&"display/window_mode"]):
 		WINDOWED:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
