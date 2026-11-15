@@ -370,3 +370,6 @@ Every player death now gores too (`Player._begin_death`). **Settings > Accessibi
 Gore color is per enemy: `EnemyData.gore_color` (transparent = red). The green slime bursts into green goo, with green chunks instead of meat and bone.
 After the player dies the music distorts and its pitch lurches between random values until respawn (`Music.warped`, tuned by the "Death Warp" exports in `core/music_player.gd`).
 Fish sell for more the bigger they are (`FishCatalog.price_mult`, size^1.5; shop and inventory show the real totals). The killer fish rumbles (a synthesized low hum plus a camera shake) when you're within `rumble_radius`, building up as it hunts you.
+
+### Texture storage
+The 47 furniture models in `assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/` no longer each embed their own copy of the (identical, 1024x1024) texture: they point at the one shared `Cute_Furniture_Free_Textures_4.png`, so it imports and ships once. After pulling, let Godot re-import the folder.
