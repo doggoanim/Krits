@@ -15,6 +15,12 @@ extends Node3D
 @export var full_stretch_y := 1.35     ## model height multiplier at terminal speed
 @export var full_stretch_xz := 0.85
 @export var stretch_follow := 10.0     ## how quickly the stretch eases in/out
+@export_group("Speed Streaks")
+@export var streak_start_drop := 14.0  ## metres fallen before the streaks appear (the stretch above starts earlier)
+@export var streak_full_drop := 32.0   ## metres fallen for full-strength streaks
+@export var wipe_time := 0.3           ## seconds the streaks take to vanish, wiped away from top to bottom
+@export var wipe_height := 4.5         ## half the height (m) of the cloud the wipe sweeps through
+@export_group("")
 @export var streak_radius := 3.0       ## how far out from the player streaks appear
 @export var streak_max_amount := 60
 @export var wiggle := 0.14             ## how far (m) a streak snakes sideways
@@ -25,6 +31,9 @@ const SEGMENTS := 10
 var _player: Player
 var _amount := 0.0          ## 0..1 current intensity (smoothed)
 var _streaks: CPUParticles3D
+var _streak_mat: ShaderMaterial
+var _streaks_on := false     ## streaks are showing (falling, or still wiping away)
+var _wipe := -1.0            ## -1 = not wiping; else 0..1 progress of the top-to-bottom wipe
 
 func _ready() -> void:
 	_player = get_parent() as Player
@@ -44,7 +53,9 @@ func _ready() -> void:
 	# it never pops into or out of existence).
 	var quad := _cross_mesh(0.07, 2.2)
 	var mat := ShaderMaterial.new()
+	_streak_mat = mat
 	mat.shader = _streak_shader()
+	mat.set_shader_parameter(&"cut_y", 100000.0)
 	mat.set_shader_parameter(&"wiggle", wiggle)
 	mat.set_shader_parameter(&"wave_speed", wiggle_speed)
 	quad.surface_set_material(0, mat)
@@ -98,6 +109,9 @@ render_mode unshaded, cull_disabled, blend_mix;
 uniform float wiggle = 0.14;
 uniform float wave_speed = 11.0;
 uniform float wave_length = 3.2;
+uniform float cut_y = 100000.0;   // world height above which streaks are wiped away
+uniform float cut_soft = 1.2;
+varying float world_y;
 void vertex() {
 	float phase = dot(NODE_POSITION_WORLD, vec3(12.9898, 78.233, 37.719));
 	float along = VERTEX.y;
@@ -106,11 +120,13 @@ void vertex() {
 	float w2 = cos(along * wave_length * 0.8 + TIME * wave_speed * 0.9 + phase * 1.7);
 	VERTEX.x += w * wiggle * taper;
 	VERTEX.z += w2 * wiggle * taper;
+	world_y = (MODEL_MATRIX * vec4(VERTEX, 1.0)).y;
 }
 void fragment() {
 	float tips = sin(UV.y * 3.14159265);
 	ALBEDO = vec3(1.0);
-	ALPHA = clamp(tips * COLOR.a, 0.0, 1.0);
+	float wiped = 1.0 - smoothstep(cut_y - cut_soft, cut_y, world_y);
+	ALPHA = clamp(tips * COLOR.a * wiped, 0.0, 1.0);
 }
 """
 	return sh
@@ -128,21 +144,49 @@ func _physics_process(delta: float) -> void:
 	if _amount < 0.01:
 		_amount = 0.0
 	_player.visual.scale = Vector3(lerpf(1.0, full_stretch_xz, _amount), lerpf(1.0, full_stretch_y, _amount), lerpf(1.0, full_stretch_xz, _amount))
-	_update_streaks()
+	_update_streaks(delta)
 
 func _is_falling() -> bool:
 	if _player.dead or _player.is_on_floor() or _player.velocity.y >= 0.0:
 		return false
 	return _player.machine.current_name != &"Swim"
 
-func _update_streaks() -> void:
-	_streaks.emitting = _amount > 0.05
-	if not _streaks.emitting:
+## 0..1 how strongly the streaks should show right now (0 when not falling).
+func _streak_target() -> float:
+	if not _is_falling():
+		return 0.0
+	var top := maxf(_player.config.terminal_velocity - start_speed, 1.0)
+	var by_speed := clampf((-_player.velocity.y - start_speed) / top, 0.0, 1.0)
+	var by_drop := clampf((_player.fall_drop() - streak_start_drop) / maxf(streak_full_drop - streak_start_drop, 1.0), 0.0, 1.0)
+	return minf(by_speed, by_drop)
+
+func _update_streaks(delta: float) -> void:
+	var target := _streak_target()
+	if target > 0.05:
+		_streaks_on = true
+		_wipe = -1.0
+		_streaks.emitting = true
+		_streak_mat.set_shader_parameter(&"cut_y", 100000.0)
+		_streaks.global_position = _player.global_position + Vector3.UP * 1.0
+		# Streaks rush upward past the falling player, faster the harder the fall.
+		var speed := absf(_player.velocity.y) * 1.1
+		_streaks.initial_velocity_min = speed * 0.8
+		_streaks.initial_velocity_max = speed * 1.2
+		_streaks.scale_amount_min = 0.7 + target
+		_streaks.scale_amount_max = 1.0 + target * 1.5
 		return
-	_streaks.global_position = _player.global_position + Vector3.UP * 1.0
-	# Streaks rush upward past the falling player, faster the harder the fall.
-	var speed := absf(_player.velocity.y) * 1.1
-	_streaks.initial_velocity_min = speed * 0.8
-	_streaks.initial_velocity_max = speed * 1.2
-	_streaks.scale_amount_min = 0.7 + _amount
-	_streaks.scale_amount_max = 1.0 + _amount * 1.5
+	if not _streaks_on:
+		return
+	# The fall is over: no new streaks, and the ones in the air are wiped away
+	# from the top of the cloud down to the bottom.
+	_streaks.emitting = false
+	if _wipe < 0.0:
+		_wipe = 0.0
+	_wipe += delta / maxf(wipe_time, 0.01)
+	var mid := _player.global_position.y + 1.0
+	_streak_mat.set_shader_parameter(&"cut_y", lerpf(mid + wipe_height, mid - wipe_height, minf(_wipe, 1.0)))
+	if _wipe >= 1.0:
+		_streaks_on = false
+		_wipe = -1.0
+		_streaks.restart()   # clears what is left; emitting stays off
+		_streaks.emitting = false
