@@ -373,3 +373,4 @@ Fish sell for more the bigger they are (`FishCatalog.price_mult`, size^1.5; shop
 
 ### Texture storage
 The 47 furniture models in `assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/` no longer each embed their own copy of the (identical, 1024x1024) texture: they point at the one shared `Cute_Furniture_Free_Textures_4.png`, so it imports and ships once. After pulling, let Godot re-import the folder.
+Textures that several models used to embed separately (houses, windows, doors, trees, rocks, grass, characters) now live once in `assets/shared_textures/` (the furniture one stays next to its models) and the `.glb` files reference them. Re-export a model from Blender as usual; Godot re-imports. Names there include a short content hash.
