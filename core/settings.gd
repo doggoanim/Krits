@@ -51,7 +51,7 @@ const DEFAULTS := {
 	&"controls/bindings": {},
 	&"accessibility/screen_shake": true,
 	&"accessibility/wobbly_text": true,       ## slight hand-drawn wobble on all UI text (core/text_wobble.gd)
-	&"accessibility/gore": true,             ## cartoon gore on deaths (core: GoreBurst); off = the plain death animations
+	&"accessibility/gore": false,            ## cartoon gore on deaths (world/gore_burst.gd); off = the plain death animations
 	&"accessibility/telegraphs": true,        ## show the ground attack telegraphs (circle / aim line); the "!" always shows
 	&"accessibility/hitstop": 1.0,            ## multiplier on hit-stop freeze time (0 = off)
 	&"accessibility/text_speed": 1.0,         ## multiplier on dialogue typewriter speed
