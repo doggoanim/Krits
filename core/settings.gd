@@ -180,17 +180,29 @@ func _apply_window_mode() -> void:
 			# Coming back from (exclusive) fullscreen can leave the window
 			# without its title bar — borderless is a separate flag from the mode.
 			DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
-			_place_window.call_deferred()   # the mode change needs a frame to settle before sizing
+			_place_window_settled()   # the mode change needs a few frames to settle before sizing
 		FULLSCREEN:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		_:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+
+## Windows takes a moment to leave (exclusive) fullscreen, and a size set too
+## early is thrown away, so place the window a few frames later and once more
+## after that to be sure.
+func _place_window_settled() -> void:
+	for _i in 3:
+		await get_tree().process_frame
+	_place_window()
+	await get_tree().create_timer(0.2, true, false, true).timeout
+	_place_window()
 
 ## Sizes and centres the window for Windowed mode (from the Resolution setting),
 ## shrunk to fit if the screen can't hold it.
 func _place_window() -> void:
 	if int(_values[&"display/window_mode"]) != WINDOWED:
 		return
+	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
 	var wanted := _windowed_size()
 	var size := Vector2i(mini(wanted.x, usable.size.x), mini(wanted.y, usable.size.y))
