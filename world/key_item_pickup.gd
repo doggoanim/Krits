@@ -10,18 +10,43 @@ extends Interactable
 @export var count := 1
 ## Unique per pickup; "picked_<pickup_id>" is the flag that remembers it.
 @export var pickup_id: StringName = &""
+## It only exists (visible, solid, takeable) while ALL of these story flags are set,
+## e.g. a quest's accepted flag so the item isn't lying there before the quest.
+@export var show_when: Array[StringName] = []
+
+var _body_layer := 0
 
 func _ready() -> void:
 	if Game.flag(_flag()):
 		queue_free()
 		return
 	super()
+	if Engine.is_editor_hint():
+		return
+	_body_layer = collision_layer
+	_refresh()
+
+func _process(delta: float) -> void:
+	super(delta)
+	if not Engine.is_editor_hint():
+		_refresh()
+
+## Shown only while every show_when flag is set; hidden it has no collision either.
+func _refresh() -> void:
+	var shown := true
+	for f in show_when:
+		if not Game.flag(f):
+			shown = false
+	if shown == visible:
+		return
+	visible = shown
+	collision_layer = _body_layer if shown else 0
 
 func _flag() -> StringName:
 	return StringName("picked_" + String(pickup_id))
 
 func _can_interact() -> bool:
-	return player != null and not player.dead and not Game.input_locked
+	return visible and player != null and not player.dead and not Game.input_locked
 
 func _interact() -> void:
 	var item := ItemLibrary.by_id(item_id)

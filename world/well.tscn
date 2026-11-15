@@ -12378,6 +12378,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, -9.7, -39.5)
 script = ExtResource("well_pickup")
 item_id = &"yule_ball"
 pickup_id = &"yule_ball"
+show_when = Array[StringName]([&"yule_quest_accepted"])
 prompt_text = "Press E to pick up"
 
 [node name="Collision" type="CollisionShape3D" parent="YuleBall" unique_id=2105245992]
