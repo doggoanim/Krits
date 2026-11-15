@@ -260,13 +260,13 @@ transform = Transform3D(36.72, 0, 0, 0, 49.367317, 0, 0, 0, 12.864001, -49.80000
 [node name="rock_terrain62" parent="Terrain" unique_id=804713345 instance=ExtResource("26_lybmh")]
 transform = Transform3D(22.032001, 0, 0, 0, 54.304047, 0, 0, 0, 10.291202, 42.199997, 28.101618, 88.3624)
 
-[node name="Cube" parent="Terrain/rock_terrain62" index="0" unique_id=714825217]
+[node name="Cube" parent="Terrain/rock_terrain62" index="0" unique_id=1661212201]
 cast_shadow = 0
 
 [node name="rock_terrain83" parent="Terrain" unique_id=1389358921 instance=ExtResource("26_lybmh")]
 transform = Transform3D(46.2672, 0, 0, 0, 68.423096, 0, 0, 0, 10.291202, -0.80000305, 28.101618, 126.3624)
 
-[node name="Cube" parent="Terrain/rock_terrain83" index="0" unique_id=714825217]
+[node name="Cube" parent="Terrain/rock_terrain83" index="0" unique_id=1661212201]
 cast_shadow = 0
 
 [node name="rock_terrain84" parent="Terrain" unique_id=1844308624 instance=ExtResource("26_lybmh")]
@@ -355,6 +355,15 @@ transform = Transform3D(3.4079013, -1.702225, 0, 3.4079013, 1.7022251, 0, 0, 0, 
 
 [node name="rock_terrain44" parent="Terrain" unique_id=1588436242 instance=ExtResource("26_lybmh")]
 transform = Transform3D(4.8195004, 0, 0, 0, 4.9533114, 0, 0, 0, 6.4320006, -38.000008, 2.6478245, 21.498398)
+
+[node name="rock_terrain91" parent="Terrain" unique_id=1968459022 instance=ExtResource("26_lybmh")]
+transform = Transform3D(4.8195004, 0, 0, 0, 0.9906622, 0, 0, 0, 2.3155203, -47.000008, 0.9478245, 0.49839783)
+
+[node name="rock_terrain94" parent="Terrain" unique_id=1260047989 instance=ExtResource("26_lybmh")]
+transform = Transform3D(11.566801, 0, 0, 0, 0.9906622, 0, 0, 0, 2.5470724, -63.40001, 1.9478245, 0.49839783)
+
+[node name="rock_terrain92" parent="Terrain" unique_id=1044360250 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.4458501, 0, 0, 0, 0.4953311, 0, 0, 0, 2.0839682, -40.800007, 0.44782448, 0.49839783)
 
 [node name="rock_terrain20" parent="Terrain" unique_id=1443854835 instance=ExtResource("26_lybmh")]
 transform = Transform3D(9.792002, 0, 0, 0, 0.8255516, 0, 0, 0, 6.4320006, 4.199999, 19.38, 24.3624)
@@ -538,6 +547,9 @@ transform = Transform3D(1.7388002, 0, 0, 0, 0.050000012, 0, 0, 0, 3.1878002, -24
 
 [node name="rock_terrain49" parent="Terrain" unique_id=2056262643 instance=ExtResource("26_lybmh")]
 transform = Transform3D(12.834002, 0, 0, 0, 0.050000012, 0, 0, 0, 1.3199999, -23.657171, 0, 0.5199995)
+
+[node name="rock_terrain93" parent="Terrain" unique_id=657679954 instance=ExtResource("26_lybmh")]
+transform = Transform3D(1.2833997, 0, 0, 0, 0.050000012, 0, 0, 0, 0.83159995, -37.75717, 0, 0.5199995)
 
 [node name="rock_terrain4" parent="Terrain" unique_id=1003991270 instance=ExtResource("26_lybmh")]
 transform = Transform3D(1.2, 0, 0, 0, 0.36999992, 0, 0, 0, 1.1880001, 18.699999, 0.3, -1.9860001)
@@ -1856,7 +1868,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.799999, 41, 4.5)
 script = ExtResource("ledge_pickup_script")
 item_id = &"hiker_pack"
 pickup_id = &"brant_pack"
-show_when = Array[StringName]([&"brant_quest_accepted"])
 prompt_text = "Press E to take"
 
 [node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/HikerPack" unique_id=1468751729]
@@ -1932,7 +1943,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 2, 28)
 script = ExtResource("91_butterflies")
 
 [node name="FieldGate" type="Area3D" parent="." unique_id=1900000010]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 47)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72, 5, 0.29999995)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("oz_gate")
@@ -1940,7 +1951,7 @@ target_level = "res://world/hub_field.tscn"
 target_spawn_id = &"from_chesburg"
 
 [node name="FromFieldSpawn" type="Node3D" parent="." unique_id=1900000011]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 43)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, 5, 0.29999995)
 script = ExtResource("47_door_spawn")
 spawn_id = &"from_field"
 
