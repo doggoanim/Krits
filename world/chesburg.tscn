@@ -759,6 +759,186 @@ transform = Transform3D(-7.503499e-08, 0, 2.5474167, 0, 0.058499973, 0, -1.71660
 [node name="nocol_rock_terrain19" parent="Terrain" unique_id=1327922133 instance=ExtResource("25_3y8fk")]
 transform = Transform3D(-4.5020997e-08, 0, 1.0189666, 0, 0.10939495, 0, -1.0299603, 0, -4.4540442e-08, 18.447855, 18.76, 22.626665)
 
+[node name="nocol_grass_terrain" parent="Terrain" unique_id=1309322825 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 3.4, 37, 7.7000003, 12)
+
+[node name="nocol_grass_terrain16" parent="Terrain" unique_id=1583348217 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 3.4, 44.3, 10, 11)
+
+[node name="nocol_grass_terrain17" parent="Terrain" unique_id=336632348 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 2.38, 43.9, 11, 20.7)
+
+[node name="nocol_grass_terrain18" parent="Terrain" unique_id=231598543 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.6100001, 0, 0, 0, 0.071999975, 0, 0, 0, 0.95199996, 43.9, 11, 25.7)
+
+[node name="nocol_grass_terrain19" parent="Terrain" unique_id=1028790502 instance=ExtResource("62_7686p")]
+transform = Transform3D(0.96600014, 0, 0, 0, 0.107999966, 0, 0, 0, 0.95199996, 42.100002, 11, 23.900002)
+
+[node name="nocol_grass_terrain20" parent="Terrain" unique_id=68339487 instance=ExtResource("62_7686p")]
+transform = Transform3D(-4.6447727e-08, 0, 1.2375998, 0, 0.19439992, 0, -1.0626001, 0, -5.4097207e-08, 44.2, 11, 23.900002)
+
+[node name="nocol_grass_terrain2" parent="Terrain" unique_id=580090696 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.3800001, 0, 0, 0, 0.071999975, 0, 0, 0, 2.0400002, 33, 7.7000003, 6)
+
+[node name="nocol_grass_terrain11" parent="Terrain" unique_id=1400498276 instance=ExtResource("62_7686p")]
+transform = Transform3D(4.0020003, 0, 0, 0, 0.071999975, 0, 0, 0, 2.0400002, 35, 5.6000004, -3)
+
+[node name="nocol_grass_terrain12" parent="Terrain" unique_id=1369172537 instance=ExtResource("62_7686p")]
+transform = Transform3D(0.6003001, 0, 0, 0, 0.071999975, 0, 0, 0, 2.7540004, 31.6, 5.6000004, -9)
+
+[node name="nocol_grass_terrain13" parent="Terrain" unique_id=820752951 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.0205102, 0, 0, 0, 0.16559996, 0, 0, 0, 1.3770002, 31.2, 5.6000004, -6)
+
+[node name="nocol_grass_terrain14" parent="Terrain" unique_id=430474029 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.0205102, 0, 0, 0, 0.16559996, 0, 0, 0, 10.052102, 31.2, 5.6000004, -23)
+
+[node name="nocol_grass_terrain3" parent="Terrain" unique_id=804154584 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.1040001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 15.2, 2.9802322e-07, 6)
+
+[node name="nocol_grass_terrain4" parent="Terrain" unique_id=856725632 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.4352001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 16.2, 2.9802322e-07, -21)
+
+[node name="nocol_grass_terrain5" parent="Terrain" unique_id=1085442607 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 2.2848003, 9.024, 2.9802322e-07, -30.792002)
+
+[node name="nocol_grass_terrain6" parent="Terrain" unique_id=552433615 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 4.1126404, -1.5964804, 2.9802322e-07, -32.20858)
+
+[node name="nocol_grass_terrain9" parent="Terrain" unique_id=670941786 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.124096, 0, 0, 0, 0.071999975, 0, 0, 0, 4.1126404, -10.59648, 2.9802322e-07, -27.20858)
+
+[node name="nocol_grass_terrain10" parent="Terrain" unique_id=1754362521 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.124096, 0, 0, 0, 0.14399995, 0, 0, 0, 2.0563202, -12.59648, 2.9802322e-07, -23.20858)
+
+[node name="nocol_grass_terrain21" parent="Terrain" unique_id=101991472 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.5226493, 0, 0, 0, 0.14399995, 0, 0, 0, 2.0563202, 13.40352, 2.9802322e-07, 45.79142)
+
+[node name="nocol_grass_terrain24" parent="Terrain" unique_id=339232087 instance=ExtResource("62_7686p")]
+transform = Transform3D(3.8658545, 0, 0, 0, 0.14399995, 0, 0, 0, 3.7013762, -21.596481, 2.9802322e-07, 43.79142)
+
+[node name="nocol_grass_terrain25" parent="Terrain" unique_id=837528108 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.2370733, 0, 0, 0, 0.14399995, 0, 0, 0, 1.9987433, -18.596481, 24.7, 29.39142)
+
+[node name="nocol_grass_terrain31" parent="Terrain" unique_id=903868745 instance=ExtResource("62_7686p")]
+transform = Transform3D(0.320178, 0, -1.9306376, 0, 0.14399993, 0, 1.194921, 0, 0.5173128, -13.596481, 22.2, 21.39142)
+
+[node name="nocol_grass_terrain32" parent="Terrain" unique_id=2103255709 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.4901161e-07, 0, -1.9987429, 0, 0.14399992, 0, 1.2370731, 0, 2.9802322e-08, 34.40352, 27.2, 34.39142)
+
+[node name="nocol_grass_terrain35" parent="Terrain" unique_id=31846479 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.3411052e-07, 0, 1.1992451, 0, 0.14399992, 0, -1.1133664, 0, -1.7881383e-08, 39.40352, 27.2, 30.391418)
+
+[node name="nocol_grass_terrain38" parent="Terrain" unique_id=730272640 instance=ExtResource("62_7686p")]
+transform = Transform3D(8.046632e-08, 0, 1.5590187, 0, 0.14399992, 0, -0.6680199, 0, -2.32458e-08, 22.403519, 18.7, 17.391418)
+
+[node name="nocol_grass_terrain36" parent="Terrain" unique_id=1416613757 instance=ExtResource("62_7686p")]
+transform = Transform3D(6.7055275e-08, 0, 1.6789433, 0, 0.14399992, 0, -0.5566833, 0, -2.503394e-08, 7.4035187, 27.2, 37.39142)
+
+[node name="nocol_grass_terrain37" parent="Terrain" unique_id=1143334977 instance=ExtResource("62_7686p")]
+transform = Transform3D(-0.39363447, 0, 1.1871922, 0, 0.1439999, 0, -0.39363456, 0, -1.1871921, 40.40352, 27.2, 37.39142)
+
+[node name="nocol_grass_terrain33" parent="Terrain" unique_id=2012858402 instance=ExtResource("62_7686p")]
+transform = Transform3D(-3.5762795e-07, 0, -6.795726, 0, 0.14399992, 0, 2.968976, 0, 1.0132789e-07, 14.403519, 27.2, 32.39142)
+
+[node name="nocol_grass_terrain34" parent="Terrain" unique_id=168528690 instance=ExtResource("62_7686p")]
+transform = Transform3D(-3.5762795e-07, 0, -6.795726, 0, 0.33119985, 0, 2.968976, 0, 1.0132789e-07, 24.403519, 27.2, 36.39142)
+
+[node name="nocol_grass_terrain39" parent="Terrain" unique_id=346334277 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.0013582e-06, 0, -9.514013, 8.313132, -4.3431614e-09, 1.4185888e-07, -3.6337855e-07, -0.09935995, 1.2900144e-13, -36.59648, 60.2, 74.89142)
+
+[node name="nocol_grass_terrain48" parent="Terrain" unique_id=1131453292 instance=ExtResource("62_7686p")]
+transform = Transform3D(-6.008148e-07, 0, -2.8542042, 4.987879, -4.3431614e-09, 4.2557666e-08, -2.1802708e-07, -0.09935995, 3.8700434e-14, -36.59648, 21.2, 74.89142)
+
+[node name="nocol_grass_terrain53" parent="Terrain" unique_id=2139539921 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.1802711e-07, 0.09935995, 1.2476119e-07, 4.987879, -4.3431614e-09, 4.2557662e-08, -6.008149e-07, 4.343162e-09, -2.8542044, -59.59648, 40.2, 62.89142)
+
+[node name="nocol_grass_terrain54" parent="Terrain" unique_id=391122272 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.1802711e-07, 0.09935995, 1.2476119e-07, 4.987879, -4.3431614e-09, 4.2557662e-08, -6.008149e-07, 4.343162e-09, -2.8542044, -59.59648, 40.2, 62.89142)
+
+[node name="nocol_grass_terrain55" parent="Terrain" unique_id=2056186255 instance=ExtResource("62_7686p")]
+transform = Transform3D(1.7442169e-07, 0.09935995, 1.2476119e-07, 3.990303, -4.3431614e-09, 4.2557662e-08, -4.806519e-07, 4.343162e-09, -2.8542044, -59.59648, 32.2, -34.10858)
+
+[node name="nocol_grass_terrain56" parent="Terrain" unique_id=1561732550 instance=ExtResource("62_7686p")]
+transform = Transform3D(6.9768674e-08, 0.09935995, 1.7466567e-07, 1.5961213, -4.3431614e-09, 5.958073e-08, -1.9226079e-07, 4.343162e-09, -3.9958866, -59.59648, 24.2, -47.10858)
+
+[node name="nocol_grass_terrain45" parent="Terrain" unique_id=1935037281 instance=ExtResource("62_7686p")]
+transform = Transform3D(-2.5436486e-07, -0.09935995, 1.6634836e-07, 5.819191, -4.3431614e-09, 5.6743556e-08, 7.009506e-07, 4.3431614e-09, 3.8056056, 69.30352, 56.2, 6.8914185)
+
+[node name="nocol_grass_terrain46" parent="Terrain" unique_id=1493579671 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.0174594e-07, -0.09935995, 1.8298321e-07, 2.3276763, -4.3431614e-09, 6.241792e-08, 2.8038022e-07, 4.3431614e-09, 4.186167, 69.30352, 28.2, -0.10858154)
+
+[node name="nocol_grass_terrain59" parent="Terrain" unique_id=1076977985 instance=ExtResource("62_7686p")]
+transform = Transform3D(-2.0349188e-07, -0.099359944, 1.8298319e-07, 4.6553526, -4.343161e-09, 6.241791e-08, 5.6076044e-07, 4.343161e-09, 4.1861663, 72.30352, 34.2, 57.89142)
+
+[node name="nocol_grass_terrain47" parent="Terrain" unique_id=1342758321 instance=ExtResource("62_7686p")]
+transform = Transform3D(-2.1366647e-07, -0.099359944, 1.4638655e-07, 4.88812, -4.343161e-09, 4.993433e-08, 5.8879846e-07, 4.343161e-09, 3.348933, 71.30352, 40.2, -48.10858)
+
+[node name="nocol_grass_terrain49" parent="Terrain" unique_id=317515361 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.887985e-07, 8.686322e-09, 4.0187197, 4.8881197, -4.3431605e-09, 5.992119e-08, 2.1366644e-07, 0.099359944, -3.5132769e-07, -2.6964798, 41.2, -65.10858)
+
+[node name="nocol_grass_terrain57" parent="Terrain" unique_id=1221170172 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.887985e-07, 8.686322e-09, 4.0187197, 4.8881197, -4.3431605e-09, 5.992119e-08, 2.1366644e-07, 0.099359944, -3.5132769e-07, -41.69648, 73.2, -92.10858)
+
+[node name="nocol_grass_terrain58" parent="Terrain" unique_id=306320178 instance=ExtResource("62_7686p")]
+transform = Transform3D(2.943993e-07, 8.686323e-09, 6.429952, 2.4440603, -4.343161e-09, 9.5873915e-08, 1.0683325e-07, 0.09935996, -5.6212434e-07, -35.69648, 40.199997, -92.10858)
+
+[node name="nocol_grass_terrain50" parent="Terrain" unique_id=1040556443 instance=ExtResource("62_7686p")]
+transform = Transform3D(4.1215898e-07, 8.686322e-09, 5.6262074, 3.421684, -4.3431605e-09, 8.388967e-08, 1.4956653e-07, 0.099359944, -4.9185877e-07, 10.30352, 16.2, -65.10858)
+
+[node name="nocol_grass_terrain51" parent="Terrain" unique_id=1451201524 instance=ExtResource("62_7686p")]
+transform = Transform3D(4.1215898e-07, 8.686322e-09, 5.6262074, 3.421684, -4.3431605e-09, 8.388967e-08, 1.4956653e-07, 0.099359944, -4.9185877e-07, 36.30352, 55.2, -67.10858)
+
+[node name="nocol_grass_terrain52" parent="Terrain" unique_id=362930721 instance=ExtResource("62_7686p")]
+transform = Transform3D(4.1215893e-07, 8.686321e-09, 3.3757246, 3.4216835, -4.34316e-09, 5.0333803e-08, 1.4956652e-07, 0.09935994, -2.9511529e-07, 40.30352, 76.2, -67.10858)
+
+[node name="nocol_grass_terrain40" parent="Terrain" unique_id=556046719 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.7023089e-06, 0, -5.708407, 14.132324, -4.343161e-09, 8.511531e-08, -6.177435e-07, -0.099359944, 7.740085e-14, -0.5964813, 24.2, 78.89142)
+
+[node name="nocol_grass_terrain41" parent="Terrain" unique_id=1450780739 instance=ExtResource("62_7686p")]
+transform = Transform3D(-6.809233e-07, 0, -3.4250445, 5.652928, -4.343161e-09, 5.1069193e-08, -2.4709732e-07, -0.099359944, 4.6440516e-14, 32.40352, 59.2, 77.89142)
+
+[node name="nocol_grass_terrain43" parent="Terrain" unique_id=921133481 instance=ExtResource("62_7686p")]
+transform = Transform3D(-7.490157e-07, 0, -6.576086, 6.2182217, -4.343161e-09, 9.805286e-08, -2.718071e-07, -0.099359944, 8.9165796e-14, 48.40352, 20.2, 77.89142)
+
+[node name="nocol_grass_terrain44" parent="Terrain" unique_id=753192077 instance=ExtResource("62_7686p")]
+transform = Transform3D(-4.7937e-07, 0, -3.9456518, 3.9796612, -4.343161e-09, 5.8831716e-08, -1.7395651e-07, -0.099359944, 5.349948e-14, 29.403519, 33.2, 77.89142)
+
+[node name="nocol_grass_terrain42" parent="Terrain" unique_id=1300088548 instance=ExtResource("62_7686p")]
+transform = Transform3D(-4.0855423e-07, 0, -8.562612, 3.391759, -4.343161e-09, 1.2767299e-07, -1.4825848e-07, -0.099359944, 1.1610129e-13, 51.40352, 50.199997, 77.89142)
+
+[node name="nocol_grass_terrain26" parent="Terrain" unique_id=1590180608 instance=ExtResource("62_7686p")]
+transform = Transform3D(0.6680196, 0, 0, 0, 0.14399995, 0, 0, 0, 0.79949725, -18.596481, 24.800001, 26.99142)
+
+[node name="nocol_grass_terrain27" parent="Terrain" unique_id=1035780257 instance=ExtResource("62_7686p")]
+transform = Transform3D(0.6680196, 0, 0, 0, 0.14399995, 0, 0, 0, 1.1192961, -19.596481, 24.6, 26.99142)
+
+[node name="nocol_grass_terrain28" parent="Terrain" unique_id=449578475 instance=ExtResource("62_7686p")]
+transform = Transform3D(-0.6680196, 0, -6.989427e-08, 0, 0.14399995, 0, 5.8400122e-08, 0, -0.7994972, -19.196482, 29.400002, 25.99142)
+
+[node name="nocol_grass_terrain30" parent="Terrain" unique_id=697706558 instance=ExtResource("62_7686p")]
+transform = Transform3D(-0.26720786, 0, -2.0968278e-08, 0, 0.14399995, 0, 2.3360052e-08, 0, -0.23984912, -18.896482, 29.300001, 26.99142)
+
+[node name="nocol_grass_terrain29" parent="Terrain" unique_id=1219939427 instance=ExtResource("62_7686p")]
+transform = Transform3D(-0.6680196, 0, -9.7851974e-08, 0, 0.14399995, 0, 5.840013e-08, 0, -1.1192961, -18.196482, 29.2, 25.99142)
+
+[node name="nocol_grass_terrain23" parent="Terrain" unique_id=63442537 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.4484161e-07, 0, -2.6732159, 0, 0.14399995, 0, 3.3135893, 0, -1.16849975e-07, 27.403519, 2.9802322e-07, 44.79142)
+
+[node name="nocol_grass_terrain22" parent="Terrain" unique_id=472639686 instance=ExtResource("62_7686p")]
+transform = Transform3D(5.5226493, 0, 0, 0, 0.2879999, 0, 0, 0, 2.0563202, 21.403519, 2.9802322e-07, 48.79142)
+
+[node name="nocol_grass_terrain15" parent="Terrain" unique_id=1565542941 instance=ExtResource("62_7686p")]
+transform = Transform3D(4.4606013, 0, 0, 0, 0.14399995, 0, 0, 0, 3.9070086, -35.59648, 2.9802322e-07, 45.79142)
+
+[node name="nocol_grass_terrain7" parent="Terrain" unique_id=1887330071 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.16058985e-07, 0, 3.2901123, 0, 0.071999975, 0, -2.6551201, 0, -1.4381537e-07, 22.513462, 2.9802322e-07, -35.12921)
+
+[node name="nocol_grass_terrain8" parent="Terrain" unique_id=1162537257 instance=ExtResource("62_7686p")]
+transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.6551201, 0, -1.4381537e-07, 12.643126, 2.9802322e-07, -35.12921)
+
+[node name="nocol_dirt_terrain" parent="Terrain" unique_id=472464163 instance=ExtResource("10_a5ueg")]
+transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
+
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
@@ -1747,183 +1927,6 @@ script = ExtResource("91_butterflies")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 2, 28)
 script = ExtResource("91_butterflies")
 
-[node name="nocol_grass_terrain" parent="." unique_id=1309322825 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 3.4, 37, 7.7000003, 12)
-
-[node name="nocol_grass_terrain16" parent="." unique_id=1583348217 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 3.4, 44.3, 10, 11)
-
-[node name="nocol_grass_terrain17" parent="." unique_id=336632348 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.3000002, 0, 0, 0, 0.071999975, 0, 0, 0, 2.38, 43.9, 11, 20.7)
-
-[node name="nocol_grass_terrain18" parent="." unique_id=231598543 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.6100001, 0, 0, 0, 0.071999975, 0, 0, 0, 0.95199996, 43.9, 11, 25.7)
-
-[node name="nocol_grass_terrain19" parent="." unique_id=1028790502 instance=ExtResource("62_7686p")]
-transform = Transform3D(0.96600014, 0, 0, 0, 0.107999966, 0, 0, 0, 0.95199996, 42.100002, 11, 23.900002)
-
-[node name="nocol_grass_terrain20" parent="." unique_id=68339487 instance=ExtResource("62_7686p")]
-transform = Transform3D(-4.6447727e-08, 0, 1.2375998, 0, 0.19439992, 0, -1.0626001, 0, -5.4097207e-08, 44.2, 11, 23.900002)
-
-[node name="nocol_grass_terrain2" parent="." unique_id=580090696 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.3800001, 0, 0, 0, 0.071999975, 0, 0, 0, 2.0400002, 33, 7.7000003, 6)
-
-[node name="nocol_grass_terrain11" parent="." unique_id=1400498276 instance=ExtResource("62_7686p")]
-transform = Transform3D(4.0020003, 0, 0, 0, 0.071999975, 0, 0, 0, 2.0400002, 35, 5.6000004, -3)
-
-[node name="nocol_grass_terrain12" parent="." unique_id=1369172537 instance=ExtResource("62_7686p")]
-transform = Transform3D(0.6003001, 0, 0, 0, 0.071999975, 0, 0, 0, 2.7540004, 31.6, 5.6000004, -9)
-
-[node name="nocol_grass_terrain13" parent="." unique_id=820752951 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.0205102, 0, 0, 0, 0.16559996, 0, 0, 0, 1.3770002, 31.2, 5.6000004, -6)
-
-[node name="nocol_grass_terrain14" parent="." unique_id=430474029 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.0205102, 0, 0, 0, 0.16559996, 0, 0, 0, 10.052102, 31.2, 5.6000004, -23)
-
-[node name="nocol_grass_terrain3" parent="." unique_id=804154584 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.1040001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 15.2, 2.9802322e-07, 6)
-
-[node name="nocol_grass_terrain4" parent="." unique_id=856725632 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.4352001, 0, 0, 0, 0.071999975, 0, 0, 0, 3.2640004, 16.2, 2.9802322e-07, -21)
-
-[node name="nocol_grass_terrain5" parent="." unique_id=1085442607 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 2.2848003, 9.024, 2.9802322e-07, -30.792002)
-
-[node name="nocol_grass_terrain6" parent="." unique_id=552433615 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.3102403, 0, 0, 0, 0.071999975, 0, 0, 0, 4.1126404, -1.5964804, 2.9802322e-07, -32.20858)
-
-[node name="nocol_grass_terrain9" parent="." unique_id=670941786 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.124096, 0, 0, 0, 0.071999975, 0, 0, 0, 4.1126404, -10.59648, 2.9802322e-07, -27.20858)
-
-[node name="nocol_grass_terrain10" parent="." unique_id=1754362521 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.124096, 0, 0, 0, 0.14399995, 0, 0, 0, 2.0563202, -12.59648, 2.9802322e-07, -23.20858)
-
-[node name="nocol_grass_terrain21" parent="." unique_id=101991472 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.5226493, 0, 0, 0, 0.14399995, 0, 0, 0, 2.0563202, 13.40352, 2.9802322e-07, 45.79142)
-
-[node name="nocol_grass_terrain24" parent="." unique_id=339232087 instance=ExtResource("62_7686p")]
-transform = Transform3D(3.8658545, 0, 0, 0, 0.14399995, 0, 0, 0, 3.7013762, -21.596481, 2.9802322e-07, 43.79142)
-
-[node name="nocol_grass_terrain25" parent="." unique_id=837528108 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.2370733, 0, 0, 0, 0.14399995, 0, 0, 0, 1.9987433, -18.596481, 24.7, 29.39142)
-
-[node name="nocol_grass_terrain31" parent="." unique_id=903868745 instance=ExtResource("62_7686p")]
-transform = Transform3D(0.320178, 0, -1.9306376, 0, 0.14399993, 0, 1.194921, 0, 0.5173128, -13.596481, 22.2, 21.39142)
-
-[node name="nocol_grass_terrain32" parent="." unique_id=2103255709 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.4901161e-07, 0, -1.9987429, 0, 0.14399992, 0, 1.2370731, 0, 2.9802322e-08, 34.40352, 27.2, 34.39142)
-
-[node name="nocol_grass_terrain35" parent="." unique_id=31846479 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.3411052e-07, 0, 1.1992451, 0, 0.14399992, 0, -1.1133664, 0, -1.7881383e-08, 39.40352, 27.2, 30.391418)
-
-[node name="nocol_grass_terrain38" parent="." unique_id=730272640 instance=ExtResource("62_7686p")]
-transform = Transform3D(8.046632e-08, 0, 1.5590187, 0, 0.14399992, 0, -0.6680199, 0, -2.32458e-08, 22.403519, 18.7, 17.391418)
-
-[node name="nocol_grass_terrain36" parent="." unique_id=1416613757 instance=ExtResource("62_7686p")]
-transform = Transform3D(6.7055275e-08, 0, 1.6789433, 0, 0.14399992, 0, -0.5566833, 0, -2.503394e-08, 7.4035187, 27.2, 37.39142)
-
-[node name="nocol_grass_terrain37" parent="." unique_id=1143334977 instance=ExtResource("62_7686p")]
-transform = Transform3D(-0.39363447, 0, 1.1871922, 0, 0.1439999, 0, -0.39363456, 0, -1.1871921, 40.40352, 27.2, 37.39142)
-
-[node name="nocol_grass_terrain33" parent="." unique_id=2012858402 instance=ExtResource("62_7686p")]
-transform = Transform3D(-3.5762795e-07, 0, -6.795726, 0, 0.14399992, 0, 2.968976, 0, 1.0132789e-07, 14.403519, 27.2, 32.39142)
-
-[node name="nocol_grass_terrain34" parent="." unique_id=168528690 instance=ExtResource("62_7686p")]
-transform = Transform3D(-3.5762795e-07, 0, -6.795726, 0, 0.33119985, 0, 2.968976, 0, 1.0132789e-07, 24.403519, 27.2, 36.39142)
-
-[node name="nocol_grass_terrain39" parent="." unique_id=346334277 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.0013582e-06, 0, -9.514013, 8.313132, -4.3431614e-09, 1.4185888e-07, -3.6337855e-07, -0.09935995, 1.2900144e-13, -36.59648, 60.2, 74.89142)
-
-[node name="nocol_grass_terrain48" parent="." unique_id=1131453292 instance=ExtResource("62_7686p")]
-transform = Transform3D(-6.008148e-07, 0, -2.8542042, 4.987879, -4.3431614e-09, 4.2557666e-08, -2.1802708e-07, -0.09935995, 3.8700434e-14, -36.59648, 21.2, 74.89142)
-
-[node name="nocol_grass_terrain53" parent="." unique_id=2139539921 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.1802711e-07, 0.09935995, 1.2476119e-07, 4.987879, -4.3431614e-09, 4.2557662e-08, -6.008149e-07, 4.343162e-09, -2.8542044, -59.59648, 40.2, 62.89142)
-
-[node name="nocol_grass_terrain54" parent="." unique_id=391122272 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.1802711e-07, 0.09935995, 1.2476119e-07, 4.987879, -4.3431614e-09, 4.2557662e-08, -6.008149e-07, 4.343162e-09, -2.8542044, -59.59648, 40.2, 62.89142)
-
-[node name="nocol_grass_terrain55" parent="." unique_id=2056186255 instance=ExtResource("62_7686p")]
-transform = Transform3D(1.7442169e-07, 0.09935995, 1.2476119e-07, 3.990303, -4.3431614e-09, 4.2557662e-08, -4.806519e-07, 4.343162e-09, -2.8542044, -59.59648, 32.2, -34.10858)
-
-[node name="nocol_grass_terrain56" parent="." unique_id=1561732550 instance=ExtResource("62_7686p")]
-transform = Transform3D(6.9768674e-08, 0.09935995, 1.7466567e-07, 1.5961213, -4.3431614e-09, 5.958073e-08, -1.9226079e-07, 4.343162e-09, -3.9958866, -59.59648, 24.2, -47.10858)
-
-[node name="nocol_grass_terrain45" parent="." unique_id=1935037281 instance=ExtResource("62_7686p")]
-transform = Transform3D(-2.5436486e-07, -0.09935995, 1.6634836e-07, 5.819191, -4.3431614e-09, 5.6743556e-08, 7.009506e-07, 4.3431614e-09, 3.8056056, 69.30352, 56.2, 6.8914185)
-
-[node name="nocol_grass_terrain46" parent="." unique_id=1493579671 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.0174594e-07, -0.09935995, 1.8298321e-07, 2.3276763, -4.3431614e-09, 6.241792e-08, 2.8038022e-07, 4.3431614e-09, 4.186167, 69.30352, 28.2, -0.10858154)
-
-[node name="nocol_grass_terrain59" parent="." unique_id=1076977985 instance=ExtResource("62_7686p")]
-transform = Transform3D(-2.0349188e-07, -0.099359944, 1.8298319e-07, 4.6553526, -4.343161e-09, 6.241791e-08, 5.6076044e-07, 4.343161e-09, 4.1861663, 72.30352, 34.2, 57.89142)
-
-[node name="nocol_grass_terrain47" parent="." unique_id=1342758321 instance=ExtResource("62_7686p")]
-transform = Transform3D(-2.1366647e-07, -0.099359944, 1.4638655e-07, 4.88812, -4.343161e-09, 4.993433e-08, 5.8879846e-07, 4.343161e-09, 3.348933, 71.30352, 40.2, -48.10858)
-
-[node name="nocol_grass_terrain49" parent="." unique_id=317515361 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.887985e-07, 8.686322e-09, 4.0187197, 4.8881197, -4.3431605e-09, 5.992119e-08, 2.1366644e-07, 0.099359944, -3.5132769e-07, -2.6964798, 41.2, -65.10858)
-
-[node name="nocol_grass_terrain57" parent="." unique_id=1221170172 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.887985e-07, 8.686322e-09, 4.0187197, 4.8881197, -4.3431605e-09, 5.992119e-08, 2.1366644e-07, 0.099359944, -3.5132769e-07, -41.69648, 73.2, -92.10858)
-
-[node name="nocol_grass_terrain58" parent="." unique_id=306320178 instance=ExtResource("62_7686p")]
-transform = Transform3D(2.943993e-07, 8.686323e-09, 6.429952, 2.4440603, -4.343161e-09, 9.5873915e-08, 1.0683325e-07, 0.09935996, -5.6212434e-07, -35.69648, 40.199997, -92.10858)
-
-[node name="nocol_grass_terrain50" parent="." unique_id=1040556443 instance=ExtResource("62_7686p")]
-transform = Transform3D(4.1215898e-07, 8.686322e-09, 5.6262074, 3.421684, -4.3431605e-09, 8.388967e-08, 1.4956653e-07, 0.099359944, -4.9185877e-07, 10.30352, 16.2, -65.10858)
-
-[node name="nocol_grass_terrain51" parent="." unique_id=1451201524 instance=ExtResource("62_7686p")]
-transform = Transform3D(4.1215898e-07, 8.686322e-09, 5.6262074, 3.421684, -4.3431605e-09, 8.388967e-08, 1.4956653e-07, 0.099359944, -4.9185877e-07, 36.30352, 55.2, -67.10858)
-
-[node name="nocol_grass_terrain52" parent="." unique_id=362930721 instance=ExtResource("62_7686p")]
-transform = Transform3D(4.1215893e-07, 8.686321e-09, 3.3757246, 3.4216835, -4.34316e-09, 5.0333803e-08, 1.4956652e-07, 0.09935994, -2.9511529e-07, 40.30352, 76.2, -67.10858)
-
-[node name="nocol_grass_terrain40" parent="." unique_id=556046719 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.7023089e-06, 0, -5.708407, 14.132324, -4.343161e-09, 8.511531e-08, -6.177435e-07, -0.099359944, 7.740085e-14, -0.5964813, 24.2, 78.89142)
-
-[node name="nocol_grass_terrain41" parent="." unique_id=1450780739 instance=ExtResource("62_7686p")]
-transform = Transform3D(-6.809233e-07, 0, -3.4250445, 5.652928, -4.343161e-09, 5.1069193e-08, -2.4709732e-07, -0.099359944, 4.6440516e-14, 32.40352, 59.2, 77.89142)
-
-[node name="nocol_grass_terrain43" parent="." unique_id=921133481 instance=ExtResource("62_7686p")]
-transform = Transform3D(-7.490157e-07, 0, -6.576086, 6.2182217, -4.343161e-09, 9.805286e-08, -2.718071e-07, -0.099359944, 8.9165796e-14, 48.40352, 20.2, 77.89142)
-
-[node name="nocol_grass_terrain44" parent="." unique_id=753192077 instance=ExtResource("62_7686p")]
-transform = Transform3D(-4.7937e-07, 0, -3.9456518, 3.9796612, -4.343161e-09, 5.8831716e-08, -1.7395651e-07, -0.099359944, 5.349948e-14, 29.403519, 33.2, 77.89142)
-
-[node name="nocol_grass_terrain42" parent="." unique_id=1300088548 instance=ExtResource("62_7686p")]
-transform = Transform3D(-4.0855423e-07, 0, -8.562612, 3.391759, -4.343161e-09, 1.2767299e-07, -1.4825848e-07, -0.099359944, 1.1610129e-13, 51.40352, 50.199997, 77.89142)
-
-[node name="nocol_grass_terrain26" parent="." unique_id=1590180608 instance=ExtResource("62_7686p")]
-transform = Transform3D(0.6680196, 0, 0, 0, 0.14399995, 0, 0, 0, 0.79949725, -18.596481, 24.800001, 26.99142)
-
-[node name="nocol_grass_terrain27" parent="." unique_id=1035780257 instance=ExtResource("62_7686p")]
-transform = Transform3D(0.6680196, 0, 0, 0, 0.14399995, 0, 0, 0, 1.1192961, -19.596481, 24.6, 26.99142)
-
-[node name="nocol_grass_terrain28" parent="." unique_id=449578475 instance=ExtResource("62_7686p")]
-transform = Transform3D(-0.6680196, 0, -6.989427e-08, 0, 0.14399995, 0, 5.8400122e-08, 0, -0.7994972, -19.196482, 29.400002, 25.99142)
-
-[node name="nocol_grass_terrain30" parent="." unique_id=697706558 instance=ExtResource("62_7686p")]
-transform = Transform3D(-0.26720786, 0, -2.0968278e-08, 0, 0.14399995, 0, 2.3360052e-08, 0, -0.23984912, -18.896482, 29.300001, 26.99142)
-
-[node name="nocol_grass_terrain29" parent="." unique_id=1219939427 instance=ExtResource("62_7686p")]
-transform = Transform3D(-0.6680196, 0, -9.7851974e-08, 0, 0.14399995, 0, 5.840013e-08, 0, -1.1192961, -18.196482, 29.2, 25.99142)
-
-[node name="nocol_grass_terrain23" parent="." unique_id=63442537 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.4484161e-07, 0, -2.6732159, 0, 0.14399995, 0, 3.3135893, 0, -1.16849975e-07, 27.403519, 2.9802322e-07, 44.79142)
-
-[node name="nocol_grass_terrain22" parent="." unique_id=472639686 instance=ExtResource("62_7686p")]
-transform = Transform3D(5.5226493, 0, 0, 0, 0.2879999, 0, 0, 0, 2.0563202, 21.403519, 2.9802322e-07, 48.79142)
-
-[node name="nocol_grass_terrain15" parent="." unique_id=1565542941 instance=ExtResource("62_7686p")]
-transform = Transform3D(4.4606013, 0, 0, 0, 0.14399995, 0, 0, 0, 3.9070086, -35.59648, 2.9802322e-07, 45.79142)
-
-[node name="nocol_grass_terrain7" parent="." unique_id=1887330071 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.16058985e-07, 0, 3.2901123, 0, 0.071999975, 0, -2.6551201, 0, -1.4381537e-07, 22.513462, 2.9802322e-07, -35.12921)
-
-[node name="nocol_grass_terrain8" parent="." unique_id=1162537257 instance=ExtResource("62_7686p")]
-transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.6551201, 0, -1.4381537e-07, 12.643126, 2.9802322e-07, -35.12921)
-
 [node name="FieldGate" type="Area3D" parent="." unique_id=1900000010]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 47)
 collision_layer = 0
@@ -1936,9 +1939,6 @@ target_spawn_id = &"from_chesburg"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 43)
 script = ExtResource("47_door_spawn")
 spawn_id = &"from_field"
-
-[node name="nocol_dirt_terrain" parent="." unique_id=472464163 instance=ExtResource("10_a5ueg")]
-transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 
 [editable path="Terrain/rock_terrain62"]
 [editable path="Terrain/rock_terrain83"]
