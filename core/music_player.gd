@@ -45,6 +45,22 @@ var duck := false   ## set by anything that wants the music pushed way down for 
 @export var duck_blend_speed := 5.0
 var _duck_blend := 0.0
 var force_muffle := false   ## set by anything that wants the muffled mix without a menu (e.g. the death sequence)
+## Set while the player is dead: the music distorts and its pitch lurches around
+## (see _update_warp()). Eases in and out; cleared again at respawn.
+var warped := false
+@export_group("Death Warp")
+@export_range(0.0, 1.0) var warp_drive := 0.75         ## distortion amount at full warp
+@export var warp_pitches: Array[float] = [0.55, 0.7, 0.82, 1.2, 1.35, 0.62, 0.9, 1.5]   ## the pitches it lurches between
+@export var warp_change_time := Vector2(0.18, 0.55)    ## seconds between lurches (min, max)
+@export var warp_glide := 7.0                          ## how fast the pitch slides to each new target
+@export var warp_blend_speed := 3.0
+@export_group("")
+var _distortion: AudioEffectDistortion
+var _distortion_idx := -1
+var _warp_blend := 0.0
+var _warp_pitch := 1.0
+var _warp_target := 1.0
+var _warp_timer := 0.0
 var _blend := 0.0   ## 0 = normal, 1 = fully muffled (menu open)
 var _normal_stream: AudioStream
 var _battle_stream: AudioStream
@@ -58,6 +74,12 @@ func _ready() -> void:
 		_lowpass = AudioEffectLowPassFilter.new()
 		_lowpass.cutoff_hz = OPEN_CUTOFF_HZ
 		AudioServer.add_bus_effect(bus_idx, _lowpass)
+		_distortion = AudioEffectDistortion.new()   # first in the chain: distort, then muffle
+		_distortion.mode = AudioEffectDistortion.MODE_OVERDRIVE
+		_distortion.drive = 0.0
+		AudioServer.add_bus_effect(bus_idx, _distortion, 0)
+		_distortion_idx = 0
+		AudioServer.set_bus_effect_enabled(bus_idx, 0, false)
 	_player = AudioStreamPlayer.new()
 	_player.bus = bus
 	_player.volume_db = linear_to_db(volume_scale)
@@ -73,6 +95,25 @@ func _process(delta: float) -> void:
 	_duck_blend = move_toward(_duck_blend, 1.0 if duck else 0.0, duck_blend_speed * delta)
 	_player.volume_db = linear_to_db(volume_scale * lerpf(1.0, menu_volume_mult, _blend) * lerpf(1.0, duck_volume_mult, _duck_blend))
 	_update_battle_mix(delta)
+	_update_warp(delta)
+
+## Death warp: distortion fades in and the pitch hops between random values,
+## gliding between them; both ease back to normal when `warped` clears.
+func _update_warp(delta: float) -> void:
+	_warp_blend = move_toward(_warp_blend, 1.0 if warped else 0.0, warp_blend_speed * delta)
+	if _warp_blend > 0.0 and warped:
+		_warp_timer -= delta
+		if _warp_timer <= 0.0:
+			_warp_timer = randf_range(warp_change_time.x, warp_change_time.y)
+			_warp_target = warp_pitches[randi() % warp_pitches.size()] if not warp_pitches.is_empty() else 1.0
+	elif not warped:
+		_warp_target = 1.0
+	_warp_pitch = lerpf(_warp_pitch, _warp_target, clampf(warp_glide * delta, 0.0, 1.0))
+	_player.pitch_scale = maxf(lerpf(1.0, _warp_pitch, minf(_warp_blend * 2.0, 1.0)), 0.05)
+	var bus_idx := AudioServer.get_bus_index(bus)
+	if _distortion != null and bus_idx != -1:
+		_distortion.drive = warp_drive * _warp_blend
+		AudioServer.set_bus_effect_enabled(bus_idx, _distortion_idx, _warp_blend > 0.0)
 
 ## Starts `stream` looping from the top. Pass `battle_stream` to give the
 ## track a battle layer that fades in during combat. A no-op if that exact

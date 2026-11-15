@@ -368,3 +368,4 @@ When the killer fish catches the player, the body bursts (`Player.gore_death()` 
 Enemies burst the same way when defeated (`Enemy._burst_on_death()`), scaled by their `size` and with scraps in their own color; this replaces their death animation. Tune with `Enemy.GORE_SIZE_PER_UNIT`.
 Every player death now gores too (`Player._begin_death`). **Settings > Accessibility > Gore** (`accessibility/gore`, default off) switches all gore on; off keeps the plain death animations for the player, enemies and killer fish.
 Gore color is per enemy: `EnemyData.gore_color` (transparent = red). The green slime bursts into green goo, with green chunks instead of meat and bone.
+After the player dies the music distorts and its pitch lurches between random values until respawn (`Music.warped`, tuned by the "Death Warp" exports in `core/music_player.gd`).

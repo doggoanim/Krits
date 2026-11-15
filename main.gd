@@ -285,6 +285,7 @@ func _on_encounter_returned(player_defeated: bool) -> void:
 ## once the arena has wrapped up; anywhere else we do it ourselves.
 func _on_player_died() -> void:
 	Music.force_muffle = true
+	Music.warped = true   # distorted, lurching pitch until the respawn
 	_death_running = true
 	await _play_death_sequence()
 	_death_running = false
@@ -333,7 +334,8 @@ func _respawn_after_death() -> void:
 		Game.stats.full_heal()
 		if not _respawn_in_dungeon():
 			_travel_to(Game.last_spawn if Game.last_spawn != &"" else &"start")
-		Music.force_muffle = false)
+		Music.force_muffle = false
+		Music.warped = false)
 	Game.input_locked = false
 	_respawning = false
 	if _gold_lost > 0:
