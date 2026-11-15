@@ -241,7 +241,12 @@ func _update_item_details() -> void:
 	if not sizes.is_empty():
 		text += "\n\nBiggest: %s   Smallest: %s" % [FishCatalog.length_text(item.id, sizes.max()), FishCatalog.length_text(item.id, sizes.min())]
 	if item.sell_price > 0:
-		text += "\n\nSells for %dg." % item.sell_price
+		if sizes.is_empty():
+			text += "\n\nSells for %dg." % item.sell_price
+		else:   # a fish's price follows its size
+			var low := FishCatalog.sell_value(item.sell_price, sizes.min())
+			var high := FishCatalog.sell_value(item.sell_price, sizes.max())
+			text += "\n\nSells for %s." % ("%dg" % low if low == high else "%d-%dg" % [low, high])
 	_set_detail_text(text)
 	_use_button.text = "Hold up" if item.holdable else "Use"
 	_use_button.disabled = false

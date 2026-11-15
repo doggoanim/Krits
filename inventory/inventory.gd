@@ -144,11 +144,31 @@ func sell_item(id: StringName, amount := 1) -> int:
 	if item == null or item.sell_price <= 0 or item.category == ItemData.Category.KEY:
 		return 0
 	var n := mini(amount, count_of(id))
+	var earned := sell_value(id, n)   # work it out before the fish are removed
 	if n <= 0 or not remove(id, n):
 		return 0
-	var earned := n * item.sell_price
 	Game.stats.add_gold(earned)
 	return earned
+
+## What selling `amount` of `id` would pay: a fish counts for its size (the newest
+## are sold first, as remove() takes them), anything else for its flat sell price.
+func sell_value(id: StringName, amount: int) -> int:
+	var item := ItemLibrary.by_id(id)
+	if item == null:
+		return 0
+	var left := amount
+	var total := 0
+	var i := stacks.size() - 1
+	while i >= 0 and left > 0:
+		if stacks[i]["id"] == id:
+			var sizes := sizes_at(i)
+			var take := mini(left, int(stacks[i]["count"]))
+			for k in take:
+				var size := float(sizes[sizes.size() - 1 - k]) if k < sizes.size() else 1.0
+				total += FishCatalog.sell_value(item.sell_price, size) if item.sized else item.sell_price
+			left -= take
+		i -= 1
+	return total
 
 ## Removes up to `amount` from stack `index`; returns how many were removed.
 func remove_at(index: int, amount := 1) -> int:

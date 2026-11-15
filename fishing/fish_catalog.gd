@@ -80,6 +80,18 @@ static func roll_size() -> float:
 		return randf_range(SIZE_BIG_MAX, SIZE_HUGE_MAX)
 	return lerpf(SIZE_HUGE_MAX, SIZE_MAX, pow(randf(), 2.0))   # skewed low: a true maximum is very rare
 
+## How much a fish of `size` is worth compared with an average one: it grows
+## faster than its length (size^1.5) so big catches pay off, but not as fast as its
+## weight would (a colossal one is ~40x, not ~1700x).
+const PRICE_EXPONENT := 1.5
+
+static func price_mult(size: float) -> float:
+	return pow(maxf(size, 0.0), PRICE_EXPONENT)
+
+## Gold one fish is worth: its base `sell_price` scaled by size (at least 1).
+static func sell_value(base_price: int, size: float) -> int:
+	return maxi(1, roundi(base_price * price_mult(size)))
+
 ## "Tiny", "Colossal"... or "" for an ordinary-sized fish.
 static func size_word(size: float) -> String:
 	if size < SIZE_TINY: return "Tiny"

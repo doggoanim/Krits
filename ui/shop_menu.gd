@@ -172,7 +172,7 @@ func _update_details() -> void:
 	_max.disabled = _plus.disabled
 	match o.tab:
 		ShopOffer.Tab.SELL:
-			_price.text = "+%dg" % (o.price * _qty)
+			_price.text = "+%dg" % Game.inventory.sell_value(o.id, _qty)
 			_set_action("Sell x%d" % _qty, false)
 		_:
 			_update_buy_details(o)
