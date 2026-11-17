@@ -73,6 +73,12 @@ const BUBBLE_RAMP := [
 	Color(1.0, 1.0, 1.0, 0.0),
 ]
 
+## Water splash sizes (see WaterSplashFx): climbing out, wading/hopping in, and a
+## fall from height or ground pound.
+const WATER_SPLASH_EXIT := 0.4
+const WATER_SPLASH_ENTER := 0.85
+const WATER_SPLASH_BIG := 1.8
+
 const SMOKE_TEXTURE_PATH := "res://assets/sprites/smoke_puff.png"
 const BUBBLE_TEXTURE_PATH := "res://assets/textures/bubble.png"
 
@@ -104,6 +110,7 @@ var _swim_bubbles: GPUParticles3D
 
 func _ready() -> void:
 	_warm_up_foam.call_deferred()
+	_warm_up_splash.call_deferred()
 	_smoke_quad = _make_quad_mesh(load(SMOKE_TEXTURE_PATH))
 	_bubble_quad = _make_quad_mesh(load(BUBBLE_TEXTURE_PATH))
 	_growth_curve = _make_growth_curve()
@@ -243,19 +250,12 @@ func burst_footstep_dust(pos: Vector3, surface: FootstepSurfaces.Surface) -> voi
 ## WaterVolume._on_body_entered()'s own fall-speed check. Only ever true
 ## together with `entering`; exiting the water never gets the big version.
 func burst_water_splash(pos: Vector3, entering: bool, big := false) -> void:
-	var amount := 14 if entering else 8
-	var speed := 4.5 if entering else 3.0
-	var scale_max := 0.7
-	var ripple_scale := 5.0
-	var ripple_duration := 0.7
+	var strength := WATER_SPLASH_EXIT
 	if big:
-		amount *= 3
-		speed *= 1.8
-		scale_max *= 1.6
-		ripple_scale *= 1.8
-		ripple_duration *= 1.3
-	_burst(pos, Vector3.UP, 45.0, _material(speed, 7.0, 0.3, scale_max, _splash_ramp_tex), amount, 0.4, _smoke_quad)
-	_spawn_ripple(pos, ripple_scale, ripple_duration)
+		strength = WATER_SPLASH_BIG
+	elif entering:
+		strength = WATER_SPLASH_ENTER
+	WaterSplashFx.spawn(get_tree().current_scene, pos, strength)
 
 ## A small puddle ring + light spray at each footstep through shallow water
 ## (see GroundState._play_footstep()) — the same splash idiom as
@@ -301,6 +301,11 @@ func _ensure_foam() -> void:
 	_foam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF   # moved by hand in _process()
 	_foam.rotation_degrees.x = -90.0  # lie flat
 	add_child(_foam)
+
+## A near-invisible splash under the player at load, so its shader and textures are
+## compiled before the first real one.
+func _warm_up_splash() -> void:
+	WaterSplashFx.spawn(get_tree().current_scene, (get_parent() as Node3D).global_position, 0.02)
 
 ## Builds the ring and draws it once, fully transparent, under the player at load
 ## so its shader is compiled up front. Otherwise the first time you step into water

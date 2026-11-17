@@ -376,3 +376,6 @@ The 47 furniture models in `assets/blender_stuff/Cute_Furniture_Free_glb/Separat
 Textures that several models used to embed separately (houses, windows, doors, trees, rocks, grass, characters) now live once in `assets/shared_textures/` (the furniture one stays next to its models) and the `.glb` files reference them. Re-export a model from Blender as usual; Godot re-imports. Names there include a short content hash.
 `KeyItemPickup.show_when` hides a pickup (and its collision) until the listed story flags are set; Yule's ball and Brant's backpack use their quests' accepted flags, so they only appear during the quest.
 Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stretch still starts at 7 m) and are wiped away from top to bottom when the fall ends (`wipe_time`, `wipe_height`).
+
+### Water splash
+Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
