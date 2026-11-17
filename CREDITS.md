@@ -15,15 +15,16 @@ Low-poly furniture models used for props in the game.
   personal and commercial projects ("Final Products"). The assets may **not**
   be redistributed as-is, even for free.
 
-### Everything Library: Animals (v0.2, 2020) — David OReilly
-Animal models used for creatures in the game.
+### Free Pack - Lowpoly Animal — PolyOne Studio
+Low-poly animal models used for creatures in the game.
 
-- Source: <http://davidoreilly.com/library>
-- Author: David OReilly — Everything Library © David OReilly
-- License: Creative Commons Attribution 4.0 International (CC BY 4.0) for the
-  creative content (the models), so credit to the author is required and any
-  changes should be noted ("modified for Krits"). Software applications that come
-  with it are MIT licensed. Details: <http://davidoreilly.com/library>
+- Source: <https://sketchfab.com/3d-models/free-pack-lowpoly-animal-7ee09512cbab4e0fb3fa7c75e3608764>
+- Author: PolyOne Studio ([@polyone](https://sketchfab.com/polyone) on Sketchfab)
+- License: Creative Commons Attribution 4.0 International
+  (<https://creativecommons.org/licenses/by/4.0/>). Credit the author, link the
+  license, and say if the models were changed ("modified for Krits").
+- Suggested credit line: "Free Pack - Lowpoly Animal" by PolyOne Studio,
+  licensed under CC BY 4.0, via Sketchfab.
 
 ## Plugins / code
 
