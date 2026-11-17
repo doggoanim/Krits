@@ -71,7 +71,7 @@ func _build() -> void:
 	if _use("wardrobe"):
 		_put(InteriorParts.wardrobe(), Vector3(east - 0.2, 0, 2.4), FACE_MINUS_X)
 	if _use("chest"):
-		_put(InteriorParts.chest(), Vector3(2.3, 0, -1.0))
+		_put(InteriorParts.chest(), Vector3(east - 0.1, 0, -0.7), FACE_MINUS_X)   # against the east wall, between the bed and the wardrobe
 	if _use("plant"):
 		_put(InteriorParts.plant(), Vector3(hx - 0.7, 0, hz - 0.8))
 		_put(InteriorParts.plant(), Vector3(-1.9, 0, hz - 0.7))
