@@ -980,13 +980,13 @@ script = ExtResource("47_door_spawn")
 spawn_id = &"house_1_entrance"
 
 [node name="house_chesburg_5" parent="Buildings" unique_id=2135377020 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 4.479099, 0, -10.312209)
+transform = Transform3D(1e-07, 0.0, -1.1, 0.0, 0.95, 0.0, 1.1, 0.0, 1e-07, 4.479099, 0, -10.312209)
 
 [node name="house_chesburg_6" parent="Buildings" unique_id=491103847 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(-2.1855693e-07, 0, 1, 0, 1, 0, -1, 0, -2.1855693e-07, -7.5209017, 0, -20.312206)
+transform = Transform3D(-2e-07, 0.0, 0.9, 0.0, 1.15, 0.0, -0.9, 0.0, -2e-07, -7.5209017, 0, -20.312206)
 
 [node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.706156, 0, -7.0017056)
+transform = Transform3D(1.08, 0.0, 0.0, 0.0, 1.1, 0.0, 0.0, 0.0, 1.08, -5.706156, 0, -7.0017056)
 
 [node name="house_chesburg_3" parent="Buildings" unique_id=1391076820 instance=ExtResource("24_iolvd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.33178, 8.084409, -24.818865)
@@ -1008,7 +1008,7 @@ script = ExtResource("47_door_spawn")
 spawn_id = &"house_3_entrance"
 
 [node name="house_chesburg_4" parent="Buildings" unique_id=1975904037 instance=ExtResource("28_lybmh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -21)
+transform = Transform3D(0.92, 0.0, 0.0, 0.0, 0.95, 0.0, 0.0, 0.0, 0.92, 7, 0, -21)
 
 [node name="nocol_dirt_terrain" parent="Buildings" unique_id=1026005673 instance=ExtResource("10_a5ueg")]
 transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032, -9.378)

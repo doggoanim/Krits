@@ -1,35 +1,46 @@
 @tool
 class_name HouseDressing
 extends Node
-## Gives every house under the parent node (Buildings in chesburg.tscn) a brick chimney
-## with a slow wisp of smoke, so the identical houses stop looking copy-pasted. The roof
-## height is read from the roof's own triangles, so the chimney stands on the roof
-## wherever the house sits. Each house gets a different spot and size.
+## Makes the identical Chesburg houses look different without touching their colours:
+## chimneys (count and style vary, some smoke), a dormer window or a weathervane on
+## some roofs, and a door awning / porch / step on some entrances. (House sizes and
+## heights are set by each house's scale in the scene.)
 ##
-## It also runs in the editor: the chimneys show up in the scene view but are never
-## saved into the scene (they have no owner), so chesburg.tscn doesn't change.
+## Everything stands on the roof or wall wherever the house is, found from the model's own
+## triangles (RoofProbe). It runs in the editor too, but the parts are children without an
+## owner, so they show in the scene view and are never saved into the scene.
+##
+## Per-house choices are the arrays below, in the order the houses appear under the parent.
+## Edit them (or `seed_offset`) to reshuffle.
 
-## Where a chimney may stand, in a house's own space (x, z). Each house starts at a
-## different one (house order) and takes the first that actually has roof under it.
-const SPOTS: Array[Vector2] = [
-	Vector2(-1.9, -0.9), Vector2(1.8, -0.5), Vector2(0.0, 0.6),
-	Vector2(1.6, 0.8), Vector2(-1.2, -0.5), Vector2(-2.0, 0.7),
-]
-## Chimney size (width = depth, height) per house, in the same order.
-const SIZES: Array[Vector2] = [
+const CHIMNEYS: Array[int] = [1, 1, 2, 1, 1, 2]                       ## how many chimneys
+const CHIMNEY_STYLES: Array[int] = [0, 2, 1, 3, 0, 2]                 ## HouseParts.ChimneyStyle
+const CHIMNEY_SIZES: Array[Vector2] = [                               ## (width, height)
 	Vector2(0.75, 1.7), Vector2(0.9, 1.4), Vector2(0.7, 2.0),
 	Vector2(0.8, 1.6), Vector2(0.7, 1.5), Vector2(0.85, 1.9),
 ]
-const CHIMNEY_NAME := "Chimney"
-const CHIMNEY_SINK := 0.5           ## how far the chimney's base is buried into the roof
-const BRICK := Color(0.62, 0.38, 0.32)
-const BRICK_DARK := Color(0.4, 0.26, 0.24)
-const TOON: Shader = preload("res://shading/toon.gdshader")
-const SMOKE_TEXTURE: Texture2D = preload("res://assets/sprites/smoke_puff.png")
+const CHIMNEY_SPOTS: Array[Vector2] = [                               ## where one may stand (x, z)
+	Vector2(-1.9, -0.9), Vector2(1.8, -0.5), Vector2(0.0, 0.6),
+	Vector2(1.6, 0.8), Vector2(-1.2, -0.5), Vector2(-2.0, 0.7),
+]
+const DORMERS: Array[bool] = [true, false, true, false, false, true]
+const WEATHERVANES: Array[bool] = [false, true, true, false, true, false]
+## HouseParts.AwningStyle per house, or -1 for a bare door.
+const ENTRANCES: Array[int] = [0, 1, 2, -1, -1, 0]
+const WOOD_SHADES: Array[float] = [0.1, 0.6, 0.3, 0.0, 0.0, 0.9]
+
+const CHIMNEY_SINK := 0.5       ## how far a chimney's base is buried in the roof
+const DORMER_SINK := 0.3
+const VANE_SINK := 0.1
+const CLEARANCE := 1.5          ## roof parts keep this far apart (metres)
+const DOOR_WALL_OFFSET := 0.33  ## from a Door_* node to the wall face in front of it
+const DOOR_FLOOR_DROP := 1.0    ## a Door_* node sits this far above the floor
+const MAX_DOOR_SETBACK := 1.0   ## a door deeper than this behind the footprint isn't dressed (the mayor's)
+const META := &"house_dressing"
 
 ## Houses to dress: nodes in the parent whose name contains one of these.
 @export var name_filter: PackedStringArray = ["house_chesburg"]
-## Shifts which spot/size each house gets; change it to reshuffle.
+## Shifts which choices each house gets; change it to reshuffle.
 @export var seed_offset := 0
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
@@ -51,126 +62,118 @@ func _matches(node_name: String) -> bool:
 	return false
 
 func _dress(house: Node3D, index: int) -> void:
-	var old := house.get_node_or_null(CHIMNEY_NAME)
-	if old != null:
-		old.queue_free()   # re-running (the editor reloading the script) must not stack chimneys
-	var size := SIZES[index % SIZES.size()]
-	for k in SPOTS.size():   # first spot with roof under it
-		var spot := SPOTS[(index + k) % SPOTS.size()]
-		if _add_chimney(house, spot, size):
-			return
+	_clear(house)   # re-running (the editor reloading the script) must not stack parts
+	var front := _front_z(house)   # measured before any part is added
+	var taken: Array[Vector2] = []
+	if WEATHERVANES[index % WEATHERVANES.size()]:
+		_add_weathervane(house, taken)
+	_add_chimneys(house, index, taken)
+	if DORMERS[index % DORMERS.size()]:
+		_add_dormer(house, index, taken)
+	var style: int = ENTRANCES[index % ENTRANCES.size()]
+	if style >= 0:
+		_add_entrance(house, front, style, WOOD_SHADES[index % WOOD_SHADES.size()])
 
-# ----------------------------------------------------------------- chimney
+func _clear(house: Node3D) -> void:
+	for child in house.get_children():
+		if child.has_meta(META):
+			house.remove_child(child)
+			child.queue_free()
 
-## A brick chimney standing on the roof (its base sinks into the roof's surface,
-## found from the roof's own triangles) with a slow wisp of smoke.
-func _add_chimney(house: Node3D, xz: Vector2, size: Vector2) -> bool:
-	var roof_y := _roof_height(house, xz)
-	if is_nan(roof_y):
-		return false
-	var dims := Vector3(size.x, size.y, size.x)
-	var chimney := Node3D.new()
-	chimney.name = CHIMNEY_NAME
-	chimney.position = Vector3(xz.x, roof_y - CHIMNEY_SINK, xz.y)
-	house.add_child(chimney)   # no owner on purpose: shown in the editor, never saved
-	var shaft := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = dims
-	shaft.mesh = box
-	shaft.material_override = _toon(BRICK)
-	shaft.position.y = dims.y * 0.5
-	chimney.add_child(shaft)
-	var cap := MeshInstance3D.new()
-	var cap_box := BoxMesh.new()
-	cap_box.size = Vector3(dims.x + 0.2, 0.18, dims.z + 0.2)
-	cap.mesh = cap_box
-	cap.material_override = _toon(BRICK_DARK)
-	cap.position.y = dims.y + 0.09
-	chimney.add_child(cap)
-	if chimney_smoke:
-		_add_smoke(chimney, Vector3(0.0, dims.y + 0.25, 0.0))
+## Adds `part` to the house (no owner: editor-only, never saved), undoing the house's own
+## scale so a squashed or stretched house doesn't squash its chimney.
+func _place(house: Node3D, part: Node3D, pos: Vector3, yaw := 0.0) -> void:
+	part.set_meta(META, true)
+	part.position = pos
+	part.rotation.y = yaw
+	var s := house.basis.get_scale()
+	part.scale = Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01))
+	house.add_child(part)
+
+func _free_spot(taken: Array[Vector2], xz: Vector2) -> bool:
+	for t in taken:
+		if t.distance_to(xz) < CLEARANCE:
+			return false
 	return true
 
-func _toon(color: Color) -> ShaderMaterial:
-	var m := ShaderMaterial.new()
-	m.shader = TOON
-	m.set_shader_parameter(&"albedo_texture", ModelUtil.white_texture())
-	m.set_shader_parameter(&"albedo_color", color)
-	m.set_shader_parameter(&"rim_strength", 0.0)
-	return m
+# ------------------------------------------------------------------- roof
 
-func _add_smoke(chimney: Node3D, at: Vector3) -> void:
-	var p := CPUParticles3D.new()
-	p.position = at
-	p.amount = 8
-	p.lifetime = 4.0
-	p.local_coords = false
-	p.direction = Vector3.UP
-	p.spread = 8.0
-	p.initial_velocity_min = 0.5
-	p.initial_velocity_max = 0.8
-	p.gravity = Vector3(0.25, 0.1, 0.0)   # drifts off with the breeze
-	p.scale_amount_min = 0.5
-	p.scale_amount_max = 0.8
-	var grow := Curve.new()
-	grow.add_point(Vector2(0.0, 0.4))
-	grow.add_point(Vector2(1.0, 1.6))
-	p.scale_amount_curve = grow
-	var fade := Gradient.new()
-	fade.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
-	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color(0.93, 0.93, 0.95, 0.5), Color(0.9, 0.9, 0.95, 0)])
-	p.color_ramp = fade
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * 0.8
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_texture = SMOKE_TEXTURE
-	quad.material = mat
-	p.mesh = quad
-	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	p.visibility_aabb = AABB(Vector3(-3, -1, -3), Vector3(6, 8, 6))
-	chimney.add_child(p)
+func _add_chimneys(house: Node3D, index: int, taken: Array[Vector2]) -> void:
+	var wanted: int = CHIMNEYS[index % CHIMNEYS.size()]
+	var size := CHIMNEY_SIZES[index % CHIMNEY_SIZES.size()]
+	var style: int = CHIMNEY_STYLES[index % CHIMNEY_STYLES.size()]
+	var made := 0
+	for k in CHIMNEY_SPOTS.size():
+		if made >= wanted:
+			return
+		var xz := CHIMNEY_SPOTS[(index + k) % CHIMNEY_SPOTS.size()]
+		if not _free_spot(taken, xz):
+			continue
+		var roof := RoofProbe.sample(house, xz)
+		if roof.is_empty():
+			continue
+		# the second chimney is a little slimmer and a different style
+		var this_style := style if made == 0 else (style + 1) % HouseParts.STYLE_COUNT
+		var width := size.x if made == 0 else size.x * 0.8
+		var chimney := HouseParts.chimney(this_style, width, size.y, chimney_smoke and made == 0)
+		_place(house, chimney, Vector3(xz.x, float(roof["y"]) - CHIMNEY_SINK, xz.y))
+		taken.append(xz)
+		made += 1
 
-## Height of the roof's surface at (x, z) in the house's own space: the highest roof
-## triangle covering that point. NAN when the roof isn't there.
-func _roof_height(house: Node3D, xz: Vector2) -> float:
-	var best := NAN
+func _add_dormer(house: Node3D, index: int, taken: Array[Vector2]) -> void:
+	var side := 1.0 if index % 2 == 0 else -1.0
+	for dz in [0.5, 1.0, 1.5, 0.0, 2.0]:
+		for dx in [1.6, 2.2, 1.0]:
+			var xz := Vector2(side * dx, dz)
+			if not _free_spot(taken, xz):
+				continue
+			var roof := RoofProbe.sample(house, xz)
+			if roof.is_empty():
+				continue
+			var n: Vector3 = roof["normal"]
+			if n.z < 0.3 or n.y < 0.2 or n.y > 0.9:   # must be a slope facing the front
+				continue
+			_place(house, HouseParts.dormer(), Vector3(xz.x, float(roof["y"]) - DORMER_SINK, xz.y), atan2(n.x, n.z))
+			taken.append(xz)
+			return
+
+func _add_weathervane(house: Node3D, taken: Array[Vector2]) -> void:
+	var top := RoofProbe.ridge(house, Vector2.ZERO)
+	if top.is_empty():
+		return
+	var xz := Vector2(float(top["x"]), float(top["z"]))
+	_place(house, HouseParts.weathervane(), Vector3(xz.x, float(top["y"]) - VANE_SINK, xz.y))
+	taken.append(xz)
+
+# --------------------------------------------------------------- entrance
+
+func _add_entrance(house: Node3D, front: float, style: int, shade: float) -> void:
+	var x := 0.0
+	var wall := front
+	var floor_y := 0.0
+	var door := _door_of(house)
+	if door != null:
+		if front - door.position.z > MAX_DOOR_SETBACK:
+			return
+		x = door.position.x
+		wall = door.position.z + DOOR_WALL_OFFSET
+		floor_y = door.position.y - DOOR_FLOOR_DROP
+	_place(house, HouseParts.entrance(style, shade), Vector3(x, floor_y, wall))
+
+func _door_of(house: Node3D) -> Node3D:
+	for child in house.get_children():
+		if child is Node3D and String(child.name).begins_with("Door_"):
+			return child as Node3D
+	return null
+
+## The front (+Z) edge of the house's visible meshes, in the house's own space.
+func _front_z(house: Node3D) -> float:
 	var inverse := house.global_transform.affine_inverse()
+	var front := -INF
 	for m in house.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
-		if mi.mesh == null or String(mi.name).containsn("collision"):
+		if mi.mesh == null or String(mi.name).containsn(RoofProbe.COLLISION_NAME):
 			continue
-		var to_house := inverse * mi.global_transform
-		for surface in mi.mesh.get_surface_count():
-			var mat := mi.mesh.surface_get_material(surface)
-			if mat == null or not mat.resource_name.to_lower().contains("roof"):
-				continue
-			var arrays := mi.mesh.surface_get_arrays(surface)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			var indices = arrays[Mesh.ARRAY_INDEX]
-			var count: int = (indices.size() if indices != null else verts.size())
-			for t in range(0, count - 2, 3):
-				var a := to_house * verts[indices[t] if indices != null else t]
-				var b := to_house * verts[indices[t + 1] if indices != null else t + 1]
-				var c := to_house * verts[indices[t + 2] if indices != null else t + 2]
-				var y := _height_in_triangle(xz, a, b, c)
-				if not is_nan(y) and (is_nan(best) or y > best):
-					best = y
-	return best
-
-## The height of triangle (a, b, c)'s plane at xz, or NAN if xz is outside it (seen from above).
-static func _height_in_triangle(xz: Vector2, a: Vector3, b: Vector3, c: Vector3) -> float:
-	var v0 := Vector2(b.x - a.x, b.z - a.z)
-	var v1 := Vector2(c.x - a.x, c.z - a.z)
-	var v2 := Vector2(xz.x - a.x, xz.y - a.z)
-	var denom := v0.x * v1.y - v1.x * v0.y
-	if absf(denom) < 0.00001:
-		return NAN
-	var u := (v2.x * v1.y - v1.x * v2.y) / denom
-	var v := (v0.x * v2.y - v2.x * v0.y) / denom
-	if u < 0.0 or v < 0.0 or u + v > 1.0:
-		return NAN
-	return a.y + u * (b.y - a.y) + v * (c.y - a.y)
+		var box := (inverse * mi.global_transform) * mi.mesh.get_aabb()
+		front = maxf(front, box.end.z)
+	return front if front > -INF else 0.0
