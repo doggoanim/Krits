@@ -13,7 +13,7 @@ extends Node
 ## Per-house choices are the arrays below, in the order the houses appear under the parent.
 ## Edit them (or `seed_offset`) to reshuffle.
 
-const CHIMNEYS: Array[int] = [1, 1, 2, 1, 1, 2]                       ## how many chimneys
+const CHIMNEYS: Array[int] = [1, 1, 1, 1, 1, 1]                       ## how many chimneys
 const CHIMNEY_STYLES: Array[int] = [0, 2, 1, 3, 0, 2]                 ## HouseParts.ChimneyStyle
 const CHIMNEY_SIZES: Array[Vector2] = [                               ## (width, height)
 	Vector2(0.75, 1.7), Vector2(0.9, 1.4), Vector2(0.7, 2.0),
