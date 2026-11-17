@@ -11,8 +11,8 @@ extends Node3D
 ## scene view, never saved into the scene, so the .tscn stays clean and this script is the
 ## single place to change the layout.
 
-## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room).
-enum Layout { HOME, HALL }
+## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room). SHOP: the shopkeeper's store.
+enum Layout { HOME, HALL, SHOP }
 @export var layout := Layout.HOME
 ## Inner floor size (x, z) in metres.
 @export var room_size := Vector2(8.0, 8.0)
@@ -53,6 +53,8 @@ func _build() -> void:
 	match layout:
 		Layout.HALL:
 			_build_hall()
+		Layout.SHOP:
+			_build_shop()
 		_:
 			_build_home()
 
@@ -102,6 +104,43 @@ func _build_hall() -> void:
 			_put(InteriorParts.chandelier(1.2), Vector3(0, ceiling_height, lerpf(-hz, hz, (i + 0.5) / count)))
 	if _use("motes"):
 		_put(InteriorParts.floating_motes(Vector3(hx - 0.4, 1.5, hz - 0.4)), Vector3(0, 1.8, 0))
+
+## The shopkeeper's store: a counter across the room's west half (the keeper stands behind
+## it, placed in the scene), goods shelves on the back wall, barrels, crates and sacks by
+## the door, a display table, a shield and banner, a window and two chandeliers.
+func _build_shop() -> void:
+	var hx := room_size.x * 0.5
+	var hz := room_size.y * 0.5
+	if _use("rug"):
+		_put(InteriorParts.runner(2.0, 4.6, Color(0.4, 0.14, 0.2), Color(0.8, 0.62, 0.25)), Vector3(0.6, 0, 1.6))
+	if _use("counter"):
+		_put(InteriorParts.counter(4.4), Vector3(-hx + 2.4, 0, -1.2))
+	if _use("shelves"):
+		_put(InteriorParts.shelf(2.3, 3.4, InteriorParts.Fill.POTIONS, seed_value), Vector3(-2.8, 0, -hz + 0.45))
+		_put(InteriorParts.shelf(2.3, 3.4, InteriorParts.Fill.JARS, seed_value + 1), Vector3(-0.3, 0, -hz + 0.45))
+		_put(InteriorParts.shelf(2.3, 3.4, InteriorParts.Fill.BOOKS, seed_value + 2), Vector3(2.2, 0, -hz + 0.45))
+		_put(InteriorParts.shelf(2.0, 2.8, InteriorParts.Fill.POTIONS, seed_value + 3), Vector3(hx - 0.4, 0, 0.2), FACE_MINUS_X)
+	if _use("decor"):
+		_put(InteriorParts.shield(), Vector3(hx - 0.1, 3.4, -1.8), FACE_MINUS_X)
+		_put(InteriorParts.banner(InteriorParts.ROOF_RED), Vector3(hx - 0.1, 1.0, -2.8), FACE_MINUS_X)
+		_put(InteriorParts.window(1.4, 1.6), Vector3(-hx + 0.06, 2.5, 1.8), FACE_PLUS_X)
+		_put(InteriorParts.picture(0.9, 0.7, Color(0.7, 0.5, 0.3)), Vector3(-hx + 0.06, 2.8, 0.1), FACE_PLUS_X)
+	if _use("stock"):
+		_put(InteriorParts.barrel(), Vector3(hx - 0.7, 0, hz - 0.6))
+		_put(InteriorParts.barrel(), Vector3(hx - 0.7, 0, hz - 1.6))
+		_put(InteriorParts.sack(Color(0.78, 0.68, 0.45)), Vector3(hx - 1.6, 0, hz - 0.6))
+		_put(InteriorParts.crate(0.85), Vector3(-hx + 0.7, 0, hz - 0.6), 0.2)
+		_put(InteriorParts.crate(0.7), Vector3(-hx + 1.55, 0, hz - 0.55), -0.15)
+		_put(InteriorParts.crate(0.6), Vector3(-hx + 0.75, 0.85, hz - 0.6), 0.4)
+	if _use("table"):
+		_put(InteriorParts.table(0.7), Vector3(2.3, 0, 1.0))
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(1.9, 0, hz - 0.7))
+	if _use("chandelier"):
+		_put(InteriorParts.chandelier(1.3), Vector3(-1.2, ceiling_height, -0.6))
+		_put(InteriorParts.chandelier(1.3), Vector3(1.4, ceiling_height, 1.8))
+	if _use("motes"):
+		_put(InteriorParts.floating_motes(Vector3(hx - 0.5, 1.5, hz - 0.5)), Vector3(0, 1.8, 0))
 
 func _build_home() -> void:
 	var hx := room_size.x * 0.5

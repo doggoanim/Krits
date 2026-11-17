@@ -45,11 +45,11 @@ const META := &"house_dressing"
 ## Shifts which choices each house gets; change it to reshuffle.
 @export var seed_offset := 0
 ## Name signs hung above a house's door: house node name -> text.
-@export var signs := {"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse"}
+@export var signs := {"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse", "house_chesburg_6": "Shop"}
 ## Size of a house's sign (house node name -> scale; 1 if absent).
 @export var sign_scales := {"house_chesburg_3": 0.65}
 ## Rod height above the door's floor per house (SIGN_HEIGHT if absent); house 3 has no awning, so it hangs lower.
-@export var sign_heights := {"house_chesburg_3": 3.2}
+@export var sign_heights := {"house_chesburg_3": 3.2, "house_chesburg_6": 3.6}
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
 

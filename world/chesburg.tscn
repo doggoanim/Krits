@@ -986,6 +986,18 @@ transform = Transform3D(1e-07, 0, -1.1, 0, 0.95, 0, 1.1, 0, 1e-07, 4.479099, 0, 
 [node name="house_chesburg_6" parent="Buildings" unique_id=491103847 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-2e-07, 0, 0.9, 0, 1.15, 0, -0.9, 0, -2e-07, -7.5209017, 0, -20.312206)
 
+[node name="Door_House6" type="StaticBody3D" parent="Buildings/house_chesburg_6" unique_id=470006001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.8000002)
+script = ExtResource("47_door")
+target_level = "res://world/house_6_interior.tscn"
+target_spawn_id = &"enter"
+prompt_text = "Press E to enter"
+
+[node name="House6EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_6" unique_id=470006002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
+script = ExtResource("47_door_spawn")
+spawn_id = &"house_6_entrance"
+
 [node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
 transform = Transform3D(1.08, 0, 0, 0, 1.1, 0, 0, 0, 1.08, -5.706156, 0, -7.0017056)
 
@@ -1748,20 +1760,6 @@ drift_area = Vector2(120, 120)
 blob_count = 16
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
-
-[node name="ShopKeeper" type="StaticBody3D" parent="NPCs" unique_id=-1165481583]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86206126, 0, -6)
-script = ExtResource("1_shopkeeper")
-prompt_text = "Press E to shop"
-
-[node name="Collision" type="CollisionShape3D" parent="NPCs/ShopKeeper" unique_id=-1165481582]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.47978187, 0.9, 0)
-shape = SubResource("Shape_ShopBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/ShopKeeper" unique_id=-1165481581]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.49585128, 0.9, 0)
-material_override = SubResource("Mat_ShopRobe")
-mesh = SubResource("Mesh_ShopBody")
 
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0.1, -8.2)

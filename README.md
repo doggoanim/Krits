@@ -390,7 +390,7 @@ Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the in
 
 ### Fantasy interiors
 
-`world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a cosy fantasy home from its `room_size`: hearth with a stew pot and flickering fire, bookshelves, pantry shelf, dining table, wardrobe, window, pictures, plants, a candle ring and drifting dust motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. `layout` picks HOME (the player's cottage, `house_1_interior.tscn`) or HALL (the mayor's study with side shelves, banners, a shield, candelabras and a runner, `house_3_interior.tscn`; its desk, chair and mayor stay hand-placed in the scene).
+`world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a cosy fantasy home from its `room_size`: hearth with a stew pot and flickering fire, bookshelves, pantry shelf, dining table, wardrobe, window, pictures, plants, a candle ring and drifting dust motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. `layout` picks SHOP (the shopkeeper's store, `house_6_interior.tscn`: counter, goods shelves, barrels, crates), HOME (the player's cottage, `house_1_interior.tscn`) or HALL (the mayor's study with side shelves, banners, a shield, candelabras and a runner, `house_3_interior.tscn`; its desk, chair and mayor stay hand-placed in the scene).
 
 ### Fire
 

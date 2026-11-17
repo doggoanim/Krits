@@ -25,8 +25,11 @@ const JAR_COLORS: Array[Color] = [
 	Color(0.75, 0.3, 0.25), Color(0.85, 0.62, 0.25), Color(0.5, 0.65, 0.3), Color(0.6, 0.35, 0.45), Color(0.9, 0.8, 0.5),
 ]
 const ROOF_RED := Color(0.745, 0.2, 0.12)   ## the red of the Chesburg roofs (sampled from the house texture)
+const POTION_COLORS: Array[Color] = [
+	Color(0.9, 0.25, 0.35), Color(0.3, 0.8, 0.95), Color(0.5, 0.95, 0.4), Color(0.75, 0.4, 0.95), Color(1.0, 0.8, 0.3),
+]
 const LEAF := Color(0.3, 0.6, 0.28)
-enum Fill { BOOKS, JARS }
+enum Fill { BOOKS, JARS, POTIONS }
 
 # ----------------------------------------------------------------- helpers
 
@@ -181,6 +184,8 @@ static func shelf(width: float, height: float, fill: int, seed_value: int) -> No
 		HouseParts.box(root, Vector3(width - 0.2, 0.1, depth - 0.04), WOOD, Vector3(0, y, 0.0))
 		if fill == Fill.BOOKS:
 			_books(root, rng, width - 0.3, y + 0.05, gap - 0.2)
+		elif fill == Fill.POTIONS:
+			_potions(root, rng, width - 0.3, y + 0.05)
 		else:
 			_jars(root, rng, width - 0.3, y + 0.05)
 	solid(root, Vector3(width, height, depth), Vector3(0, height * 0.5, 0))
@@ -196,6 +201,21 @@ static func _books(root: Node3D, rng: RandomNumberGenerator, span: float, y: flo
 			continue
 		HouseParts.box(root, Vector3(w, h, 0.34), BOOK_COLORS[rng.randi() % BOOK_COLORS.size()], Vector3(x + w * 0.5, y + h * 0.5, 0.02))
 		x += w + 0.01
+
+static func _potions(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
+	var x := -span * 0.5 + 0.2
+	while x < span * 0.5 - 0.15:
+		var color := POTION_COLORS[rng.randi() % POTION_COLORS.size()]
+		var r := rng.randf_range(0.09, 0.14)
+		var body := CylinderMesh.new()
+		body.top_radius = r
+		body.bottom_radius = r
+		body.height = r * 2.2
+		body.radial_segments = 10
+		_mesh(root, body, glow(color), Vector3(x, y + r * 1.1, 0.05))
+		HouseParts.cylinder(root, r * 0.35, 0.18, Color(0.85, 0.9, 0.95), Vector3(x, y + r * 2.2 + 0.09, 0.05))
+		HouseParts.cylinder(root, r * 0.4, 0.06, WOOD, Vector3(x, y + r * 2.2 + 0.2, 0.05))   # cork
+		x += r * 2.0 + rng.randf_range(0.12, 0.3)
 
 static func _jars(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
 	var x := -span * 0.5 + 0.2
@@ -370,3 +390,62 @@ static func floating_motes(extent: Vector3) -> CPUParticles3D:
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	p.emission_box_extents = extent
 	return p
+
+# --------------------------------------------------------------------- shop
+
+## A long shop counter (length along X, customers on the +Z side) with a ledger, coin
+## stacks, a brass bell and a candle on top.
+static func counter(length: float) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Counter"
+	HouseParts.box(root, Vector3(length, 1.0, 0.8), WOOD, Vector3(0, 0.5, 0))
+	HouseParts.box(root, Vector3(length + 0.2, 0.1, 1.0), WOOD_DARK, Vector3(0, 1.05, 0))
+	HouseParts.box(root, Vector3(length - 0.3, 0.7, 0.04), WOOD_DARK, Vector3(0, 0.5, 0.41))   # front panel
+	var half := length * 0.5
+	HouseParts.box(root, Vector3(0.5, 0.05, 0.38), VELVET_DARK, Vector3(-half + 0.8, 1.13, 0.05), Vector3(0, 8, 0))   # ledger
+	HouseParts.box(root, Vector3(0.46, 0.04, 0.34), PARCHMENT, Vector3(-half + 0.8, 1.16, 0.05), Vector3(0, 8, 0))
+	for i in 3:
+		HouseParts.cylinder(root, 0.1, 0.05 * (i + 2), GOLD, Vector3(half - 1.2 + i * 0.26, 1.1 + 0.025 * (i + 2), 0.15 - i * 0.04))   # coin stacks
+	_sphere(root, 0.14, toon_mat(GOLD), Vector3(0.3, 1.1, 0.1), 0.8)                                # bell
+	HouseParts.cylinder(root, 0.17, 0.03, WOOD_DARK, Vector3(0.3, 1.11, 0.1))
+	root.add_child(candle(Vector3(-0.5, 1.1, -0.1), false))
+	solid(root, Vector3(length + 0.2, 1.1, 1.0), Vector3(0, 0.55, 0))
+	return root
+
+## A wooden crate with slats.
+static func crate(size := 0.8) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Crate"
+	HouseParts.box(root, Vector3(size, size, size), WOOD, Vector3(0, size * 0.5, 0))
+	for sy in [0.15, 0.85]:
+		HouseParts.box(root, Vector3(size + 0.04, 0.1, size + 0.04), WOOD_DARK, Vector3(0, size * sy, 0))
+	for sx in [-1.0, 1.0]:
+		HouseParts.box(root, Vector3(0.1, size + 0.04, size + 0.04), WOOD_DARK, Vector3(sx * (size * 0.5 - 0.06), size * 0.5, 0))
+	solid(root, Vector3(size, size, size), Vector3(0, size * 0.5, 0))
+	return root
+
+## A barrel with iron hoops.
+static func barrel() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Barrel"
+	var body := CylinderMesh.new()
+	body.top_radius = 0.4
+	body.bottom_radius = 0.4
+	body.height = 1.0
+	body.radial_segments = 14
+	_mesh(root, body, toon_mat(WOOD), Vector3(0, 0.5, 0))
+	for hy in [0.2, 0.8]:
+		HouseParts.cylinder(root, 0.43, 0.07, IRON, Vector3(0, hy, 0))
+	HouseParts.cylinder(root, 0.38, 0.03, WOOD_DARK, Vector3(0, 1.0, 0))   # lid
+	solid(root, Vector3(0.9, 1.0, 0.9), Vector3(0, 0.5, 0))
+	return root
+
+## A tied grain sack.
+static func sack(color: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Sack"
+	_sphere(root, 0.4, toon_mat(color), Vector3(0, 0.34, 0), 0.9)
+	_cone(root, 0.14, 0.25, toon_mat(color.darkened(0.15)), Vector3(0, 0.78, 0))
+	HouseParts.cylinder(root, 0.1, 0.05, WOOD_DARK, Vector3(0, 0.66, 0))
+	solid(root, Vector3(0.8, 0.8, 0.8), Vector3(0, 0.4, 0))
+	return root
