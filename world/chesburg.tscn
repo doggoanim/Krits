@@ -983,6 +983,18 @@ spawn_id = &"house_1_entrance"
 [node name="house_chesburg_5" parent="Buildings" unique_id=2135377020 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(1e-07, 0, -1.1, 0, 0.95, 0, 1.1, 0, 1e-07, 4.479099, 0, -10.312209)
 
+[node name="Door_House5" type="StaticBody3D" parent="Buildings/house_chesburg_5" unique_id=470005001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.8000002)
+script = ExtResource("47_door")
+target_level = "res://world/house_5_interior.tscn"
+target_spawn_id = &"enter"
+prompt_text = "Press E to enter"
+
+[node name="House5EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_5" unique_id=470005002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
+script = ExtResource("47_door_spawn")
+spawn_id = &"house_5_entrance"
+
 [node name="house_chesburg_6" parent="Buildings" unique_id=491103847 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-2e-07, 0, 0.9, 0, 1.15, 0, -0.9, 0, -2e-07, -7.5209017, 0, -20.312206)
 
@@ -1000,6 +1012,18 @@ spawn_id = &"house_6_entrance"
 
 [node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
 transform = Transform3D(1.08, 0, 0, 0, 1.1, 0, 0, 0, 1.08, -5.706156, 0, -7.0017056)
+
+[node name="Door_House2" type="StaticBody3D" parent="Buildings/house_chesburg_2" unique_id=470002001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.8000002)
+script = ExtResource("47_door")
+target_level = "res://world/house_2_interior.tscn"
+target_spawn_id = &"enter"
+prompt_text = "Press E to enter"
+
+[node name="House2EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_2" unique_id=470002002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
+script = ExtResource("47_door_spawn")
+spawn_id = &"house_2_entrance"
 
 [node name="house_chesburg_3" parent="Buildings" unique_id=1391076820 instance=ExtResource("24_iolvd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.33178, 8.084409, -24.818865)
@@ -1022,6 +1046,18 @@ spawn_id = &"house_3_entrance"
 
 [node name="house_chesburg_4" parent="Buildings" unique_id=1975904037 instance=ExtResource("28_lybmh")]
 transform = Transform3D(0.92, 0, 0, 0, 0.95, 0, 0, 0, 0.92, 7, 0, -21)
+
+[node name="Door_House4" type="StaticBody3D" parent="Buildings/house_chesburg_4" unique_id=470004001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.8000002)
+script = ExtResource("47_door")
+target_level = "res://world/house_4_interior.tscn"
+target_spawn_id = &"enter"
+prompt_text = "Press E to enter"
+
+[node name="House4EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_4" unique_id=470004002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
+script = ExtResource("47_door_spawn")
+spawn_id = &"house_4_entrance"
 
 [node name="nocol_dirt_terrain" parent="Buildings" unique_id=1026005673 instance=ExtResource("10_a5ueg")]
 transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032, -9.378)
@@ -1775,19 +1811,6 @@ idle_animation = &"Yule_Idle"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("Shape_YuleBody")
 
-[node name="Marta" type="StaticBody3D" parent="NPCs" unique_id=512657571]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 11)
-script = ExtResource("yule_npc_script")
-dialogue_file = "res://dialogue/npcs/marta.dlg"
-
-[node name="Collision" type="CollisionShape3D" parent="NPCs/Marta" unique_id=1641745535]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("Shape_YuleBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Marta" unique_id=1245091750]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_ShopBody")
-
 [node name="Brant" type="StaticBody3D" parent="NPCs" unique_id=2022950744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
 script = ExtResource("yule_npc_script")
@@ -1798,20 +1821,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_YuleBody")
 
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/Brant" unique_id=567638989]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_ShopBody")
-
-[node name="Tuppence" type="StaticBody3D" parent="NPCs" unique_id=1693845074]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 12)
-script = ExtResource("yule_npc_script")
-dialogue_file = "res://dialogue/npcs/tuppence.dlg"
-head_height = 1.5
-
-[node name="Collision" type="CollisionShape3D" parent="NPCs/Tuppence" unique_id=1055373293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("Shape_YuleBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Tuppence" unique_id=156224868]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
@@ -1849,16 +1858,6 @@ kind = 4
 show_when = Array[StringName]([&"cat_clue_1", &"cat_clue_2", &"cat_clue_3"])
 hide_when = &"cat_found"
 dialogue_file = "res://dialogue/npcs/biscuit.dlg"
-facing_offset = 3.14159
-model = ExtResource("biscuit_model")
-model_height = 0.7
-
-[node name="BiscuitHome" type="StaticBody3D" parent="NPCs" unique_id=1346034375]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.8, 0, 12.8)
-script = ExtResource("quest_prop_script")
-kind = 4
-show_when = Array[StringName]([&"tuppence_got_cat"])
-dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 facing_offset = 3.14159
 model = ExtResource("biscuit_model")
 model_height = 0.7

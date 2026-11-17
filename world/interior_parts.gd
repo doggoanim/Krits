@@ -28,8 +28,10 @@ const ROOF_RED := Color(0.745, 0.2, 0.12)   ## the red of the Chesburg roofs (sa
 const POTION_COLORS: Array[Color] = [
 	Color(0.9, 0.25, 0.35), Color(0.3, 0.8, 0.95), Color(0.5, 0.95, 0.4), Color(0.75, 0.4, 0.95), Color(1.0, 0.8, 0.3),
 ]
+const BREAD_CRUST := Color(0.82, 0.58, 0.3)
+const BRICK := Color(0.62, 0.38, 0.32)
 const LEAF := Color(0.3, 0.6, 0.28)
-enum Fill { BOOKS, JARS, POTIONS }
+enum Fill { BOOKS, JARS, POTIONS, BREAD }
 
 # ----------------------------------------------------------------- helpers
 
@@ -186,6 +188,8 @@ static func shelf(width: float, height: float, fill: int, seed_value: int) -> No
 			_books(root, rng, width - 0.3, y + 0.05, gap - 0.2)
 		elif fill == Fill.POTIONS:
 			_potions(root, rng, width - 0.3, y + 0.05)
+		elif fill == Fill.BREAD:
+			_loaves(root, rng, width - 0.3, y + 0.05)
 		else:
 			_jars(root, rng, width - 0.3, y + 0.05)
 	solid(root, Vector3(width, height, depth), Vector3(0, height * 0.5, 0))
@@ -216,6 +220,25 @@ static func _potions(root: Node3D, rng: RandomNumberGenerator, span: float, y: f
 		HouseParts.cylinder(root, r * 0.35, 0.18, Color(0.85, 0.9, 0.95), Vector3(x, y + r * 2.2 + 0.09, 0.05))
 		HouseParts.cylinder(root, r * 0.4, 0.06, WOOD, Vector3(x, y + r * 2.2 + 0.2, 0.05))   # cork
 		x += r * 2.0 + rng.randf_range(0.12, 0.3)
+
+static func _loaves(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
+	var x := -span * 0.5 + 0.3
+	while x < span * 0.5 - 0.3:
+		var crust := BREAD_CRUST.lerp(Color(0.6, 0.38, 0.18), rng.randf() * 0.5)
+		if rng.randf() < 0.4:   # a round loaf
+			var r := rng.randf_range(0.17, 0.24)
+			_sphere(root, r, toon_mat(crust), Vector3(x, y + r * 0.7, 0.05), 0.75)
+			HouseParts.box(root, Vector3(r * 0.9, 0.02, 0.03), crust.darkened(0.25), Vector3(x, y + r * 1.0, r * 0.62), Vector3(0, 0, 20))
+			x += r * 2.0 + 0.1
+		else:                      # a long loaf, lying down
+			var length := rng.randf_range(0.5, 0.75)
+			var cap := CapsuleMesh.new()
+			cap.radius = 0.1
+			cap.height = length
+			_mesh(root, cap, toon_mat(crust), Vector3(x + length * 0.5, y + 0.1, 0.05), Vector3(0, 0, 90))
+			for k in 3:
+				HouseParts.box(root, Vector3(0.03, 0.02, 0.1), crust.darkened(0.25), Vector3(x + length * (0.25 + k * 0.25), y + 0.2, 0.05), Vector3(0, 0, 0))
+			x += length + 0.12
 
 static func _jars(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
 	var x := -span * 0.5 + 0.2
@@ -448,4 +471,155 @@ static func sack(color: Color) -> Node3D:
 	_cone(root, 0.14, 0.25, toon_mat(color.darkened(0.15)), Vector3(0, 0.78, 0))
 	HouseParts.cylinder(root, 0.1, 0.05, WOOD_DARK, Vector3(0, 0.66, 0))
 	solid(root, Vector3(0.8, 0.8, 0.8), Vector3(0, 0.4, 0))
+	return root
+
+# --------------------------------------------------------- homes and bakery
+
+## Instances a furniture model (e.g. from the cute-furniture pack) with a box collision
+## taken from its bounds, so the player can't walk through it. The model's own origin and
+## facing are kept: place it like any other piece.
+static func model(path: String, collide := true) -> Node3D:
+	var root := Node3D.new()
+	root.name = path.get_file().get_basename()
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return root
+	var inst := scene.instantiate() as Node3D
+	root.add_child(inst)
+	if collide:
+		var box := _model_bounds(inst)
+		if box.size.length() > 0.0:
+			solid(root, box.size, box.get_center())
+	return root
+
+## Bounds of a model's meshes in the model root's space (it is not in the tree yet, so
+## the transforms are chained by hand).
+static func _model_bounds(root: Node3D) -> AABB:
+	var out := AABB()
+	var first := true
+	for m in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var t := mi.transform
+		var p := mi.get_parent()
+		while p != null and p != root:
+			t = (p as Node3D).transform * t
+			p = p.get_parent()
+		var box := t * mi.mesh.get_aabb()
+		out = box if first else out.merge(box)
+		first = false
+	return out
+
+## A round pet bed: a plump cushion in a soft rim.
+static func cushion(color: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Cushion"
+	HouseParts.cylinder(root, 0.46, 0.14, color.lightened(0.15), Vector3(0, 0.07, 0))
+	var rim := TorusMesh.new()
+	rim.inner_radius = 0.34
+	rim.outer_radius = 0.56
+	_mesh(root, rim, toon_mat(color), Vector3(0, 0.14, 0))
+	return root
+
+## A tall scratching post with perches and a rope-wrapped trunk.
+static func cat_tree() -> Node3D:
+	var root := Node3D.new()
+	root.name = "CatTree"
+	var rope := Color(0.78, 0.66, 0.45)
+	HouseParts.box(root, Vector3(1.1, 0.12, 1.1), VELVET_DARK, Vector3(0, 0.06, 0))
+	HouseParts.cylinder(root, 0.13, 2.3, rope, Vector3(0, 1.2, 0))
+	for level in [[0.9, 0.9], [1.55, 0.75], [2.2, 0.8]]:
+		HouseParts.box(root, Vector3(level[1], 0.1, level[1]), VELVET, Vector3(0, level[0], 0))
+		HouseParts.box(root, Vector3(level[1] + 0.06, 0.04, level[1] + 0.06), VELVET_DARK, Vector3(0, level[0] - 0.07, 0))
+	HouseParts.box(root, Vector3(0.5, 0.45, 0.5), WOOD, Vector3(0.1, 1.8, 0.0))   # a little cat house
+	solid(root, Vector3(1.1, 2.4, 1.1), Vector3(0, 1.2, 0))
+	return root
+
+## A basket of wool with needles sticking out.
+static func yarn_basket() -> Node3D:
+	var root := Node3D.new()
+	root.name = "YarnBasket"
+	HouseParts.cylinder(root, 0.32, 0.3, Color(0.7, 0.5, 0.3), Vector3(0, 0.15, 0))
+	var colors: Array[Color] = [Color(0.85, 0.3, 0.4), Color(0.3, 0.6, 0.8), Color(0.9, 0.75, 0.3)]
+	for i in 3:
+		_sphere(root, 0.15, toon_mat(colors[i]), Vector3(cos(i * 2.1) * 0.12, 0.38, sin(i * 2.1) * 0.12))
+	HouseParts.cylinder(root, 0.015, 0.6, WOOD, Vector3(0.08, 0.55, 0.0)).rotation_degrees = Vector3(0, 0, 18)
+	HouseParts.cylinder(root, 0.015, 0.6, WOOD, Vector3(-0.08, 0.55, 0.0)).rotation_degrees = Vector3(0, 0, -18)
+	return root
+
+## A brick bread oven (front +Z): a dark mouth with a lively fire, a chimney going up.
+static func oven() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Oven"
+	HouseParts.box(root, Vector3(2.8, 0.5, 1.6), BRICK, Vector3(0, 0.25, 0))
+	for sx in [-1.0, 1.0]:
+		HouseParts.box(root, Vector3(0.8, 1.2, 1.6), BRICK, Vector3(sx * 1.0, 1.1, 0))
+	HouseParts.box(root, Vector3(2.8, 0.7, 1.6), BRICK, Vector3(0, 1.95, 0))
+	HouseParts.box(root, Vector3(1.2, 1.2, 0.2), Color(0.08, 0.06, 0.06), Vector3(0, 1.1, -0.65))
+	HouseParts.box(root, Vector3(1.2, 0.05, 1.3), STONE_DARK, Vector3(0, 0.52, 0.0))        # the baking floor
+	HouseParts.box(root, Vector3(0.9, 3.0, 0.9), BRICK, Vector3(0, 3.3, -0.3))                # chimney
+	HouseParts.box(root, Vector3(1.1, 0.16, 1.1), BRICK.darkened(0.3), Vector3(0, 4.88, -0.3))
+	var flames := FireFx.flame(0.9, 0.7, FireFx.PALETTE_FIRE, 3)
+	flames.position = Vector3(0, 0.55, -0.1)
+	root.add_child(flames)
+	var embers := FireFx.embers(8, 1.4, 1.1, 0.25, 0.07)
+	embers.position = Vector3(0, 1.2, 0.0)
+	root.add_child(embers)
+	HouseParts.add_loop_sound(root, FIRE_SFX, -6.0, 3.5, 26.0, Vector3(0, 1.0, 0.5))
+	_light(root, Color(1.0, 0.58, 0.25), 2.0, 8.0, Vector3(0, 1.2, 1.2), 0.5)
+	solid(root, Vector3(2.8, 2.3, 1.6), Vector3(0, 1.15, 0))
+	return root
+
+## A long baker's worktable (length along X) with dough, a rolling pin, a flour pile and a bowl.
+static func worktable(length: float) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Worktable"
+	HouseParts.box(root, Vector3(length, 0.14, 1.0), WOOD, Vector3(0, 1.0, 0))
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			HouseParts.box(root, Vector3(0.14, 0.95, 0.14), WOOD_DARK, Vector3(sx * (length * 0.5 - 0.15), 0.475, sz * 0.38))
+	HouseParts.box(root, Vector3(length - 0.3, 0.08, 0.7), WOOD_DARK, Vector3(0, 0.3, 0))   # low shelf
+	var dough := Color(0.96, 0.9, 0.78)
+	for i in 3:
+		_sphere(root, 0.16, toon_mat(dough), Vector3(-length * 0.25 + i * 0.4, 1.15, 0.1 - i * 0.08), 0.6)
+	HouseParts.cylinder(root, 0.04, 0.6, WOOD, Vector3(length * 0.2, 1.1, 0.0)).rotation_degrees = Vector3(0, 0, 90)   # rolling pin
+	_cone(root, 0.22, 0.28, toon_mat(Color(0.97, 0.97, 0.95)), Vector3(length * 0.38, 1.22, -0.15))                # flour pile
+	HouseParts.cylinder(root, 0.2, 0.14, Color(0.7, 0.7, 0.75), Vector3(length * 0.4, 1.14, 0.25))                  # bowl
+	solid(root, Vector3(length, 1.1, 1.0), Vector3(0, 0.55, 0))
+	return root
+
+## A pyramid of toy blocks.
+static func toy_blocks() -> Node3D:
+	var root := Node3D.new()
+	root.name = "ToyBlocks"
+	var colors: Array[Color] = [Color(0.9, 0.3, 0.3), Color(0.3, 0.6, 0.9), Color(0.95, 0.8, 0.3), Color(0.4, 0.75, 0.4)]
+	var cells := [[-0.22, 0.0, 0], [0.22, 0.0, 1], [0.0, 0.3, 2], [0.5, 0.0, 3]]
+	for c in cells:
+		HouseParts.box(root, Vector3(0.4, 0.4, 0.4), colors[c[2]], Vector3(c[0], 0.2 + c[1], 0.0), Vector3(0, 8.0 * c[2], 0))
+	return root
+
+## A small wooden toy horse on a rocker.
+static func toy_horse() -> Node3D:
+	var root := Node3D.new()
+	root.name = "ToyHorse"
+	HouseParts.box(root, Vector3(0.9, 0.12, 0.3), WOOD_DARK, Vector3(0, 0.06, 0))              # rocker base
+	HouseParts.box(root, Vector3(0.7, 0.35, 0.25), Color(0.7, 0.45, 0.25), Vector3(0, 0.55, 0))   # body
+	HouseParts.box(root, Vector3(0.2, 0.45, 0.2), Color(0.7, 0.45, 0.25), Vector3(0.38, 0.8, 0), Vector3(0, 0, -20))   # neck
+	HouseParts.box(root, Vector3(0.3, 0.18, 0.18), Color(0.7, 0.45, 0.25), Vector3(0.55, 1.0, 0))   # head
+	for sx in [-0.25, 0.25]:
+		HouseParts.box(root, Vector3(0.08, 0.4, 0.08), WOOD, Vector3(sx, 0.3, 0.07))
+	solid(root, Vector3(0.9, 1.1, 0.35), Vector3(0, 0.55, 0))
+	return root
+
+## A kite pinned to a wall (origin at its centre, front +Z) with a ribbon tail.
+static func kite(color: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Kite"
+	HouseParts.box(root, Vector3(0.9, 0.9, 0.04), color, Vector3.ZERO, Vector3(0, 0, 45))
+	HouseParts.box(root, Vector3(0.05, 1.3, 0.06), WOOD, Vector3(0, 0, 0.01))
+	HouseParts.box(root, Vector3(1.3, 0.05, 0.06), WOOD, Vector3(0, 0, 0.01))
+	var ribbons: Array[Color] = [Color(0.95, 0.4, 0.4), Color(0.95, 0.85, 0.3), Color(0.4, 0.7, 0.95)]
+	for i in 3:
+		HouseParts.box(root, Vector3(0.2, 0.1, 0.03), ribbons[i], Vector3((i % 2) * 0.1 - 0.05, -0.8 - i * 0.2, 0.02), Vector3(0, 0, 10 * (i - 1)))
 	return root

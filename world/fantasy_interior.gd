@@ -11,8 +11,8 @@ extends Node3D
 ## scene view, never saved into the scene, so the .tscn stays clean and this script is the
 ## single place to change the layout.
 
-## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room). SHOP: the shopkeeper's store.
-enum Layout { HOME, HALL, SHOP }
+## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room). SHOP: the shopkeeper's store. CAT_LADY / BAKERY / KIDS_HOME: Mrs. Tuppence's, Marta's and Yule's houses.
+enum Layout { HOME, HALL, SHOP, CAT_LADY, BAKERY, KIDS_HOME }
 @export var layout := Layout.HOME
 ## Inner floor size (x, z) in metres.
 @export var room_size := Vector2(8.0, 8.0)
@@ -28,6 +28,8 @@ const WALL_GAP := 0.12          ## furniture stands this far off the wall face
 const FACE_PLUS_X := PI * 0.5   ## yaw that turns a piece's front (+Z) to +X (standing on the west wall)
 const FACE_MINUS_X := -PI * 0.5
 const FACE_PLUS_Z := 0.0
+const FACE_MINUS_Z := PI
+const FURNITURE := "res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/"
 const META := &"fantasy_interior"
 
 func _ready() -> void:
@@ -55,6 +57,12 @@ func _build() -> void:
 			_build_hall()
 		Layout.SHOP:
 			_build_shop()
+		Layout.CAT_LADY:
+			_build_cat_lady()
+		Layout.BAKERY:
+			_build_bakery()
+		Layout.KIDS_HOME:
+			_build_kids_home()
 		_:
 			_build_home()
 
@@ -139,6 +147,113 @@ func _build_shop() -> void:
 	if _use("chandelier"):
 		_put(InteriorParts.chandelier(1.3), Vector3(-1.2, ceiling_height, -0.6))
 		_put(InteriorParts.chandelier(1.3), Vector3(1.4, ceiling_height, 1.8))
+	if _use("motes"):
+		_put(InteriorParts.floating_motes(Vector3(hx - 0.5, 1.5, hz - 0.5)), Vector3(0, 1.8, 0))
+
+func _furniture(file: String) -> Node3D:
+	return InteriorParts.model(FURNITURE + file + ".glb")
+
+## Mrs. Tuppence's house: cosy and cat-crazy. A hearth with her armchair and yarn, a pet bed
+## by the fire (Biscuit comes home to it), a cat tree, cat pictures, a couch, books and tea.
+func _build_cat_lady() -> void:
+	var hx := room_size.x * 0.5
+	var hz := room_size.y * 0.5
+	if _use("rug"):
+		_put(InteriorParts.rug(1.9, Color(0.62, 0.3, 0.42), Color(0.85, 0.68, 0.3)), Vector3(0.2, 0, 0.5))
+	if _use("fireplace"):
+		_put(InteriorParts.fireplace(), Vector3(-hx + 0.52, 0, -0.2), FACE_PLUS_X)
+	if _use("furniture"):
+		_put(_furniture("Armchair_18"), Vector3(-0.4, 0, -1.6), FACE_MINUS_X)
+		_put(_furniture("Couch_08"), Vector3(-1.0, 0, -hz + 0.6))
+		_put(_furniture("Nightstand_02"), Vector3(0.5, 0, -hz + 0.15))
+		_put(InteriorParts.yarn_basket(), Vector3(-0.5, 0, -0.7))
+		_put(InteriorParts.cushion(Color(0.85, 0.5, 0.55)), Vector3(-1.1, 0, 1.0))   # Biscuit's bed
+		_put(InteriorParts.cat_tree(), Vector3(hx - 0.8, 0, -hz + 1.0))
+		_put(InteriorParts.table(0.6), Vector3(1.7, 0, 1.2))
+		_put(InteriorParts.stool(), Vector3(1.0, 0, 1.9), 0.3)
+		_put(InteriorParts.stool(), Vector3(2.4, 0, 1.9), -0.3)
+	if _use("shelves"):
+		_put(InteriorParts.shelf(2.0, 3.0, InteriorParts.Fill.BOOKS, seed_value), Vector3(1.5, 0, -hz + 0.45))
+	if _use("decor"):
+		_put(InteriorParts.window(1.3, 1.6), Vector3(hx - 0.06, 2.5, 0.3), FACE_MINUS_X)
+		for i in 3:   # portraits of Biscuit
+			_put(InteriorParts.picture(0.6 + 0.1 * (i % 2), 0.7, Color(0.9, 0.55, 0.2)), Vector3(hx - 0.06, 2.6 - 0.1 * (i % 2), -1.4 - 0.9 * i), FACE_MINUS_X)
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(-hx + 0.6, 0, hz - 0.6))
+		_put(InteriorParts.plant(), Vector3(hx - 0.6, 0, hz - 0.6))
+	if _use("chandelier"):
+		_put(InteriorParts.chandelier(1.3), Vector3(0.2, ceiling_height, 0.4))
+	if _use("motes"):
+		_put(InteriorParts.floating_motes(Vector3(hx - 0.5, 1.5, hz - 0.5)), Vector3(0, 1.8, 0))
+
+## Marta's bakery: a brick oven with a roaring fire, a worktable of dough, shelves of bread,
+## a counter (she stands behind it, placed in the scene), flour sacks and a few tables.
+func _build_bakery() -> void:
+	var hx := room_size.x * 0.5
+	var hz := room_size.y * 0.5
+	if _use("rug"):
+		_put(InteriorParts.rug(1.5, Color(0.55, 0.28, 0.2), Color(0.9, 0.78, 0.5)), Vector3(-1.9, 0, 1.4))
+	if _use("oven"):
+		_put(InteriorParts.oven(), Vector3(-hx + 2.0, 0, -hz + 1.0))
+	if _use("worktable"):
+		_put(InteriorParts.worktable(2.8), Vector3(-hx + 1.0, 0, 0.7), FACE_PLUS_X)
+	if _use("counter"):
+		_put(InteriorParts.counter(4.0), Vector3(hx - 2.3, 0, -0.6))
+	if _use("shelves"):
+		_put(InteriorParts.shelf(2.4, 3.2, InteriorParts.Fill.BREAD, seed_value), Vector3(0.6, 0, -hz + 0.45))
+		_put(InteriorParts.shelf(2.4, 3.2, InteriorParts.Fill.BREAD, seed_value + 1), Vector3(3.0, 0, -hz + 0.45))
+		_put(InteriorParts.shelf(1.8, 2.6, InteriorParts.Fill.JARS, seed_value + 2), Vector3(hx - 0.4, 0, 1.6), FACE_MINUS_X)
+	if _use("stock"):
+		_put(InteriorParts.sack(Color(0.95, 0.93, 0.85)), Vector3(hx - 0.7, 0, hz - 0.7))
+		_put(InteriorParts.sack(Color(0.95, 0.93, 0.85)), Vector3(hx - 1.6, 0, hz - 0.6))
+		_put(InteriorParts.sack(Color(0.9, 0.88, 0.8)), Vector3(hx - 0.6, 0, hz - 1.6))
+		_put(InteriorParts.barrel(), Vector3(-hx + 0.7, 0, hz - 0.7))
+		_put(InteriorParts.crate(0.8), Vector3(-hx + 1.7, 0, hz - 0.6), 0.2)
+	if _use("table"):
+		_put(InteriorParts.table(0.7), Vector3(-1.9, 0, 1.4))
+		_put(InteriorParts.stool(), Vector3(-2.9, 0, 1.4), 0.4)
+		_put(InteriorParts.stool(), Vector3(-0.9, 0, 1.6), -0.4)
+	if _use("decor"):
+		_put(InteriorParts.window(1.4, 1.6), Vector3(hx - 0.06, 2.5, -2.2), FACE_MINUS_X)
+		_put(InteriorParts.banner(InteriorParts.ROOF_RED), Vector3(-hx + 0.1, 1.0, 0.6), FACE_PLUS_X)
+		_put(InteriorParts.picture(0.8, 0.6, Color(0.8, 0.6, 0.3)), Vector3(1.9, 2.6, hz - 0.06), FACE_MINUS_Z)
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(1.8, 0, hz - 0.6))
+	if _use("chandelier"):
+		_put(InteriorParts.chandelier(1.3), Vector3(-1.6, ceiling_height, 0.8))
+		_put(InteriorParts.chandelier(1.3), Vector3(2.0, ceiling_height, 0.6))
+	if _use("motes"):
+		_put(InteriorParts.floating_motes(Vector3(hx - 0.5, 1.5, hz - 0.5)), Vector3(0, 1.8, 0))
+
+## Yule's house (she stands outside it): two beds, a nightstand, toys on a bright rug, a
+## small hearth, drawings and a kite on the walls, and a clock.
+func _build_kids_home() -> void:
+	var hx := room_size.x * 0.5
+	var hz := room_size.y * 0.5
+	if _use("rug"):
+		_put(InteriorParts.rug(1.7, Color(0.3, 0.5, 0.72), Color(0.95, 0.75, 0.3)), Vector3(0.3, 0, 0.7))
+	if _use("fireplace"):
+		_put(InteriorParts.fireplace(), Vector3(-hx + 0.52, 0, 0.9), FACE_PLUS_X)
+	if _use("furniture"):
+		_put(_furniture("Bed_02"), Vector3(-hx + 1.3, 0, -hz + 1.3))
+		_put(_furniture("Bed_07"), Vector3(hx - 1.2, 0, -hz + 1.4))
+		_put(_furniture("Nightstand_02"), Vector3(0.1, 0, -hz + 0.15))
+		_put(_furniture("Clock_03"), Vector3(hx - 0.5, 0, 2.4), FACE_MINUS_X)
+		_put(InteriorParts.toy_blocks(), Vector3(-0.2, 0, 0.5), 0.3)
+		_put(InteriorParts.toy_horse(), Vector3(1.0, 0, 1.2), 0.9)
+		_put(InteriorParts.table(0.6), Vector3(1.7, 0, -0.5))
+		_put(InteriorParts.stool(), Vector3(1.0, 0, -0.5), 0.2)
+	if _use("decor"):
+		_put(InteriorParts.kite(Color(0.9, 0.35, 0.4)), Vector3(0.1, 2.7, -hz + 0.07))
+		_put(InteriorParts.window(1.2, 1.5), Vector3(hx - 0.06, 2.5, 0.8), FACE_MINUS_X)
+		for i in 3:   # her drawings
+			_put(InteriorParts.picture(0.5, 0.4, Color(0.5 + 0.15 * i, 0.6, 0.4)), Vector3(hx - 0.06, 2.4 + 0.1 * (i % 2), -0.9 - 0.7 * i), FACE_MINUS_X)
+	if _use("shelves"):
+		_put(InteriorParts.shelf(1.6, 2.4, InteriorParts.Fill.BOOKS, seed_value), Vector3(-hx + 0.4, 0, hz - 1.4), FACE_PLUS_X)
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(hx - 0.6, 0, hz - 0.7))
+	if _use("chandelier"):
+		_put(InteriorParts.chandelier(1.3), Vector3(0.0, ceiling_height, 0.8))
 	if _use("motes"):
 		_put(InteriorParts.floating_motes(Vector3(hx - 0.5, 1.5, hz - 0.5)), Vector3(0, 1.8, 0))
 
