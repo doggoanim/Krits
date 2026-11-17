@@ -44,17 +44,21 @@ const META := &"house_dressing"
 @export var name_filter: PackedStringArray = ["house_chesburg"]
 ## Shifts which choices each house gets; change it to reshuffle.
 @export var seed_offset := 0
-## Name signs hung above a house's door: house node name -> text.
-@export var signs := {"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse", "house_chesburg_6": "Shop",
-		"house_chesburg_2": "Tuppence", "house_chesburg_4": "Bakery", "house_chesburg_5": "Yule"}
+## Name signs hung above a house's door: house node name -> text. (Constants, not exports:
+## an exported list gets frozen into the saved scene the first time the editor saves it, so
+## later changes here would silently not apply.)
+const SIGNS := {
+	"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse", "house_chesburg_6": "Shop",
+	"house_chesburg_2": "Tuppence", "house_chesburg_4": "Bakery", "house_chesburg_5": "Yule",
+}
 ## Houses whose sign is a tall vertical board (letters stacked), and how far it hangs from
 ## the door sideways (metres; + is the viewer's right when facing the house).
-@export var vertical_signs := PackedStringArray(["house_chesburg_2"])
-@export var sign_offsets := {"house_chesburg_2": 1.8}
+const VERTICAL_SIGNS: Array[String] = ["house_chesburg_2"]
+const SIGN_OFFSETS := {"house_chesburg_2": 1.8}
 ## Size of a house's sign (house node name -> scale; 1 if absent).
-@export var sign_scales := {"house_chesburg_3": 0.65}
-## Rod height above the door's floor per house (SIGN_HEIGHT if absent); house 3 has no awning, so it hangs lower.
-@export var sign_heights := {"house_chesburg_3": 3.2, "house_chesburg_6": 3.6, "house_chesburg_2": 4.0}
+const SIGN_SCALES := {"house_chesburg_3": 0.65}
+## Rod height above the door's floor per house (SIGN_HEIGHT if absent); houses without an awning hang lower.
+const SIGN_HEIGHTS := {"house_chesburg_3": 3.2, "house_chesburg_6": 3.6, "house_chesburg_2": 4.0}
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
 
@@ -75,7 +79,7 @@ func _dress_all() -> void:
 	for child in holder.get_children():
 		if child is Node3D and _matches(child.name):
 			_dress(child as Node3D, index + seed_offset)
-			if signs.has(String(child.name)):
+			if SIGNS.has(String(child.name)):
 				signed += 1
 			index += 1
 	if Engine.is_editor_hint():
@@ -96,8 +100,8 @@ func _dress(house: Node3D, index: int) -> void:
 	_add_chimneys(house, index, taken)
 	if DORMERS[index % DORMERS.size()]:
 		_add_dormer(house, index, taken)
-	if signs.has(String(house.name)):
-		_add_sign(house, String(signs[String(house.name)]))
+	if SIGNS.has(String(house.name)):
+		_add_sign(house, String(SIGNS[String(house.name)]))
 	var style: int = ENTRANCES[index % ENTRANCES.size()]
 	if style >= 0:
 		_add_entrance(house, front, style, WOOD_SHADES[index % WOOD_SHADES.size()])
@@ -199,12 +203,12 @@ func _add_sign(house: Node3D, text: String) -> void:
 		return
 	var floor_y := door.position.y - DOOR_FLOOR_DROP
 	# the same wall face (and the same sink into it) as the door entrance, so both sit at one distance
-	var x := door.position.x + float(sign_offsets.get(String(house.name), 0.0))
+	var x := door.position.x + float(SIGN_OFFSETS.get(String(house.name), 0.0))
 	var wall := RoofProbe.wall_front(house, x, 1.5, floor_y + 0.3, floor_y + 2.5)
 	if is_nan(wall):
 		wall = door.position.z + DOOR_WALL_OFFSET
-	_place(house, HouseParts.hanging_sign(text, vertical_signs.has(String(house.name))), Vector3(x, floor_y + float(sign_heights.get(String(house.name), SIGN_HEIGHT)), wall - WALL_OVERLAP),
-			0.0, float(sign_scales.get(String(house.name), 1.0)))
+	_place(house, HouseParts.hanging_sign(text, vertical_SIGNS.has(String(house.name))), Vector3(x, floor_y + float(SIGN_HEIGHTS.get(String(house.name), SIGN_HEIGHT)), wall - WALL_OVERLAP),
+			0.0, float(SIGN_SCALES.get(String(house.name), 1.0)))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
