@@ -385,7 +385,7 @@ Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stret
 Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
 
 ## Foliage
-Chesburg has a `LevelAmbience` (the grassland bed, `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
+Chesburg has a `LevelAmbience` (the grassland bed, daytime only via `day_only`; `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
 Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
 
 ## Fantasy interiors
@@ -410,7 +410,7 @@ Everything that makes Chesburg and the well feel alive is a small, separate piec
 - **Barks** — `NpcBarks` child + `data/barks.cfg`: a line floats above the character when you walk past, by time of day or story flag.
 - **Animals** — `Birds` (flock on the `bird_perch` points, flee when you approach), `RoofCat`, `Chickens`; all built from `CritterParts`.
 - **Wind** — cloth (`cloth_wind.gdshader` + `ClothSway`) and `WindChimes` follow the shared gust field (`WindGusts`), like the grass and signs.
-- **Sound** — `AmbienceLayers` crossfades birdsong (day) and crickets (night); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/birdsong_loop.ogg`, `crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
+- **Sound** — `AmbienceLayers` fades in crickets at night (the day bed, birds included, is the level's grassland ambience); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
 - **Night extras** — `NightOnly` (fireflies only after dark, dust motes only by day), `Campfire` (lit after dark; Brant sits by it in the evening).
 
 ### Stepped (choppy) animation

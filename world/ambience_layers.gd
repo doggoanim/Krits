@@ -1,32 +1,26 @@
 class_name AmbienceLayers
 extends Node
-## Extra looping sound beds on top of the level's own ambience (LevelAmbience), faded by the
-## time of day: birdsong while it is light, crickets once it is dark. Both play on the
-## Ambience bus (its volume slider), start when the level enters the scene and stop when it
-## leaves. Put one in an outdoor level.
+## An extra looping sound bed on top of the level's own ambience (LevelAmbience), faded by the
+## time of day: crickets once it is dark. (The daytime bed, birds included, is the level's own
+## grassland ambience.) Plays on the Ambience bus (its volume slider), starts when the level
+## enters the scene and stops when it leaves. Put one in an outdoor level.
 
-## Leave empty for the default birdsong / crickets loops.
-@export var day_stream: AudioStream
+## Leave empty for the default crickets loop.
 @export var night_stream: AudioStream
-@export var day_volume_db := -10.0
 @export var night_volume_db := -12.0
-@export var fade_speed := 0.4              ## how fast (per second) a layer fades as the light changes
+@export var fade_speed := 0.4              ## how fast (per second) the layer fades as the light changes
 @export var bus := &"Ambience"
 
 const SILENT_DB := -60.0
-const DAY_DEFAULT := "res://sounds/Ambience/birdsong_loop.ogg"
 const NIGHT_DEFAULT := "res://sounds/Ambience/crickets_loop.ogg"
 
-var _day: AudioStreamPlayer
 var _night: AudioStreamPlayer
-var _day_level := 0.0
 var _night_level := 0.0
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 		return
-	_day = _make_layer(day_stream if day_stream != null else load(DAY_DEFAULT) as AudioStream)
 	_night = _make_layer(night_stream if night_stream != null else load(NIGHT_DEFAULT) as AudioStream)
 
 func _make_layer(stream: AudioStream) -> AudioStreamPlayer:
@@ -41,12 +35,10 @@ func _make_layer(stream: AudioStream) -> AudioStreamPlayer:
 	return p
 
 func _process(delta: float) -> void:
-	_day_level = move_toward(_day_level, WorldClock.day_amount(), fade_speed * delta)
 	_night_level = move_toward(_night_level, WorldClock.night_amount(), fade_speed * delta)
-	_drive(_day, _day_level, day_volume_db)
 	_drive(_night, _night_level, night_volume_db)
 
-## Silent layers are stopped (no decoding cost); audible ones play, volume following `level`.
+## A silent layer is stopped (no decoding cost); an audible one plays, volume following `level`.
 func _drive(player: AudioStreamPlayer, level: float, volume_db: float) -> void:
 	if level < 0.02:
 		if player.playing:
