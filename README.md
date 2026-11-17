@@ -385,7 +385,7 @@ Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stret
 Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
 
 ## Foliage
-Chesburg has a `LevelAmbience` (the grassland bed, `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
+Chesburg has a `LevelAmbience` (the grassland bed, daytime only via `day_only`; `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
 Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
 
 ## Fantasy interiors
