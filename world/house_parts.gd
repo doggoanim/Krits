@@ -244,5 +244,5 @@ static func entrance(style: int, wood_shade: float) -> Node3D:
 		_:
 			box(root, Vector3(2.4, 0.09, 1.4), wood, Vector3(0, 2.75, 0.62), Vector3(-18, 0, 0)) # slanted canopy
 			for sx in [-1.0, 1.0]:
-				box(root, Vector3(0.08, 0.08, 1.3), dark, Vector3(sx, 2.45, 0.55), Vector3(-30, 0, 0))   # brackets
+				box(root, Vector3(0.08, 0.08, 1.3), dark, Vector3(sx, 2.62, 0.62), Vector3(-18, 0, 0))   # brackets
 	return root
