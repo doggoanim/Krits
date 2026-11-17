@@ -1,6 +1,6 @@
 class_name ShopLife
 extends Node
-## Makes a shop look like it opens and closes: a little OPEN / CLOSED board hangs by the door
+## Makes a shop look like it opens and closes: a little OPEN / CLOSED board hangs from the name sign
 ## and flips with the door's hours (Door.open_from / open_to), and the goods outside (the
 ## market stall, crates and barrels) are carried out in the morning and taken in at dusk,
 ## popping in and out in held poses (see Choppy). While they are away their collision is off.
@@ -13,7 +13,7 @@ extends Node
 @export var goods_paths: Array[NodePath] = []
 @export var goods_from := -1.0
 @export var goods_to := -1.0
-@export var side_offset := -1.0                       ## sideways from the door's middle, in the door's own space: negative = the viewer's left
+@export var side_offset := -1.0                       ## (fallback mount by the door) sideways from the door's middle, in the door's own space: negative = the viewer's left
 @export var height_offset := 0.45                     ## above the door node (which sits 1 m above the floor)
 @export var wall_gap := 0.03                          ## how far the board's middle stands off the wall face (the name sign is flush, at 0)
 @export var open_color := Color(0.4, 0.8, 0.4)
@@ -48,8 +48,6 @@ func _ready() -> void:
 			g.node = n
 			g.rest_scale = n.scale
 			_goods.append(g)
-	if _door != null:
-		_build_board()
 	_snap()
 	set_process(true)
 
@@ -73,6 +71,8 @@ func _snap() -> void:
 	_apply_board()
 
 func _process(_delta: float) -> void:
+	if _board == null and _door != null:
+		_try_build_board()
 	var step := Choppy.index()
 	if step == _last_step:
 		return
@@ -113,16 +113,51 @@ func _set_collision(node: Node, enabled: bool) -> void:
 
 # --- the OPEN / CLOSED board ----------------------------------------------------------
 
-func _build_board() -> void:
+## The board hangs from the bottom of the shop's name sign on two short chains, as a pendulum of
+## its own (a SwingingSign inside the sign's swing, so it sways with the sign and on its own).
+## HouseDressing builds the sign a moment after the level loads, so we look for it for a while;
+## if there is none (or it never shows up) the board is mounted by the door instead.
+const SIGN_HANG_Y := -1.10      ## bottom of the name sign's frame, in the sign's swing space
+const CHAIN_LENGTH := 0.2
+const SIGN_SEARCH_FRAMES := 180
+
+var _search_frames := 0
+
+func _find_sign_swing() -> Node3D:
+	var house := _door.get_parent() as Node3D
+	if house == null:
+		return null
+	var sign_node := house.find_child("Sign", true, false)
+	return sign_node.get_node_or_null("Swing") as Node3D if sign_node != null else null
+
+## Returns true once the board exists (hung from the sign, or on the door as a fallback).
+func _try_build_board() -> bool:
+	var swing := _find_sign_swing()
+	if swing != null:
+		var pivot := SwingingSign.new()
+		pivot.name = "OpenClosedSwing"
+		swing.add_child(pivot)
+		pivot.position = Vector3(0, SIGN_HANG_Y, 0)
+		_build_board(pivot, Vector3(0, -(CHAIN_LENGTH + 0.15), 0))
+		return true
+	_search_frames += 1
+	if _search_frames < SIGN_SEARCH_FRAMES:
+		return false
+	_build_board(_door, Vector3(side_offset, height_offset, _wall_local_z() + wall_gap))
+	return true
+
+func _build_board(parent: Node3D, at: Vector3) -> void:
 	_board = Node3D.new()
 	_board.name = "OpenClosedBoard"
-	_door.add_child(_board)
-	_board.position = Vector3(side_offset, height_offset, _wall_local_z() + wall_gap)
+	parent.add_child(_board)
+	_board.position = at
 	var wood := Color(0.42, 0.28, 0.16)
+	var iron := Color(0.2, 0.2, 0.22)
+	var chain_y := 0.15 + CHAIN_LENGTH * 0.5
 	HouseParts.box(_board, Vector3(0.62, 0.3, 0.08), wood, Vector3.ZERO)
 	HouseParts.box(_board, Vector3(0.66, 0.04, 0.07), wood.darkened(0.3), Vector3(0, 0.17, 0))
-	HouseParts.box(_board, Vector3(0.02, 0.2, 0.02), Color(0.2, 0.2, 0.22), Vector3(-0.2, 0.28, 0))   # two short chains
-	HouseParts.box(_board, Vector3(0.02, 0.2, 0.02), Color(0.2, 0.2, 0.22), Vector3(0.2, 0.28, 0))
+	HouseParts.box(_board, Vector3(0.02, CHAIN_LENGTH, 0.02), iron, Vector3(-0.2, chain_y, 0))   # two short chains
+	HouseParts.box(_board, Vector3(0.02, CHAIN_LENGTH, 0.02), iron, Vector3(0.2, chain_y, 0))
 	_label = Label3D.new()
 	_label.font_size = 44
 	_label.pixel_size = 0.0045
@@ -131,6 +166,7 @@ func _build_board() -> void:
 	_label.position = Vector3(0, 0, 0.045)
 	_label.double_sided = false
 	_board.add_child(_label)
+	_apply_board()
 
 ## The wall face in front of the door, in the door's own space: the same wall the name sign is
 ## mounted on (HouseMount), so the board stands off the wall by exactly as much.
