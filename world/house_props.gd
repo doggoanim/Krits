@@ -155,11 +155,17 @@ static func lantern() -> Node3D:
 	root.name = "Lantern"
 	var iron := HouseParts.IRON
 	HouseParts.box(root, Vector3(0.05, 0.05, 0.4), iron, Vector3(0, 0, 0.2))            # arm (its first 0.3 m is inside the wall, like the sign's rod)
-	HouseParts.box(root, Vector3(0.05, 0.3, 0.05), iron, Vector3(0, -0.12, 0.05), Vector3(0, 0, 0))   # wall plate
-	HouseParts.box(root, Vector3(0.02, 0.12, 0.02), iron, Vector3(0, -0.06, 0.4))       # hook
+	HouseParts.box(root, Vector3(0.05, 0.3, 0.05), iron, Vector3(0, -0.12, 0.05))       # wall plate
+	# the lantern hangs from the arm's tip and swings on it (see SwingingSign): the wind pushes it
+	# out from the wall, someone running past sets it rocking
+	var pivot := SwingingSign.new()
+	pivot.name = "Swing"
+	pivot.position = Vector3(0, 0, 0.4)
+	root.add_child(pivot)
+	HouseParts.box(pivot, Vector3(0.02, 0.12, 0.02), iron, Vector3(0, -0.06, 0))        # hook
 	var body := Node3D.new()
-	body.position = Vector3(0, -0.34, 0.4)
-	root.add_child(body)
+	body.position = Vector3(0, -0.34, 0)
+	pivot.add_child(body)
 	HouseParts.box(body, Vector3(0.26, 0.05, 0.26), iron, Vector3(0, 0.17, 0))          # lid
 	HouseParts.box(body, Vector3(0.18, 0.06, 0.18), iron, Vector3(0, 0.22, 0))
 	HouseParts.box(body, Vector3(0.24, 0.04, 0.24), iron, Vector3(0, -0.17, 0))         # base
@@ -176,7 +182,7 @@ static func lantern() -> Node3D:
 	var lamp := _lamp_root(root)
 	lamp.flicker = 0.18
 	lamp.add_material(glass, 3.4)
-	lamp.add_light(_glow_light(root, Vector3(0, -0.34, 0.8), 1.6, 7.0), 1.6)
+	lamp.add_light(_glow_light(body, Vector3(0, 0, 0.4), 1.6, 7.0), 1.6)   # the light swings with the lantern
 	return root
 
 # --------------------------------------------------------------------- cloth
