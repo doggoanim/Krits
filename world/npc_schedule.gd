@@ -67,7 +67,7 @@ func _on_hour_changed(_hour: int) -> void:
 # --- which stop is current -----------------------------------------------
 
 func _current_stop() -> ScheduleStop:
-	var stay_out := quest_flag != &"" and Game.flag(quest_flag) and not (quest_done_flag != &"" and Game.flag(quest_done_flag))
+	var stay_out: bool = quest_flag != &"" and Game.flag(quest_flag) and not (quest_done_flag != &"" and Game.flag(quest_done_flag))
 	var current: ScheduleStop = stops.back()   # before the first entry: still doing last night's
 	var h := WorldClock.hour
 	for s in stops:
@@ -109,7 +109,9 @@ func _resolve_anchor() -> void:
 
 func _lookup(path: NodePath) -> Node3D:
 	var root: Node = owner if owner != null else get_tree().current_scene
-	var node := root.get_node_or_null(path) as Node3D if root != null else null
+	var node: Node3D = null
+	if root != null:
+		node = root.get_node_or_null(path) as Node3D
 	return node if node != null else get_node_or_null(path) as Node3D
 
 ## The nearest door-type stop (an INSIDE entry's place): where indoors NPCs appear.
