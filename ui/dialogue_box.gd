@@ -48,6 +48,7 @@ var _stage: DialogueStage
 var _line_done := false
 var _opened_frame := -1
 var _locked_until_msec := 0   ## interact presses are ignored until then (see SKIP_DELAY / ADVANCE_DELAY)
+var _word_start := true   ## the next visible character begins a word (the speaker pops on it)
 var _typed := 0   ## visible characters revealed so far, for thinning out the typing sound
 var _tween: Tween
 
@@ -152,7 +153,11 @@ func _press_interact() -> void:
 ## punctuation stay silent), using the UI focus sound.
 func _on_character_revealed(character: String) -> void:
 	if character.strip_edges() == "":
+		_word_start = true
 		return
+	if _word_start and _stage != null:
+		_stage.talk_pop()
+	_word_start = false
 	_typed += 1
 	if _typed % 2 == 0:
 		UiSfx.blip()
@@ -176,6 +181,7 @@ func _show_node(node: DialogueNode) -> void:
 	if node.gives_item != &"":
 		ItemGet.give(node.gives_item, node.gives_count)   # important items wait for the end of the talk
 	_line_done = false
+	_word_start = true
 	_locked_until_msec = Time.get_ticks_msec() + int(SKIP_DELAY * 1000.0)
 	_clear_choices()
 	_hint.visible = false

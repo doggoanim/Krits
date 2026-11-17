@@ -12,6 +12,7 @@ extends RefCounted
 ##   get_focus_point() -> Vector3   where the camera should look (the head)
 ##   face_toward(world_pos)         turn to face the player
 ##   restore_facing()               go back to how it was standing
+##   talk_pop()                     a squash-and-stretch pop, once per spoken word
 
 var player: Player
 
@@ -31,6 +32,11 @@ func begin(speaker: Node3D, tree: SceneTree) -> void:
 		_speaker.face_toward(player.global_position)
 	if player.camera_rig:
 		player.camera_rig.begin_focus(_speaker, _focus_point())
+
+## One beat of speech (the start of a word): the speaker pops, if it can.
+func talk_pop() -> void:
+	if is_instance_valid(_speaker) and _speaker.has_method(&"talk_pop"):
+		_speaker.talk_pop()
 
 func end() -> void:
 	if player == null:

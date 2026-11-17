@@ -35,6 +35,19 @@ extends Interactable
 
 const EDITOR_PREVIEW_NAME := "EditorModelPreview"
 
+## Talking pop: while this NPC speaks, its model squashes and stretches on every
+## word (see talk_pop(), called by DialogueStage). Strength 0 turns it off.
+@export_group("Talking")
+@export var talk_pop_strength := 1.0
+@export var talk_pop_stretch := Vector2(0.9, 1.16)   ## (x/z, y) scale at the top of the pop
+@export var talk_pop_squash := Vector2(1.07, 0.93)   ## (x/z, y) scale of the little rebound
+@export var talk_pop_min_gap := 0.14                 ## seconds between pops, so a fast word run stays readable
+@export_group("")
+
+var _talk_tween: Tween
+var _talk_last_msec := -100000
+var _talk_rest_scale := Vector3.ONE
+var _model_node: Node3D
 var _rest_yaw := 0.0
 var _turn_tween: Tween
 
@@ -95,6 +108,7 @@ func _build_model() -> void:
 	if node == null:
 		return
 	add_child(node)
+	_model_node = node
 	ModelUtil.fit_height(node, model_height)
 	ModelUtil.apply_cel_shading(node, [], {}, Callable(OutlineSystem, &"mark_occludable"))
 	var anim := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
@@ -132,6 +146,36 @@ func _current_dialogue() -> DialogueNode:
 	return dialogue
 
 # --- DialogueStage speaker interface ------------------------------------
+
+## What squashes and stretches while talking: the model, else the placeholder mesh.
+func _talk_target() -> Node3D:
+	if _model_node != null and is_instance_valid(_model_node):
+		return _model_node
+	return get_node_or_null("Mesh") as Node3D
+
+## One squash-and-stretch pop (feet stay planted, since scaling is about the NPC's
+## origin): shoots tall and thin, rebounds a bit squat, settles back.
+func talk_pop() -> void:
+	var target := _talk_target()
+	if target == null or talk_pop_strength <= 0.0:
+		return
+	var now := Time.get_ticks_msec()
+	if now - _talk_last_msec < int(talk_pop_min_gap * 1000.0):
+		return
+	_talk_last_msec = now
+	if _talk_tween != null and _talk_tween.is_valid():
+		_talk_tween.kill()
+		target.scale = _talk_rest_scale
+	else:
+		_talk_rest_scale = target.scale
+	var k := talk_pop_strength
+	var rest := _talk_rest_scale
+	var up := Vector3(lerpf(1.0, talk_pop_stretch.x, k), lerpf(1.0, talk_pop_stretch.y, k), lerpf(1.0, talk_pop_stretch.x, k))
+	var down := Vector3(lerpf(1.0, talk_pop_squash.x, k), lerpf(1.0, talk_pop_squash.y, k), lerpf(1.0, talk_pop_squash.x, k))
+	_talk_tween = create_tween()
+	_talk_tween.tween_property(target, "scale", rest * up, 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_talk_tween.tween_property(target, "scale", rest * down, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_talk_tween.tween_property(target, "scale", rest, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func get_focus_point() -> Vector3:
 	return global_position + Vector3.UP * head_height
