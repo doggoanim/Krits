@@ -138,10 +138,10 @@ static func rug(radius: float, field: Color, trim: Color) -> Node3D:
 static func fireplace() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Fireplace"
-	HouseParts.box(root, Vector3(3.4, 0.25, 1.6), STONE_DARK, Vector3(0, 0.125, 0.3))       # hearth slab
+	HouseParts.box(root, Vector3(3.5, 0.25, 1.6), STONE_DARK, Vector3(0, 0.125, 0.3))       # hearth slab
 	HouseParts.box(root, Vector3(0.8, 3.2, 1.0), STONE, Vector3(-1.3, 1.6, 0.0))            # left pillar
 	HouseParts.box(root, Vector3(0.8, 3.2, 1.0), STONE, Vector3(1.3, 1.6, 0.0))             # right pillar
-	HouseParts.box(root, Vector3(3.4, 0.7, 1.1), STONE, Vector3(0, 2.85, 0.0))              # lintel
+	HouseParts.box(root, Vector3(3.3, 0.66, 1.1), STONE, Vector3(0, 2.85, 0.0))              # lintel
 	HouseParts.box(root, Vector3(3.8, 0.2, 1.4), WOOD_DARK, Vector3(0, 3.3, 0.1))           # mantle
 	HouseParts.box(root, Vector3(1.8, 2.5, 0.3), Color(0.08, 0.06, 0.06), Vector3(0, 1.4, -0.4))   # sooty back
 	HouseParts.cylinder(root, 0.16, 1.3, WOOD_DARK, Vector3(0, 0.45, 0.0)).rotation_degrees = Vector3(0, 0, 90)
@@ -171,7 +171,7 @@ static func shelf(width: float, height: float, fill: int, seed_value: int) -> No
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var depth := 0.6
-	HouseParts.box(root, Vector3(width, height, 0.1), WOOD_DARK, Vector3(0, height * 0.5, -depth * 0.5 + 0.05))
+	HouseParts.box(root, Vector3(width - 0.1, height - 0.1, 0.1), WOOD_DARK, Vector3(0, height * 0.5, -depth * 0.5 + 0.08))
 	for sx in [-1.0, 1.0]:
 		HouseParts.box(root, Vector3(0.12, height, depth), WOOD, Vector3(sx * (width * 0.5 - 0.06), height * 0.5, 0))
 	HouseParts.box(root, Vector3(width + 0.1, 0.12, depth + 0.1), WOOD, Vector3(0, height + 0.06, 0))   # crown
@@ -179,7 +179,7 @@ static func shelf(width: float, height: float, fill: int, seed_value: int) -> No
 	var gap := (height - 0.15) / rows
 	for r in rows:
 		var y := 0.1 + r * gap
-		HouseParts.box(root, Vector3(width - 0.2, 0.1, depth), WOOD, Vector3(0, y, 0))
+		HouseParts.box(root, Vector3(width - 0.2, 0.1, depth - 0.04), WOOD, Vector3(0, y, 0.0))
 		if fill == Fill.BOOKS:
 			_books(root, rng, width - 0.3, y + 0.05, gap - 0.2)
 		else:
@@ -224,7 +224,7 @@ static func shield() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Shield"
 	for side in [-1.0, 1.0]:
-		HouseParts.box(root, Vector3(0.1, 2.2, 0.06), Color(0.75, 0.78, 0.85), Vector3.ZERO, Vector3(0, 0, 38.0 * side))
+		HouseParts.box(root, Vector3(0.1, 2.2, 0.06), Color(0.75, 0.78, 0.85), Vector3(0, 0, 0.015 * side), Vector3(0, 0, 38.0 * side))
 		HouseParts.box(root, Vector3(0.5, 0.08, 0.08), GOLD, Vector3(-side * 0.62, 0.5, 0.02), Vector3(0, 0, 38.0 * side))
 	HouseParts.box(root, Vector3(1.0, 1.2, 0.1), GOLD.darkened(0.2), Vector3(0, 0, 0.06))
 	_cone(root, 0.5, 0.5, toon_mat(GOLD.darkened(0.2)), Vector3(0, -0.85, 0.06), Vector3(180, 0, 0))
@@ -272,7 +272,7 @@ static func window(width: float, height: float) -> Node3D:
 	HouseParts.box(root, Vector3(width + 0.3, height + 0.3, 0.1), WOOD_DARK, Vector3.ZERO)
 	_glow_box(root, Vector3(width, height, 0.12), Color(0.95, 0.9, 0.7), Vector3.ZERO)
 	HouseParts.box(root, Vector3(0.08, height, 0.16), WOOD_DARK, Vector3.ZERO)
-	HouseParts.box(root, Vector3(width, 0.08, 0.16), WOOD_DARK, Vector3.ZERO)
+	HouseParts.box(root, Vector3(width, 0.08, 0.14), WOOD_DARK, Vector3.ZERO)
 	HouseParts.box(root, Vector3(width + 0.5, 0.1, 0.3), WOOD, Vector3(0, -height * 0.5 - 0.2, 0.1))   # sill
 	_light(root, Color(1.0, 0.92, 0.75), 0.9, 6.0, Vector3(0, 0, 1.2))
 	return root
@@ -333,7 +333,7 @@ static func chest() -> Node3D:
 	for sx in [-0.45, 0.45]:
 		HouseParts.box(root, Vector3(0.12, 0.75, 0.84), GOLD, Vector3(sx, 0.37, 0))
 	HouseParts.box(root, Vector3(0.18, 0.22, 0.06), GOLD, Vector3(0, 0.62, 0.42))
-	_glow_box(root, Vector3(1.2, 0.04, 0.04), Color(1.0, 0.9, 0.5), Vector3(0, 0.71, 0.4))
+	_glow_box(root, Vector3(1.2, 0.04, 0.08), Color(1.0, 0.9, 0.5), Vector3(0, 0.71, 0.4))
 	solid(root, Vector3(1.3, 1.1, 0.8), Vector3(0, 0.55, 0))
 	return root
 
