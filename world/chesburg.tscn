@@ -63,6 +63,7 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
+[ext_resource type="Script" path="res://world/house_variation.gd" id="house_variation_script"]
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
 [ext_resource type="AudioStream" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
@@ -959,6 +960,9 @@ transform = Transform3D(-1.16058985e-07, 0, -3.2901123, 0, 0.071999975, 0, 2.655
 transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
+
+[node name="HouseVariation" type="Node" parent="Buildings"]
+script = ExtResource("house_variation_script")
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
