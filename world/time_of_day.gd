@@ -67,6 +67,9 @@ var _env: Environment
 var _sun: DirectionalLight3D
 var _day_lantern_boost := -1.0
 
+const MIN_HOUR_CHANGE := 0.02   ## hours the clock must move before the lighting is re-tuned (about 0.5 s of normal play)
+var _last_hour := -100.0
+
 func _process(_delta: float) -> void:
 	if _sun == null or not is_instance_valid(_sun):
 		_sun = get_tree().get_first_node_in_group(&"sun") as DirectionalLight3D
@@ -75,6 +78,12 @@ func _process(_delta: float) -> void:
 	if _sun == null or _env == null:
 		return
 	var h := WorldClock.hour
+	# Re-tuning the sun, ambient light and sky material every frame is wasteful (and re-lights the
+	# sky's reflection probe each time); the clock moves slowly, so only update on a visible change.
+	var moved := absf(fposmod(h - _last_hour + 12.0, 24.0) - 12.0)
+	if moved < MIN_HOUR_CHANGE:
+		return
+	_last_hour = h
 	_apply_sun(h)
 	_apply_ambient(h)
 	_apply_sky(h)
