@@ -20,7 +20,7 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(4, 2, 10.4)
+size = Vector3(3.8, 2, 9.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1fccd"]
 size = Vector3(4, 0.2, 10.4)
@@ -150,7 +150,7 @@ script = ExtResource("3")
 normal_axis = Vector3(-1, 0, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="WallWest" unique_id=1099163910]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.49999997)
 material_override = SubResource("InnerMat")
 mesh = SubResource("EWWallMesh")
 
