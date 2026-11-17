@@ -11,6 +11,8 @@ a script attached — all their content is built in `_ready()`) — but that's j
 how this project started, not a rule: see "Building your own map" below for
 hand-building levels visually in the editor, which works fine.
 
+Contents: Main menu · Controls · Layout · Extending · Building your own map · Lighting and color grading · Dialogue · Combat · Inventory · Quests · Hotbar and abilities · Gore and death · Assets and textures · Water splash and effects · Foliage · Fantasy interiors · Fire · The living world (Chesburg, stepped animation, night windows, the well).
+
 ## Main menu
 `ui/main_menu.tscn` (script `ui/main_menu.gd`) is a controller over a persistent 3D
 backdrop plus a stack of full-screen pages, shown one at a time with fades:
@@ -304,6 +306,7 @@ couple of its fields (background/ambient) temporarily during a fight and
 restores them after, so whatever look you set here carries into combat too.
 
 ## Dialogue system
+Speakers pop while they talk: on every word the dialogue box asks the speaker for `talk_pop()` (via `DialogueStage`), and an NPC squashes and stretches its model with its feet planted. Tune per NPC under "Talking" (`talk_pop_strength`, 0 = off; stretch, squash, minimum gap).
 
 - **Authoring:** write each NPC's conversation as one plain-text `.dlg` file (`dialogue/npcs/*.dlg`, format documented at the top of `dialogue/dialogue_parser.gd`) and point the NPC's `dialogue_file` at it — sections, lines, choices with `[set flag]` / `[if flag]` / `[item x]` / `[give x N]` tags, and `@when flag -> section` for flag-switched lines. `DialogueParser` builds the same node graph the `.tres` route does (both still work; parse errors are logged as `file:line: message`). Godot exports `.dlg` only if Export > Resources > "Filters to export non-resource files" includes `*.dlg`.
 - **Data:** `DialogueNode` / `DialogueChoice` resources (`dialogue/`). Code helpers: `DialogueNode.say(speaker, text)` and `DialogueNode.chain([[speaker, text], ...])`.
@@ -347,7 +350,9 @@ restores them after, so whatever look you set here carries into combat too.
 
 **Sword pound bonus:** finish an airborne combo with a ground pound (`crouch_pound` in the air, landing from the slam) and the banked damage is ×1.25 (`Arena.POUND_BONUS`). Success cue: a golden "POUND x1.25!" plate under the combo plate (`PoundPlate` in hud.tscn), golden damage numbers/confetti, its own hit sound (`attack_orb_sword_hit_pound.wav`, replaces the normal sword hit), a bigger kick and longer hitstop.
 
-### Quests
+## Quests
+`KeyItemPickup.show_when` hides a pickup (and its collision) until the listed story flags are set; Yule's ball and Brant's backpack use their quests' accepted flags, so they only appear during the quest.
+Biscuit (both the hilltop cat and the one at Mrs. Vael's) now uses `assets/npcs/cat_biscuit.glb`. A QuestProp with a real `model` keeps its look-here marker; the model's head faces +Z, hence `facing_offset = PI`.
 - The inventory has a **Quests** tab next to Abilities (active quests, main first, then finished ones, with objective checklists).
 - `quests/`: `QuestData` (title, objectives, rewards, `is_main`), `QuestObjective` (FLAG / DEFEAT / REACH / COLLECT), `QuestLibrary` (the catalog; texts in `data/descriptions.cfg` under `[quests]`), `QuestLog` (`Game.quests`, saves only the completed ids).
 - Progress is derived, never stored: every objective except COLLECT is a story flag (dialogue `sets_flag`, `cleared_<enemy_id>`, `reached_<place_id>`), COLLECT reads the bag. `QuestLog.evaluate()` re-checks on every flag/item change, pays rewards and sets `quest_done_<id>`.
@@ -358,12 +363,12 @@ restores them after, so whatever look you set here carries into combat too.
 - Side quests so far: Yule's Ball, Goo for Marta, The Overgrown Ledges, Fenn's Fish Stew (fishing: 3 perch for Fenn by the lake, `dialogue/npcs/fenn.dlg`), and The Missing Cat (Mrs. Vael, `dialogue/npcs/vael.dlg`). The cat quest is clue-hunting built from `QuestProp` (`world/quest_prop.gd`): an NPC that only exists while its `show_when` flags are set, hides on `hide_when`, drops to the ground and gets a placeholder look per `kind` (`world/quest_prop_visuals.gd`) until it has a model. Three clues (`cat_clue_1..3`) reveal Biscuit on the hilltop; picking him up sets `cat_found`, and Mrs. Vael completes the quest.
 - A quest starts when its `start_flag` is set (empty = from the start of the game) and its `requires_quest` is done. `QuestTrigger` (`world/`) sets `reached_<place_id>` when the player walks in. Active quests are listed in the inventory's Quests tab, main first (there is no on-screen tracker).
 
-### Hotbar & abilities
+## Hotbar and abilities
 - `abilities/`: `AbilityData` (effect, cooldown, stamina cost, price), `AbilityLibrary` (catalog: Heal, Air Step, Guard Up, Shockwave, Orb Stack; each spends stamina, see `PlayerStats`), `AbilityRunner.activate()` does the effect.
 - `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; learn new abilities in shops.
 - `ui/widgets/hotbar_bar.tscn`: the HUD strip (cooldown wipe, item counts); a display-only copy sits at the bottom of the inventory screen.
 
-### Killer-fish gore
+## Gore and death
 When the killer fish catches the player, the body bursts (`Player.gore_death()` → `world/gore_burst.gd`): blood spray and mist, flying chunks of meat, bone and outfit scraps that bounce and leave splats, a stain spreading on the water, a red flash. The fish lingers 1.8 s over the remains (`KillerFish.FEAST_TIME`). Tune counts and colors via the constants at the top of `GoreBurst`. Other deaths are unchanged.
 Enemies burst the same way when defeated (`Enemy._burst_on_death()`), scaled by their `size` and with scraps in their own color; this replaces their death animation. Tune with `Enemy.GORE_SIZE_PER_UNIT`.
 Every player death now gores too (`Player._begin_death`). **Settings > Accessibility > Gore** (`accessibility/gore`, default off) switches all gore on; off keeps the plain death animations for the player, enemies and killer fish.
@@ -371,40 +376,34 @@ Gore color is per enemy: `EnemyData.gore_color` (transparent = red). The green s
 After the player dies the music distorts and its pitch lurches between random values until respawn (`Music.warped`, tuned by the "Death Warp" exports in `core/music_player.gd`).
 Fish sell for more the bigger they are (`FishCatalog.price_mult`, size^1.5; shop and inventory show the real totals). The killer fish rumbles (a synthesized low hum plus a camera shake) when you're within `rumble_radius`, building up as it hunts you.
 
-### Texture storage
+## Assets and textures
 The 47 furniture models in `assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/` no longer each embed their own copy of the (identical, 1024x1024) texture: they point at the one shared `Cute_Furniture_Free_Textures_4.png`, so it imports and ships once. After pulling, let Godot re-import the folder.
 Textures that several models used to embed separately (houses, windows, doors, trees, rocks, grass, characters) now live once in `assets/shared_textures/` (the furniture one stays next to its models) and the `.glb` files reference them. Re-export a model from Blender as usual; Godot re-imports. Names there include a short content hash.
-`KeyItemPickup.show_when` hides a pickup (and its collision) until the listed story flags are set; Yule's ball and Brant's backpack use their quests' accepted flags, so they only appear during the quest.
+
+## Water splash and effects
 Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stretch still starts at 7 m) and are wiped away from top to bottom when the fall ends (`wipe_time`, `wipe_height`).
-
-### Water splash
 Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
-Biscuit (both the hilltop cat and the one at Mrs. Vael's) now uses `assets/npcs/cat_biscuit.glb`. A QuestProp with a real `model` keeps its look-here marker; the model's head faces +Z, hence `facing_offset = PI`.
-Speakers pop while they talk: on every word the dialogue box asks the speaker for `talk_pop()` (via `DialogueStage`), and an NPC squashes and stretches its model with its feet planted. Tune per NPC under "Talking" (`talk_pop_strength`, 0 = off; stretch, squash, minimum gap).
 
-### Walking through foliage
-Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
+## Foliage
 Chesburg has a `LevelAmbience` (the grassland bed, `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
-Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`, a node under `Buildings`; per-house choices are the arrays at its top): each house's scale gives a different size and height, chimneys vary in count and style (plain, tapered, round, potted; some smoke), some roofs get a dormer window or a swinging weathervane, and some doors a canopy, porch or step. Parts are built in `world/house_parts.gd` and placed on the roof / wall found by `world/roof_probe.gd`. It runs in the editor too, but the parts are never saved into the scene.
-Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the interior hearth a fire loop (`fireplace.ogg`): 3D sounds that only get loud when you are near, via `HouseParts.add_loop_sound` (silent in the editor).
+Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
 
-### Fantasy interiors
+## Fantasy interiors
 
 `world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a cosy fantasy home from its `room_size`: hearth with a stew pot and flickering fire, bookshelves, pantry shelf, dining table, wardrobe, window, pictures, plants, a candle ring and drifting dust motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. `layout` picks CAT_LADY / BAKERY / KIDS_HOME (Mrs. Vael's, Marta's and Yule's houses: `house_2_interior.tscn`, `house_4_interior.tscn`, `house_5_interior.tscn`; Vael, Marta and Biscuit's bed live inside now, while Yule stays outside and her house is empty), SHOP (the shopkeeper's store, `house_6_interior.tscn`: counter, goods shelves, barrels, crates), HOME (the player's cottage, `house_1_interior.tscn`) or HALL (the mayor's study with side shelves, banners, a shield, candelabras and a runner, `house_3_interior.tscn`; its desk, chair and mayor stay hand-placed in the scene).
 
-### Fire
+## Fire
 
 Every fire shares one look (`world/fire_fx.gd`, `FireFx`): hand-painted, stylised flame cards (`shading/flame.gdshader`: a wobbling teardrop in hard colour bands with brush-streak edges and a dry-brush tip, upright billboards) plus rising ember flecks like the staff's burn (yellow -> orange -> red). Used by the hearth and candles (`world/interior_parts.gd`) and by the burn status on enemies (`combat/status_fx.gd`). Palettes (`PALETTE_FIRE`, `PALETTE_CANDLE`) and the shader's `fatness`, `speed` and `wobble` tune the look.
 
-Shop signs swing (`world/swinging_sign.gd`): the board and chains are a damped pendulum on the rod, pushed out by the shared wind gusts (`WindGusts`), stopped by the wall, and rocked a little by a player running past. Tune `WIND_PUSH`, `DAMPING` and `GRAVITY_OVER_LENGTH` there.
+## The living world
 
-Scripts that the editor-visible dressing (`HouseDressing`, `FantasyInterior`) calls are marked `@tool` too (`HouseParts`, `RoofProbe`, `InteriorParts`, `FireFx`, `SwingingSign`, `ModelUtil`) — Godot only runs a script in the editor if it is `@tool`, so a helper missing it makes the parts silently not appear there.
+Everything that makes Chesburg and the well feel alive is a small, separate piece: add, remove or retune each on its own.
 
-### A living Chesburg
-Everything that makes the town feel alive is a small, separate piece — add, remove or retune each on its own:
+### Chesburg
 
 - **Time of day** — `core/world_clock.gd` (autoload `WorldClock`) is the one clock (`day_length` real seconds per 24h; `WorldClock.set_hour(21)` to jump while testing). `world/time_of_day.gd` (drop into an outdoor level) re-tunes Main's sun and sky from keyframe tables: dawn, day, dusk, a moonlit night with stars and a moon (`sky_painted.gdshader`). Walking into a house hands lighting back to the interior grade; the clock keeps running.
-- **Lanterns** — `NightLamp` (`world/night_lamp.gd`) makes emissive glass and lights glow after dusk; `HouseExtras` (`world/house_extras.gd`) hangs windows with shutters and flower boxes, a lantern, bunting, laundry, a market stall, crates, a wood pile, wind chimes, a notice board, bird perches, a roof cat and chickens on the houses. **What each house gets is the `PLAN` table at the top of that file.** Each prop is a `PropSlot` node under an `Extras_N` node beside its house: in the editor click it in the 3D view (or the scene tree), move/rotate/delete/duplicate it and save the scene (HouseExtras then leaves that house alone; its "Reset extras" button lays everything out again from `PLAN`). The builders are in `world/house_props.gd`, shared plumbing in `world/house_mount.gd`.
+- **Lanterns** — `NightLamp` (`world/night_lamp.gd`) makes emissive glass and lights glow after dusk; `HouseExtras` (`world/house_extras.gd`) hangs a lantern, bunting, laundry, a market stall, crates, a wood pile, wind chimes, a notice board, bird perches, a roof cat and chickens on the houses. **What each house gets is the `PLAN` table at the top of that file.** Each prop is a `PropSlot` node under an `Extras_N` node beside its house: in the editor click it in the 3D view (or the scene tree), move/rotate/delete/duplicate it and save the scene (HouseExtras then leaves that house alone; its "Reset extras" button lays everything out again from `PLAN`). The builders are in `world/house_props.gd`, shared plumbing in `world/house_mount.gd`.
 - **Notice board** — its notes follow story flags (`FlagVisibility`): "LOST CAT" until `cat_found`, then "BISCUIT IS HOME!".
 - **Shop hours** — `Door.open_from` / `open_to` (WorldClock hours). Closed, the prompt says so and the door shows when it opens.
 - **NPC routines** — add `NpcSchedule` as a child of an NPC with `ScheduleStop` entries (from hour → stand / wander / go indoors, at a Marker3D or a door's spawn point). NPCs walk there, wander their yard, head home at dusk, stop and look at you when you come near, and are placed straight at the right spot when a level reloads. `quest_flag` / `quest_done_flag` keep a quest giver outside while their quest is open.
@@ -414,11 +413,25 @@ Everything that makes the town feel alive is a small, separate piece — add, re
 - **Sound** — `AmbienceLayers` crossfades birdsong (day) and crickets (night); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/birdsong_loop.ogg`, `crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
 - **Night extras** — `NightOnly` (fireflies only after dark, dust motes only by day), `Campfire` (lit after dark; Brant sits by it in the evening).
 
-## Stepped (choppy) animation
+### Stepped (choppy) animation
 
 All the ambient animation (chickens, birds, roof cat, NPC walk bob, signs, lanterns, chimes, weathervanes, flames, cloth, star twinkle, particles) is shown in held poses, like Blender's stepped interpolation: a new pose every 2 frames at 24 fps (12 poses a second, "on 2s"). Movement stays smooth; only poses are held.
 The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders keep a copy of `STEP_SECONDS` (`flame`, `cloth_wind`, `sky_painted`, `foliage_wind`, `water`); update them if you change it.
 
-## A living well
+### Night windows
+
+`WindowGlow` (next to `HouseDressing` in `chesburg.tscn`) drives the houses' window-pane material: dim glass by day, warm glow from dusk, and each house goes dark at its own bedtime (`bedtime` range, hours past midnight count on from 24). It finds the pane material by name (`Material.003`).
+
+### The well
 
 `world/well.tscn` has `WellLights` (crystals breathe in a slow wave and hum softly up close, torches flicker), `CaveGlimmers` (cyan motes orbiting each crystal) and `WaterLife` (ripples, rising bubbles and a few fish in the pool). They find their targets by node name/path (`AccentLights`, `Water`) and are all held in stepped poses via `Choppy`.
+
+### Editor-visible dressing
+Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`, a node under `Buildings`; per-house choices are the arrays at its top): each house's scale gives a different size and height, chimneys vary in count and style (plain, tapered, round, potted; some smoke), some roofs get a dormer window or a swinging weathervane, and some doors a canopy, porch or step. Parts are built in `world/house_parts.gd` and placed on the roof / wall found by `world/roof_probe.gd`. It runs in the editor too, but the parts are never saved into the scene.
+
+Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the interior hearth a fire loop (`fireplace.ogg`): 3D sounds that only get loud when you are near, via `HouseParts.add_loop_sound` (silent in the editor).
+
+
+Shop signs swing (`world/swinging_sign.gd`): the board and chains are a damped pendulum on the rod, pushed out by the shared wind gusts (`WindGusts`), stopped by the wall, and rocked a little by a player running past. Tune `WIND_PUSH`, `DAMPING` and `GRAVITY_OVER_LENGTH` there.
+
+Scripts that the editor-visible dressing (`HouseDressing`, `FantasyInterior`) calls are marked `@tool` too (`HouseParts`, `RoofProbe`, `InteriorParts`, `FireFx`, `SwingingSign`, `ModelUtil`) — Godot only runs a script in the editor if it is `@tool`, so a helper missing it makes the parts silently not appear there.
