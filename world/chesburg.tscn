@@ -66,6 +66,7 @@
 [ext_resource type="AudioStream" uid="uid://ci84xm6i6olb1" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="Script" uid="uid://b8mj2xaqcf7na" path="res://world/house_dressing.gd" id="house_dressing_script"]
 [ext_resource type="Script" uid="uid://0cbpy1r6y3yx" path="res://world/house_extras.gd" id="house_extras_script"]
+[ext_resource type="Script" path="res://world/window_glow.gd" id="window_glow_script"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://w4i06xqwevvb" path="res://world/ambience_layers.gd" id="layers_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
@@ -996,6 +997,10 @@ transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 
 [node name="HouseDressing" type="Node" parent="Buildings" unique_id=2107741015]
 script = ExtResource("house_dressing_script")
+name_filter = PackedStringArray("house_chesburg")
+
+[node name="WindowGlow" type="Node" parent="Buildings"]
+script = ExtResource("window_glow_script")
 name_filter = PackedStringArray("house_chesburg")
 
 [node name="HouseExtras" type="Node" parent="Buildings" unique_id=311763749]
