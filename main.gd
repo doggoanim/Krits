@@ -307,15 +307,13 @@ func _play_death_sequence() -> void:
 	cam.target = _death_cam_hold
 	cam.look_locked = true
 	var cam3d := cam.get_camera()
-	# Dying in the water: the underwater tint (a flat layer over the 3D view) would colour the
-	# body, so lift the player onto the untinted top layer straight away, drawn normally.
-	if player.water_submersion() > 0.0 or WaterVolume.at(cam3d.global_position) != null:
-		_show_death_overlay(cam3d)
+	# The moment of death: the player goes onto the top layer, above the iris and any underwater
+	# tint, drawn normally (see DeathOverlay).
+	_show_death_overlay(cam3d)
 	await get_tree().create_timer(DEATH_FREEZE_WAIT, true, false, true).timeout
 	var uv := cam3d.unproject_position(player.global_position + Vector3.UP * 0.9) / get_viewport().get_visible_rect().size
 	await LoadingScreen.instance.close_to(DEATH_IRIS_RADIUS, uv, DEATH_IRIS_TIME)
 	await get_tree().create_timer(DEATH_PRE_HOP_WAIT, true, false, true).timeout
-	_show_death_overlay(cam3d)   # the fall stays visible over the black (a no-op if it is already up)
 	player.death_hop()
 	await get_tree().create_timer(DEATH_HOP_TIME, true, false, true).timeout
 
