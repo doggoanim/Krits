@@ -302,10 +302,11 @@ static func runner(width: float, length: float, field: Color, trim: Color) -> No
 static func picture(width: float, height: float, art: Color) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Picture"
-	HouseParts.box(root, Vector3(width + 0.16, height + 0.16, 0.06), GOLD.darkened(0.3), Vector3.ZERO)
-	HouseParts.box(root, Vector3(width, height, 0.07), PARCHMENT, Vector3.ZERO)
-	HouseParts.box(root, Vector3(width * 0.8, height * 0.45, 0.08), art, Vector3(0, -height * 0.15, 0))
-	HouseParts.box(root, Vector3(width * 0.8, height * 0.28, 0.08), art.lerp(Color(0.6, 0.8, 1.0), 0.7), Vector3(0, height * 0.22, 0))
+	# every layer sits clear of the wall face (0.04 behind the origin) and of the layer below
+	HouseParts.box(root, Vector3(width + 0.16, height + 0.16, 0.06), GOLD.darkened(0.3), Vector3(0, 0, 0.07))
+	HouseParts.box(root, Vector3(width, height, 0.07), PARCHMENT, Vector3(0, 0, 0.075))
+	HouseParts.box(root, Vector3(width * 0.8, height * 0.45, 0.08), art, Vector3(0, -height * 0.15, 0.08))
+	HouseParts.box(root, Vector3(width * 0.8, height * 0.28, 0.08), art.lerp(Color(0.6, 0.8, 1.0), 0.7), Vector3(0, height * 0.22, 0.08))
 	return root
 
 ## A window letting in warm daylight (origin at its centre, front +Z).
@@ -444,7 +445,7 @@ static func crate(size := 0.8) -> Node3D:
 	for sy in [0.15, 0.85]:
 		HouseParts.box(root, Vector3(size + 0.04, 0.1, size + 0.04), WOOD_DARK, Vector3(0, size * sy, 0))
 	for sx in [-1.0, 1.0]:
-		HouseParts.box(root, Vector3(0.1, size + 0.04, size + 0.04), WOOD_DARK, Vector3(sx * (size * 0.5 - 0.06), size * 0.5, 0))
+		HouseParts.box(root, Vector3(0.1, size + 0.07, size + 0.07), WOOD_DARK, Vector3(sx * (size * 0.5 - 0.06), size * 0.5, 0))
 	solid(root, Vector3(size, size, size), Vector3(0, size * 0.5, 0))
 	return root
 
@@ -556,7 +557,7 @@ static func oven() -> Node3D:
 	HouseParts.box(root, Vector3(2.8, 0.5, 1.6), BRICK, Vector3(0, 0.25, 0))
 	for sx in [-1.0, 1.0]:
 		HouseParts.box(root, Vector3(0.8, 1.2, 1.6), BRICK, Vector3(sx * 1.0, 1.1, 0))
-	HouseParts.box(root, Vector3(2.8, 0.7, 1.6), BRICK, Vector3(0, 1.95, 0))
+	HouseParts.box(root, Vector3(2.8, 0.6, 1.6), BRICK, Vector3(0, 2.0, 0))
 	HouseParts.box(root, Vector3(1.2, 1.2, 0.2), Color(0.08, 0.06, 0.06), Vector3(0, 1.1, -0.65))
 	HouseParts.box(root, Vector3(1.2, 0.05, 1.3), STONE_DARK, Vector3(0, 0.52, 0.0))        # the baking floor
 	HouseParts.box(root, Vector3(0.9, 3.0, 0.9), BRICK, Vector3(0, 3.3, -0.3))                # chimney
@@ -619,7 +620,7 @@ static func kite(color: Color) -> Node3D:
 	root.name = "Kite"
 	HouseParts.box(root, Vector3(0.9, 0.9, 0.04), color, Vector3.ZERO, Vector3(0, 0, 45))
 	HouseParts.box(root, Vector3(0.05, 1.3, 0.06), WOOD, Vector3(0, 0, 0.01))
-	HouseParts.box(root, Vector3(1.3, 0.05, 0.06), WOOD, Vector3(0, 0, 0.01))
+	HouseParts.box(root, Vector3(1.3, 0.05, 0.05), WOOD, Vector3(0, 0, 0.012))
 	var ribbons: Array[Color] = [Color(0.95, 0.4, 0.4), Color(0.95, 0.85, 0.3), Color(0.4, 0.7, 0.95)]
 	for i in 3:
 		HouseParts.box(root, Vector3(0.2, 0.1, 0.03), ribbons[i], Vector3((i % 2) * 0.1 - 0.05, -0.8 - i * 0.2, 0.02), Vector3(0, 0, 10 * (i - 1)))
