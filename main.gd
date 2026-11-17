@@ -75,6 +75,7 @@ var player: Player
 var _respawning := false
 var _death_running := false
 var _death_cam_hold: Node3D   ## parks the camera at the spot of death
+var _death_overlay_shown := false
 var _death_overlay: DeathOverlay   ## draws the falling player over the iris's black
 const DEATH_FREEZE_WAIT := 0.45   ## frozen on the pose before the iris starts
 const DEATH_IRIS_RADIUS := 0.2    ## the gap left open around the player (screen heights)
@@ -298,23 +299,34 @@ func _on_player_died() -> void:
 ## All in real time — the hit-stop freeze would otherwise stretch the waits.
 func _play_death_sequence() -> void:
 	if _death_overlay != null:
-		_death_overlay.clear()   # never start a death with the player still lifted onto the top layer by an earlier one
+		_death_overlay.clear()
+		_death_overlay_shown = false   # never start a death with the player still lifted onto the top layer by an earlier one
 	_death_cam_hold = Node3D.new()   # the camera stays where it was while the player falls away
 	add_child(_death_cam_hold)
 	_death_cam_hold.global_position = player.global_position
 	cam.target = _death_cam_hold
 	cam.look_locked = true
-	await get_tree().create_timer(DEATH_FREEZE_WAIT, true, false, true).timeout
 	var cam3d := cam.get_camera()
+	# Dying in the water: the underwater tint (a flat layer over the 3D view) would colour the
+	# body, so lift the player onto the untinted top layer straight away, drawn normally.
+	if player.water_submersion() > 0.0 or WaterVolume.at(cam3d.global_position) != null:
+		_show_death_overlay(cam3d)
+	await get_tree().create_timer(DEATH_FREEZE_WAIT, true, false, true).timeout
 	var uv := cam3d.unproject_position(player.global_position + Vector3.UP * 0.9) / get_viewport().get_visible_rect().size
 	await LoadingScreen.instance.close_to(DEATH_IRIS_RADIUS, uv, DEATH_IRIS_TIME)
 	await get_tree().create_timer(DEATH_PRE_HOP_WAIT, true, false, true).timeout
+	_show_death_overlay(cam3d)   # the fall stays visible over the black (a no-op if it is already up)
+	player.death_hop()
+	await get_tree().create_timer(DEATH_HOP_TIME, true, false, true).timeout
+
+## Puts the player on the top layer, above the iris and any underwater tint (see DeathOverlay).
+func _show_death_overlay(cam3d: Camera3D) -> void:
 	if _death_overlay == null:
 		_death_overlay = DeathOverlay.new()
 		add_child(_death_overlay)
-	_death_overlay.show_player(player, cam3d)   # the fall stays visible over the black
-	player.death_hop()
-	await get_tree().create_timer(DEATH_HOP_TIME, true, false, true).timeout
+	if not _death_overlay_shown:
+		_death_overlay.show_player(player, cam3d)
+		_death_overlay_shown = true
 
 ## Iris wipe, then — while the screen is fully covered — lose some gold, heal
 ## and put the player back at the last spawnpoint.
@@ -328,6 +340,7 @@ func _respawn_after_death() -> void:
 	await LoadingScreen.instance.run(func():
 		if _death_overlay != null:
 			_death_overlay.clear()   # fully covered now: the player goes back to being drawn normally
+			_death_overlay_shown = false
 		cam.look_locked = false
 		cam.target = player   # the camera was parked while the player fell away (see _play_death_sequence())
 		if is_instance_valid(_death_cam_hold):
