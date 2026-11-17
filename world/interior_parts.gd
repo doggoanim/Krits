@@ -158,7 +158,7 @@ static func fireplace() -> Node3D:
 	var embers := FireFx.embers(14, 1.8, 1.5, 0.35, 0.09)
 	embers.position = Vector3(0, 1.3, 0.05)
 	root.add_child(embers)
-	HouseParts.add_loop_sound(root, FIRE_SFX, -4.0, 3.5, 14.0, Vector3(0, 0.8, 0.4))
+	HouseParts.add_loop_sound(root, FIRE_SFX, -4.0, 6.0, 32.0, Vector3(0, 0.8, 0.4))
 	_light(root, Color(1.0, 0.58, 0.25), 2.4, 9.0, Vector3(0, 1.4, 1.2), 0.6)
 	solid(root, Vector3(3.6, 3.4, 1.2), Vector3(0, 1.7, 0.1))
 	return root

@@ -111,7 +111,7 @@ static func chimney(style: int, width: float, height: float, smoke: bool) -> Nod
 			top = height + 0.18
 	if smoke:
 		root.add_child(_smoke(Vector3(0, top + 0.1, 0)))
-		add_loop_sound(root, CHIMNEY_SFX, -10.0, 2.5, 16.0, Vector3(0, top, 0))
+		add_loop_sound(root, CHIMNEY_SFX, -10.0, 5.0, 40.0, Vector3(0, top, 0))
 	return root
 
 static func _smoke(at: Vector3) -> CPUParticles3D:
