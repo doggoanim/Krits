@@ -2,7 +2,7 @@
 class_name FantasyInterior
 extends Node3D
 ## Dresses a rectangular room (floor at y 0, door on the +Z wall) as a cosy fantasy home:
-## hearth with a stew pot, bookshelves, a pantry shelf, a dining table, wardrobe, chest,
+## hearth with a stew pot, bookshelves, a pantry shelf, a dining table, wardrobe,
 ## a window, pictures, a plant, a candle ring and drifting dust motes. The pieces come from
 ## InteriorParts; this node only decides where they go, from the room's size, so a
 ## differently sized room just needs a different `room_size`.
@@ -18,7 +18,7 @@ enum Layout { HOME, HALL }
 @export var room_size := Vector2(8.0, 8.0)
 ## Height from the floor to the ceiling's underside.
 @export var ceiling_height := 5.0
-## Parts to leave out (any of: rug, fireplace, shelves, table, wardrobe, chest, decor,
+## Parts to leave out (any of: rug, fireplace, shelves, table, wardrobe, decor,
 ## plant, chandelier, motes). Handy when the room already has something there.
 @export var skip: PackedStringArray = []
 ## Seed for the book / potion colours.
@@ -127,8 +127,6 @@ func _build_home() -> void:
 		_put(InteriorParts.stool(), Vector3(0.8, 0, 0.0), -0.6)
 	if _use("wardrobe"):
 		_put(InteriorParts.wardrobe(), Vector3(east - 0.2, 0, 2.4), FACE_MINUS_X)
-	if _use("chest"):
-		_put(InteriorParts.chest(), Vector3(east - 0.1, 0, -0.7), FACE_MINUS_X)   # against the east wall, between the bed and the wardrobe
 	if _use("plant"):
 		_put(InteriorParts.plant(), Vector3(hx - 0.7, 0, hz - 0.8))
 		_put(InteriorParts.plant(), Vector3(-1.9, 0, hz - 0.7))

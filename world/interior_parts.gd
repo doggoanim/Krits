@@ -318,24 +318,6 @@ static func stool() -> Node3D:
 		HouseParts.box(root, Vector3(0.08, 0.6, 0.08), WOOD_DARK, Vector3(cos(angle) * 0.18, 0.3, sin(angle) * 0.18))
 	return root
 
-## A treasure chest with gold bands and a gentle glow where the lid meets the body.
-static func chest() -> Node3D:
-	var root := Node3D.new()
-	root.name = "Chest"
-	HouseParts.box(root, Vector3(1.3, 0.7, 0.8), WOOD, Vector3(0, 0.35, 0))
-	var lid := CylinderMesh.new()
-	lid.top_radius = 0.4
-	lid.bottom_radius = 0.4
-	lid.height = 1.3
-	lid.radial_segments = 12
-	_mesh(root, lid, toon_mat(WOOD_DARK), Vector3(0, 0.72, 0), Vector3(0, 0, 90))
-	for sx in [-0.45, 0.45]:
-		HouseParts.box(root, Vector3(0.12, 0.75, 0.84), GOLD, Vector3(sx, 0.37, 0))
-	HouseParts.box(root, Vector3(0.18, 0.22, 0.06), GOLD, Vector3(0, 0.62, 0.42))
-	_glow_box(root, Vector3(1.2, 0.04, 0.08), Color(1.0, 0.9, 0.5), Vector3(0, 0.71, 0.4))
-	solid(root, Vector3(1.3, 1.1, 0.8), Vector3(0, 0.55, 0))
-	return root
-
 ## A tall wardrobe with two doors.
 static func wardrobe() -> Node3D:
 	var root := Node3D.new()
