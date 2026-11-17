@@ -40,6 +40,8 @@ var _taken: Array[bool] = []
 var _birds: Array[Flock] = []
 var _tries := 0.0
 var _built := false
+var _last_step := -1
+var _new_step := false   ## true on the frame a new held pose begins (see Choppy)
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -52,6 +54,9 @@ func _process(delta: float) -> void:
 			_tries = 0.0
 			_try_build()
 		return
+	var step := Choppy.index()
+	_new_step = step != _last_step
+	_last_step = step
 	var player := get_tree().get_first_node_in_group(&"player") as Node3D
 	var ppos := player.global_position if player != null else Vector3(INF, INF, INF)
 	var awake := WorldClock.day_amount() > 0.2
@@ -117,15 +122,17 @@ func _step_perched(b: Flock, delta: float, ppos: Vector3, awake: bool) -> void:
 	# idle: look around, bob the tail, now and then a hop
 	var head: Node3D = b.rig["head"]
 	b.look = lerpf(b.look, b.look_target, 6.0 * delta)
-	head.rotation.y = b.look
+	if _new_step:
+		head.rotation.y = b.look
 	if randf() < 0.6 * delta:
 		b.look_target = randf_range(-1.0, 1.0)
 	if randf() < 0.12 * delta:
 		b.hop = 1.0
 	b.hop = maxf(b.hop - 5.0 * delta, 0.0)
-	root.global_position.y = _perches[b.perch].y + sin(b.hop * PI) * 0.05
-	var tail: Node3D = b.rig["tail"]
-	tail.rotation.x = deg_to_rad(-14.0) + sin(Time.get_ticks_msec() / 400.0 + float(b.perch)) * 0.08
+	if _new_step:   # hops and tail bobs are held poses
+		root.global_position.y = _perches[b.perch].y + sin(b.hop * PI) * 0.05
+		var tail: Node3D = b.rig["tail"]
+		tail.rotation.x = deg_to_rad(-14.0) + (0.08 if (Choppy.index() / 2 + b.perch) % 2 == 0 else -0.08)
 
 func _take_off(b: Flock, scared_of: Vector3) -> void:
 	var dest := _free_perch(scared_of)
@@ -156,9 +163,10 @@ func _step_flying(b: Flock, delta: float) -> void:
 	dir.y = 0.0
 	if dir.length() > 0.001:
 		root.rotation.y = lerp_angle(root.rotation.y, atan2(-dir.x, -dir.z), 10.0 * delta)
-	var flap := sin(Time.get_ticks_msec() / 1000.0 * 42.0 + float(b.next_perch)) * 0.95
-	(b.rig["right_wing"] as Node3D).rotation.z = flap
-	(b.rig["left_wing"] as Node3D).rotation.z = -flap
+	if _new_step:   # wings snap between an up and a down pose each step
+		var flap := 0.95 if Choppy.index() % 2 == 0 else -0.6
+		(b.rig["right_wing"] as Node3D).rotation.z = flap
+		(b.rig["left_wing"] as Node3D).rotation.z = -flap
 	if b.t >= 1.0:
 		b.perch = b.next_perch
 		b.state = State.PERCHED

@@ -22,6 +22,7 @@ var _angle := 0.0   ## how far the board is swung OUT from the wall, radians
 var _omega := 0.0
 var _player: Node3D
 var _phase := 0.0
+var _shown_step := -1   ## the pose index last put on screen (see Choppy)
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -45,7 +46,12 @@ func _physics_process(delta: float) -> void:
 	elif _angle > MAX_ANGLE:
 		_angle = MAX_ANGLE
 		_omega = -absf(_omega) * BOUNCE
-	rotation.x = -_angle   # a positive angle swings the hanging board towards +Z
+	# The swing itself is simulated smoothly, but only shown in held poses, like the
+	# hand-made animations (see Choppy).
+	var step := Choppy.index()
+	if step != _shown_step:
+		_shown_step = step
+		rotation.x = -_angle   # a positive angle swings the hanging board towards +Z
 
 ## Airflow behind someone moving past: a small shove along the wall's normal.
 func _passer_push() -> float:

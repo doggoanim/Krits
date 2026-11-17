@@ -104,7 +104,7 @@ void sky() {
 		vec3 f = fract(p);
 		float h = hash13(cell);
 		vec3 centre = vec3(hash13(cell + 17.0), hash13(cell + 31.0), hash13(cell + 53.0));
-		float twinkle = 0.65 + 0.35 * sin(TIME * (1.5 + h * 2.0) + h * 40.0);
+		float twinkle = 0.65 + 0.35 * sin(floor(TIME / 0.208333) * 0.208333 * (1.5 + h * 2.0) + h * 40.0)   /* held in poses: keep in sync with core/choppy.gd */;
 		float star = step(0.94, h) * smoothstep(0.14, 0.0, length(f - centre)) * twinkle;
 		night_col += vec3(0.85, 0.9, 1.0) * star * (1.0 - cover) * smoothstep(0.02, 0.3, dir.y) * 1.6;
 	}

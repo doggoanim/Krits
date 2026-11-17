@@ -118,6 +118,7 @@ static func chimney(style: int, width: float, height: float, smoke: bool) -> Nod
 static func _smoke(at: Vector3) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.name = "Smoke"
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in steps, like the hand-made animations
 	p.position = at
 	p.amount = 8
 	p.lifetime = 4.0
@@ -181,10 +182,13 @@ static func weathervane() -> Node3D:
 	_part(arrow, head, IRON, Vector3(0.38, 0.0, 0.0), Vector3(0, 0, -90))
 	cylinder(root, 0.025, 0.4, IRON, Vector3(0, 1.0, 0))
 	arrow.rotation_degrees.y = -35.0
-	when_in_tree(arrow, func() -> void:   # a Tween can only be made once the node is in the tree
-		var swing := arrow.create_tween().set_loops()
-		swing.tween_property(arrow, "rotation_degrees:y", 35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		swing.tween_property(arrow, "rotation_degrees:y", -35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT))
+	var swing := SteppedSwing.new()   # turns back and forth in held poses
+	swing.name = "SteppedSwing"
+	swing.axis = Vector3.UP
+	swing.from_degrees = -35.0
+	swing.to_degrees = 35.0
+	swing.period = 6.4
+	arrow.add_child(swing)
 	return root
 
 # ------------------------------------------------------------------- sign

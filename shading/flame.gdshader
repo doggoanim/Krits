@@ -7,6 +7,8 @@ render_mode unshaded, cull_disabled, depth_draw_never, fog_disabled, shadows_dis
 // roughened by vertical "brush streaks", so it reads as painted rather than gradient-lit.
 // The tip breaks up into dry-brush flecks. `seed` makes each card flicker differently.
 
+const float STEP_SECONDS = 0.208333;   // 5 frames at 24 fps: keep in sync with core/choppy.gd
+
 uniform vec4 rim_color : source_color = vec4(0.78, 0.12, 0.06, 1.0);
 uniform vec4 body_color : source_color = vec4(1.0, 0.42, 0.08, 1.0);
 uniform vec4 core_color : source_color = vec4(1.0, 0.78, 0.2, 1.0);
@@ -41,7 +43,7 @@ void vertex() {
 
 void fragment() {
 	float t = 1.0 - UV.y;                       // 0 at the base, 1 at the tip
-	float time = TIME * speed + seed * 7.0;
+	float time = floor(TIME / STEP_SECONDS) * STEP_SECONDS * speed + seed * 7.0;   // held in poses, like the hand-made animations
 	float x = (UV.x - 0.5) * 2.0;
 	// the flame sways more the higher it is
 	x += sin(t * 5.0 - time * 3.1) * wobble * t + (vnoise(vec2(t * 2.0, time * 0.7)) - 0.5) * wobble * t * 2.0;

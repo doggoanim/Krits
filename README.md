@@ -413,3 +413,8 @@ Everything that makes the town feel alive is a small, separate piece — add, re
 - **Wind** — cloth (`cloth_wind.gdshader` + `ClothSway`) and `WindChimes` follow the shared gust field (`WindGusts`), like the grass and signs.
 - **Sound** — `AmbienceLayers` crossfades birdsong (day) and crickets (night); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/birdsong_loop.ogg`, `crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
 - **Night extras** — `NightOnly` (fireflies only after dark, dust motes only by day), `Campfire` (lit after dark; Brant sits by it in the evening).
+
+## Stepped (choppy) animation
+
+All the ambient animation (chickens, birds, roof cat, NPC walk bob, signs, lanterns, chimes, weathervanes, flames, cloth, star twinkle, particles) is shown in held poses, like Blender's stepped interpolation: a new pose every 5 frames at 24 fps. Movement stays smooth; only poses are held.
+The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders keep a copy of `STEP_SECONDS` (`flame`, `cloth_wind`, `sky_painted`); update them if you change it.

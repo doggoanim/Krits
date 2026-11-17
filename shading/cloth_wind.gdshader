@@ -9,6 +9,8 @@ render_mode cull_disabled;
 global uniform float time_offset;
 #include "res://shading/toon_light.gdshaderinc"
 
+const float STEP_SECONDS = 0.208333;   // 5 frames at 24 fps: keep in sync with core/choppy.gd
+
 uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform float cloth_h = 0.6;       // mesh height (m): measures how far down the hanging edge the cloth is
 uniform bool tip_up = false;       // true when the free end is at +Y (a pennant's point), false when it is at -Y
@@ -19,7 +21,8 @@ uniform float gust = 1.0;
 
 void vertex() {
 	float free_end = clamp(tip_up ? 0.5 + VERTEX.y / cloth_h : 0.5 - VERTEX.y / cloth_h, 0.0, 1.0);
-	float t = (TIME - time_offset) * speed + phase + MODEL_MATRIX[3].x * 0.6;
+	float held = floor((TIME - time_offset) / STEP_SECONDS) * STEP_SECONDS;   // poses are held, like the hand-made animations
+	float t = held * speed + phase + MODEL_MATRIX[3].x * 0.6;
 	VERTEX.z += sin(t + VERTEX.x * 3.0) * sway * gust * free_end;
 	VERTEX.x += sin(t * 0.7 + 1.3) * sway * 0.35 * gust * free_end;
 }
