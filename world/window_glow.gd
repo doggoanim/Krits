@@ -33,6 +33,7 @@ class House:
 	var bedtime := 23.0
 	var seed := 0.0
 	var level := 0.0
+	var applied := -1.0   ## the level last pushed to the materials and lights
 
 var _houses: Array[House] = []
 var _last_step := -1
@@ -115,7 +116,10 @@ func _process(delta: float) -> void:
 		var target := dusk if _awake(h) else 0.0
 		var before := h.level
 		h.level = move_toward(h.level, target, delta / maxf(fade_seconds, 0.01))
+		if h.level <= 0.0 and h.applied == 0.0:
+			continue   # dark and already shown dark (all day): nothing to update
 		if new_step or h.level != before:   # the flicker is held in poses; fades are smooth
+			h.applied = h.level
 			_apply(h, t, player)
 
 ## Awake from dusk until its bedtime. After midnight the hour counts on from 24, so a
