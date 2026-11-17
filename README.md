@@ -75,7 +75,7 @@ toward the new direction.
 			 exactly like the lit/dark band does, instead of a hard-banded diffuse term sitting next
 			 to the engine's default soft PCF shadow blur. `rim_strength`/`specular_strength` default
 			 to 0 (both effects off) — raise either to add a rim light or a toon specular highlight
-			 band per-material. outline_overlay.gdshader is OutlineSystem's (core/) screen-space
+			 band per-material. outline_overlay.gdshader is OutlineSystem's (core/) screen-space, depth-aware
 			 edge-detect pass — see there for why outlines are a global compositor pass and not a
 			 per-mesh effect.
 - core/      Events (signal bus), Game (stats, flags, spawns, save), InputSetup,
