@@ -62,6 +62,15 @@ extends Area3D
 ## this one already does for the player.
 static var active: Array[WaterVolume] = []
 
+## Volumes that only care about their surface leave `size.y` at (nearly) zero (the chesburg
+## lake). A collider that thin is skipped by a fast fall (the body is above it one physics
+## step and below it the next), so the splash / swim check fired only sometimes. Colliders
+## and the point tests below always use at least this much depth.
+const MIN_DEPTH := 3.0
+
+func _depth() -> float:
+	return maxf(size.y, MIN_DEPTH)
+
 var _player_inside := false
 var _preview: Node3D   ## editor-only visualisation, see _refresh_preview()
 
@@ -127,11 +136,11 @@ func _ready() -> void:
 	if radius > 0.0:
 		var cyl := CylinderShape3D.new()
 		cyl.radius = radius
-		cyl.height = size.y
+		cyl.height = _depth()
 		cs.shape = cyl
 	else:
 		var box := BoxShape3D.new()
-		box.size = size
+		box.size = Vector3(size.x, _depth(), size.z)
 		cs.shape = box
 	# A bare BoxShape3D/CylinderShape3D is centered on this node's own
 	# origin, extending size.y/2 both above AND below it — but surface_y
@@ -144,7 +153,7 @@ func _ready() -> void:
 	# body_entered, with it, the splash) at all, instead of leaving right
 	# at the surface like it looks like it should. Offsetting the shape's
 	# own position down into the water aligns the two.
-	cs.position.y = surface_y - size.y * 0.5
+	cs.position.y = surface_y - _depth() * 0.5
 	add_child(cs)
 
 	body_entered.connect(_on_body_entered)
@@ -195,7 +204,7 @@ func contains_point(pos: Vector3) -> bool:
 			return false
 	elif absf(local.x) > size.x * 0.5 or absf(local.z) > size.z * 0.5:
 		return false
-	return local.y <= surface_y and local.y >= surface_y - size.y
+	return local.y <= surface_y and local.y >= surface_y - _depth()
 
 ## True if `pos` is over this volume's footprint, whatever its height. Unlike
 ## contains_point() this doesn't care about `size.y`, which some volumes leave
