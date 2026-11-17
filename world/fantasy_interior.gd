@@ -62,25 +62,44 @@ func _build() -> void:
 func _build_hall() -> void:
 	var hx := room_size.x * 0.5
 	var hz := room_size.y * 0.5
+	var run := room_size.y - 0.8
 	if _use("rug"):
-		_put(InteriorParts.runner(1.5, room_size.y - 0.8, Color(0.4, 0.14, 0.2), Color(0.8, 0.62, 0.25)), Vector3(0, 0, 0.1))
-	if _use("shelves"):
-		_put(InteriorParts.shelf(1.6, 3.4, InteriorParts.Fill.BOOKS, seed_value), Vector3(-hx + 0.4, 0, -hz + 1.2), FACE_PLUS_X)
-		_put(InteriorParts.shelf(1.6, 3.4, InteriorParts.Fill.BOOKS, seed_value + 3), Vector3(hx - 0.4, 0, -hz + 1.2), FACE_MINUS_X)
-		_put(InteriorParts.shelf(1.5, 2.6, InteriorParts.Fill.JARS, seed_value + 4), Vector3(hx - 0.4, 0, hz - 1.5), FACE_MINUS_X)
+		_put(InteriorParts.runner(1.5, run, Color(0.4, 0.14, 0.2), Color(0.8, 0.62, 0.25)), Vector3(0, 0, 0.1))
 	if _use("decor"):
 		_put(InteriorParts.shield(), Vector3(0, 3.4, -hz + 0.1))
-		_put(InteriorParts.banner(InteriorParts.VELVET), Vector3(-1.15, 1.0, -hz + 0.1))
-		_put(InteriorParts.banner(InteriorParts.VELVET), Vector3(1.15, 1.0, -hz + 0.1))
-		_put(InteriorParts.window(1.0, 1.6), Vector3(-hx + 0.06, 2.6, hz - 1.5), FACE_PLUS_X)
-		_put(InteriorParts.picture(0.9, 1.1, Color(0.35, 0.45, 0.6)), Vector3(hx - 0.06, 3.0, 0.2), FACE_MINUS_X)
+		_put(InteriorParts.banner(InteriorParts.ROOF_RED), Vector3(-1.15, 1.0, -hz + 0.1))
+		_put(InteriorParts.banner(InteriorParts.ROOF_RED), Vector3(1.15, 1.0, -hz + 0.1))
+	# Down the long side walls, from the study at the far end towards the door, a repeating
+	# rhythm: shelves, then banner + window, then shelves... so the hall reads like the street.
+	var z := -hz + 1.2
+	var step := 0
+	while z < hz - 2.4:
+		for side in [-1.0, 1.0]:
+			var wall_x: float = side * (hx - 0.06)
+			var yaw := FACE_PLUS_X if side < 0.0 else FACE_MINUS_X
+			match step % 3:
+				0:
+					if _use("shelves"):
+						_put(InteriorParts.shelf(1.6, 3.4, InteriorParts.Fill.BOOKS, seed_value + step * 2 + (1 if side > 0.0 else 0)),
+							Vector3(side * (hx - 0.4), 0, z), yaw)
+				1:
+					if _use("decor"):
+						_put(InteriorParts.banner(InteriorParts.ROOF_RED), Vector3(wall_x, 1.0, z - 0.9), yaw)
+						_put(InteriorParts.window(1.0, 1.6), Vector3(wall_x, 2.6, z + 0.5), yaw)
+				_:
+					if _use("shelves"):
+						_put(InteriorParts.shelf(1.5, 2.6, InteriorParts.Fill.JARS, seed_value + step), Vector3(side * (hx - 0.4), 0, z), yaw)
+					if _use("plant") and side < 0.0:
+						_put(InteriorParts.plant(), Vector3(-hx + 0.55, 0, z + 1.2))
+		z += 2.4
+		step += 1
 	if _use("candelabra"):
 		_put(InteriorParts.candelabra(), Vector3(-hx + 0.5, 0, hz - 0.5))
 		_put(InteriorParts.candelabra(), Vector3(hx - 0.5, 0, hz - 0.5))
-	if _use("plant"):
-		_put(InteriorParts.plant(), Vector3(-hx + 0.55, 0, 0.9))
 	if _use("chandelier"):
-		_put(InteriorParts.chandelier(1.2), Vector3(0, ceiling_height, 0.2))
+		var count := maxi(1, roundi(room_size.y / 4.0))
+		for i in count:
+			_put(InteriorParts.chandelier(1.2), Vector3(0, ceiling_height, lerpf(-hz, hz, (i + 0.5) / count)))
 	if _use("motes"):
 		_put(InteriorParts.floating_motes(Vector3(hx - 0.4, 1.5, hz - 0.4)), Vector3(0, 1.8, 0))
 

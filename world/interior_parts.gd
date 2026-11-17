@@ -23,6 +23,7 @@ const BOOK_COLORS: Array[Color] = [
 const JAR_COLORS: Array[Color] = [
 	Color(0.75, 0.3, 0.25), Color(0.85, 0.62, 0.25), Color(0.5, 0.65, 0.3), Color(0.6, 0.35, 0.45), Color(0.9, 0.8, 0.5),
 ]
+const ROOF_RED := Color(0.745, 0.2, 0.12)   ## the red of the Chesburg roofs (sampled from the house texture)
 const LEAF := Color(0.3, 0.6, 0.28)
 enum Fill { BOOKS, JARS }
 

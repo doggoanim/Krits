@@ -20,14 +20,14 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(4, 0.2, 6)
+size = Vector3(4, 0.2, 10.4)
 
 [sub_resource type="BoxMesh" id="CeilingMesh"]
-size = Vector3(4, 0.2, 6)
+size = Vector3(4, 0.2, 10.4)
 flip_faces = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1fccd"]
-size = Vector3(4, 0.2, 6)
+size = Vector3(4, 0.2, 10.4)
 
 [sub_resource type="StandardMaterial3D" id="InnerMat"]
 albedo_color = Color(0.82, 0.74, 0.6, 1)
@@ -37,7 +37,7 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mk7mh"]
-size = Vector3(4, 0.2, 6)
+size = Vector3(4, 0.2, 10.4)
 
 [sub_resource type="BoxMesh" id="NSWallMesh"]
 flip_faces = true
@@ -51,13 +51,13 @@ size = Vector3(4, 5, 0.2)
 
 [sub_resource type="BoxMesh" id="EWWallMesh"]
 flip_faces = true
-size = Vector3(0.2, 5, 5)
+size = Vector3(0.2, 5, 10)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_jm3bf"]
-size = Vector3(0.2, 5, 5)
+size = Vector3(0.2, 5, 10)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gk8no"]
-size = Vector3(0.2, 5, 5)
+size = Vector3(0.2, 5, 10)
 
 [sub_resource type="BoxShape3D" id="DoorShape"]
 size = Vector3(1.2, 2.2, 0.3)
@@ -85,12 +85,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 collision_layer = 129
 
 [node name="Mesh" type="MeshInstance3D" parent="Floor" unique_id=827068073]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.7)
 material_override = SubResource("OuterMat")
 mesh = SubResource("FloorMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=778816954]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.7)
 shape = SubResource("BoxShape3D_1fccd")
 
 [node name="Ceiling" type="StaticBody3D" parent="." unique_id=1666054002]
@@ -99,12 +99,12 @@ script = ExtResource("3")
 normal_axis = Vector3(0, 1, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="Ceiling" unique_id=473521490]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.7)
 material_override = SubResource("InnerMat")
 mesh = SubResource("CeilingMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=240249591]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.7)
 shape = SubResource("BoxShape3D_mk7mh")
 
 [node name="WallNorth" type="StaticBody3D" parent="." unique_id=1861953727]
@@ -119,7 +119,7 @@ mesh = SubResource("NSWallMesh")
 shape = SubResource("BoxShape3D_n0ev2")
 
 [node name="WallSouth" type="StaticBody3D" parent="." unique_id=1608215960]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -5.8)
 script = ExtResource("3")
 normal_axis = Vector3(0, 0, -1)
 
@@ -136,12 +136,12 @@ script = ExtResource("3")
 normal_axis = Vector3(1, 0, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="WallEast" unique_id=1987255519]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.9)
 material_override = SubResource("InnerMat")
 mesh = SubResource("EWWallMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallEast" unique_id=1798241955]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.9)
 shape = SubResource("BoxShape3D_jm3bf")
 
 [node name="WallWest" type="StaticBody3D" parent="." unique_id=1719540168]
@@ -150,16 +150,22 @@ script = ExtResource("3")
 normal_axis = Vector3(-1, 0, 0)
 
 [node name="Mesh" type="MeshInstance3D" parent="WallWest" unique_id=1099163910]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.5)
 material_override = SubResource("InnerMat")
 mesh = SubResource("EWWallMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallWest" unique_id=408405944]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.5)
 shape = SubResource("BoxShape3D_gk8no")
 
 [node name="Lamp" type="OmniLight3D" parent="." unique_id=1311946840]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 2)
+light_color = Color(1, 0.88, 0.7, 1)
+light_energy = 1.4
+omni_range = 12.6
+
+[node name="LampBack" type="OmniLight3D" parent="." unique_id=1311946841]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, -3.4)
 light_color = Color(1, 0.88, 0.7, 1)
 light_energy = 1.4
 omni_range = 12.6
@@ -187,7 +193,7 @@ script = ExtResource("2")
 spawn_id = &"enter"
 
 [node name="MayorArse" type="StaticBody3D" parent="." unique_id=485061302]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052152872, 0, 0.12543857)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052152872, 0, -4.67456143)
 script = ExtResource("npc")
 dialogue_file = "res://dialogue/npcs/mayor_arse.dlg"
 facing_offset = 3.14159
@@ -198,7 +204,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_MayorBody")
 
 [node name="Chair_172" parent="." unique_id=307196311 instance=ExtResource("10_550li")]
-transform = Transform3D(1.8, 0, 0, 0, 1, 0, 0, 0, 1.6, 0, 0, -0.6)
+transform = Transform3D(1.8, 0, 0, 0, 1, 0, 0, 0, 1.6, 0, 0, -5.4)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Chair_172" unique_id=1191452906]
 
@@ -207,7 +213,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
 shape = SubResource("BoxShape3D_wgm46")
 
 [node name="Closet_012" parent="." unique_id=1724283639 instance=ExtResource("11_2gwfi")]
-transform = Transform3D(-2.4, 0, -8.7422784e-08, 0, 1.3, 0, 2.0981467e-07, 0, -1.0000001, 0, -1.2, 1)
+transform = Transform3D(-2.4, 0, -8.7422784e-08, 0, 1.3, 0, 2.0981467e-07, 0, -1.0000001, 0, -1.2, -3.8)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Closet_012" unique_id=1147984706]
 transform = Transform3D(0.99999994, 0, 3.5527137e-15, 0, 1, 0, 0, 0, 1, 0, 1.5384616, 0)
@@ -217,10 +223,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 3.5100811e-12, 0, 1, -7.1054274e-15, -
 shape = SubResource("BoxShape3D_m7dut")
 
 [node name="Plants_052" parent="." unique_id=123769374 instance=ExtResource("14_1fccd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59999996, 0.8, 0.79999995)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59999996, 0.8, -4.0)
 
 [node name="FantasyInterior" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.9)
 script = ExtResource("fantasy_script")
 layout = 1
-room_size = Vector2(3.8, 4.8)
+room_size = Vector2(3.8, 9.6)
