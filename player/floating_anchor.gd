@@ -12,8 +12,7 @@ extends Node3D
 
 var _bob_t := randf() * TAU
 var _yaw := 0.0
-var _pos := Vector3.ZERO   ## the smooth simulated position; the node itself shows it in held poses
-var _shown_step := -1
+var _pos := Vector3.ZERO
 
 func _ready() -> void:
 	top_level = true   # world-space: follows by script, not by inheriting the player's motion
@@ -35,8 +34,6 @@ func follow(target_pos: Vector3, yaw: float, delta: float, tilt := Basis.IDENTIT
 	var before := _pos
 	_pos = before.lerp(target_pos, 1.0 - exp(-position_follow * delta))
 	_yaw = lerp_angle(_yaw, yaw, 1.0 - exp(-turn_follow * delta))
-	if Choppy.index() != _shown_step:   # the lag, bob and turn are shown in held poses
-		_shown_step = Choppy.index()
-		global_position = _pos
-		global_basis = tilt * Basis(Vector3.UP, _yaw)
+	global_position = _pos   # position, bob and turn stay smooth; only the swing of what hangs off it is stepped
+	global_basis = tilt * Basis(Vector3.UP, _yaw)
 	return (_pos - before) / maxf(delta, 0.0001)
