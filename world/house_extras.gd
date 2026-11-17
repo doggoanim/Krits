@@ -7,13 +7,14 @@ extends Node
 ## a market stall, crates and barrels, a wood pile, wind chimes, a notice board whose
 ## notes follow the quest flags.
 ##
-## Everything is found from the house itself (its door, its front wall, how wide the facade
-## is — see RoofProbe), so it follows a house if you move or scale it. Like HouseDressing it
-## runs in the editor too; parts are ownerless children, shown in the viewport and never
-## saved into the scene.
+## Each prop is a PropSlot node under its house, placed the first time from the house's own
+## door, front wall and facade width (see RoofProbe). In the editor the slots are real, saved
+## nodes: SELECT ONE AND MOVE, ROTATE, DELETE OR DUPLICATE IT, then save the scene. Once a house
+## has slots this script leaves it alone, so your changes stick; press "Reset extras" to throw
+## them all away and lay them out again from the PLAN table (also the way to pick up new
+## entries in PLAN).
 ##
-## What each house gets is the PLAN table below — edit it to move things around; nothing
-## else needs to change. Keys per house (all optional):
+## Keys per house in PLAN (all optional):
 ##   windows        [-1, 1]   which sides of the door get a window (-1 left, +1 right, as seen facing the house)
 ##   window_pairs   1 / 2     how many windows per side (wide houses take 2)
 ##   shutter        Color     shutter paint
@@ -38,7 +39,6 @@ const PLAN := {
 	"house_chesburg_6": {"windows": [-1, 1], "shutter": Color(0.62, 0.22, 0.2), "lantern": 1, "bunting": true, "stall": 4.4, "barrels": -3.0, "perches": true},
 }
 
-const META := &"house_extra"
 const WINDOW_FIRST := 1.95         ## door -> first window centre (m)
 const WINDOW_STEP := 1.9           ## door -> next window along the wall
 const WINDOW_HEIGHT := 1.55        ## window centre above the floor
@@ -52,29 +52,35 @@ const NOTICE_X := -3.8
 const NOTICE_OUT := 1.8            ## how far in front of the wall the notice board stands
 const STALL_OUT := 2.6
 const CHIMES_HEIGHT := 2.35
-const HAMMER_SFX := ["res://sounds/SFX/others/hammer_tink.ogg"]
-const CHOP_SFX := ["res://sounds/SFX/others/wood_chop.ogg"]
+const CHICKENS_OUT := 3.6
 
 @export var name_filter: PackedStringArray = ["house_chesburg"]
 
-## Click in the inspector to rebuild everything (e.g. after editing PLAN).
-@export_tool_button("Rebuild extras") var rebuild_button := _dress_all
+## Click in the inspector to delete every prop on these houses and lay them out again from PLAN.
+@export_tool_button("Reset extras") var reset_button := _reset
 
 func _ready() -> void:
 	# Deferred: in the editor the houses' meshes and doors may not be in place yet.
-	_dress_all.call_deferred()
+	_dress_all.call_deferred(false)
 
-func _dress_all() -> void:
+func _reset() -> void:
+	_dress_all(true)
+
+func _dress_all(reset: bool) -> void:
 	var holder := get_parent()
 	if holder == null or not is_inside_tree():
 		return
-	var count := 0
+	var made := 0
 	for child in holder.get_children():
 		if child is Node3D and _matches(child.name) and PLAN.has(String(child.name)):
-			_dress(child as Node3D, PLAN[String(child.name)])
-			count += 1
-	if Engine.is_editor_hint():
-		print("HouseExtras: dressed %d houses" % count)
+			var house := child as Node3D
+			if reset:
+				_remove_slots(house)
+			if _has_slots(house):
+				continue   # already laid out (and maybe moved by hand): leave it
+			made += _dress(house, PLAN[String(child.name)])
+	if Engine.is_editor_hint() and made > 0:
+		print("HouseExtras: laid out %d props - save the scene (Ctrl+S) to keep them, then move them freely" % made)
 
 func _matches(node_name: String) -> bool:
 	for f in name_filter:
@@ -82,22 +88,36 @@ func _matches(node_name: String) -> bool:
 			return true
 	return false
 
-func _dress(house: Node3D, plan: Dictionary) -> void:
-	HouseMount.clear(house, META)
+func _has_slots(house: Node3D) -> bool:
+	for child in house.get_children():
+		if child is PropSlot:
+			return true
+	return false
+
+func _remove_slots(house: Node3D) -> void:
+	for child in house.get_children():
+		if child is PropSlot:
+			house.remove_child(child)
+			child.queue_free()
+
+## Lays out `plan`'s props on `house`; returns how many slots it made.
+func _dress(house: Node3D, plan: Dictionary) -> int:
 	var door := HouseMount.door_of(house)
 	if door == null:
 		push_warning("HouseExtras: %s has no Door_* child, so it gets no extras" % house.name)
-		return
+		return 0
 	var ctx := {
 		"house": house,
 		"x0": door.position.x,
 		"floor": door.position.y - HouseMount.DOOR_FLOOR_DROP,
 		"span": RoofProbe.front_wall_span(house),
+		"count": 0,
 	}
 	if plan.has("windows"):
 		_add_windows(ctx, plan)
 	if plan.has("lantern"):
-		_add_lantern(ctx, float(plan["lantern"]))
+		var x: float = ctx["x0"] + float(plan["lantern"]) * LANTERN_X
+		_slot(ctx, "Lantern", PropSlot.Kind.LANTERN, Vector3(x, float(ctx["floor"]) + LANTERN_HEIGHT, _wall(ctx, x) - LANTERN_SINK))
 	if plan.get("bunting", false):
 		_add_bunting(ctx)
 	if plan.get("laundry", false):
@@ -105,32 +125,53 @@ func _dress(house: Node3D, plan: Dictionary) -> void:
 	if plan.get("woodpile", false):
 		_add_woodpile(ctx)
 	if plan.has("stall"):
-		_add_stall(ctx, float(plan["stall"]))
+		var x: float = ctx["x0"] + float(plan["stall"])
+		_slot(ctx, "Stall", PropSlot.Kind.STALL, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + STALL_OUT))
 	if plan.has("barrels"):
-		_add_barrels(ctx, float(plan["barrels"]))
+		var x: float = ctx["x0"] + float(plan["barrels"])
+		_slot(ctx, "CratesAndBarrels", PropSlot.Kind.CRATES_AND_BARRELS, Vector3(x, float(ctx["floor"]), _wall(ctx, x) + 0.55))
 	if plan.has("chimes"):
-		_add_chimes(ctx, float(plan["chimes"]))
+		var x: float = ctx["x0"] + float(plan["chimes"]) * (LANTERN_X + 0.15)
+		_slot(ctx, "WindChimes", PropSlot.Kind.WIND_CHIMES, Vector3(x, float(ctx["floor"]) + CHIMES_HEIGHT, _wall(ctx, x) - WALL_SINK))
 	if plan.get("notice", false):
-		_add_notice_board(ctx)
-	if plan.get("perches", false):
-		_add_perches(ctx)
-	if plan.get("cat", false):
-		_add_cat(ctx)
+		var x: float = ctx["x0"] + NOTICE_X
+		_slot(ctx, "NoticeBoard", PropSlot.Kind.NOTICE_BOARD, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + NOTICE_OUT))
+	if plan.get("perches", false) or plan.get("cat", false):
+		_add_roof_animals(ctx, plan)
 	if plan.has("chickens"):
-		_add_chickens(ctx, float(plan["chickens"]))
+		var x: float = ctx["x0"] + float(plan["chickens"])
+		_slot(ctx, "Chickens", PropSlot.Kind.CHICKENS, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + CHICKENS_OUT))
+	return int(ctx["count"])
 
 # ----------------------------------------------------------------- helpers
 
 func _wall(ctx: Dictionary, x: float) -> float:
 	return HouseMount.wall_z(ctx["house"], x, ctx["floor"])
 
-func _put(ctx: Dictionary, part: Node3D, pos: Vector3, yaw := 0.0) -> void:
-	HouseMount.place(ctx["house"], part, META, pos, yaw)
-
 ## Is there wall left at x (given the facade's width) for something `half` wide?
 func _fits(ctx: Dictionary, x: float, half: float) -> bool:
 	var span: Vector2 = ctx["span"]
 	return not is_nan(span.x) and x - half >= span.x and x + half <= span.y
+
+## Adds one PropSlot to the house (undoing the house's own scale so a squashed house doesn't
+## squash its props). In the editor it becomes a saved node, so the scene tree shows it and
+## you can move it.
+func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3, yaw := 0.0, color := Color(0.3, 0.5, 0.35), length := 4.0) -> void:
+	var house: Node3D = ctx["house"]
+	var slot := PropSlot.new()
+	slot.name = slot_name
+	slot.kind = kind
+	slot.color = color
+	slot.length = length
+	slot.position = pos
+	slot.rotation.y = yaw
+	slot.scale = HouseMount.inverse_scale(house)
+	house.add_child(slot)
+	if Engine.is_editor_hint():
+		var root := get_tree().edited_scene_root
+		if root != null and (root == house or root.is_ancestor_of(house)):
+			slot.owner = root
+	ctx["count"] = int(ctx["count"]) + 1
 
 # ------------------------------------------------------------------ pieces
 
@@ -142,11 +183,8 @@ func _add_windows(ctx: Dictionary, plan: Dictionary) -> void:
 			if not _fits(ctx, x, WINDOW_CLEARANCE):
 				continue
 			var shade := shutter if k == 0 else shutter.lerp(HouseParts.WOOD_DARK, 0.35)
-			_put(ctx, HouseProps.window_lit(shade, true), Vector3(x, float(ctx["floor"]) + WINDOW_HEIGHT, _wall(ctx, x) - WALL_SINK))
-
-func _add_lantern(ctx: Dictionary, side: float) -> void:
-	var x: float = ctx["x0"] + side * LANTERN_X
-	_put(ctx, HouseProps.lantern(), Vector3(x, float(ctx["floor"]) + LANTERN_HEIGHT, _wall(ctx, x) - LANTERN_SINK))
+			_slot(ctx, "Window_%s%d" % ["L" if side < 0 else "R", k + 1], PropSlot.Kind.WINDOW,
+					Vector3(x, float(ctx["floor"]) + WINDOW_HEIGHT, _wall(ctx, x) - WALL_SINK), 0.0, shade)
 
 func _add_bunting(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]
@@ -156,68 +194,20 @@ func _add_bunting(ctx: Dictionary) -> void:
 	var x_to: float = ctx["x0"] - 1.5   # stops short of the door, its sign and lantern
 	if x_to - x_from < 1.5:
 		return
-	var length := x_to - x_from
-	_put(ctx, HouseProps.bunting(length, maxi(int(length / 0.45), 4)), Vector3(x_from, float(ctx["floor"]) + BUNTING_HEIGHT, _wall(ctx, x_from) + 0.2))
+	_slot(ctx, "Bunting", PropSlot.Kind.BUNTING, Vector3(x_from, float(ctx["floor"]) + BUNTING_HEIGHT, _wall(ctx, x_from) + 0.2), 0.0, Color.WHITE, x_to - x_from)
 
 func _add_laundry(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]
 	if is_nan(span.y):
 		return
-	var front := _wall(ctx, ctx["x0"])
 	# beside the right-hand wall, running back from the front corner
-	_put(ctx, HouseProps.laundry_line(3.4, 4), Vector3(span.y + 0.9, float(ctx["floor"]), front - 0.8), PI * 0.5)
+	_slot(ctx, "LaundryLine", PropSlot.Kind.LAUNDRY_LINE, Vector3(span.y + 0.9, float(ctx["floor"]), _wall(ctx, ctx["x0"]) - 0.8), PI * 0.5, Color.WHITE, 3.4)
 
 func _add_woodpile(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]
 	if is_nan(span.x):
 		return
-	var front := _wall(ctx, ctx["x0"])
-	var pile := HouseProps.wood_pile()
-	pile.add_child(_one_shots(CHOP_SFX, 14.0, 40.0, 7.0, 18.5, Vector3(1.9, 0.8, 0.5)))   # someone splitting logs by day
-	_put(ctx, pile, Vector3(span.x - 0.8, float(ctx["floor"]), front - 1.2), PI * 0.5)
-
-func _add_stall(ctx: Dictionary, dx: float) -> void:
-	var x: float = ctx["x0"] + dx
-	var stall := HouseProps.stall()
-	stall.add_child(_one_shots(HAMMER_SFX, 10.0, 28.0, 8.0, 17.0, Vector3(0, 1.2, -0.4)))   # the shopkeeper mending crates
-	_put(ctx, stall, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + STALL_OUT))
-
-func _one_shots(paths: Array, min_gap: float, max_gap: float, from_hour: float, to_hour: float, pos: Vector3) -> SpatialOneShots:
-	var shots := SpatialOneShots.new()
-	shots.name = "OneShots"
-	shots.position = pos
-	var list: Array[AudioStream] = []
-	for path in paths:
-		if not Engine.is_editor_hint():   # nothing plays in the editor, so don't load there
-			var stream := load(path) as AudioStream
-			if stream != null:
-				list.append(stream)
-	shots.streams = list
-	shots.min_gap = min_gap
-	shots.max_gap = max_gap
-	shots.active_from = from_hour
-	shots.active_to = to_hour
-	return shots
-
-func _add_barrels(ctx: Dictionary, dx: float) -> void:
-	var x: float = ctx["x0"] + dx
-	_put(ctx, HouseProps.crates_and_barrels(), Vector3(x, float(ctx["floor"]), _wall(ctx, x) + 0.55))
-
-func _add_chimes(ctx: Dictionary, side: float) -> void:
-	var x: float = ctx["x0"] + side * (LANTERN_X + 0.15)
-	_put(ctx, HouseProps.wind_chimes(), Vector3(x, float(ctx["floor"]) + CHIMES_HEIGHT, _wall(ctx, x) - WALL_SINK))
-
-func _add_notice_board(ctx: Dictionary) -> void:
-	var x: float = ctx["x0"] + NOTICE_X
-	var notes := [
-		{"text": "LOST CAT\nBiscuit, ginger\nAsk at Vael's", "hide_when": "cat_found"},
-		{"text": "BISCUIT IS\nHOME!\nThank you!", "show_when": ["cat_found"]},
-		{"text": "BALL LOST\nDOWN THE WELL\n- Yule", "hide_when": "yule_got_ball"},
-		{"text": "PACK STUCK\nON A LEDGE\n- Brant", "hide_when": "brant_got_pack"},
-	]
-	_put(ctx, HouseProps.notice_board(notes), Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + NOTICE_OUT))
-
-# ------------------------------------------------------------------ animals
+	_slot(ctx, "WoodPile", PropSlot.Kind.WOOD_PILE, Vector3(span.x - 0.8, float(ctx["floor"]), _wall(ctx, ctx["x0"]) - 1.2), PI * 0.5)
 
 ## Roof points along the ridge worth sitting on: the highest roof spot and up to two
 ## neighbours 1.6 m away that are about as high (so they sit on the ridge, not on a slope).
@@ -235,24 +225,10 @@ func _ridge_points(house: Node3D) -> Array[Vector3]:
 			points.append(Vector3(rx + offset.x, float(s["y"]) - 0.02, rz + offset.y))
 	return points
 
-func _add_perches(ctx: Dictionary) -> void:
+func _add_roof_animals(ctx: Dictionary, plan: Dictionary) -> void:
 	var points := _ridge_points(ctx["house"])
-	for i in mini(points.size(), 2):
-		var marker := Marker3D.new()
-		marker.name = "BirdPerch%d" % i
-		marker.add_to_group(&"bird_perch")
-		_put(ctx, marker, points[i])
-
-func _add_cat(ctx: Dictionary) -> void:
-	var points := _ridge_points(ctx["house"])
-	if points.is_empty():
-		return
-	var cat := RoofCat.new()
-	cat.name = "RoofCat"
-	_put(ctx, cat, points.back(), PI)   # the cat faces -Z; turn it to watch the street
-
-func _add_chickens(ctx: Dictionary, dx: float) -> void:
-	var x: float = ctx["x0"] + dx
-	var hens := Chickens.new()
-	hens.name = "Chickens"
-	_put(ctx, hens, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + 3.6))
+	if plan.get("perches", false):
+		for i in mini(points.size(), 2):
+			_slot(ctx, "BirdPerch%d" % (i + 1), PropSlot.Kind.BIRD_PERCH, points[i])
+	if plan.get("cat", false) and not points.is_empty():
+		_slot(ctx, "RoofCat", PropSlot.Kind.ROOF_CAT, points.back())

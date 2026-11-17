@@ -1,3 +1,4 @@
+@tool
 class_name Chickens
 extends Node3D
 ## A few hens pottering about a yard: they walk to a spot, peck at the ground, wander on,
@@ -29,8 +30,6 @@ var _hens: Array[Hen] = []
 var _home := Vector3.ZERO
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
 	_home = global_position
 	for i in count:
 		var h := Hen.new()
@@ -132,6 +131,8 @@ func _path_clear(from: Vector3, to: Vector3) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 func _ground(point: Vector3) -> Vector3:
+	if Engine.is_editor_hint():
+		return point   # no physics world in the editor: just stand them where they are
 	var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 1.5, point + Vector3.DOWN * 3.0, GROUND_MASK)
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return point if hit.is_empty() else hit["position"]

@@ -1,3 +1,4 @@
+@tool
 class_name RoofCat
 extends Node3D
 ## A cat sitting on a roof or sill, watching the street: slow breathing, a swishing tail,

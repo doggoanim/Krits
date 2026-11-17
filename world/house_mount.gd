@@ -1,30 +1,17 @@
 @tool
 class_name HouseMount
 extends RefCounted
-## Shared plumbing for scripts that hang things on the (identical, imported) house
-## models — see HouseDressing and HouseExtras. Parts are added as children without an
-## owner, so they show in the editor but are never saved into the scene, and each part
-## is tagged with a meta key so a rebuild can remove exactly its own earlier parts.
+## Shared plumbing for scripts that hang things on the (identical, imported) house models —
+## see HouseExtras: finding a house's door and front wall, and undoing its scale.
 
 const DOOR_WALL_OFFSET := 0.33   ## from a Door_* node to the wall face in front of it
 const DOOR_FLOOR_DROP := 1.0     ## a Door_* node sits this far above the floor
 
-## Removes the parts a previous run tagged with `meta` from `house`.
-static func clear(house: Node3D, meta: StringName) -> void:
-	for child in house.get_children():
-		if child.has_meta(meta):
-			house.remove_child(child)
-			child.queue_free()
-
-## Adds `part` to the house (tagged `meta`), undoing the house's own scale so a squashed
-## or stretched house doesn't squash what hangs on it.
-static func place(house: Node3D, part: Node3D, meta: StringName, pos: Vector3, yaw := 0.0, extra_scale := 1.0) -> void:
-	part.set_meta(meta, true)
-	part.position = pos
-	part.rotation.y = yaw
+## The factor that undoes `house`'s own scale, so a prop placed under a squashed or stretched
+## house keeps its true proportions.
+static func inverse_scale(house: Node3D) -> Vector3:
 	var s := house.basis.get_scale()
-	part.scale = Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01)) * extra_scale
-	house.add_child(part)
+	return Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01))
 
 static func door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
