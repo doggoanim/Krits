@@ -389,4 +389,4 @@ Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`,
 
 ### Fantasy interiors
 
-`world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a wizard's cottage from its `room_size`: hearth with a flickering fire, bookshelves, potion shelf, round table with crystal ball and spellbook, cauldron, chest, banners, glowing crystals, chandelier and drifting motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. Currently on `house_1_interior.tscn`.
+`world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a cosy fantasy home from its `room_size`: hearth with a stew pot and flickering fire, bookshelves, pantry shelf, dining table, wardrobe, chest, window, pictures, plants, a candle ring and drifting dust motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. Currently on `house_1_interior.tscn`.

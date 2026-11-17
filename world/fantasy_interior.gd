@@ -1,9 +1,9 @@
 @tool
 class_name FantasyInterior
 extends Node3D
-## Dresses a rectangular room (floor at y 0, door on the +Z wall) as a wizard's cottage:
-## hearth, bookshelves, potion shelf, round table with crystal ball, cauldron, chest,
-## banners, glowing crystals, a chandelier and drifting motes. The pieces come from
+## Dresses a rectangular room (floor at y 0, door on the +Z wall) as a cosy fantasy home:
+## hearth with a stew pot, bookshelves, a pantry shelf, a dining table, wardrobe, chest,
+## a window, pictures, a plant, a candle ring and drifting dust motes. The pieces come from
 ## InteriorParts; this node only decides where they go, from the room's size, so a
 ## differently sized room just needs a different `room_size`.
 ##
@@ -15,8 +15,8 @@ extends Node3D
 @export var room_size := Vector2(8.0, 8.0)
 ## Height from the floor to the ceiling's underside.
 @export var ceiling_height := 5.0
-## Parts to leave out (any of: rug, fireplace, shelves, table, cauldron, chest, banners,
-## crystals, chandelier, motes). Handy when the room already has something there.
+## Parts to leave out (any of: rug, fireplace, shelves, table, wardrobe, chest, decor,
+## plant, chandelier, motes). Handy when the room already has something there.
 @export var skip: PackedStringArray = []
 ## Seed for the book / potion colours.
 @export var seed_value := 7
@@ -59,20 +59,22 @@ func _build() -> void:
 	if _use("shelves"):
 		_put(InteriorParts.shelf(2.4, 3.4, InteriorParts.Fill.BOOKS, seed_value), Vector3(-2.7, 0, back - 0.2))
 		_put(InteriorParts.shelf(2.4, 3.4, InteriorParts.Fill.BOOKS, seed_value + 1), Vector3(-0.2, 0, back - 0.2))
-		_put(InteriorParts.shelf(2.2, 2.9, InteriorParts.Fill.POTIONS, seed_value + 2), Vector3(west - 0.15, 0, 2.2), FACE_PLUS_X)
-	if _use("banners"):
-		_put(InteriorParts.banner(InteriorParts.VELVET), Vector3(1.4, 1.0, -hz + 0.1))
-		_put(InteriorParts.banner(InteriorParts.VELVET_DARK), Vector3(hx - 0.1, 1.0, 0.4), FACE_MINUS_X)
+		_put(InteriorParts.shelf(2.2, 2.9, InteriorParts.Fill.JARS, seed_value + 2), Vector3(west - 0.15, 0, 2.2), FACE_PLUS_X)
+	if _use("decor"):
+		_put(InteriorParts.window(1.5, 1.7), Vector3(1.3, 2.4, -hz + 0.06))
+		_put(InteriorParts.picture(1.0, 0.75, Color(0.4, 0.6, 0.35)), Vector3(hx - 0.06, 2.6, -0.2), FACE_MINUS_X)
+		_put(InteriorParts.picture(0.7, 0.9, Color(0.7, 0.5, 0.3)), Vector3(hx - 0.06, 2.4, 0.8), FACE_MINUS_X)
 	if _use("table"):
 		_put(InteriorParts.table(0.85), Vector3(-0.6, 0, 0.5))
 		_put(InteriorParts.stool(), Vector3(-1.9, 0, 0.9), 0.4)
 		_put(InteriorParts.stool(), Vector3(0.8, 0, 0.0), -0.6)
-	if _use("cauldron"):
-		_put(InteriorParts.cauldron(), Vector3(-2.3, 0, 2.3))
+	if _use("wardrobe"):
+		_put(InteriorParts.wardrobe(), Vector3(east - 0.2, 0, 2.4), FACE_MINUS_X)
 	if _use("chest"):
-		_put(InteriorParts.chest(), Vector3(east + 0.1, 0, 2.0), FACE_MINUS_X)
-	if _use("crystals"):
-		_put(InteriorParts.crystals(InteriorParts.CRYSTAL), Vector3(hx - 0.8, 0, hz - 0.9), 0.8)
+		_put(InteriorParts.chest(), Vector3(2.3, 0, -1.0))
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(hx - 0.7, 0, hz - 0.8))
+		_put(InteriorParts.plant(), Vector3(-1.9, 0, hz - 0.7))
 	if _use("chandelier"):
 		_put(InteriorParts.chandelier(1.3), Vector3(-0.6, ceiling_height, 0.5))
 	if _use("motes"):

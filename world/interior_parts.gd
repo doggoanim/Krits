@@ -20,10 +20,11 @@ const BOOK_COLORS: Array[Color] = [
 	Color(0.55, 0.18, 0.2), Color(0.2, 0.32, 0.55), Color(0.2, 0.45, 0.3), Color(0.5, 0.35, 0.15),
 	Color(0.4, 0.2, 0.5), Color(0.75, 0.65, 0.4),
 ]
-const POTION_COLORS: Array[Color] = [
-	Color(0.9, 0.25, 0.35), Color(0.3, 0.8, 0.95), Color(0.5, 0.95, 0.4), Color(0.75, 0.4, 0.95), Color(1.0, 0.8, 0.3),
+const JAR_COLORS: Array[Color] = [
+	Color(0.75, 0.3, 0.25), Color(0.85, 0.62, 0.25), Color(0.5, 0.65, 0.3), Color(0.6, 0.35, 0.45), Color(0.9, 0.8, 0.5),
 ]
-enum Fill { BOOKS, POTIONS }
+const LEAF := Color(0.3, 0.6, 0.28)
+enum Fill { BOOKS, JARS }
 
 # ----------------------------------------------------------------- helpers
 
@@ -144,6 +145,11 @@ static func fireplace() -> Node3D:
 	HouseParts.box(root, Vector3(1.8, 2.5, 0.3), Color(0.08, 0.06, 0.06), Vector3(0, 1.4, -0.4))   # sooty back
 	HouseParts.cylinder(root, 0.16, 1.3, WOOD_DARK, Vector3(0, 0.45, 0.0)).rotation_degrees = Vector3(0, 0, 90)
 	HouseParts.cylinder(root, 0.14, 1.1, WOOD, Vector3(0.0, 0.62, 0.0)).rotation_degrees = Vector3(90, 0, 25)
+	HouseParts.cylinder(root, 0.04, 2.1, IRON, Vector3(0, 1.45, -0.35))    # crane post
+	HouseParts.box(root, Vector3(0.9, 0.05, 0.05), IRON, Vector3(0.4, 2.45, -0.1))   # arm
+	_sphere(root, 0.34, toon_mat(IRON), Vector3(0.7, 1.55, -0.1), 0.85)               # cooking pot
+	var stew := HouseParts.cylinder(root, 0.25, 0.03, Color(0.5, 0.3, 0.15), Vector3(0.7, 1.75, -0.1))
+	stew.material_override = toon_mat(Color(0.55, 0.32, 0.18))
 	var flames := Node3D.new()
 	flames.position = Vector3(0, 0.55, 0)
 	root.add_child(flames)
@@ -157,7 +163,7 @@ static func fireplace() -> Node3D:
 	solid(root, Vector3(3.6, 3.4, 1.2), Vector3(0, 1.7, 0.1))
 	return root
 
-## A tall shelf (back panel, uprights, boards) full of books or glowing potions.
+## A tall shelf (back panel, uprights, boards) full of books or jars of preserves.
 static func shelf(width: float, height: float, fill: int, seed_value: int) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Shelf"
@@ -176,7 +182,7 @@ static func shelf(width: float, height: float, fill: int, seed_value: int) -> No
 		if fill == Fill.BOOKS:
 			_books(root, rng, width - 0.3, y + 0.05, gap - 0.2)
 		else:
-			_potions(root, rng, width - 0.3, y + 0.05)
+			_jars(root, rng, width - 0.3, y + 0.05)
 	solid(root, Vector3(width, height, depth), Vector3(0, height * 0.5, 0))
 	return root
 
@@ -191,30 +197,36 @@ static func _books(root: Node3D, rng: RandomNumberGenerator, span: float, y: flo
 		HouseParts.box(root, Vector3(w, h, 0.34), BOOK_COLORS[rng.randi() % BOOK_COLORS.size()], Vector3(x + w * 0.5, y + h * 0.5, 0.02))
 		x += w + 0.01
 
-static func _potions(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
+static func _jars(root: Node3D, rng: RandomNumberGenerator, span: float, y: float) -> void:
 	var x := -span * 0.5 + 0.2
 	while x < span * 0.5 - 0.15:
-		var color := POTION_COLORS[rng.randi() % POTION_COLORS.size()]
-		var r := rng.randf_range(0.09, 0.14)
-		var body := CylinderMesh.new()
-		body.top_radius = r
-		body.bottom_radius = r
-		body.height = r * 2.2
-		body.radial_segments = 10
-		_mesh(root, body, glow(color), Vector3(x, y + r * 1.1, 0.05))
-		HouseParts.cylinder(root, r * 0.35, 0.18, Color(0.85, 0.9, 0.95), Vector3(x, y + r * 2.2 + 0.09, 0.05))
-		HouseParts.cylinder(root, r * 0.4, 0.06, WOOD, Vector3(x, y + r * 2.2 + 0.2, 0.05))   # cork
-		x += r * 2.0 + rng.randf_range(0.12, 0.3)
+		var color := JAR_COLORS[rng.randi() % JAR_COLORS.size()]
+		var r := rng.randf_range(0.1, 0.15)
+		var h := rng.randf_range(0.2, 0.34)
+		HouseParts.cylinder(root, r, h, color, Vector3(x, y + h * 0.5, 0.05))
+		HouseParts.cylinder(root, r * 1.05, 0.05, PARCHMENT, Vector3(x, y + h + 0.025, 0.05))   # cloth lid
+		x += r * 2.0 + rng.randf_range(0.1, 0.28)
 
-## A hanging cloth banner with a gold diamond.
-static func banner(cloth: Color) -> Node3D:
+## A framed picture hanging on a wall (origin at its centre, front +Z).
+static func picture(width: float, height: float, art: Color) -> Node3D:
 	var root := Node3D.new()
-	root.name = "Banner"
-	HouseParts.box(root, Vector3(1.3, 0.12, 0.12), GOLD, Vector3(0, 3.0, 0.08))
-	HouseParts.box(root, Vector3(1.1, 2.6, 0.05), cloth, Vector3(0, 1.7, 0.05))
-	_cone(root, 0.3, 0.4, toon_mat(cloth), Vector3(0, 0.2, 0.05), Vector3(180, 0, 0))   # pointed end
-	HouseParts.box(root, Vector3(0.36, 0.36, 0.04), GOLD, Vector3(0, 2.0, 0.1), Vector3(0, 0, 45))
-	HouseParts.box(root, Vector3(0.2, 0.2, 0.05), cloth.darkened(0.3), Vector3(0, 2.0, 0.12), Vector3(0, 0, 45))
+	root.name = "Picture"
+	HouseParts.box(root, Vector3(width + 0.16, height + 0.16, 0.06), GOLD.darkened(0.3), Vector3.ZERO)
+	HouseParts.box(root, Vector3(width, height, 0.07), PARCHMENT, Vector3.ZERO)
+	HouseParts.box(root, Vector3(width * 0.8, height * 0.45, 0.08), art, Vector3(0, -height * 0.15, 0))
+	HouseParts.box(root, Vector3(width * 0.8, height * 0.28, 0.08), art.lerp(Color(0.6, 0.8, 1.0), 0.7), Vector3(0, height * 0.22, 0))
+	return root
+
+## A window letting in warm daylight (origin at its centre, front +Z).
+static func window(width: float, height: float) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Window"
+	HouseParts.box(root, Vector3(width + 0.3, height + 0.3, 0.1), WOOD_DARK, Vector3.ZERO)
+	_glow_box(root, Vector3(width, height, 0.12), Color(0.95, 0.9, 0.7), Vector3.ZERO)
+	HouseParts.box(root, Vector3(0.08, height, 0.16), WOOD_DARK, Vector3.ZERO)
+	HouseParts.box(root, Vector3(width, 0.08, 0.16), WOOD_DARK, Vector3.ZERO)
+	HouseParts.box(root, Vector3(width + 0.5, 0.1, 0.3), WOOD, Vector3(0, -height * 0.5 - 0.2, 0.1))   # sill
+	_light(root, Color(1.0, 0.92, 0.75), 0.9, 6.0, Vector3(0, 0, 1.2))
 	return root
 
 static func toon_mat(color: Color) -> ShaderMaterial:
@@ -222,24 +234,21 @@ static func toon_mat(color: Color) -> ShaderMaterial:
 
 # ---------------------------------------------------------------- furniture
 
-## A round table with a candle, a crystal ball and an open spellbook on it.
+## A round dining table with plates, a loaf, a fruit bowl and a candle.
 static func table(radius: float) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Table"
 	HouseParts.cylinder(root, radius, 0.12, WOOD, Vector3(0, 1.0, 0))
 	HouseParts.cylinder(root, radius * 0.18, 0.95, WOOD_DARK, Vector3(0, 0.5, 0))
 	HouseParts.cylinder(root, radius * 0.55, 0.1, WOOD_DARK, Vector3(0, 0.05, 0))
-	# crystal ball on a gold stand
-	HouseParts.cylinder(root, 0.16, 0.08, GOLD, Vector3(-0.2, 1.1, -0.1))
-	_sphere(root, 0.22, glow(Color(0.6, 0.85, 1.0, 1.0)), Vector3(-0.2, 1.34, -0.1))
-	var wisp := _sparkles(CRYSTAL, 5, 2.0, 0.07, 0.25)
-	wisp.position = Vector3(-0.2, 1.4, -0.1)
-	root.add_child(wisp)
-	_light(root, CRYSTAL, 0.6, 3.5, Vector3(-0.2, 1.5, -0.1))
-	# open book
-	HouseParts.box(root, Vector3(0.34, 0.05, 0.42), VELVET_DARK, Vector3(0.28, 1.09, 0.12), Vector3(0, 12, 0))
-	HouseParts.box(root, Vector3(0.3, 0.04, 0.38), PARCHMENT, Vector3(0.28, 1.12, 0.12), Vector3(0, 12, 0))
-	root.add_child(candle(Vector3(0.15, 1.06, -0.3)))
+	for a in 2:
+		var angle := a * PI + 0.6
+		HouseParts.cylinder(root, 0.17, 0.03, Color(0.92, 0.92, 0.88), Vector3(cos(angle) * 0.5, 1.07, sin(angle) * 0.5))
+	HouseParts.box(root, Vector3(0.32, 0.12, 0.16), Color(0.82, 0.58, 0.3), Vector3(-0.15, 1.12, -0.05), Vector3(0, 25, 0))   # loaf
+	HouseParts.cylinder(root, 0.16, 0.1, WOOD_DARK, Vector3(0.12, 1.11, 0.05))   # fruit bowl
+	for f in 3:
+		_sphere(root, 0.06, toon_mat([Color(0.8, 0.25, 0.2), Color(0.85, 0.7, 0.2), Color(0.5, 0.7, 0.25)][f]), Vector3(0.12 + (f - 1) * 0.07, 1.2, 0.05 + (f % 2) * 0.04))
+	root.add_child(candle(Vector3(0.0, 1.06, -0.3)))
 	solid(root, Vector3(radius * 2.0, 1.1, radius * 2.0), Vector3(0, 0.55, 0))
 	return root
 
@@ -280,55 +289,33 @@ static func chest() -> Node3D:
 	solid(root, Vector3(1.3, 1.1, 0.8), Vector3(0, 0.55, 0))
 	return root
 
-## An iron cauldron with a bubbling green brew.
-static func cauldron() -> Node3D:
+## A tall wardrobe with two doors.
+static func wardrobe() -> Node3D:
 	var root := Node3D.new()
-	root.name = "Cauldron"
-	_sphere(root, 0.75, toon_mat(IRON), Vector3(0, 0.75, 0), 0.9)
-	var rim := TorusMesh.new()
-	rim.inner_radius = 0.58
-	rim.outer_radius = 0.72
-	_mesh(root, rim, toon_mat(IRON.lightened(0.1)), Vector3(0, 1.15, 0))
-	HouseParts.cylinder(root, 0.6, 0.04, Color(0, 0, 0), Vector3(0, 1.1, 0)).material_override = glow(Color(0.4, 0.95, 0.35))
-	for a in 3:
-		var angle := a * TAU / 3.0 + 0.5
-		HouseParts.box(root, Vector3(0.14, 0.4, 0.14), IRON, Vector3(cos(angle) * 0.5, 0.2, sin(angle) * 0.5))
-	var bubbles := _sparkles(Color(0.5, 1.0, 0.45), 9, 1.4, 0.13, 0.7)
-	bubbles.position = Vector3(0, 1.15, 0)
-	bubbles.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	bubbles.emission_sphere_radius = 0.4
-	root.add_child(bubbles)
-	_light(root, Color(0.4, 1.0, 0.4), 0.8, 4.5, Vector3(0, 1.8, 0), 0.2)
-	solid(root, Vector3(1.4, 1.2, 1.4), Vector3(0, 0.6, 0))
+	root.name = "Wardrobe"
+	HouseParts.box(root, Vector3(1.8, 3.2, 0.8), WOOD, Vector3(0, 1.6, 0))
+	HouseParts.box(root, Vector3(2.0, 0.15, 0.95), WOOD_DARK, Vector3(0, 3.27, 0))
+	HouseParts.box(root, Vector3(0.82, 2.8, 0.06), WOOD_DARK, Vector3(-0.44, 1.65, 0.4))
+	HouseParts.box(root, Vector3(0.82, 2.8, 0.06), WOOD_DARK, Vector3(0.44, 1.65, 0.4))
+	for sx in [-0.12, 0.12]:
+		HouseParts.cylinder(root, 0.04, 0.12, GOLD, Vector3(sx, 1.6, 0.46))
+	solid(root, Vector3(1.8, 3.2, 0.8), Vector3(0, 1.6, 0))
 	return root
 
-# -------------------------------------------------------------- magic bits
-
-## A cluster of glowing crystals growing out of the floor.
-static func crystals(color: Color) -> Node3D:
+## A leafy potted plant.
+static func plant() -> Node3D:
 	var root := Node3D.new()
-	root.name = "Crystals"
-	var spec := [
-		[Vector3(0, 0, 0), 0.3, 1.8, Vector3(0, 0, 0)],
-		[Vector3(0.45, 0, 0.1), 0.2, 1.2, Vector3(0, 0, -22)],
-		[Vector3(-0.4, 0, 0.15), 0.22, 1.35, Vector3(0, 0, 20)],
-		[Vector3(0.1, 0, -0.4), 0.18, 1.0, Vector3(18, 0, 0)],
-	]
-	for s in spec:
-		var h: float = s[2]
-		var holder := Node3D.new()
-		holder.position = s[0]
-		holder.rotation_degrees = s[3]
-		root.add_child(holder)
-		_cone(holder, s[1], h, glow(color.lerp(Color.WHITE, randf() * 0.25)), Vector3(0, h * 0.5, 0))
-	_light(root, color, 1.0, 6.0, Vector3(0, 1.2, 0.3))
-	var motes := _sparkles(color, 6, 2.5, 0.07, 0.4)
-	motes.position = Vector3(0, 1.6, 0)
-	root.add_child(motes)
-	solid(root, Vector3(1.2, 1.8, 1.0), Vector3(0, 0.9, 0))
+	root.name = "Plant"
+	HouseParts.cylinder(root, 0.3, 0.5, Color(0.72, 0.42, 0.3), Vector3(0, 0.25, 0))
+	for a in 7:
+		var angle := a * TAU / 7.0
+		_cone(root, 0.14, 1.0 + (a % 3) * 0.25, toon_mat(LEAF.lerp(Color(0.5, 0.75, 0.3), (a % 2) * 0.4)), Vector3(cos(angle) * 0.2, 0.95, sin(angle) * 0.2), Vector3(sin(angle) * 20, 0, -cos(angle) * 20))
+	solid(root, Vector3(0.7, 1.6, 0.7), Vector3(0, 0.8, 0))
 	return root
 
-## A ring chandelier hanging from the ceiling (origin at the ceiling), with candles and a crystal.
+# -------------------------------------------------------------- hanging light
+
+## A candle ring hanging from the ceiling (origin at the ceiling).
 static func chandelier(drop: float) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Chandelier"
@@ -340,7 +327,6 @@ static func chandelier(drop: float) -> Node3D:
 	for a in 6:
 		var angle := a * TAU / 6.0
 		root.add_child(candle(Vector3(cos(angle) * 0.75, -drop + 0.02, sin(angle) * 0.75), false))   # the lamp below lights the room
-	_cone(root, 0.18, 0.5, glow(CRYSTAL), Vector3(0, -drop - 0.25, 0), Vector3(180, 0, 0))
 	_light(root, Color(1.0, 0.85, 0.6), 1.2, 9.0, Vector3(0, -drop - 0.3, 0), 0.15)
 	return root
 
