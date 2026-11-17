@@ -45,6 +45,10 @@ static func cylinder(parent: Node3D, radius: float, height: float, color: Color,
 	mesh.radial_segments = 14
 	return _part(parent, mesh, color, pos)
 
+## Runs `start` each time `node` enters the tree (tweens and the like can't be made before).
+static func when_in_tree(node: Node, start: Callable) -> void:
+	node.tree_entered.connect(start)
+
 static func _part(parent: Node3D, mesh: Mesh, color: Color, pos: Vector3, rot_deg := Vector3.ZERO) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -150,10 +154,11 @@ static func weathervane() -> Node3D:
 	head.size = Vector3(0.22, 0.22, 0.05)
 	_part(arrow, head, IRON, Vector3(0.38, 0.0, 0.0), Vector3(0, 0, -90))
 	cylinder(root, 0.025, 0.4, IRON, Vector3(0, 1.0, 0))
-	var swing := arrow.create_tween().set_loops()
 	arrow.rotation_degrees.y = -35.0
-	swing.tween_property(arrow, "rotation_degrees:y", 35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	swing.tween_property(arrow, "rotation_degrees:y", -35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	when_in_tree(arrow, func() -> void:   # a Tween can only be made once the node is in the tree
+		var swing := arrow.create_tween().set_loops()
+		swing.tween_property(arrow, "rotation_degrees:y", 35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		swing.tween_property(arrow, "rotation_degrees:y", -35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT))
 	return root
 
 # ------------------------------------------------------- awnings and porches

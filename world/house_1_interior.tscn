@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b01cy6x0mw13r" path="res://world/door.gd" id="1"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="2"]
 [ext_resource type="Script" uid="uid://bf0u4pce3srrb" path="res://world/cutaway_wall.gd" id="3"]
+[ext_resource type="Script" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="PackedScene" uid="uid://dbiov62udfua1" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Bed_07.glb" id="4_4q5kq"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
@@ -163,3 +164,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1000001, 0, -2.9)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bed_072/StaticBody3D" unique_id=417095395]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.19999999, 0.25)
 shape = SubResource("BoxShape3D_wgm46")
+
+[node name="FantasyInterior" type="Node3D" parent="."]
+script = ExtResource("fantasy_script")
