@@ -7,6 +7,9 @@
 [ext_resource type="Script" uid="uid://dfd47cc554yqi" path="res://addons/cyclops_level_builder/resources/data_vector_int.gd" id="5_yicfs"]
 [ext_resource type="Script" uid="uid://dmot4k5n7k0w6" path="res://addons/cyclops_level_builder/resources/mesh_vector_data.gd" id="6_ld685"]
 [ext_resource type="Material" uid="uid://38x6l4wyby7r" path="res://assets/materials/sewer_wall.tres" id="7_8grio"]
+[ext_resource type="Script" path="res://world/well_lights.gd" id="wl_lights"]
+[ext_resource type="Script" path="res://world/cave_glimmers.gd" id="wl_glimmers"]
+[ext_resource type="Script" path="res://world/water_life.gd" id="wl_waterlife"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="7_yugcs"]
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
@@ -12886,5 +12889,14 @@ transform = Transform3D(0.68999976, 0, 0, 0, 1, 0, 0, 0, 1, -45.789513, -24.8206
 [node name="WaterVolume" type="Area3D" parent="Water" unique_id=203175890]
 script = ExtResource("12_qcdpf")
 size = Vector3(20, 6.98, 20)
+
+[node name="WellLights" type="Node" parent="."]
+script = ExtResource("wl_lights")
+
+[node name="CaveGlimmers" type="Node3D" parent="."]
+script = ExtResource("wl_glimmers")
+
+[node name="WaterLife" type="Node3D" parent="."]
+script = ExtResource("wl_waterlife")
 
 [editable path="Water"]

@@ -418,3 +418,7 @@ Everything that makes the town feel alive is a small, separate piece — add, re
 
 All the ambient animation (chickens, birds, roof cat, NPC walk bob, signs, lanterns, chimes, weathervanes, flames, cloth, star twinkle, particles) is shown in held poses, like Blender's stepped interpolation: a new pose every 2 frames at 24 fps (12 poses a second, "on 2s"). Movement stays smooth; only poses are held.
 The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders keep a copy of `STEP_SECONDS` (`flame`, `cloth_wind`, `sky_painted`, `foliage_wind`, `water`); update them if you change it.
+
+## A living well
+
+`world/well.tscn` has `WellLights` (crystals breathe in a slow wave and hum softly up close, torches flicker), `CaveGlimmers` (cyan motes orbiting each crystal) and `WaterLife` (ripples, rising bubbles and a few fish in the pool). They find their targets by node name/path (`AccentLights`, `Water`) and are all held in stepped poses via `Choppy`.
