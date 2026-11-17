@@ -85,6 +85,7 @@ func _unshaded(color: Color, texture: Texture2D = null) -> StandardMaterial3D:
 
 func _drop_emitter(amount_base: int, lifetime: float, color: Color, size: float) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.one_shot = true
 	p.explosiveness = 1.0
 	p.amount = maxi(int(amount_base * _size), 8)
@@ -125,6 +126,7 @@ func _spray(away: Vector3) -> void:
 ## A soft red cloud that billows out and fades.
 func _mist() -> void:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.one_shot = true
 	p.explosiveness = 1.0
 	p.amount = 16
@@ -230,6 +232,7 @@ class Gib extends Node3D:
 		add_child(mesh_instance)
 		if kind != 3 and kind != 4:
 			_drip = CPUParticles3D.new()   # a trail of drops while it flies
+			_drip.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 			_drip.amount = 14
 			_drip.lifetime = 0.6
 			_drip.local_coords = false

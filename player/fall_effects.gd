@@ -38,6 +38,7 @@ var _wipe := -1.0            ## -1 = not wiping; else 0..1 progress of the top-t
 func _ready() -> void:
 	_player = get_parent() as Player
 	_streaks = CPUParticles3D.new()
+	_streaks.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	_streaks.emitting = false
 	_streaks.local_coords = false   # streaks stay in the world, so the player visibly falls past them
 	_streaks.amount = streak_max_amount

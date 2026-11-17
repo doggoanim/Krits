@@ -45,6 +45,9 @@ var _awake := 0.0           ## 0 = locked look, 1 = unlocked look
 var _active_blend := 0.0
 var _flash := 0.0
 var _t := 0.0
+var _core_spin := 0.0
+var _orbit_spin := 0.0
+var _pose_step := -1
 
 var _core: Node3D
 var _orbit: Node3D
@@ -196,6 +199,7 @@ func _build_motes() -> void:
 
 func _make_sparks(amount: int, lifetime: float, one_shot: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.emitting = false
 	p.one_shot = one_shot
 	p.amount = amount
@@ -220,8 +224,13 @@ func _process(delta: float) -> void:
 	_awake = move_toward(_awake, 1.0 if _unlocked else 0.0, delta * WAKE_SPEED)
 	_active_blend = move_toward(_active_blend, 1.0 if _active else 0.0, delta * ACTIVE_SPEED)
 	_flash = move_toward(_flash, 0.0, delta * FLASH_DECAY)
-	_core.rotation.y += delta * lerpf(0.4, 1.6, _awake)
-	_orbit.rotation.y -= delta * lerpf(0.3, 1.4, _awake)
+	_core_spin += delta * lerpf(0.4, 1.6, _awake)
+	_orbit_spin -= delta * lerpf(0.3, 1.4, _awake)
+	if Choppy.index() == _pose_step:
+		return   # hold the current pose until the next step
+	_pose_step = Choppy.index()
+	_core.rotation.y = _core_spin
+	_orbit.rotation.y = _orbit_spin
 	_apply()
 
 func _apply() -> void:

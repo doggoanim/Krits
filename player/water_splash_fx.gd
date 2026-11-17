@@ -123,6 +123,7 @@ static func _flat_quad(root: Node3D, texture: Texture2D, color: Color, alpha: fl
 ## Round droplets thrown up and out, falling in arcs, shrinking as they go.
 static func _droplets(root: Node3D, s: float, amount: int, speed_mult: float, size: float) -> void:
 	var p := GPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = maxi(int(amount * (0.5 + 0.5 * s)), 6)
 	p.lifetime = 0.9
 	p.one_shot = true

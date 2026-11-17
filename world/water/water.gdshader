@@ -5,6 +5,12 @@ render_mode cull_disabled, diffuse_toon, specular_toon, blend_mix;
 // and we subtract that — animation freezes with the pause menu. (Unset, e.g.
 // in the editor's own viewport, it's 0 and this is plain TIME.)
 global uniform float time_offset;
+
+// Held poses (see core/choppy.gd): 2 frames at 24 fps = 12 poses a second. Keep in sync.
+const float STEP_SECONDS = 0.083333;
+float held_time() {
+	return floor((TIME - time_offset) / STEP_SECONDS) * STEP_SECONDS;
+}
 global uniform float water_detail;   // Graphics setting: 0 turns off sparkle and wave lines (see core/graphics_quality.gd)
 // Simple stylized water: a toon-stepped shallow/deep color blend plus a
 // couple of layered sine waves for gentle animated motion, and a fresnel
@@ -74,8 +80,8 @@ float sparkle_layer(vec2 p, float density, float angle, float seed, float t) {
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_xz = world_pos.xz;
-	float w1 = sin(world_pos.x * wave_scale + (TIME - time_offset) * wave_speed);
-	float w2 = sin((world_pos.x + world_pos.z) * wave_scale * 0.6 - (TIME - time_offset) * wave_speed * 1.3);
+	float w1 = sin(world_pos.x * wave_scale + held_time() * wave_speed);
+	float w2 = sin((world_pos.x + world_pos.z) * wave_scale * 0.6 - held_time() * wave_speed * 1.3);
 	wave_offset = (w1 + w2) * 0.5;
 	VERTEX.y += wave_offset * wave_height;
 }
@@ -100,7 +106,7 @@ void fragment() {
 	// Texture is optional: an unset sampler2D defaults to solid white, so
 	// this multiply is a no-op (leaves the flat toon-color look untouched)
 	// until you actually assign one.
-	vec2 scrolled_uv = UV * uv_tiling + (TIME - time_offset) * uv_scroll_speed;
+	vec2 scrolled_uv = UV * uv_tiling + held_time() * uv_scroll_speed;
 	vec4 tex = texture(albedo_texture, scrolled_uv);
 	color *= mix(vec3(1.0), tex.rgb, texture_strength);
 	alpha *= mix(1.0, tex.a, texture_strength);

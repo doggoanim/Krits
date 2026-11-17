@@ -12360,6 +12360,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.5, -0.3)
 script = ExtResource("well_bats_script")
 
 [node name="SpiritMotes" type="GPUParticles3D" parent="." unique_id=35003688]
+fixed_fps = 12
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.75, -21.5, -7.6)
 script = ExtResource("well_motes")
 area_size = Vector3(12, 6, 12)
@@ -12415,6 +12416,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps1" type="GPUParticles3D" parent="AccentLights/CyanCrystal1" unique_id=910000101]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12433,6 +12435,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps1" type="GPUParticles3D" parent="AccentLights/CyanCrystal12" unique_id=822293508]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12451,6 +12454,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps2" type="GPUParticles3D" parent="AccentLights/CyanCrystal2" unique_id=910000102]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12469,6 +12473,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal3" unique_id=910000103]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12487,6 +12492,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal4" unique_id=1221681203]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12505,6 +12511,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal5" unique_id=1814658502]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12523,6 +12530,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal6" unique_id=1745991533]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12541,6 +12549,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal7" unique_id=1494043961]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12559,6 +12568,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal8" unique_id=1835924898]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12577,6 +12587,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal9" unique_id=716328108]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12595,6 +12606,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal10" unique_id=1560571011]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12613,6 +12625,7 @@ light_energy = 1.15
 omni_range = 5.5
 
 [node name="Wisps3" type="GPUParticles3D" parent="AccentLights/CyanCrystal11" unique_id=371194468]
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(5, 3, 5)
 mote_count = 14
@@ -12717,6 +12730,7 @@ search_height = 0.0
 spot_count = 3
 
 [node name="ShaftDust" type="GPUParticles3D" parent="." unique_id=920000210]
+fixed_fps = 12
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 5, -0.3)
 script = ExtResource("well_motes")
 area_size = Vector3(1.6, 8, 1.6)

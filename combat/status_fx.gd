@@ -21,6 +21,8 @@ var _mist: GPUParticles3D
 var _orbit: Node3D
 var _visual: EnemyVisual
 var _t := 0.0
+var _orbit_spin := 0.0
+var _orbit_step := -1
 var _radius := 0.5
 var _body_height := 1.4
 
@@ -58,8 +60,11 @@ func clear_all() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	if _active[&"stun"]:
-		_orbit.rotation.y += delta * 5.0
-		_orbit.position.y = _body_height * 0.5 + 0.15 + sin(_t * 4.0) * 0.05
+		_orbit_spin += delta * 5.0
+		if Choppy.index() != _orbit_step:   # held poses
+			_orbit_step = Choppy.index()
+			_orbit.rotation.y = _orbit_spin
+			_orbit.position.y = _body_height * 0.5 + 0.15 + sin(Choppy.snap(_t) * 4.0) * 0.05
 	if _active[&"burn"]:
 		_burn_light.light_energy = 1.6 + sin(_t * 31.0) * 0.5 + sin(_t * 17.0) * 0.4
 	_update_tint()
@@ -149,6 +154,7 @@ func _particle_material(direction: Vector3, spread: float, vmin: float, vmax: fl
 
 func _emitter(mat: ParticleProcessMaterial, amount: int, lifetime: float, mesh: Mesh) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = amount
 	p.lifetime = lifetime
 	p.local_coords = false

@@ -91,6 +91,7 @@ func _burst(wind: FoliageWind, prop: Node3D, entering: bool) -> void:
 
 func _emit(pos: Vector3, amount: int, colors: Array[Color], size: Vector2, speed: float, use_ellipse: bool) -> void:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.one_shot = true
 	p.explosiveness = 0.9
 	p.amount = amount

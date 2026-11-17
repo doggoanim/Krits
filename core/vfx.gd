@@ -33,6 +33,7 @@ static func smoke_puff(parent: Node3D, pos: Vector3, scale := 1.0) -> void:
 	mat.emission_sphere_radius = 0.2 * scale
 
 	var p := GPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = 14
 	p.lifetime = 0.5
 	p.one_shot = true
@@ -72,6 +73,7 @@ static func shatter(parent: Node3D, pos: Vector3, color: Color, scale := 1.0) ->
 	mat.emission_sphere_radius = 0.15 * scale
 
 	var p := GPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = 16
 	p.lifetime = 0.55
 	p.one_shot = true

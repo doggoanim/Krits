@@ -87,6 +87,7 @@ func _place(t: float) -> void:
 ## Tiny pale drops that float up from the group and shrink away.
 func _make_drops() -> CPUParticles3D:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.name = "Drops"
 	p.amount = 14
 	p.lifetime = 1.8

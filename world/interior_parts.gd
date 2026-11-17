@@ -102,6 +102,7 @@ static func _light(parent: Node3D, color: Color, energy: float, range_m: float, 
 ## Soft glowing quads rising from a point: fire sparks, cauldron bubbles, drifting motes.
 static func _sparkles(color: Color, amount: int, lifetime: float, size: float, rise: float) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = amount
 	p.lifetime = lifetime
 	p.local_coords = false

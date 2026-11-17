@@ -32,6 +32,8 @@ var _visual: Node3D
 var _marker: Node3D
 var _marker_base_y := 0.0
 var _t := 0.0
+var _marker_spin := 0.0
+var _marker_step := -1
 
 func _init() -> void:
 	collision_layer = 0
@@ -61,10 +63,13 @@ func _process(delta: float) -> void:
 	_t += delta
 	_refresh()
 	if _marker != null and _marker.visible:
-		_marker.position.y = _marker_base_y + sin(_t * 2.2) * MARKER_BOB
-		_marker.rotation.y += delta * MARKER_SPIN
+		_marker_spin += delta * MARKER_SPIN
+		if Choppy.index() != _marker_step:   # the marker bobs and spins in held poses
+			_marker_step = Choppy.index()
+			_marker.position.y = _marker_base_y + sin(Choppy.snap(_t) * 2.2) * MARKER_BOB
+			_marker.rotation.y = _marker_spin
 	if kind == Kind.CAT and _visual != null and model == null:
-		_visual.scale.y = 1.0 + sin(_t * 2.0) * IDLE_BREATH   # slow breathing
+		_visual.scale.y = 1.0 + sin(Choppy.snap(_t) * 2.0) * IDLE_BREATH   # slow breathing
 
 func _can_interact() -> bool:
 	return visible and super()

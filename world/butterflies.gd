@@ -73,7 +73,7 @@ func _random_point() -> Vector3:
 	return Vector3(cos(a) * r, randf_range(height_range.x, height_range.y), sin(a) * r)
 
 func _process(delta: float) -> void:
-	var t := Time.get_ticks_msec() / 1000.0
+	var t := Choppy.time()   # wing and bob poses are held; flight itself stays smooth
 	for f in _flyers:
 		var to := f.target - f.root.position
 		if to.length() < 0.4:
@@ -81,7 +81,7 @@ func _process(delta: float) -> void:
 		else:
 			var dir := to.normalized()
 			f.root.position += dir * speed * delta
-			f.root.position.y += sin(t * 5.0 + f.bob_phase) * 0.6 * delta   # bob
+			f.root.position.y += sin(t * 5.0 + f.bob_phase) * 0.6 * delta   # bob (held, so it steps)
 			# face the way it is flying
 			f.root.rotation.y = lerp_angle(f.root.rotation.y, atan2(-dir.x, -dir.z), 4.0 * delta)
 		var flap := sin(t * flap_speed + f.phase) * 1.0   # -1..1

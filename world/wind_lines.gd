@@ -31,6 +31,7 @@ extends GPUParticles3D
 var _mat: ParticleProcessMaterial
 
 func _ready() -> void:
+	fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	_build()
 	set_process(true)
 

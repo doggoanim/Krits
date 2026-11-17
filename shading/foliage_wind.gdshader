@@ -5,6 +5,12 @@ render_mode cull_disabled;
 // and we subtract that — animation freezes with the pause menu. (Unset, e.g.
 // in the editor's own viewport, it's 0 and this is plain TIME.)
 global uniform float time_offset;
+
+// Held poses (see core/choppy.gd): 2 frames at 24 fps = 12 poses a second. Keep in sync.
+const float STEP_SECONDS = 0.083333;
+float held_time() {
+	return floor((TIME - time_offset) / STEP_SECONDS) * STEP_SECONDS;
+}
 // Where the player's feet are, and how far their stepping reaches (0 = nobody is
 // pushing anything). Published every frame by player/foliage_steps.gd.
 global uniform vec3 foliage_pusher_pos;
@@ -79,13 +85,13 @@ void vertex() {
 	// same mesh scattered around the level don't all sway in lockstep — each
 	// one samples a slightly different point of the same slow-moving "gust"
 	// field instead.
-	float phase = (TIME - time_offset) * wind_speed + dot(world_pos.xz, vec2(wind_scale));
+	float phase = held_time() * wind_speed + dot(world_pos.xz, vec2(wind_scale));
 	float sway = height * wind_strength * gust;
 	VERTEX.x += sin(phase) * sway;
 	VERTEX.z += cos(phase * 0.7) * sway * 0.6;
 
 	if (rustle > 0.001) {
-		float t = (TIME - time_offset) * 24.0 + phase * 2.0;
+		float t = held_time() * 24.0 + phase * 2.0;
 		VERTEX.x += sin(t) * height * 0.09 * rustle;
 		VERTEX.z += cos(t * 1.3) * height * 0.07 * rustle;
 	}

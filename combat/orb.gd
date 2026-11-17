@@ -97,6 +97,8 @@ var _outline_mat: Material   ## hollow kinds: rim-only ShaderMaterial (orb_outli
 var _base_scale := 1.0   ## target scale from _refresh() (1.0 active, 0.5 inactive); the
                           ## per-frame breathing pulse multiplies on top of this
 var _t := randf() * TAU
+var _ring_spin := 0.0
+var _ring_step := -1
 var _pop := 1.0            ## squash-and-stretch multiplier on the visuals, tweened by _punch()
 var _shadow: MeshInstance3D   ## flat blob on the ground below, so you can judge where the orb is
 
@@ -198,7 +200,7 @@ func _punch(from: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_t += delta * BOB_SPEED
-	var bob := sin(_t) * BOB_HEIGHT
+	var bob := sin(Choppy.snap(_t / BOB_SPEED) * BOB_SPEED) * BOB_HEIGHT   # held pose
 	_mesh.position.y = bob
 	_ring.position.y = bob
 	# The outline is a one-off duplicate sibling (see CelOutline), not a child of
@@ -208,12 +210,15 @@ func _physics_process(delta: float) -> void:
 	if _icon:
 		_icon.position.y = bob
 
-	var pulse := 1.0 + sin(_t * PULSE_SPEED) * PULSE_AMOUNT
+	var pulse := 1.0 + sin(Choppy.snap(_t / BOB_SPEED) * BOB_SPEED * PULSE_SPEED) * PULSE_AMOUNT
 	_mesh.scale = Vector3.ONE * (_base_scale * pulse * _pop)
 	if _mesh_outline:
 		_mesh_outline.scale = _mesh.scale
 	_ring.scale = Vector3.ONE * (_base_scale * _pop)
-	_ring.rotate_y(delta * (RING_SPIN_SPEED if active else RING_SPIN_SPEED_IDLE))
+	_ring_spin += delta * (RING_SPIN_SPEED if active else RING_SPIN_SPEED_IDLE)
+	if Choppy.index() != _ring_step:   # the ring turns in held poses
+		_ring_step = Choppy.index()
+		_ring.rotation.y = _ring_spin
 
 	if Engine.get_physics_frames() % 3 == 0:
 		_update_shadow()

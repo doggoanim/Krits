@@ -39,6 +39,9 @@ var _player: Player
 var _prop: Node3D
 var _age := 0.0
 
+var _prop_spin := 0.0
+var _prop_step := -1
+
 func _ready() -> void:
 	instance = self
 	set_process(false)
@@ -157,8 +160,11 @@ func _process(delta: float) -> void:
 	_age += delta
 	_face_camera()   # straight at the camera, even if it is orbited meanwhile
 	if is_instance_valid(_prop):
-		_prop.rotation.y += PROP_SPIN * delta
-		_prop.position.y = Player.STAND_HEIGHT + PROP_RAISE + sin(_age * 2.4) * PROP_BOB
+		_prop_spin += PROP_SPIN * delta
+		if Choppy.index() != _prop_step:   # held poses
+			_prop_step = Choppy.index()
+			_prop.rotation.y = _prop_spin
+			_prop.position.y = Player.STAND_HEIGHT + PROP_RAISE + sin(Choppy.snap(_age) * 2.4) * PROP_BOB
 
 func _face_camera() -> void:
 	var rig := _player.camera_rig
@@ -183,6 +189,8 @@ func _play_jingle() -> void:
 ## The treasure floating over the player's head: the item's model if it has
 ## one, else its icon as a billboard, else a glowing orb in its colour.
 func _spawn_prop(entry: Dictionary) -> void:
+	_prop_spin = 0.0
+	_prop_step = -1
 	_prop = Node3D.new()
 	_prop.position = Vector3(0.0, Player.STAND_HEIGHT + PROP_RAISE, 0.0)
 	_player.add_child(_prop)
