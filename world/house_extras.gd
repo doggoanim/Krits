@@ -44,6 +44,7 @@ const WINDOW_STEP := 1.9           ## door -> next window along the wall
 const WINDOW_HEIGHT := 1.55        ## window centre above the floor
 const WINDOW_CLEARANCE := 1.0      ## the wall must continue this far past a window's centre (shutters)
 const WALL_SINK := 0.08            ## wall decorations sink this far into the wall: no gap
+const LANTERN_SINK := 0.3          ## the lantern mounts this far inside the wall, same as the hanging signs (HouseDressing.WALL_OVERLAP)
 const LANTERN_X := 1.05
 const LANTERN_HEIGHT := 2.15
 const BUNTING_HEIGHT := 3.6
@@ -145,7 +146,7 @@ func _add_windows(ctx: Dictionary, plan: Dictionary) -> void:
 
 func _add_lantern(ctx: Dictionary, side: float) -> void:
 	var x: float = ctx["x0"] + side * LANTERN_X
-	_put(ctx, HouseProps.lantern(), Vector3(x, float(ctx["floor"]) + LANTERN_HEIGHT, _wall(ctx, x) - WALL_SINK))
+	_put(ctx, HouseProps.lantern(), Vector3(x, float(ctx["floor"]) + LANTERN_HEIGHT, _wall(ctx, x) - LANTERN_SINK))
 
 func _add_bunting(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]

@@ -149,16 +149,16 @@ static func _flower_box(parent: Node3D, width: float, pos: Vector3) -> void:
 		var x := lerpf(-width * 0.42, width * 0.42, float(i) / 5.0)
 		_sphere(box, 0.065, FLOWER_COLORS[rng.randi() % FLOWER_COLORS.size()], Vector3(x, 0.16 + rng.randf() * 0.04, rng.randf_range(-0.04, 0.04)))
 
-## A lantern on a wall bracket: origin at the wall, hangs 0.2 out. Glows and lights after dusk.
+## A lantern on a wall bracket: origin 0.3 m inside the wall, hangs 0.4 out; mount it sunk 0.3 m into the wall (as the hanging sign is). Glows and lights after dusk.
 static func lantern() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Lantern"
 	var iron := HouseParts.IRON
-	HouseParts.box(root, Vector3(0.05, 0.05, 0.22), iron, Vector3(0, 0, 0.11))           # arm
+	HouseParts.box(root, Vector3(0.05, 0.05, 0.4), iron, Vector3(0, 0, 0.2))            # arm (its first 0.3 m is inside the wall, like the sign's rod)
 	HouseParts.box(root, Vector3(0.05, 0.3, 0.05), iron, Vector3(0, -0.12, 0.05), Vector3(0, 0, 0))   # wall plate
-	HouseParts.box(root, Vector3(0.02, 0.12, 0.02), iron, Vector3(0, -0.06, 0.2))       # hook
+	HouseParts.box(root, Vector3(0.02, 0.12, 0.02), iron, Vector3(0, -0.06, 0.4))       # hook
 	var body := Node3D.new()
-	body.position = Vector3(0, -0.34, 0.2)
+	body.position = Vector3(0, -0.34, 0.4)
 	root.add_child(body)
 	HouseParts.box(body, Vector3(0.26, 0.05, 0.26), iron, Vector3(0, 0.17, 0))          # lid
 	HouseParts.box(body, Vector3(0.18, 0.06, 0.18), iron, Vector3(0, 0.22, 0))
@@ -176,7 +176,7 @@ static func lantern() -> Node3D:
 	var lamp := _lamp_root(root)
 	lamp.flicker = 0.18
 	lamp.add_material(glass, 3.4)
-	lamp.add_light(_glow_light(root, Vector3(0, -0.34, 0.5), 1.6, 7.0), 1.6)
+	lamp.add_light(_glow_light(root, Vector3(0, -0.34, 0.8), 1.6, 7.0), 1.6)
 	return root
 
 # --------------------------------------------------------------------- cloth
