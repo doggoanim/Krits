@@ -39,9 +39,9 @@ const EDITOR_PREVIEW_NAME := "EditorModelPreview"
 ## word (see talk_pop(), called by DialogueStage). Strength 0 turns it off.
 @export_group("Talking")
 @export var talk_pop_strength := 1.0
-@export var talk_pop_stretch := Vector2(0.9, 1.16)   ## (x/z, y) scale at the top of the pop
-@export var talk_pop_squash := Vector2(1.07, 0.93)   ## (x/z, y) scale of the little rebound
-@export var talk_pop_min_gap := 0.14                 ## seconds between pops, so a fast word run stays readable
+@export var talk_pop_stretch := Vector2(0.97, 1.06)   ## (x/z, y) scale at the top of the pop
+@export var talk_pop_squash := Vector2(1.02, 0.98)   ## (x/z, y) scale of the little rebound
+@export var talk_pop_min_gap := 0.18                 ## seconds between pops, so a fast word run stays readable
 @export_group("")
 
 var _talk_tween: Tween
@@ -173,9 +173,9 @@ func talk_pop() -> void:
 	var up := Vector3(lerpf(1.0, talk_pop_stretch.x, k), lerpf(1.0, talk_pop_stretch.y, k), lerpf(1.0, talk_pop_stretch.x, k))
 	var down := Vector3(lerpf(1.0, talk_pop_squash.x, k), lerpf(1.0, talk_pop_squash.y, k), lerpf(1.0, talk_pop_squash.x, k))
 	_talk_tween = create_tween()
-	_talk_tween.tween_property(target, "scale", rest * up, 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_talk_tween.tween_property(target, "scale", rest * down, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_talk_tween.tween_property(target, "scale", rest, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_talk_tween.tween_property(target, "scale", rest * up, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_talk_tween.tween_property(target, "scale", rest * down, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_talk_tween.tween_property(target, "scale", rest, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func get_focus_point() -> Vector3:
 	return global_position + Vector3.UP * head_height
