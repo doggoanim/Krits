@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="PackedScene" path="res://world/chest.tscn" id="6_kbm7p"]
 [ext_resource type="Script" uid="uid://c2h4vvhp2fkep" path="res://world/fantasy_interior.gd" id="fantasy_script"]
+[ext_resource type="Script" path="res://world/npc_barks.gd" id="barks_script"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
 albedo_color = Color(0.82, 0.74, 0.6, 1)
@@ -183,3 +184,6 @@ mesh = SubResource("Mesh_ShopBody")
 [node name="FantasyInterior" type="Node3D" parent="."]
 script = ExtResource("fantasy_script")
 layout = 2
+
+[node name="Barks" type="Node" parent="ShopKeeper"]
+script = ExtResource("barks_script")

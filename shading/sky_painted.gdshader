@@ -23,6 +23,15 @@ uniform vec3 cloud_shadow : source_color = vec3(0.50, 0.64, 0.90);
 uniform float light_reach : hint_range(0.0, 0.5) = 0.12;     // how far toward the sun the shading samples
 uniform float shading_contrast : hint_range(0.5, 8.0) = 3.5;
 
+group_uniforms night;
+// Driven every frame by world/time_of_day.gd (all 0 / unused in daylight or in a level without one).
+uniform float star_strength : hint_range(0.0, 1.0) = 0.0;   // 0 = no stars, 1 = full night sky
+uniform float star_density = 70.0;                          // grid cells across the sky: more = more, smaller stars
+uniform vec3 body_dir = vec3(0.0, 1.0, 0.0);                // unit vector toward the moon (the sun light's +Z)
+uniform float body_strength : hint_range(0.0, 1.0) = 0.0;   // moon visibility
+uniform vec3 body_color : source_color = vec3(0.92, 0.95, 1.0);
+uniform float body_size : hint_range(0.0, 0.1) = 0.018;     // moon radius, in sky-direction units
+
 // Cloud shapes come from a tileable noise TEXTURE (a NoiseTexture2D, set on the
 // material) rather than hash-based value noise computed here: hashed noise
 // showed up as blocky, straight-edged patches on some GPUs, whereas sampling a
@@ -54,6 +63,12 @@ float density(vec2 p) {
 	return v;   // ~0..1, centred near 0.5
 }
 
+float hash13(vec3 p3) {
+	p3 = fract(p3 * 0.1031);
+	p3 += dot(p3, p3.zyx + 31.32);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
 void sky() {
 	vec3 dir = EYEDIR;
 	float up = clamp(dir.y, 0.0, 1.0);
@@ -79,6 +94,26 @@ void sky() {
 	// (sky() can't `return` early, so this is a mask instead of a branch).
 	float horizon_fade = smoothstep(0.0, 0.22, dir.y);
 	vec3 sky_col = mix(col, cloud_col, cover * horizon_fade);
+
+	// Night: stars (hidden behind clouds and fading toward the horizon) and the moon.
+	vec3 night_col = vec3(0.0);
+	if (star_strength > 0.001) {
+		vec3 p = dir * star_density;
+		vec3 cell = floor(p);
+		vec3 f = fract(p);
+		float h = hash13(cell);
+		vec3 centre = vec3(hash13(cell + 17.0), hash13(cell + 31.0), hash13(cell + 53.0));
+		float twinkle = 0.65 + 0.35 * sin(TIME * (1.5 + h * 2.0) + h * 40.0);
+		float star = step(0.94, h) * smoothstep(0.14, 0.0, length(f - centre)) * twinkle;
+		night_col += vec3(0.85, 0.9, 1.0) * star * (1.0 - cover) * smoothstep(0.02, 0.3, dir.y) * 1.6;
+	}
+	if (body_strength > 0.001) {
+		float c = dot(dir, normalize(body_dir));
+		float disc = smoothstep(1.0 - body_size * body_size * 0.5, 1.0 - body_size * body_size * 0.35, c);
+		float halo = pow(max(c, 0.0), 220.0) * 0.5;
+		night_col += body_color * (disc * 1.3 + halo) * (1.0 - cover * 0.8);
+	}
+	sky_col += night_col * star_strength * step(0.0, dir.y);
 
 	// Below the horizon: just continue the horizon colour, slightly darker.
 	float below = clamp(-dir.y * 3.0, 0.0, 1.0);

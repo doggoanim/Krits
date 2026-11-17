@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/woodplank.jpg" id="floor_tex"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
 [ext_resource type="PackedScene" uid="uid://b2xyt50ku3keo" path="res://assets/npcs/cat_biscuit.glb" id="biscuit_model"]
+[ext_resource type="Script" path="res://world/npc_barks.gd" id="barks_script"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
 albedo_color = Color(0.95, 0.88, 0.8, 1)
@@ -192,3 +193,6 @@ dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 facing_offset = 3.14159
 model = ExtResource("biscuit_model")
 model_height = 0.7
+
+[node name="Barks" type="Node" parent="Vael"]
+script = ExtResource("barks_script")

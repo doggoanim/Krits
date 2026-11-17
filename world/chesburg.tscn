@@ -68,6 +68,15 @@
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
+[ext_resource type="Script" path="res://world/time_of_day.gd" id="tod_script"]
+[ext_resource type="Script" path="res://world/ambience_layers.gd" id="layers_script"]
+[ext_resource type="Script" path="res://world/house_extras.gd" id="house_extras_script"]
+[ext_resource type="Script" path="res://world/birds.gd" id="birds_script"]
+[ext_resource type="Script" path="res://world/night_only.gd" id="night_only_script"]
+[ext_resource type="Script" path="res://world/npc_schedule.gd" id="schedule_script"]
+[ext_resource type="Script" path="res://world/schedule_stop.gd" id="stop_script"]
+[ext_resource type="Script" path="res://world/npc_barks.gd" id="barks_script"]
+[ext_resource type="Script" path="res://world/campfire.gd" id="campfire_script"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
 albedo_color = Color(0.30980393, 0.72156864, 0.05882353, 1)
@@ -176,11 +185,57 @@ albedo_color = Color(0.7, 0.45, 0.25, 1)
 [sub_resource type="BoxMesh" id="Mesh_HikerPack"]
 size = Vector3(0.5, 0.65, 0.35)
 
+[sub_resource type="Resource" id="Stop_YuleDay"]
+script = ExtResource("stop_script")
+from_hour = 6.5
+mode = 1
+wander_radius = 3.0
+
+[sub_resource type="Resource" id="Stop_YuleHome"]
+script = ExtResource("stop_script")
+from_hour = 20.0
+mode = 2
+place = NodePath("Buildings/house_chesburg_5/House5EntranceSpawn")
+
+[sub_resource type="Resource" id="Stop_BrantDay"]
+script = ExtResource("stop_script")
+from_hour = 6.0
+mode = 1
+wander_radius = 2.0
+
+[sub_resource type="Resource" id="Stop_BrantCamp"]
+script = ExtResource("stop_script")
+from_hour = 18.5
+mode = 0
+place = NodePath("NPCs/Routes/BrantByFire")
+
+[sub_resource type="Resource" id="Stop_FennSpot"]
+script = ExtResource("stop_script")
+from_hour = 6.0
+mode = 0
+
+[sub_resource type="Resource" id="Stop_FennStroll"]
+script = ExtResource("stop_script")
+from_hour = 12.0
+mode = 1
+wander_radius = 2.5
+
+[sub_resource type="Resource" id="Stop_FennBack"]
+script = ExtResource("stop_script")
+from_hour = 14.5
+mode = 0
+
 [node name="Chesburg" type="Node3D" unique_id=1195529557]
 
 [node name="Ambience" type="Node" parent="." unique_id=75010380]
 script = ExtResource("chesburg_ambience_script")
 stream = ExtResource("chesburg_ambience_stream")
+
+[node name="AmbienceLayers" type="Node" parent="."]
+script = ExtResource("layers_script")
+
+[node name="TimeOfDay" type="Node" parent="."]
+script = ExtResource("tod_script")
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
 
@@ -965,6 +1020,10 @@ transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 script = ExtResource("house_dressing_script")
 name_filter = PackedStringArray("house_chesburg")
 
+[node name="HouseExtras" type="Node" parent="Buildings"]
+script = ExtResource("house_extras_script")
+name_filter = PackedStringArray("house_chesburg")
+
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
 
@@ -1004,6 +1063,8 @@ script = ExtResource("47_door")
 target_level = "res://world/house_6_interior.tscn"
 target_spawn_id = &"enter"
 prompt_text = "Press E to enter"
+open_from = 7.0
+open_to = 21.0
 
 [node name="House6EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_6" unique_id=470006002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
@@ -1066,6 +1127,13 @@ transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032
 transform = Transform3D(-4.3711385e-08, 0, 6.426, 0, 0.09999996, 0, -0.99999994, 0, -2.808894e-07, 7.0414987, 0.10000032, -24.769499)
 
 [node name="Props" type="Node3D" parent="." unique_id=1770766056]
+
+[node name="Birds" type="Node3D" parent="Props"]
+script = ExtResource("birds_script")
+
+[node name="BrantCampfire" type="Node3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 15.2)
+script = ExtResource("campfire_script")
 
 [node name="well" parent="Props" unique_id=1061802426 instance=ExtResource("20_38blh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 0.034999855, -5.3904057)
@@ -1374,6 +1442,10 @@ script = ExtResource("41_ambient_motes")
 area_size = Vector3(80, 4, 80)
 mote_count = 50
 
+[node name="DayOnly" type="Node" parent="Props/DustMotes"]
+script = ExtResource("night_only_script")
+day_only = true
+
 [node name="Fireflies" type="GPUParticles3D" parent="Props" unique_id=640155073]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2, -9)
 script = ExtResource("41_ambient_motes")
@@ -1383,6 +1455,9 @@ color = Color(0.75, 1, 0.45, 0.8)
 glow_energy = 3.5
 mote_size = 0.035
 drift_speed = 0.3
+
+[node name="NightOnly" type="Node" parent="Props/Fireflies"]
+script = ExtResource("night_only_script")
 
 [node name="WindLines" type="GPUParticles3D" parent="Props" unique_id=1252742016]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -10)
@@ -1797,6 +1872,11 @@ blob_count = 16
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
+[node name="Routes" type="Node3D" parent="NPCs"]
+
+[node name="BrantByFire" type="Marker3D" parent="NPCs/Routes"]
+transform = Transform3D(-0.48, 0, 0.877, 0, 1, 0, -0.877, 0, -0.48, -1.6, 0, 14.6)
+
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0.1, -8.2)
 script = ExtResource("yule_npc_script")
@@ -1811,6 +1891,15 @@ idle_animation = &"Yule_Idle"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("Shape_YuleBody")
 
+[node name="Schedule" type="Node" parent="NPCs/Yule"]
+script = ExtResource("schedule_script")
+stops = Array[ExtResource("stop_script")]([SubResource("Stop_YuleDay"), SubResource("Stop_YuleHome")])
+quest_flag = &"yule_quest_accepted"
+quest_done_flag = &"yule_got_ball"
+
+[node name="Barks" type="Node" parent="NPCs/Yule"]
+script = ExtResource("barks_script")
+
 [node name="Brant" type="StaticBody3D" parent="NPCs" unique_id=2022950744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
 script = ExtResource("yule_npc_script")
@@ -1823,6 +1912,13 @@ shape = SubResource("Shape_YuleBody")
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/Brant" unique_id=567638989]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
+
+[node name="Schedule" type="Node" parent="NPCs/Brant"]
+script = ExtResource("schedule_script")
+stops = Array[ExtResource("stop_script")]([SubResource("Stop_BrantDay"), SubResource("Stop_BrantCamp")])
+
+[node name="Barks" type="Node" parent="NPCs/Brant"]
+script = ExtResource("barks_script")
 
 [node name="CatClueFur" type="StaticBody3D" parent="NPCs" unique_id=1636745183]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.1, 6, -8.8)
@@ -1874,6 +1970,13 @@ shape = SubResource("Shape_YuleBody")
 [node name="Mesh" type="MeshInstance3D" parent="NPCs/Fenn" unique_id=7189073]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
+
+[node name="Schedule" type="Node" parent="NPCs/Fenn"]
+script = ExtResource("schedule_script")
+stops = Array[ExtResource("stop_script")]([SubResource("Stop_FennSpot"), SubResource("Stop_FennStroll"), SubResource("Stop_FennBack")])
+
+[node name="Barks" type="Node" parent="NPCs/Fenn"]
+script = ExtResource("barks_script")
 
 [node name="OvergrownLedges" type="Node3D" parent="." unique_id=1249404075]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 20)

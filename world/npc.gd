@@ -53,6 +53,10 @@ var _turn_tween: Tween
 
 var _script: DialogueScript   ## parsed from dialogue_file, if any
 
+## False while something (an NpcSchedule sending the NPC indoors) has taken the NPC out of
+## the world: it can't be talked to.
+var available := true
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		_refresh_editor_preview()
@@ -130,7 +134,7 @@ func _build_model() -> void:
 ## triggered moves make before taking over (e.g. WallClimbState's regrab
 ## cooldown), just gating a talk instead of a move.
 func _can_interact() -> bool:
-	return (_current_dialogue() != null and player != null and not player.dead
+	return (available and _current_dialogue() != null and player != null and not player.dead
 		and player.machine.current_name == &"Ground"
 		and DialogueBox.instance != null and not DialogueBox.instance.is_active())
 
@@ -176,6 +180,10 @@ func talk_pop() -> void:
 	_talk_tween.tween_property(target, "scale", rest * up, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_talk_tween.tween_property(target, "scale", rest * down, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_talk_tween.tween_property(target, "scale", rest, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+## The node that shows the NPC (model, else the placeholder mesh) — what a routine bobs while walking.
+func get_visual() -> Node3D:
+	return _talk_target()
 
 func get_focus_point() -> Vector3:
 	return global_position + Vector3.UP * head_height

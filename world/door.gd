@@ -38,6 +38,25 @@ extends Interactable
 ## Story flag set when the door is used (e.g. "entered_mayor_house").
 @export var sets_flag: StringName = &""
 
+## Opening hours (WorldClock hours, 0-24; both -1 = always open). Outside them the prompt
+## reads "Closed" and using the door only shows when it opens. Wraps midnight (22 -> 6).
+@export var open_from := -1.0
+@export var open_to := -1.0
+
+var _open_verb := ""
+
+func _ready() -> void:
+	super()
+	_open_verb = _verb
+
+func _process(delta: float) -> void:
+	if not Engine.is_editor_hint() and open_from >= 0.0:
+		_verb = _open_verb if is_open() else "Closed"
+	super(delta)
+
+func is_open() -> bool:
+	return open_from < 0.0 or open_to < 0.0 or WorldClock.in_range(open_from, open_to)
+
 ## Grounded and alive, same spirit as NPC's own gate — walking through a
 ## door mid-air/mid-roll/etc. would be a strange moment to cut away. Also
 ## refused while a swap is already underway (Game.input_locked, set for the
@@ -51,6 +70,9 @@ func _can_interact() -> bool:
 		and not Game.in_combat
 
 func _interact() -> void:
+	if not is_open():
+		Events.notice.emit("Closed - opens at %02d:00" % int(open_from))
+		return
 	if sets_flag != &"":
 		Game.set_flag(sets_flag)
 	Events.level_travel_requested.emit(load(target_level) as PackedScene, target_spawn_id)

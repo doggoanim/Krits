@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="npc_script"]
 [ext_resource type="Texture2D" path="res://assets/textures/woodplank.jpg" id="floor_tex"]
+[ext_resource type="Script" path="res://world/npc_barks.gd" id="barks_script"]
 
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
@@ -180,3 +181,6 @@ mesh = SubResource("Mesh_Npc")
 script = ExtResource("fantasy_script")
 layout = 4
 room_size = Vector2(9, 7)
+
+[node name="Barks" type="Node" parent="Marta"]
+script = ExtResource("barks_script")

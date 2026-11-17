@@ -70,6 +70,32 @@ static func wall_front(house: Node3D, x: float, half_width := 1.5, y_low := 0.3,
 					best = p.z
 	return best
 
+## The x range (min, max) of the front wall's face in the house's own space: how wide the
+## facade is, so wall decorations know where the wall ends. (NAN, NAN) when there is none.
+static func front_wall_span(house: Node3D, y_low := 0.3, y_high := 2.5) -> Vector2:
+	var front := wall_front(house, 0.0, 1000.0, y_low, y_high)
+	if is_nan(front):
+		return Vector2(NAN, NAN)
+	var lo := INF
+	var hi := -INF
+	var inverse := house.global_transform.affine_inverse()
+	for m in house.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		if mi.mesh == null or String(mi.name).containsn(COLLISION_NAME):
+			continue
+		var to_house := inverse * mi.global_transform
+		for surface in mi.mesh.get_surface_count():
+			var mat := mi.mesh.surface_get_material(surface)
+			if mat == null or not mat.resource_name.to_lower().contains("wall"):
+				continue
+			var verts: PackedVector3Array = mi.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				var p := to_house * v
+				if p.y > y_low and p.y < y_high and p.z > front - 0.4:
+					lo = minf(lo, p.x)
+					hi = maxf(hi, p.x)
+	return Vector2(lo, hi) if lo < INF else Vector2(NAN, NAN)
+
 ## The height of triangle (a, b, c)'s plane at xz, or NAN if xz is outside it (seen from above).
 static func _height_in_triangle(xz: Vector2, a: Vector3, b: Vector3, c: Vector3) -> float:
 	var v0 := Vector2(b.x - a.x, b.z - a.z)
