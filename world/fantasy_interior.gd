@@ -11,6 +11,9 @@ extends Node3D
 ## scene view, never saved into the scene, so the .tscn stays clean and this script is the
 ## single place to change the layout.
 
+## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room).
+enum Layout { HOME, HALL }
+@export var layout := Layout.HOME
 ## Inner floor size (x, z) in metres.
 @export var room_size := Vector2(8.0, 8.0)
 ## Height from the floor to the ceiling's underside.
@@ -47,6 +50,41 @@ func _put(part: Node3D, pos: Vector3, yaw := 0.0) -> void:
 	add_child(part)
 
 func _build() -> void:
+	match layout:
+		Layout.HALL:
+			_build_hall()
+		_:
+			_build_home()
+
+## The mayor's study: shelves down both side walls, banners and a shield behind the
+## desk, candelabras by the door, a carpet runner, a window and a chandelier. The room's
+## centre is this node's origin; the desk, chair and mayor are placed in the scene itself.
+func _build_hall() -> void:
+	var hx := room_size.x * 0.5
+	var hz := room_size.y * 0.5
+	if _use("rug"):
+		_put(InteriorParts.runner(1.5, room_size.y - 0.8, Color(0.4, 0.14, 0.2), Color(0.8, 0.62, 0.25)), Vector3(0, 0, 0.1))
+	if _use("shelves"):
+		_put(InteriorParts.shelf(1.6, 3.4, InteriorParts.Fill.BOOKS, seed_value), Vector3(-hx + 0.4, 0, -hz + 1.2), FACE_PLUS_X)
+		_put(InteriorParts.shelf(1.6, 3.4, InteriorParts.Fill.BOOKS, seed_value + 3), Vector3(hx - 0.4, 0, -hz + 1.2), FACE_MINUS_X)
+		_put(InteriorParts.shelf(1.5, 2.6, InteriorParts.Fill.JARS, seed_value + 4), Vector3(hx - 0.4, 0, hz - 1.5), FACE_MINUS_X)
+	if _use("decor"):
+		_put(InteriorParts.shield(), Vector3(0, 3.4, -hz + 0.1))
+		_put(InteriorParts.banner(InteriorParts.VELVET), Vector3(-1.15, 1.0, -hz + 0.1))
+		_put(InteriorParts.banner(InteriorParts.VELVET), Vector3(1.15, 1.0, -hz + 0.1))
+		_put(InteriorParts.window(1.0, 1.6), Vector3(-hx + 0.06, 2.6, hz - 1.5), FACE_PLUS_X)
+		_put(InteriorParts.picture(0.9, 1.1, Color(0.35, 0.45, 0.6)), Vector3(hx - 0.06, 3.0, 0.2), FACE_MINUS_X)
+	if _use("candelabra"):
+		_put(InteriorParts.candelabra(), Vector3(-hx + 0.5, 0, hz - 0.5))
+		_put(InteriorParts.candelabra(), Vector3(hx - 0.5, 0, hz - 0.5))
+	if _use("plant"):
+		_put(InteriorParts.plant(), Vector3(-hx + 0.55, 0, 0.9))
+	if _use("chandelier"):
+		_put(InteriorParts.chandelier(1.2), Vector3(0, ceiling_height, 0.2))
+	if _use("motes"):
+		_put(InteriorParts.floating_motes(Vector3(hx - 0.4, 1.5, hz - 0.4)), Vector3(0, 1.8, 0))
+
+func _build_home() -> void:
 	var hx := room_size.x * 0.5
 	var hz := room_size.y * 0.5
 	var west := -hx + WALL_GAP + 0.5     # a piece 1 m deep, backed on the west wall, has its centre here

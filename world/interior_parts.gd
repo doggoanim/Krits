@@ -207,6 +207,53 @@ static func _jars(root: Node3D, rng: RandomNumberGenerator, span: float, y: floa
 		HouseParts.cylinder(root, r * 1.05, 0.05, PARCHMENT, Vector3(x, y + h + 0.025, 0.05))   # cloth lid
 		x += r * 2.0 + rng.randf_range(0.1, 0.28)
 
+## A hanging cloth banner with a gold diamond (origin at its centre-bottom on the wall).
+static func banner(cloth: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Banner"
+	HouseParts.box(root, Vector3(1.3, 0.12, 0.12), GOLD, Vector3(0, 3.0, 0.08))
+	HouseParts.box(root, Vector3(1.1, 2.6, 0.05), cloth, Vector3(0, 1.7, 0.05))
+	_cone(root, 0.3, 0.4, toon_mat(cloth), Vector3(0, 0.2, 0.05), Vector3(180, 0, 0))   # pointed end
+	HouseParts.box(root, Vector3(0.36, 0.36, 0.04), GOLD, Vector3(0, 2.0, 0.1), Vector3(0, 0, 45))
+	HouseParts.box(root, Vector3(0.2, 0.2, 0.05), cloth.darkened(0.3), Vector3(0, 2.0, 0.12), Vector3(0, 0, 45))
+	return root
+
+## A heraldic shield with crossed swords, for a hall wall (origin at its centre, front +Z).
+static func shield() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Shield"
+	for side in [-1.0, 1.0]:
+		HouseParts.box(root, Vector3(0.1, 2.2, 0.06), Color(0.75, 0.78, 0.85), Vector3.ZERO, Vector3(0, 0, 38.0 * side))
+		HouseParts.box(root, Vector3(0.5, 0.08, 0.08), GOLD, Vector3(-side * 0.62, 0.5, 0.02), Vector3(0, 0, 38.0 * side))
+	HouseParts.box(root, Vector3(1.0, 1.2, 0.1), GOLD.darkened(0.2), Vector3(0, 0, 0.06))
+	_cone(root, 0.5, 0.5, toon_mat(GOLD.darkened(0.2)), Vector3(0, -0.85, 0.06), Vector3(180, 0, 0))
+	HouseParts.box(root, Vector3(0.84, 1.04, 0.1), VELVET, Vector3(0, 0, 0.08))
+	_cone(root, 0.42, 0.42, toon_mat(VELVET), Vector3(0, -0.72, 0.08), Vector3(180, 0, 0))
+	HouseParts.box(root, Vector3(0.32, 0.32, 0.1), GOLD, Vector3(0, 0.1, 0.12), Vector3(0, 0, 45))
+	return root
+
+## A tall standing candelabra.
+static func candelabra() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Candelabra"
+	HouseParts.cylinder(root, 0.22, 0.1, GOLD.darkened(0.2), Vector3(0, 0.05, 0))
+	HouseParts.cylinder(root, 0.05, 1.6, GOLD, Vector3(0, 0.9, 0))
+	HouseParts.box(root, Vector3(0.7, 0.06, 0.06), GOLD, Vector3(0, 1.7, 0))
+	for sx in [-0.35, 0.0, 0.35]:
+		root.add_child(candle(Vector3(sx, 1.73, 0), sx == 0.0))
+	solid(root, Vector3(0.5, 2.2, 0.5), Vector3(0, 1.1, 0))
+	return root
+
+## A long carpet runner lying on the floor (length along Z).
+static func runner(width: float, length: float, field: Color, trim: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Runner"
+	HouseParts.box(root, Vector3(width, 0.04, length), trim, Vector3(0, 0.02, 0))
+	HouseParts.box(root, Vector3(width - 0.3, 0.05, length - 0.3), field, Vector3(0, 0.025, 0))
+	HouseParts.box(root, Vector3(width - 0.6, 0.06, length - 0.6), trim.darkened(0.15), Vector3(0, 0.03, 0))
+	HouseParts.box(root, Vector3(width - 0.75, 0.07, length - 0.75), field, Vector3(0, 0.035, 0))
+	return root
+
 ## A framed picture hanging on a wall (origin at its centre, front +Z).
 static func picture(width: float, height: float, art: Color) -> Node3D:
 	var root := Node3D.new()

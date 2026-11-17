@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://d2atpvqxq1a3" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Closet_01.glb" id="11_2gwfi"]
 [ext_resource type="PackedScene" uid="uid://bxfw0ahs7euv8" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Plants_05.glb" id="14_1fccd"]
 [ext_resource type="PackedScene" uid="uid://78s6i6j5jrwu" path="res://assets/npcs/Mayor_Arse.glb" id="mayor_model"]
+[ext_resource type="Script" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="npc"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
@@ -217,3 +218,9 @@ shape = SubResource("BoxShape3D_m7dut")
 
 [node name="Plants_052" parent="." unique_id=123769374 instance=ExtResource("14_1fccd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59999996, 0.8, 0.79999995)
+
+[node name="FantasyInterior" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+script = ExtResource("fantasy_script")
+layout = 1
+room_size = Vector2(3.8, 4.8)
