@@ -13,7 +13,9 @@ extends Node
 @export var goods_paths: Array[NodePath] = []
 @export var goods_from := -1.0
 @export var goods_to := -1.0
-@export var sign_offset := Vector3(1.0, 0.45, 0.4)   ## board position in the door's own space (x sideways, y up, z out)
+@export var side_offset := -1.0                       ## sideways from the door's middle, in the door's own space: negative = the viewer's left
+@export var height_offset := 0.45                     ## above the door node (which sits 1 m above the floor)
+@export var wall_gap := 0.03                          ## how far the board's middle stands off the wall face (the name sign is flush, at 0)
 @export var open_color := Color(0.4, 0.8, 0.4)
 @export var closed_color := Color(0.85, 0.35, 0.3)
 @export var pop_steps := 5                            ## poses a good takes to appear or vanish
@@ -115,9 +117,9 @@ func _build_board() -> void:
 	_board = Node3D.new()
 	_board.name = "OpenClosedBoard"
 	_door.add_child(_board)
-	_board.position = sign_offset
+	_board.position = Vector3(side_offset, height_offset, _wall_local_z() + wall_gap)
 	var wood := Color(0.42, 0.28, 0.16)
-	HouseParts.box(_board, Vector3(0.62, 0.3, 0.05), wood, Vector3.ZERO)
+	HouseParts.box(_board, Vector3(0.62, 0.3, 0.08), wood, Vector3.ZERO)
 	HouseParts.box(_board, Vector3(0.66, 0.04, 0.07), wood.darkened(0.3), Vector3(0, 0.17, 0))
 	HouseParts.box(_board, Vector3(0.02, 0.2, 0.02), Color(0.2, 0.2, 0.22), Vector3(-0.2, 0.28, 0))   # two short chains
 	HouseParts.box(_board, Vector3(0.02, 0.2, 0.02), Color(0.2, 0.2, 0.22), Vector3(0.2, 0.28, 0))
@@ -126,9 +128,19 @@ func _build_board() -> void:
 	_label.pixel_size = 0.0045
 	_label.outline_size = 10
 	_label.outline_modulate = Color(0.08, 0.06, 0.05)
-	_label.position = Vector3(0, 0, 0.03)
+	_label.position = Vector3(0, 0, 0.045)
 	_label.double_sided = false
 	_board.add_child(_label)
+
+## The wall face in front of the door, in the door's own space: the same wall the name sign is
+## mounted on (HouseMount), so the board stands off the wall by exactly as much.
+func _wall_local_z() -> float:
+	var house := _door.get_parent() as Node3D
+	if house == null:
+		return HouseMount.DOOR_WALL_OFFSET
+	var floor_y := _door.position.y - HouseMount.DOOR_FLOOR_DROP
+	var wall := HouseMount.wall_z(house, _door.position.x + side_offset, floor_y)
+	return wall - _door.position.z
 
 func _apply_board() -> void:
 	if _board == null:

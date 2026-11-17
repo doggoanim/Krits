@@ -11,6 +11,8 @@ extends Node3D
 @export var speed := 1.1
 @export var wing_size := 0.16
 @export var flap_speed := 16.0
+@export var day_only := true                  ## butterflies sleep at night: hidden (and not simulated) once it is dark
+@export_range(0.05, 0.95) var day_threshold := 0.3   ## how much daylight (WorldClock.day_amount) they need
 @export var palette: Array[Color] = [
 	Color(1.0, 0.82, 0.3), Color(0.95, 0.55, 0.7), Color(0.6, 0.8, 1.0), Color(1.0, 1.0, 0.95),
 ]
@@ -73,6 +75,12 @@ func _random_point() -> Vector3:
 	return Vector3(cos(a) * r, randf_range(height_range.x, height_range.y), sin(a) * r)
 
 func _process(delta: float) -> void:
+	if day_only:
+		var awake := WorldClock.day_amount() > day_threshold
+		if awake != visible:
+			visible = awake
+		if not awake:
+			return
 	var t := Choppy.time()   # wing and bob poses are held; flight itself stays smooth
 	for f in _flyers:
 		var to := f.target - f.root.position
