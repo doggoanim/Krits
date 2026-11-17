@@ -35,7 +35,7 @@ extends Node
 const OPEN_CUTOFF_HZ := 20500.0   ## lowpass fully open = no audible effect
 const LAYER_NORMAL := 0
 ## Extra loudness of the battle mix over the normal one (dB), applied at full battle mix.
-@export_range(0.0, 12.0) var battle_gain_db := 5.0
+@export_range(0.0, 12.0) var battle_gain_db := 3.0
 
 const LAYER_BATTLE := 1
 const SILENT_DB := -80.0
