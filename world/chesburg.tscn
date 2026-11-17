@@ -63,6 +63,8 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
+[ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
+[ext_resource type="AudioStream" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
@@ -174,6 +176,10 @@ albedo_color = Color(0.7, 0.45, 0.25, 1)
 size = Vector3(0.5, 0.65, 0.35)
 
 [node name="Chesburg" type="Node3D" unique_id=1195529557]
+
+[node name="Ambience" type="Node" parent="."]
+script = ExtResource("chesburg_ambience_script")
+stream = ExtResource("chesburg_ambience_stream")
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
 

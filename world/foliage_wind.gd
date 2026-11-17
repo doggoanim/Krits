@@ -52,10 +52,32 @@ const GROUP := &"steppable_foliage"
 const BEND_BY_KIND := {Kind.GRASS: 1.0, Kind.FLOWER: 0.8, Kind.BUSH: 0.2}
 const RUSTLE_DECAY := 3.0
 
+## Bush rustle takes (four recordings; one is picked at random, never the same twice
+## in a row): when the player walks into a bush, and a quieter one when a gust of
+## breeze sweeps over it.
+const RUSTLE_SFX: Array[AudioStream] = [
+	preload("res://sounds/SFX/others/bush_rustle_1.wav"),
+	preload("res://sounds/SFX/others/bush_rustle_2.wav"),
+	preload("res://sounds/SFX/others/bush_rustle_3.wav"),
+	preload("res://sounds/SFX/others/bush_rustle_4.wav"),
+]
+const SFX_BUS := &"SFX"
+const STEP_RUSTLE_DB := Vector2(-12.0, -3.0)   ## quietest / loudest walk-in rustle (slow to fast)
+const STEP_SOUND_GAP_MSEC := 450               ## one bush won't rustle again this soon
+const BREEZE_THRESHOLD := 1.25                 ## the gust level (WindGusts, 0.5 calm to 1.8 peak) that counts as "the breeze arrives"
+const BREEZE_RUSTLE_DB := -13.0
+const BREEZE_VISUAL_RUSTLE := 0.25             ## how much the bush shakes visually in the breeze
+const BREEZE_HEARING := 18.0                   ## only bushes this close to the player make breeze sounds
+const BREEZE_GAP_MSEC := Vector2i(1400, 3400)  ## a breeze across many bushes still only rustles every so often
+static var _last_variant := -1
+static var _breeze_next_msec := 0
+
 var kind := Kind.NONE
 var petal_color := Color(0.98, 0.55, 0.7)   ## flowers: what the petals thrown up look like
 var reach := 0.6                            ## horizontal radius (m) within which stepping affects it
 var _rustle := 0.0
+var _step_sound_msec := 0
+var _prev_gust := 0.0
 
 var _materials: Array[ShaderMaterial] = []
 var _anchor: Node3D   ## whatever _ready() finds itself attached to, for gust position sampling
@@ -75,6 +97,9 @@ func _process(delta: float) -> void:
 		var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
 		for mat in _materials:
 			mat.set_shader_parameter(&"gust", gust)
+		if kind == Kind.BUSH and _prev_gust < BREEZE_THRESHOLD and gust >= BREEZE_THRESHOLD:
+			_on_breeze()
+		_prev_gust = gust
 	if _rustle > 0.0:
 		_rustle = maxf(_rustle - RUSTLE_DECAY * delta, 0.0)
 		for mat in _materials:
@@ -82,10 +107,48 @@ func _process(delta: float) -> void:
 
 ## The player is moving through this (called by FoliageSteps): shake it. 0..1.
 func step_on(strength: float) -> void:
-	if kind == Kind.BUSH:
-		_rustle = maxf(_rustle, clampf(strength, 0.0, 1.0))
-		for mat in _materials:
-			mat.set_shader_parameter(&"rustle", _rustle)
+	if kind != Kind.BUSH:
+		return
+	var now := Time.get_ticks_msec()
+	if _rustle < 0.15 and now - _step_sound_msec >= STEP_SOUND_GAP_MSEC:   # a fresh disturbance, not the same shake continuing
+		_step_sound_msec = now
+		_play_rustle(lerpf(STEP_RUSTLE_DB.x, STEP_RUSTLE_DB.y, clampf(strength, 0.0, 1.0)))
+	_set_rustle(strength)
+
+func _set_rustle(amount: float) -> void:
+	_rustle = maxf(_rustle, clampf(amount, 0.0, 1.0))
+	for mat in _materials:
+		mat.set_shader_parameter(&"rustle", _rustle)
+
+## A gust reaches this bush: it shivers, and (for bushes near the player, and only
+## every so often) a soft rustle plays.
+func _on_breeze() -> void:
+	_set_rustle(BREEZE_VISUAL_RUSTLE)
+	var now := Time.get_ticks_msec()
+	if now < _breeze_next_msec:
+		return
+	var listener := get_tree().get_first_node_in_group(&"player") as Node3D
+	if listener == null or listener.global_position.distance_to(_anchor.global_position) > BREEZE_HEARING:
+		return
+	_breeze_next_msec = now + randi_range(BREEZE_GAP_MSEC.x, BREEZE_GAP_MSEC.y)
+	_play_rustle(BREEZE_RUSTLE_DB)
+
+func _play_rustle(volume_db: float) -> void:
+	var pick := randi() % RUSTLE_SFX.size()
+	if pick == _last_variant:
+		pick = (pick + 1 + randi() % (RUSTLE_SFX.size() - 1)) % RUSTLE_SFX.size()
+	_last_variant = pick
+	var p := AudioStreamPlayer3D.new()
+	p.stream = RUSTLE_SFX[pick]
+	p.volume_db = volume_db
+	p.pitch_scale = randf_range(0.92, 1.08)
+	p.bus = SFX_BUS
+	p.unit_size = 5.0
+	p.max_distance = 25.0
+	_anchor.add_child(p)
+	p.position = Vector3(0.0, 0.4, 0.0)
+	p.play()
+	p.finished.connect(p.queue_free)
 
 func _detect_kind() -> void:
 	var label := (_anchor.name + " " + _anchor.scene_file_path.get_file()).to_lower()

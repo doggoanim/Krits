@@ -384,3 +384,4 @@ Speakers pop while they talk: on every word the dialogue box asks the speaker fo
 
 ### Walking through foliage
 Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
+Chesburg has a `LevelAmbience` (the grassland bed, `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
