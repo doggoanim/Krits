@@ -98,6 +98,10 @@ const SPAWN_CLEARANCE_LIFT := 0.4  ## see is_spot_clear()
 
 ## ---- reveal sequence (see play_intro()) ----
 const WALL_SHADER := preload("res://combat/arena_wall.gdshader")
+## Both the wall and the water are transparent, so Godot sorts them by distance and a
+## wall standing in or behind water could be drawn BEFORE it and get covered by it. A
+## higher priority (the water's is 0) always draws the wall on top of the water.
+const WALL_RENDER_PRIORITY := 5
 const PLATFORM_SHADER := preload("res://combat/arena_platform.gdshader")
 const POST_EVERY := 4           ## a post at every Nth wall segment
 const POST_HEIGHT := 2.2
@@ -1146,6 +1150,7 @@ func _mesh(size: Vector3, col: Color, emit: float, translucent: bool) -> MeshIns
 	if translucent:
 		var wall_mat := ShaderMaterial.new()
 		wall_mat.shader = WALL_SHADER
+		wall_mat.render_priority = WALL_RENDER_PRIORITY   # drawn after the water, which is also transparent
 		wall_mat.set_shader_parameter(&"wall_height", size.y)
 		wall_mat.set_shader_parameter(&"chalk", col)
 		mi.material_override = wall_mat
