@@ -34,6 +34,9 @@ extends Node
 
 const OPEN_CUTOFF_HZ := 20500.0   ## lowpass fully open = no audible effect
 const LAYER_NORMAL := 0
+## Extra loudness of the battle mix over the normal one (dB), applied at full battle mix.
+@export_range(0.0, 12.0) var battle_gain_db := 5.0
+
 const LAYER_BATTLE := 1
 const SILENT_DB := -80.0
 const LENGTH_MISMATCH_WARN := 0.05   ## seconds
@@ -171,7 +174,7 @@ func _apply_layer_volumes() -> void:
 		return
 	var angle := _battle_mix * PI * 0.5
 	_sync.set_sync_stream_volume(LAYER_NORMAL, maxf(linear_to_db(cos(angle)), SILENT_DB))
-	_sync.set_sync_stream_volume(LAYER_BATTLE, maxf(linear_to_db(sin(angle)), SILENT_DB))
+	_sync.set_sync_stream_volume(LAYER_BATTLE, maxf(linear_to_db(sin(angle)), SILENT_DB) + (battle_gain_db if _battle_mix > 0.0 else 0.0))
 
 ## Loops by just restarting on its own `finished` signal rather than relying
 ## on the imported stream's own loop flag — works regardless of how any
