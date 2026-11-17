@@ -62,10 +62,10 @@ const RUSTLE_SFX: Array[AudioStream] = [
 	preload("res://sounds/SFX/others/bush_rustle_4.wav"),
 ]
 const SFX_BUS := &"SFX"
-const STEP_RUSTLE_DB := Vector2(-12.0, -3.0)   ## quietest / loudest walk-in rustle (slow to fast)
+const STEP_RUSTLE_DB := Vector2(-4.0, 5.0)   ## quietest / loudest walk-in rustle (slow to fast)
 const STEP_SOUND_GAP_MSEC := 450               ## one bush won't rustle again this soon
 const BREEZE_THRESHOLD := 1.25                 ## the gust level (WindGusts, 0.5 calm to 1.8 peak) that counts as "the breeze arrives"
-const BREEZE_RUSTLE_DB := -13.0
+const BREEZE_RUSTLE_DB := -9.0
 const BREEZE_VISUAL_RUSTLE := 0.25             ## how much the bush shakes visually in the breeze
 const BREEZE_HEARING := 18.0                   ## only bushes this close to the player make breeze sounds
 const BREEZE_GAP_MSEC := Vector2i(1400, 3400)  ## a breeze across many bushes still only rustles every so often
