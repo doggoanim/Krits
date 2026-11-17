@@ -5,6 +5,10 @@ render_mode cull_disabled;
 // and we subtract that — animation freezes with the pause menu. (Unset, e.g.
 // in the editor's own viewport, it's 0 and this is plain TIME.)
 global uniform float time_offset;
+// Where the player's feet are, and how far their stepping reaches (0 = nobody is
+// pushing anything). Published every frame by player/foliage_steps.gd.
+global uniform vec3 foliage_pusher_pos;
+global uniform float foliage_pusher_radius;
 // Wind-swaying foliage material. Same albedo/colour handling as imported .glb
 // materials, but lit with the project's toon lighting (shading/toon_light.gdshaderinc:
 // banded sun shadows, smooth point lights) so trees and grass match the toon-shaded
@@ -57,6 +61,12 @@ uniform float wind_scale = 0.3;       // world-space frequency of the sway — l
 // idea what time of day or weather it is, FoliageWind just hands it a number.
 uniform float gust = 1.0;
 
+// Stepping through it: 0 = this prop ignores the player (trees); 1 = grass-like, flattens
+// and leans away from the player's feet. `rustle` (0..1) is a quick shake pushed by
+// world/foliage_wind.gd while the player is moving inside a bush.
+uniform float step_bend = 0.0;
+uniform float rustle = 0.0;
+
 // Per-instance tint applied ONLY to strongly-green texels (leaves), so a tree's
 // trunk keeps its own colour. White = no change. See world/tree_variation.gd.
 uniform vec3 green_tint : source_color = vec3(1.0);
@@ -72,6 +82,24 @@ void vertex() {
 	float sway = height * wind_strength * gust;
 	VERTEX.x += sin(phase) * sway;
 	VERTEX.z += cos(phase * 0.7) * sway * 0.6;
+
+	if (rustle > 0.001) {
+		float t = (TIME - time_offset) * 24.0 + phase * 2.0;
+		VERTEX.x += sin(t) * height * 0.09 * rustle;
+		VERTEX.z += cos(t * 1.3) * height * 0.07 * rustle;
+	}
+
+	if (step_bend > 0.0 && foliage_pusher_radius > 0.0) {
+		vec3 wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		float root_y = MODEL_MATRIX[3].y;
+		vec2 away = wp.xz - foliage_pusher_pos.xz;
+		float near = 1.0 - smoothstep(0.0, foliage_pusher_radius, length(away));
+		near *= 1.0 - smoothstep(0.9, 1.8, abs(root_y - foliage_pusher_pos.y));   // only stepping on what is at your feet
+		float lean = near * step_bend * clamp(wp.y - root_y, 0.0, 1.5);
+		wp.xz += normalize(away + vec2(0.0001)) * lean * 0.8;
+		wp.y -= lean * 0.5;                                                      // pressed down, not just pushed aside
+		VERTEX = (inverse(MODEL_MATRIX) * vec4(wp, 1.0)).xyz;
+	}
 }
 
 void fragment() {

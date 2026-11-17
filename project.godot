@@ -82,6 +82,14 @@ time_offset={
 "type": "float",
 "value": 0.0
 }
+foliage_pusher_pos={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+foliage_pusher_radius={
+"type": "float",
+"value": 0.0
+}
 level_tint={
 "type": "color",
 "value": Color(1, 1, 1, 1)

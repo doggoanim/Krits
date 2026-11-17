@@ -40,6 +40,23 @@ const SHADER := preload("res://shading/foliage_wind.gdshader")
 ## untouched). White = no change. TreeVariation sets this per tree.
 @export var green_tint := Color.WHITE
 
+## Stepping through it (see player/foliage_steps.gd): grass and flowers flatten and lean
+## away from the player's feet, bushes shake, and all of them kick up particles. Which
+## one a prop is comes from its name or model file (grass / flower / bush / berry), so
+## trees and anything else are left alone. `step_bend` < 0 = the default for its kind.
+@export var react_to_steps := true
+@export var step_bend := -1.0
+
+enum Kind { NONE, GRASS, FLOWER, BUSH }
+const GROUP := &"steppable_foliage"
+const BEND_BY_KIND := {Kind.GRASS: 1.0, Kind.FLOWER: 0.8, Kind.BUSH: 0.2}
+const RUSTLE_DECAY := 3.0
+
+var kind := Kind.NONE
+var petal_color := Color(0.98, 0.55, 0.7)   ## flowers: what the petals thrown up look like
+var reach := 0.6                            ## horizontal radius (m) within which stepping affects it
+var _rustle := 0.0
+
 var _materials: Array[ShaderMaterial] = []
 var _anchor: Node3D   ## whatever _ready() finds itself attached to, for gust position sampling
 
@@ -48,13 +65,68 @@ func _ready() -> void:
 	if parent:
 		_apply_recursive(parent)
 	_anchor = parent as Node3D
-	set_process(react_to_gusts and _anchor != null)
+	if react_to_steps and _anchor != null:
+		_detect_kind()
+	set_process((react_to_gusts or kind != Kind.NONE) and _anchor != null)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var pos := _anchor.global_position
-	var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
+	if react_to_gusts:
+		var gust := WindGusts.sample(Vector2(pos.x, pos.z), Time.get_ticks_msec() / 1000.0)
+		for mat in _materials:
+			mat.set_shader_parameter(&"gust", gust)
+	if _rustle > 0.0:
+		_rustle = maxf(_rustle - RUSTLE_DECAY * delta, 0.0)
+		for mat in _materials:
+			mat.set_shader_parameter(&"rustle", _rustle)
+
+## The player is moving through this (called by FoliageSteps): shake it. 0..1.
+func step_on(strength: float) -> void:
+	if kind == Kind.BUSH:
+		_rustle = maxf(_rustle, clampf(strength, 0.0, 1.0))
+		for mat in _materials:
+			mat.set_shader_parameter(&"rustle", _rustle)
+
+func _detect_kind() -> void:
+	var label := (_anchor.name + " " + _anchor.scene_file_path.get_file()).to_lower()
+	if label.contains("terrain"):
+		return   # ground meshes are not foliage you walk through
+	if label.contains("flower"):
+		kind = Kind.FLOWER
+		if label.contains("red"):
+			petal_color = Color(0.95, 0.25, 0.3)
+		elif label.contains("blue"):
+			petal_color = Color(0.4, 0.6, 1.0)
+		elif label.contains("green"):
+			petal_color = Color(0.55, 0.9, 0.4)
+		elif label.contains("yellow"):
+			petal_color = Color(1.0, 0.85, 0.3)
+	elif label.contains("bush") or label.contains("berry"):
+		kind = Kind.BUSH
+	elif label.contains("grass"):
+		kind = Kind.GRASS
+	if kind == Kind.NONE:
+		return
+	add_to_group(GROUP)
+	var bend := step_bend if step_bend >= 0.0 else float(BEND_BY_KIND[kind])
 	for mat in _materials:
-		mat.set_shader_parameter(&"gust", gust)
+		mat.set_shader_parameter(&"step_bend", bend)
+	var box := _local_box(_anchor)
+	var scale := _anchor.global_transform.basis.get_scale()
+	reach = clampf(maxf(box.size.x * scale.x, box.size.z * scale.z) * 0.5, 0.4, 1.8)
+
+## Bounding box of every mesh under `n`, in n's own space (approximate: ignores rotation of children).
+func _local_box(n: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for m in n.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var b := mi.transform * mi.mesh.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
 
 func _apply_recursive(n: Node) -> void:
 	if n is MeshInstance3D:

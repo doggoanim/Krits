@@ -187,6 +187,7 @@ func _ready() -> void:
 	add_child(visual)
 
 	add_child(FallEffects.new())   # speed streaks + stretch the longer you fall
+	add_child(FoliageSteps.new())   # grass/flowers bend underfoot, bushes shake, bits fly up
 
 	gear = GearDisplay.new()
 	add_child(gear)
