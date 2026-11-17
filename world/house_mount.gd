@@ -2,16 +2,10 @@
 class_name HouseMount
 extends RefCounted
 ## Shared plumbing for scripts that hang things on the (identical, imported) house models —
-## see HouseExtras: finding a house's door and front wall, and undoing its scale.
+## see HouseExtras: finding a house's door and the front wall in front of it.
 
 const DOOR_WALL_OFFSET := 0.33   ## from a Door_* node to the wall face in front of it
 const DOOR_FLOOR_DROP := 1.0     ## a Door_* node sits this far above the floor
-
-## The factor that undoes `house`'s own scale, so a prop placed under a squashed or stretched
-## house keeps its true proportions.
-static func inverse_scale(house: Node3D) -> Vector3:
-	var s := house.basis.get_scale()
-	return Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01))
 
 static func door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():

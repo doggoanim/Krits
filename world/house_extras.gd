@@ -7,9 +7,11 @@ extends Node
 ## a market stall, crates and barrels, a wood pile, wind chimes, a notice board whose
 ## notes follow the quest flags.
 ##
-## Each prop is a PropSlot node under its house, placed the first time from the house's own
-## door, front wall and facade width (see RoofProbe). In the editor the slots are real, saved
-## nodes: SELECT ONE AND MOVE, ROTATE, DELETE OR DUPLICATE IT, then save the scene. Once a house
+## Each prop is a PropSlot node, placed the first time from the house's own door, front wall
+## and facade width (see RoofProbe). The slots of a house sit under a plain "Extras_N" node
+## next to the house (not inside the house model, which would make a click in the viewport
+## select the whole house). In the editor they are real, saved nodes: CLICK ONE IN THE 3D
+## VIEW, then MOVE, ROTATE, DELETE OR DUPLICATE IT, and save the scene. Once a house
 ## has slots this script leaves it alone, so your changes stick; press "Reset extras" to throw
 ## them all away and lay them out again from the PLAN table (also the way to pick up new
 ## entries in PLAN).
@@ -74,8 +76,8 @@ func _dress_all(reset: bool) -> void:
 	for child in holder.get_children():
 		if child is Node3D and _matches(child.name) and PLAN.has(String(child.name)):
 			var house := child as Node3D
-			if reset:
-				_remove_slots(house)
+			if reset or not _has_slots(house):
+				_remove_slots(house)   # (also clears slots left inside the house by an earlier version)
 			if _has_slots(house):
 				continue   # already laid out (and maybe moved by hand): leave it
 			made += _dress(house, PLAN[String(child.name)])
@@ -88,17 +90,49 @@ func _matches(node_name: String) -> bool:
 			return true
 	return false
 
+const HOLDER_PREFIX := "Extras_"
+
+## The node that holds a house's slots, or null: "Extras_<n>" beside the house.
+func _holder_of(house: Node3D) -> Node3D:
+	return house.get_parent().get_node_or_null(HOLDER_PREFIX + String(house.name).get_slice("_", 2)) as Node3D
+
 func _has_slots(house: Node3D) -> bool:
-	for child in house.get_children():
+	var holder := _holder_of(house)
+	if holder == null:
+		return false
+	for child in holder.get_children():
 		if child is PropSlot:
 			return true
 	return false
 
+## Removes a house's slots: its holder, and any slots an earlier version put inside the house itself.
 func _remove_slots(house: Node3D) -> void:
+	var holder := _holder_of(house)
+	if holder != null:
+		holder.get_parent().remove_child(holder)
+		holder.queue_free()
 	for child in house.get_children():
 		if child is PropSlot:
 			house.remove_child(child)
 			child.queue_free()
+
+## The holder for `house`, made (unscaled, at the house's position and rotation) if missing.
+func _ensure_holder(house: Node3D) -> Node3D:
+	var holder := _holder_of(house)
+	if holder != null:
+		return holder
+	holder = Node3D.new()
+	holder.name = HOLDER_PREFIX + String(house.name).get_slice("_", 2)
+	holder.transform = Transform3D(house.basis.orthonormalized(), house.position)
+	house.get_parent().add_child(holder)
+	if Engine.is_editor_hint():
+		_own(holder)
+	return holder
+
+func _own(node: Node) -> void:
+	var root := get_tree().edited_scene_root
+	if root != null and root.is_ancestor_of(node):
+		node.owner = root
 
 ## Lays out `plan`'s props on `house`; returns how many slots it made.
 func _dress(house: Node3D, plan: Dictionary) -> int:
@@ -153,9 +187,9 @@ func _fits(ctx: Dictionary, x: float, half: float) -> bool:
 	var span: Vector2 = ctx["span"]
 	return not is_nan(span.x) and x - half >= span.x and x + half <= span.y
 
-## Adds one PropSlot to the house (undoing the house's own scale so a squashed house doesn't
-## squash its props). In the editor it becomes a saved node, so the scene tree shows it and
-## you can move it.
+## Adds one PropSlot for the house. `pos` is in the house's own space; the slot lives in the
+## house's holder, which has the house's position and rotation but no scale, so the position
+## is stretched by the house's scale here (and a squashed house doesn't squash its props).
 func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3, yaw := 0.0, color := Color(0.3, 0.5, 0.35), length := 4.0) -> void:
 	var house: Node3D = ctx["house"]
 	var slot := PropSlot.new()
@@ -163,14 +197,11 @@ func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3
 	slot.kind = kind
 	slot.color = color
 	slot.length = length
-	slot.position = pos
+	slot.position = pos * house.basis.get_scale()
 	slot.rotation.y = yaw
-	slot.scale = HouseMount.inverse_scale(house)
-	house.add_child(slot)
+	_ensure_holder(house).add_child(slot)
 	if Engine.is_editor_hint():
-		var root := get_tree().edited_scene_root
-		if root != null and (root == house or root.is_ancestor_of(house)):
-			slot.owner = root
+		_own(slot)
 	ctx["count"] = int(ctx["count"]) + 1
 
 # ------------------------------------------------------------------ pieces
