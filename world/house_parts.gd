@@ -203,11 +203,16 @@ static func hanging_sign(text: String) -> Node3D:
 	box(root, Vector3(rod_w, 0.07, 0.07), IRON, Vector3(0, 0, reach))                       # rod along the wall
 	for sx in [-1.0, 1.0]:
 		box(root, Vector3(0.07, 0.07, reach), IRON, Vector3(sx * (rod_w * 0.5 - 0.05), 0, reach * 0.5))   # brackets into the wall
+	# everything below hangs from the rod and swings on it (see SwingingSign)
+	var pivot := SwingingSign.new()
+	pivot.name = "Swing"
+	pivot.position = Vector3(0, 0, reach)
+	root.add_child(pivot)
 	var cy := -chain - board_h * 0.5
 	for sx in [-1.0, 1.0]:
-		cylinder(root, 0.02, chain, IRON, Vector3(sx * (board_w * 0.5 - 0.25), -chain * 0.5, reach))
-	box(root, Vector3(board_w + 0.16, board_h + 0.16, 0.1), WOOD_DARK, Vector3(0, cy, reach))   # frame
-	box(root, Vector3(board_w, board_h, 0.13), WOOD_LIGHT, Vector3(0, cy, reach))               # board
+		cylinder(pivot, 0.02, chain, IRON, Vector3(sx * (board_w * 0.5 - 0.25), -chain * 0.5, 0))
+	box(pivot, Vector3(board_w + 0.16, board_h + 0.16, 0.1), WOOD_DARK, Vector3(0, cy, 0))   # frame
+	box(pivot, Vector3(board_w, board_h, 0.13), WOOD_LIGHT, Vector3(0, cy, 0))               # board
 	for side in [1.0, -1.0]:
 		var label := Label3D.new()
 		label.text = text
@@ -217,9 +222,9 @@ static func hanging_sign(text: String) -> Node3D:
 		label.outline_size = 0
 		label.shaded = false
 		label.double_sided = false
-		label.position = Vector3(0, cy, reach + side * 0.07)
+		label.position = Vector3(0, cy, side * 0.07)
 		label.rotation.y = 0.0 if side > 0.0 else PI
-		root.add_child(label)
+		pivot.add_child(label)
 	return root
 
 # ------------------------------------------------------- awnings and porches

@@ -395,3 +395,5 @@ Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the in
 ### Fire
 
 Every fire shares one look (`world/fire_fx.gd`, `FireFx`): hand-painted, stylised flame cards (`shading/flame.gdshader`: a wobbling teardrop in hard colour bands with brush-streak edges and a dry-brush tip, upright billboards) plus rising ember flecks like the staff's burn (yellow -> orange -> red). Used by the hearth and candles (`world/interior_parts.gd`) and by the burn status on enemies (`combat/status_fx.gd`). Palettes (`PALETTE_FIRE`, `PALETTE_CANDLE`) and the shader's `fatness`, `speed` and `wobble` tune the look.
+
+Shop signs swing (`world/swinging_sign.gd`): the board and chains are a damped pendulum on the rod, pushed out by the shared wind gusts (`WindGusts`), stopped by the wall, and rocked a little by a player running past. Tune `WIND_PUSH`, `DAMPING` and `GRAVITY_OVER_LENGTH` there.
