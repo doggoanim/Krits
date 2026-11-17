@@ -28,9 +28,11 @@ class Hen:
 
 var _hens: Array[Hen] = []
 var _home := Vector3.ZERO
+var _base_y := 0.0   ## every hen stays at this height: they never climb or sink
 
 func _ready() -> void:
 	_home = global_position
+	_base_y = _ground(_home).y
 	for i in count:
 		var h := Hen.new()
 		h.rig = CritterParts.chicken(feathers[i % feathers.size()])
@@ -39,7 +41,7 @@ func _ready() -> void:
 		var root: Node3D = h.rig["root"]
 		add_child(root)
 		var a := randf() * TAU
-		root.global_position = _ground(_home + Vector3(cos(a), 0, sin(a)) * radius * sqrt(randf()))
+		root.global_position = _level(_home + Vector3(cos(a), 0, sin(a)) * radius * sqrt(randf()))
 		root.rotation.y = randf() * TAU
 		_hens.append(h)
 
@@ -93,8 +95,15 @@ func _walk(h: Hen, delta: float, speed: float) -> void:
 		_flap(h, 0.0)
 		return
 	var dir := to.normalized()
-	root.global_position = _ground(root.global_position + dir * speed * delta)
-	root.rotation.y = lerp_angle(root.rotation.y, atan2(-dir.x, -dir.z), 8.0 * delta)
+	var here := root.global_position
+	if not _path_clear(here, here + dir * (speed * delta + 0.3)):
+		h.state = State.PECK   # something is in the way: just stop
+		h.timer = randf_range(1.5, 3.5)
+		_flap(h, 0.0)
+		return
+	root.global_position = _level(here + dir * speed * delta)
+	# the hens are children of a rotated node, so turn them in world space
+	root.global_rotation.y = lerp_angle(root.global_rotation.y, atan2(-dir.x, -dir.z), 8.0 * delta)
 	var t := Time.get_ticks_msec() / 1000.0
 	var stride := 9.0 if h.state == State.WALK else 18.0
 	(h.rig["neck"] as Node3D).rotation.x = sin(t * stride + h.phase) * 0.12 - 0.05   # head bobs with each step
@@ -129,6 +138,10 @@ func _spot_near_home(from: Vector3) -> Vector3:
 func _path_clear(from: Vector3, to: Vector3) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(from + Vector3.UP * 0.5, to + Vector3.UP * 0.5, GROUND_MASK)
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+## `point` at the hens' fixed height.
+func _level(point: Vector3) -> Vector3:
+	return Vector3(point.x, _base_y, point.z)
 
 func _ground(point: Vector3) -> Vector3:
 	if Engine.is_editor_hint():
