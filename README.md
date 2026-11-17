@@ -416,5 +416,5 @@ Everything that makes the town feel alive is a small, separate piece — add, re
 
 ## Stepped (choppy) animation
 
-All the ambient animation (chickens, birds, roof cat, NPC walk bob, signs, lanterns, chimes, weathervanes, flames, cloth, star twinkle, particles) is shown in held poses, like Blender's stepped interpolation: a new pose every 5 frames at 24 fps. Movement stays smooth; only poses are held.
+All the ambient animation (chickens, birds, roof cat, NPC walk bob, signs, lanterns, chimes, weathervanes, flames, cloth, star twinkle, particles) is shown in held poses, like Blender's stepped interpolation: a new pose every 2 frames at 24 fps (12 poses a second, "on 2s"). Movement stays smooth; only poses are held.
 The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders keep a copy of `STEP_SECONDS` (`flame`, `cloth_wind`, `sky_painted`); update them if you change it.

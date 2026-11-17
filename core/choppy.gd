@@ -6,13 +6,13 @@ extends RefCounted
 ## cloth and signs, flame flicker, walking bobs...) asks this class for its time, so it holds
 ## poses the same way and the whole world matches.
 ##
-## One setting: STEP_FRAMES frames of a FRAME_RATE-fps timeline per pose (5 frames at 24 fps
-## = a new pose about 4.8 times a second). Change it here to make everything choppier or
+## One setting: STEP_FRAMES frames of a FRAME_RATE-fps timeline per pose (2 frames at 24 fps
+## = "on 2s" = 12 poses a second). Change it here to make everything choppier or
 ## smoother. The shaders (flame, cloth, sky) keep their own copy of STEP_SECONDS — if you
 ## change it here, change `STEP_SECONDS` at the top of shading/flame.gdshader,
 ## cloth_wind.gdshader and the sky shader as well.
 
-const STEP_FRAMES := 5
+const STEP_FRAMES := 2
 const FRAME_RATE := 24.0
 const STEP_SECONDS := STEP_FRAMES / FRAME_RATE
 

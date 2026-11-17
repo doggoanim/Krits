@@ -132,7 +132,7 @@ func _step_perched(b: Flock, delta: float, ppos: Vector3, awake: bool) -> void:
 	if _new_step:   # hops and tail bobs are held poses
 		root.global_position.y = _perches[b.perch].y + sin(b.hop * PI) * 0.05
 		var tail: Node3D = b.rig["tail"]
-		tail.rotation.x = deg_to_rad(-14.0) + (0.08 if (Choppy.index() / 2 + b.perch) % 2 == 0 else -0.08)
+		tail.rotation.x = deg_to_rad(-14.0) + (0.08 if (Choppy.index() / 6 + b.perch) % 2 == 0 else -0.08)
 
 func _take_off(b: Flock, scared_of: Vector3) -> void:
 	var dest := _free_perch(scared_of)

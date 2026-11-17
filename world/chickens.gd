@@ -130,7 +130,9 @@ func _pose_all() -> void:
 	for h in _hens:
 		_pose(h, step + h.offset)
 
-func _pose(h: Hen, step: int) -> void:
+## `tick` counts 12 fps poses; most cycles read better holding each pose two ticks.
+func _pose(h: Hen, tick: int) -> void:
+	var step := tick / 2
 	var neck: Node3D = h.rig["neck"]
 	var body: Node3D = h.rig["body"]
 	var left_leg: Node3D = h.rig["left_leg"]

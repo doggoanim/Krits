@@ -7,7 +7,7 @@ render_mode unshaded, cull_disabled, depth_draw_never, fog_disabled, shadows_dis
 // roughened by vertical "brush streaks", so it reads as painted rather than gradient-lit.
 // The tip breaks up into dry-brush flecks. `seed` makes each card flicker differently.
 
-const float STEP_SECONDS = 0.208333;   // 5 frames at 24 fps: keep in sync with core/choppy.gd
+const float STEP_SECONDS = 0.083333;   // 2 frames at 24 fps: keep in sync with core/choppy.gd
 
 uniform vec4 rim_color : source_color = vec4(0.78, 0.12, 0.06, 1.0);
 uniform vec4 body_color : source_color = vec4(1.0, 0.42, 0.08, 1.0);

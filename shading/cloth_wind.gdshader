@@ -9,7 +9,7 @@ render_mode cull_disabled;
 global uniform float time_offset;
 #include "res://shading/toon_light.gdshaderinc"
 
-const float STEP_SECONDS = 0.208333;   // 5 frames at 24 fps: keep in sync with core/choppy.gd
+const float STEP_SECONDS = 0.083333;   // 2 frames at 24 fps: keep in sync with core/choppy.gd
 
 uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform float cloth_h = 0.6;       // mesh height (m): measures how far down the hanging edge the cloth is
