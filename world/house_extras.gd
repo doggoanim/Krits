@@ -33,12 +33,12 @@ extends Node
 ##   chickens       float     x offset of a hen yard out front (Chickens)
 
 const PLAN := {
-	"house_chesburg_1": {"windows": [-1, 1], "shutter": Color(0.3, 0.5, 0.35), "lantern": 1, "woodpile": true, "perches": true, "chickens": 4.8},
-	"house_chesburg_2": {"windows": [-1], "shutter": Color(0.55, 0.38, 0.6), "lantern": -1, "notice": true, "perches": true},
+	"house_chesburg_1": {"lantern": 1, "woodpile": true, "perches": true, "chickens": 4.8},
+	"house_chesburg_2": {"lantern": -1, "notice": true, "perches": true},
 	"house_chesburg_3": {"lantern": 1, "bunting": true, "perches": true},
-	"house_chesburg_4": {"windows": [-1, 1], "window_pairs": 2, "shutter": Color(0.82, 0.52, 0.25), "lantern": 1, "bunting": true, "barrels": -3.0, "perches": true, "cat": true},
-	"house_chesburg_5": {"windows": [-1, 1], "shutter": Color(0.3, 0.45, 0.72), "lantern": -1, "laundry": true, "chimes": 1, "perches": true},
-	"house_chesburg_6": {"windows": [-1, 1], "shutter": Color(0.62, 0.22, 0.2), "lantern": 1, "bunting": true, "stall": 4.4, "barrels": -3.0, "perches": true},
+	"house_chesburg_4": {"lantern": 1, "bunting": true, "barrels": -3.0, "perches": true, "cat": true},
+	"house_chesburg_5": {"lantern": -1, "laundry": true, "chimes": 1, "perches": true},
+	"house_chesburg_6": {"lantern": 1, "bunting": true, "stall": 4.4, "barrels": -3.0, "perches": true},
 }
 
 const WINDOW_FIRST := 1.95         ## door -> first window centre (m)
