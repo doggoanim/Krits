@@ -14,6 +14,7 @@ const MIN_SPEED := 1.0               ## m/s along the ground before anything is 
 const FULL_SPEED := 6.0              ## speed at which a bush shakes at full strength
 const STEP_DISTANCE := 0.6           ## metres moved inside a prop between particle bursts
 const ENTER_MARGIN := 0.35           ## extra reach around a prop that already counts as "in" it
+const BUSH_ENTER_MARGIN := 1.1       ## bushes rustle from further away (they are big and shake as a whole)
 const MAX_VERTICAL := 1.4            ## foliage this far above/below the feet is ignored
 const MAX_BURSTS := 8                ## particle bursts alive at once (the rest are skipped)
 
@@ -52,7 +53,7 @@ func _physics_process(delta: float) -> void:
 		var d := _player.global_position - prop.global_position
 		if absf(d.y) > MAX_VERTICAL:
 			continue
-		var reach := wind.reach + ENTER_MARGIN
+		var reach := wind.reach + (BUSH_ENTER_MARGIN if wind.kind == FoliageWind.Kind.BUSH else ENTER_MARGIN)
 		if Vector2(d.x, d.z).length_squared() > reach * reach:
 			continue
 		var id := wind.get_instance_id()
