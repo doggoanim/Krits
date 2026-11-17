@@ -50,7 +50,7 @@ static func ridge(house: Node3D, xz: Vector2, reach := 1.5) -> Dictionary:
 
 ## z of the front wall (the "wall" material, +Z side) around x, at door height, in the
 ## house's own space; NAN when there is none. Used to put a door canopy flush on the wall.
-static func wall_front(house: Node3D, x: float, half_width := 1.5) -> float:
+static func wall_front(house: Node3D, x: float, half_width := 1.5, y_low := 0.3, y_high := 2.5) -> float:
 	var best := NAN
 	var inverse := house.global_transform.affine_inverse()
 	for m in house.find_children("*", "MeshInstance3D", true, false):
@@ -65,7 +65,7 @@ static func wall_front(house: Node3D, x: float, half_width := 1.5) -> float:
 			var verts: PackedVector3Array = mi.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
 			for v in verts:
 				var p := to_house * v
-				if absf(p.x - x) <= half_width and p.y > 0.3 and p.y < 2.5 and (is_nan(best) or p.z > best):
+				if absf(p.x - x) <= half_width and p.y > y_low and p.y < y_high and (is_nan(best) or p.z > best):
 					best = p.z
 	return best
 

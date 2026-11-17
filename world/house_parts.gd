@@ -186,6 +186,40 @@ static func weathervane() -> Node3D:
 		swing.tween_property(arrow, "rotation_degrees:y", -35.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT))
 	return root
 
+# ------------------------------------------------------------------- sign
+
+## A wooden shop-style sign on an iron bracket: an arm out of the wall, a crossbar, and the
+## board hanging from it on two chains, with `text` on both faces. The origin is where the
+## arm meets the wall; +Z points out of the house; the board hangs below the origin.
+static func hanging_sign(text: String) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Sign"
+	var board_w := maxf(1.6, text.length() * 0.2 + 0.5)
+	var board_h := 0.75
+	var reach := 1.1
+	var chain := 0.4
+	box(root, Vector3(0.1, 0.1, reach), IRON, Vector3(0, 0, reach * 0.5))                       # arm
+	box(root, Vector3(board_w + 0.2, 0.08, 0.08), IRON, Vector3(0, 0, reach))                    # crossbar
+	box(root, Vector3(0.08, 0.08, reach * 0.6), IRON, Vector3(0, -0.28, reach * 0.3), Vector3(-25, 0, 0))   # brace
+	var cy := -chain - board_h * 0.5
+	for sx in [-1.0, 1.0]:
+		cylinder(root, 0.025, chain, IRON, Vector3(sx * (board_w * 0.5 - 0.2), -chain * 0.5, reach))
+	box(root, Vector3(board_w + 0.16, board_h + 0.16, 0.1), WOOD_DARK, Vector3(0, cy, reach))   # frame
+	box(root, Vector3(board_w, board_h, 0.13), WOOD_LIGHT, Vector3(0, cy, reach))               # board
+	for side in [1.0, -1.0]:
+		var label := Label3D.new()
+		label.text = text
+		label.font_size = 48
+		label.pixel_size = 0.007
+		label.modulate = Color(0.2, 0.1, 0.05)
+		label.outline_size = 0
+		label.shaded = false
+		label.double_sided = false
+		label.position = Vector3(0, cy, reach + side * 0.07)
+		label.rotation.y = 0.0 if side > 0.0 else PI
+		root.add_child(label)
+	return root
+
 # ------------------------------------------------------- awnings and porches
 
 ## A door canopy / porch / step, built for a door whose wall face is at z = 0 of the

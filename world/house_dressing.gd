@@ -37,12 +37,15 @@ const DOOR_WALL_OFFSET := 0.33  ## from a Door_* node to the wall face in front 
 const DOOR_FLOOR_DROP := 1.0    ## a Door_* node sits this far above the floor
 const MAX_DOOR_SETBACK := 1.0   ## a door deeper than this behind the footprint isn't dressed (the mayor's)
 const WALL_OVERLAP := 0.3       ## the entrance sinks this far into the wall: no gap, and it hugs the door
+const SIGN_HEIGHT := 4.3         ## sign bracket height above the door's floor (clears the awning)
 const META := &"house_dressing"
 
 ## Houses to dress: nodes in the parent whose name contains one of these.
 @export var name_filter: PackedStringArray = ["house_chesburg"]
 ## Shifts which choices each house gets; change it to reshuffle.
 @export var seed_offset := 0
+## Name signs hung above a house's door: house node name -> text.
+@export var signs := {"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse"}
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
 
@@ -71,6 +74,8 @@ func _dress(house: Node3D, index: int) -> void:
 	_add_chimneys(house, index, taken)
 	if DORMERS[index % DORMERS.size()]:
 		_add_dormer(house, index, taken)
+	if signs.has(String(house.name)):
+		_add_sign(house, String(signs[String(house.name)]))
 	var style: int = ENTRANCES[index % ENTRANCES.size()]
 	if style >= 0:
 		_add_entrance(house, front, style, WOOD_SHADES[index % WOOD_SHADES.size()])
@@ -163,6 +168,17 @@ func _add_entrance(house: Node3D, front: float, style: int, shade: float) -> voi
 	if not is_nan(flush):
 		wall = flush
 	_place(house, HouseParts.entrance(style, shade), Vector3(x, floor_y, wall - WALL_OVERLAP))
+
+## A hanging sign above the house's door (Door_* node), flush on the wall there.
+func _add_sign(house: Node3D, text: String) -> void:
+	var door := _door_of(house)
+	if door == null:
+		return
+	var floor_y := door.position.y - DOOR_FLOOR_DROP
+	var wall := RoofProbe.wall_front(house, door.position.x, 1.0, floor_y + 1.0, floor_y + SIGN_HEIGHT)
+	if is_nan(wall):
+		wall = door.position.z + DOOR_WALL_OFFSET
+	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - WALL_OVERLAP * 0.2))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
