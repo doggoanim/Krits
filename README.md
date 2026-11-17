@@ -306,6 +306,7 @@ couple of its fields (background/ambient) temporarily during a fight and
 restores them after, so whatever look you set here carries into combat too.
 
 ## Dialogue system
+Speakers pop while they talk: on every word the dialogue box asks the speaker for `talk_pop()` (via `DialogueStage`), and an NPC squashes and stretches its model with its feet planted. Tune per NPC under "Talking" (`talk_pop_strength`, 0 = off; stretch, squash, minimum gap).
 
 - **Authoring:** write each NPC's conversation as one plain-text `.dlg` file (`dialogue/npcs/*.dlg`, format documented at the top of `dialogue/dialogue_parser.gd`) and point the NPC's `dialogue_file` at it — sections, lines, choices with `[set flag]` / `[if flag]` / `[item x]` / `[give x N]` tags, and `@when flag -> section` for flag-switched lines. `DialogueParser` builds the same node graph the `.tres` route does (both still work; parse errors are logged as `file:line: message`). Godot exports `.dlg` only if Export > Resources > "Filters to export non-resource files" includes `*.dlg`.
 - **Data:** `DialogueNode` / `DialogueChoice` resources (`dialogue/`). Code helpers: `DialogueNode.say(speaker, text)` and `DialogueNode.chain([[speaker, text], ...])`.
@@ -382,13 +383,10 @@ Textures that several models used to embed separately (houses, windows, doors, t
 ## Water splash and effects
 Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stretch still starts at 7 m) and are wiped away from top to bottom when the fall ends (`wipe_time`, `wipe_height`).
 Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
-Speakers pop while they talk: on every word the dialogue box asks the speaker for `talk_pop()` (via `DialogueStage`), and an NPC squashes and stretches its model with its feet planted. Tune per NPC under "Talking" (`talk_pop_strength`, 0 = off; stretch, squash, minimum gap).
 
 ## Foliage
 Chesburg has a `LevelAmbience` (the grassland bed, `sounds/Ambience/grassland.ogg`). Bushes rustle with four randomly picked takes (`sounds/SFX/others/bush_rustle_*.wav`) when you walk into them and, quieter and not too often, when a breeze (`WindGusts`) sweeps across the ones near you; see `FoliageWind`'s `RUSTLE_*` and `BREEZE_*` constants.
 Grass and flowers flatten and lean away from your feet, bushes shake, and all three kick up blades, petals or leaves (`player/foliage_steps.gd` + the `step_bend`/`rustle` parts of `shading/foliage_wind.gdshader`). Props with a `FoliageWind` child opt in automatically by name (grass / flower / bush / berry; trees and terrain don't). The player's position reaches the shader through the `foliage_pusher_pos` / `foliage_pusher_radius` global shader parameters (in `project.godot`).
-Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`, a node under `Buildings`; per-house choices are the arrays at its top): each house's scale gives a different size and height, chimneys vary in count and style (plain, tapered, round, potted; some smoke), some roofs get a dormer window or a swinging weathervane, and some doors a canopy, porch or step. Parts are built in `world/house_parts.gd` and placed on the roof / wall found by `world/roof_probe.gd`. It runs in the editor too, but the parts are never saved into the scene.
-Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the interior hearth a fire loop (`fireplace.ogg`): 3D sounds that only get loud when you are near, via `HouseParts.add_loop_sound` (silent in the editor).
 
 ## Fantasy interiors
 
@@ -429,6 +427,10 @@ The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders kee
 `world/well.tscn` has `WellLights` (crystals breathe in a slow wave and hum softly up close, torches flicker), `CaveGlimmers` (cyan motes orbiting each crystal) and `WaterLife` (ripples, rising bubbles and a few fish in the pool). They find their targets by node name/path (`AccentLights`, `Water`) and are all held in stepped poses via `Choppy`.
 
 ### Editor-visible dressing
+Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`, a node under `Buildings`; per-house choices are the arrays at its top): each house's scale gives a different size and height, chimneys vary in count and style (plain, tapered, round, potted; some smoke), some roofs get a dormer window or a swinging weathervane, and some doors a canopy, porch or step. Parts are built in `world/house_parts.gd` and placed on the roof / wall found by `world/roof_probe.gd`. It runs in the editor too, but the parts are never saved into the scene.
+
+Chimney smoke has a looping crackle (`sounds/SFX/others/chimney.ogg`) and the interior hearth a fire loop (`fireplace.ogg`): 3D sounds that only get loud when you are near, via `HouseParts.add_loop_sound` (silent in the editor).
+
 
 Shop signs swing (`world/swinging_sign.gd`): the board and chains are a damped pendulum on the rod, pushed out by the shared wind gusts (`WindGusts`), stopped by the wall, and rocked a little by a player running past. Tune `WIND_PUSH`, `DAMPING` and `GRAVITY_OVER_LENGTH` there.
 
