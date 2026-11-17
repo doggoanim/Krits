@@ -175,10 +175,11 @@ func _add_sign(house: Node3D, text: String) -> void:
 	if door == null:
 		return
 	var floor_y := door.position.y - DOOR_FLOOR_DROP
-	var wall := RoofProbe.wall_front(house, door.position.x, 1.0, floor_y + 1.0, floor_y + SIGN_HEIGHT)
+	# the same wall face (and the same sink into it) as the door entrance, so both sit at one distance
+	var wall := RoofProbe.wall_front(house, door.position.x, 1.5, floor_y + 0.3, floor_y + 2.5)
 	if is_nan(wall):
 		wall = door.position.z + DOOR_WALL_OFFSET
-	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - 0.02))
+	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - WALL_OVERLAP))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
