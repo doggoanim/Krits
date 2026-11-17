@@ -420,7 +420,7 @@ The one setting is `STEP_FRAMES` / `FRAME_RATE` in `core/choppy.gd`. Shaders kee
 
 ### Night windows
 
-`WindowGlow` (next to `HouseDressing` in `chesburg.tscn`) drives the houses' window-pane material: dim glass by day, warm glow from dusk, and each house goes dark at its own bedtime (`bedtime` range, hours past midnight count on from 24). It finds the pane material by name (`Material.003`).
+`WindowGlow` (next to `HouseDressing` in `chesburg.tscn`) drives the houses' window-pane material: dim glass by day, warm glow from dusk, and each house goes dark at its own bedtime (`bedtime` range, hours past midnight count on from 24). Each lit window also throws a small warm light onto the wall and ground in front of it (`spill_*` exports; no shadows, and only within `active_distance` of the player). It finds the pane material by name (`Material.003`).
 
 ### The well
 
