@@ -1264,11 +1264,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 0.78200006)
 script = ExtResource("21_nqvox")
 kind = 11
 
-[node name="RoofCat" type="Node3D" parent="Buildings/Extras_4" unique_id=1468745388]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 2.1819992)
-script = ExtResource("21_nqvox")
-kind = 10
-
 [node name="Props" type="Node3D" parent="." unique_id=1770766056]
 
 [node name="Birds" type="Node3D" parent="Props" unique_id=1026983212]

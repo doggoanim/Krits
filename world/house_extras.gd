@@ -25,14 +25,13 @@ extends Node
 ##   chimes         -1 / 1    wind chimes beside the door
 ##   notice         true      a notice board in the front yard (left of the door)
 ##   perches        true      two bird perches on the roof ridge (the Birds flock lands there)
-##   cat            true      a cat sitting on the roof ridge (RoofCat)
 ##   chickens       float     x offset of a hen yard out front (Chickens)
 
 const PLAN := {
 	"house_chesburg_1": {"lantern": 1, "woodpile": true, "perches": true, "chickens": 4.8},
 	"house_chesburg_2": {"lantern": -1, "notice": true, "perches": true},
 	"house_chesburg_3": {"lantern": 1, "bunting": true, "perches": true},
-	"house_chesburg_4": {"lantern": 1, "bunting": true, "barrels": -3.0, "perches": true, "cat": true},
+	"house_chesburg_4": {"lantern": 1, "bunting": true, "barrels": -3.0, "perches": true},
 	"house_chesburg_5": {"lantern": -1, "laundry": true, "chimes": 1, "perches": true},
 	"house_chesburg_6": {"lantern": 1, "bunting": true, "stall": 4.4, "barrels": -3.0, "perches": true},
 }
@@ -160,7 +159,7 @@ func _dress(house: Node3D, plan: Dictionary) -> int:
 	if plan.get("notice", false):
 		var x: float = ctx["x0"] + NOTICE_X
 		_slot(ctx, "NoticeBoard", PropSlot.Kind.NOTICE_BOARD, Vector3(x, float(ctx["floor"]), _wall(ctx, ctx["x0"]) + NOTICE_OUT))
-	if plan.get("perches", false) or plan.get("cat", false):
+	if plan.get("perches", false):
 		_add_roof_animals(ctx, plan)
 	if plan.has("chickens"):
 		var x: float = ctx["x0"] + float(plan["chickens"])
@@ -234,5 +233,3 @@ func _add_roof_animals(ctx: Dictionary, plan: Dictionary) -> void:
 	if plan.get("perches", false):
 		for i in mini(points.size(), 2):
 			_slot(ctx, "BirdPerch%d" % (i + 1), PropSlot.Kind.BIRD_PERCH, points[i])
-	if plan.get("cat", false) and not points.is_empty():
-		_slot(ctx, "RoofCat", PropSlot.Kind.ROOF_CAT, points.back())

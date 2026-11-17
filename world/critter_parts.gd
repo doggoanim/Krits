@@ -3,7 +3,7 @@ class_name CritterParts
 extends RefCounted
 ## Little animals built from a handful of simple shapes in the project's toon look: a small
 ## songbird, a chicken and a sitting cat. Each builder returns a Dictionary of the rig's
-## named parts ({"root": Node3D, ...}) so a behaviour script (Birds, Chickens, RoofCat) can
+## named parts ({"root": Node3D, ...}) so a behaviour script (Birds, Chickens) can
 ## animate them without knowing how they're assembled. Animals face -Z; origin is at the feet.
 
 const BEAK := Color(0.95, 0.7, 0.2)
@@ -126,43 +126,3 @@ static func chicken(feathers: Color) -> Dictionary:
 		legs.append(hip)
 	return {"root": root, "body": body, "neck": neck, "head": head, "left_wing": wings[0], "right_wing": wings[1],
 			"left_leg": legs[0], "right_leg": legs[1]}
-
-## A cat sitting upright, about 30 cm tall, facing -Z. Parts: root, body, head (pivot),
-## left_ear, right_ear, tail (Array of 5 pivots, base first: rotate each for a swish).
-static func cat(fur: Color) -> Dictionary:
-	var root := Node3D.new()
-	root.name = "Cat"
-	var body := _blob(root, 0.15, Vector3(0.85, 1.15, 0.95), fur, Vector3(0, 0.17, 0.02))
-	_blob(root, 0.1, Vector3(1.25, 0.8, 1.2), fur, Vector3(-0.0, 0.1, 0.08))                           # haunches
-	_blob(root, 0.07, Vector3(0.8, 1.2, 0.5), fur.lightened(0.3), Vector3(0, 0.22, -0.12))             # chest
-	for sx in [-1.0, 1.0]:
-		HouseParts.box(root, Vector3(0.05, 0.16, 0.05), fur, Vector3(sx * 0.055, 0.08, -0.1))           # front legs
-	var head := Node3D.new()
-	head.name = "Head"
-	head.position = Vector3(0, 0.36, -0.05)
-	root.add_child(head)
-	_blob(head, 0.095, Vector3(1.1, 0.95, 1.0), fur.lightened(0.04), Vector3.ZERO)
-	_blob(head, 0.03, Vector3(1.4, 0.8, 1.0), fur.lightened(0.45), Vector3(0, -0.035, -0.085))         # muzzle
-	_blob(head, 0.012, Vector3.ONE, Color(0.9, 0.5, 0.55), Vector3(0, -0.015, -0.112))                  # nose
-	for sx in [-1.0, 1.0]:
-		_blob(head, 0.011, Vector3(0.7, 1.4, 0.7), Color(0.55, 0.85, 0.3), Vector3(sx * 0.04, 0.015, -0.085))   # eyes
-	var ears: Array[Node3D] = []
-	for sx in [-1.0, 1.0]:
-		var ear := Node3D.new()
-		ear.name = "LeftEar" if sx < 0.0 else "RightEar"
-		ear.position = Vector3(sx * 0.06, 0.07, -0.01)
-		head.add_child(ear)
-		var cone := _cone(ear, 0.035, 0.08, fur.darkened(0.05), Vector3(0, 0.035, 0), Vector3(0, 0, 0))
-		cone.rotation_degrees.z = -sx * 12.0
-		ears.append(ear)
-	var tail: Array[Node3D] = []
-	var parent: Node3D = root
-	for i in 5:
-		var seg := Node3D.new()
-		seg.name = "Tail%d" % i
-		seg.position = Vector3(0, 0.05, 0.16) if i == 0 else Vector3(0, 0, 0.07)
-		parent.add_child(seg)
-		_blob(seg, 0.032 - i * 0.003, Vector3(1, 1, 1.5), fur.darkened(0.08 * float(i == 4)), Vector3(0, 0, 0.035))
-		tail.append(seg)
-		parent = seg
-	return {"root": root, "body": body, "head": head, "left_ear": ears[0], "right_ear": ears[1], "tail": tail}
