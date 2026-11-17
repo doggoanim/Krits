@@ -61,7 +61,7 @@ func _build() -> void:
 		_put(InteriorParts.shelf(2.4, 3.4, InteriorParts.Fill.BOOKS, seed_value + 1), Vector3(-0.2, 0, back - 0.2))
 		_put(InteriorParts.shelf(2.2, 2.9, InteriorParts.Fill.JARS, seed_value + 2), Vector3(west - 0.15, 0, 2.2), FACE_PLUS_X)
 	if _use("decor"):
-		_put(InteriorParts.window(1.5, 1.7), Vector3(1.3, 2.4, -hz + 0.06))
+		_put(InteriorParts.window(1.5, 1.7), Vector3(hx - 0.06, 2.5, -2.7), FACE_MINUS_X)   # on the east wall, beside the bed
 		_put(InteriorParts.picture(1.0, 0.75, Color(0.4, 0.6, 0.35)), Vector3(hx - 0.06, 2.6, -0.2), FACE_MINUS_X)
 		_put(InteriorParts.picture(0.7, 0.9, Color(0.7, 0.5, 0.3)), Vector3(hx - 0.06, 2.4, 0.8), FACE_MINUS_X)
 	if _use("table"):
