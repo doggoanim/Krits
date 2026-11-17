@@ -78,15 +78,14 @@ func _process(_delta: float) -> void:
 	if _sun == null or _env == null:
 		return
 	var h := WorldClock.hour
-	# Re-tuning the sun, ambient light and sky material every frame is wasteful (and re-lights the
+	_apply_sun(h)   # every frame: the sun's angle is cheap, and stepping it makes the cloud shadows jump
+	# Re-tuning the ambient light and sky material every frame is wasteful (and re-lights the
 	# sky's reflection probe each time); the clock moves slowly, so only update on a visible change.
 	var moved := absf(fposmod(h - _last_hour + 12.0, 24.0) - 12.0)
-	if moved < MIN_HOUR_CHANGE:
-		return
-	_last_hour = h
-	_apply_sun(h)
-	_apply_ambient(h)
-	_apply_sky(h)
+	if moved >= MIN_HOUR_CHANGE:
+		_last_hour = h
+		_apply_ambient(h)
+		_apply_sky(h)
 	_apply_lantern()
 
 func _find_environment() -> Environment:
