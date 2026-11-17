@@ -188,22 +188,24 @@ static func weathervane() -> Node3D:
 
 # ------------------------------------------------------------------- sign
 
-## A wooden shop-style sign on an iron bracket: an arm out of the wall, a crossbar, and the
-## board hanging from it on two chains, with `text` on both faces. The origin is where the
-## arm meets the wall; +Z points out of the house; the board hangs below the origin.
+## A wooden name plaque hung close to the wall: an iron rod held out from the wall by two
+## short brackets, with the board hanging from it on two chains, `text` on both faces.
+## The origin is the rod's height on the wall; +Z points out of the house; the board hangs
+## below the origin.
 static func hanging_sign(text: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Sign"
 	var board_w := maxf(1.6, text.length() * 0.2 + 0.5)
 	var board_h := 0.75
-	var reach := 1.1
-	var chain := 0.4
-	box(root, Vector3(0.1, 0.1, reach), IRON, Vector3(0, 0, reach * 0.5))                       # arm
-	box(root, Vector3(board_w + 0.2, 0.08, 0.08), IRON, Vector3(0, 0, reach))                    # crossbar
-	box(root, Vector3(0.08, 0.08, reach * 0.6), IRON, Vector3(0, -0.28, reach * 0.3), Vector3(-25, 0, 0))   # brace
+	var reach := 0.3            ## how far the plaque stands off the wall
+	var chain := 0.3
+	var rod_w := board_w - 0.1
+	box(root, Vector3(rod_w, 0.07, 0.07), IRON, Vector3(0, 0, reach))                       # rod along the wall
+	for sx in [-1.0, 1.0]:
+		box(root, Vector3(0.07, 0.07, reach), IRON, Vector3(sx * (rod_w * 0.5 - 0.05), 0, reach * 0.5))   # brackets into the wall
 	var cy := -chain - board_h * 0.5
 	for sx in [-1.0, 1.0]:
-		cylinder(root, 0.025, chain, IRON, Vector3(sx * (board_w * 0.5 - 0.2), -chain * 0.5, reach))
+		cylinder(root, 0.02, chain, IRON, Vector3(sx * (board_w * 0.5 - 0.25), -chain * 0.5, reach))
 	box(root, Vector3(board_w + 0.16, board_h + 0.16, 0.1), WOOD_DARK, Vector3(0, cy, reach))   # frame
 	box(root, Vector3(board_w, board_h, 0.13), WOOD_LIGHT, Vector3(0, cy, reach))               # board
 	for side in [1.0, -1.0]:

@@ -37,7 +37,7 @@ const DOOR_WALL_OFFSET := 0.33  ## from a Door_* node to the wall face in front 
 const DOOR_FLOOR_DROP := 1.0    ## a Door_* node sits this far above the floor
 const MAX_DOOR_SETBACK := 1.0   ## a door deeper than this behind the footprint isn't dressed (the mayor's)
 const WALL_OVERLAP := 0.3       ## the entrance sinks this far into the wall: no gap, and it hugs the door
-const SIGN_HEIGHT := 4.3         ## sign bracket height above the door's floor (clears the awning)
+const SIGN_HEIGHT := 4.2         ## the rod's height above the door's floor (the board hangs below it, clear of the awning)
 const META := &"house_dressing"
 
 ## Houses to dress: nodes in the parent whose name contains one of these.
@@ -178,7 +178,7 @@ func _add_sign(house: Node3D, text: String) -> void:
 	var wall := RoofProbe.wall_front(house, door.position.x, 1.0, floor_y + 1.0, floor_y + SIGN_HEIGHT)
 	if is_nan(wall):
 		wall = door.position.z + DOOR_WALL_OFFSET
-	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - WALL_OVERLAP * 0.2))
+	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - 0.02))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
