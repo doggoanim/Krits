@@ -31,6 +31,7 @@ uniform vec3 body_dir = vec3(0.0, 1.0, 0.0);                // unit vector towar
 uniform float body_strength : hint_range(0.0, 1.0) = 0.0;   // moon visibility
 uniform vec3 body_color : source_color = vec3(0.92, 0.95, 1.0);
 uniform float body_size : hint_range(0.0, 0.1) = 0.018;     // moon radius, in sky-direction units
+group_uniforms;
 
 // Cloud shapes come from a tileable noise TEXTURE (a NoiseTexture2D, set on the
 // material) rather than hash-based value noise computed here: hashed noise
