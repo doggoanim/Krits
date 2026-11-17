@@ -17,6 +17,10 @@ extends Node3D
 	Color(0.55, 0.4, 0.28), Color(0.35, 0.5, 0.78), Color(0.72, 0.3, 0.2), Color(0.85, 0.85, 0.82), Color(0.45, 0.45, 0.5),
 ]
 
+const FLOCK_SFX := "res://sounds/SFX/others/bird_flock.ogg"
+const FLOCK_DB := -3.0
+const FLOCK_GAP_MSEC := 4000   ## the whole flock bursting up is one sound, not one per bird
+
 enum State { PERCHED, FLYING }
 
 class Flock:
@@ -40,6 +44,8 @@ var _birds: Array[Flock] = []
 var _tries := 0.0
 var _built := false
 var _last_step := -1
+var _flock_sfx: AudioStream
+var _next_flock_msec := 0
 var _new_step := false   ## true on the frame a new held pose begins (see Choppy)
 
 func _ready() -> void:
@@ -74,6 +80,8 @@ func _try_build() -> void:
 		_taken.clear()
 		return   # roofs not dressed yet; try again shortly
 	_built = true
+	var takes := SpatialSfx.load_takes([FLOCK_SFX])
+	_flock_sfx = takes[0] if not takes.is_empty() else null
 	for i in mini(bird_count, _perches.size() - 1):
 		var b := Flock.new()
 		var back := palette[i % palette.size()]
@@ -138,6 +146,8 @@ func _take_off(b: Flock, scared_of: Vector3) -> void:
 	if dest < 0:
 		b.stay = randf_range(stay_time.x, stay_time.y)
 		return
+	if scared_of.x != INF:   # startled by the player (not just wandering to another perch)
+		_flock_startled((b.rig["root"] as Node3D).global_position)
 	_taken[b.perch] = false
 	_taken[dest] = true
 	b.next_perch = dest
@@ -150,6 +160,14 @@ func _take_off(b: Flock, scared_of: Vector3) -> void:
 	b.duration = maxf(dist / fly_speed, 0.6)
 	b.arc = clampf(dist * 0.18, 0.6, 3.0)
 	(b.rig["head"] as Node3D).rotation.y = 0.0
+
+## The flock bursts up at the sound of footsteps: one wing-clatter, from where the first bird left.
+func _flock_startled(at: Vector3) -> void:
+	var now := Time.get_ticks_msec()
+	if _flock_sfx == null or now < _next_flock_msec:
+		return
+	_next_flock_msec = now + FLOCK_GAP_MSEC
+	SpatialSfx.play(self, _flock_sfx, at, FLOCK_DB, Vector2(0.95, 1.05), 40.0, 8.0)
 
 func _step_flying(b: Flock, delta: float) -> void:
 	var root: Node3D = b.rig["root"]
