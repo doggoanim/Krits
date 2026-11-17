@@ -8,6 +8,7 @@ extends RefCounted
 const TOON: Shader = preload("res://shading/toon.gdshader")
 const SMOKE_TEXTURE: Texture2D = preload("res://assets/sprites/smoke_puff.png")
 
+const CHIMNEY_SFX := "res://sounds/SFX/others/chimney.ogg"
 const BRICK := Color(0.62, 0.38, 0.32)
 const BRICK_DARK := Color(0.4, 0.26, 0.24)
 const PLASTER := Color(0.93, 0.88, 0.78)
@@ -49,6 +50,29 @@ static func cylinder(parent: Node3D, radius: float, height: float, color: Color,
 static func when_in_tree(node: Node, start: Callable) -> void:
 	node.tree_entered.connect(start)
 
+## A looping 3D sound on `parent`, quiet beyond `max_distance`. Starts at a random point of
+## the loop (so neighbours don't pulse in step) and never plays in the editor, where these
+## @tool-built parts also appear.
+static func add_loop_sound(parent: Node3D, path: String, volume_db: float, unit_size: float, max_distance: float, pos := Vector3.ZERO) -> void:
+	if Engine.is_editor_hint():
+		return
+	var stream := load(path) as AudioStream
+	if stream == null:
+		return
+	stream = stream.duplicate()   # the loaded resource is shared; don't change its loop flag for everyone
+	if "loop" in stream:
+		stream.set("loop", true)
+	var p := AudioStreamPlayer3D.new()
+	p.name = "LoopSound"
+	p.stream = stream
+	p.bus = &"SFX"
+	p.volume_db = volume_db
+	p.unit_size = unit_size
+	p.max_distance = max_distance
+	p.position = pos
+	parent.add_child(p)
+	when_in_tree(p, func() -> void: p.play(randf() * maxf(stream.get_length() - 0.1, 0.0)))
+
 static func _part(parent: Node3D, mesh: Mesh, color: Color, pos: Vector3, rot_deg := Vector3.ZERO) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -87,6 +111,7 @@ static func chimney(style: int, width: float, height: float, smoke: bool) -> Nod
 			top = height + 0.18
 	if smoke:
 		root.add_child(_smoke(Vector3(0, top + 0.1, 0)))
+		add_loop_sound(root, CHIMNEY_SFX, -10.0, 2.5, 16.0, Vector3(0, top, 0))
 	return root
 
 static func _smoke(at: Vector3) -> CPUParticles3D:

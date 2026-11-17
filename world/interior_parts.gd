@@ -5,6 +5,7 @@ extends RefCounted
 ## origin is on the floor (or the ceiling for hanging things) and whose front is +Z, so
 ## the caller only has to position and turn it. Big pieces carry a box collision.
 
+const FIRE_SFX := "res://sounds/SFX/others/fireplace.ogg"
 const STONE := Color(0.55, 0.54, 0.58)
 const STONE_DARK := Color(0.32, 0.31, 0.36)
 const WOOD := Color(0.5, 0.33, 0.2)
@@ -157,6 +158,7 @@ static func fireplace() -> Node3D:
 	var embers := FireFx.embers(14, 1.8, 1.5, 0.35, 0.09)
 	embers.position = Vector3(0, 1.3, 0.05)
 	root.add_child(embers)
+	HouseParts.add_loop_sound(root, FIRE_SFX, -4.0, 3.5, 14.0, Vector3(0, 0.8, 0.4))
 	_light(root, Color(1.0, 0.58, 0.25), 2.4, 9.0, Vector3(0, 1.4, 1.2), 0.6)
 	solid(root, Vector3(3.6, 3.4, 1.2), Vector3(0, 1.7, 0.1))
 	return root
