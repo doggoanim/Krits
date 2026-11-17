@@ -36,7 +36,7 @@ const CLEARANCE := 1.5          ## roof parts keep this far apart (metres)
 const DOOR_WALL_OFFSET := 0.33  ## from a Door_* node to the wall face in front of it
 const DOOR_FLOOR_DROP := 1.0    ## a Door_* node sits this far above the floor
 const MAX_DOOR_SETBACK := 1.0   ## a door deeper than this behind the footprint isn't dressed (the mayor's)
-const WALL_OVERLAP := 0.05      ## the entrance sinks this far into the wall so no gap shows
+const WALL_OVERLAP := 0.3       ## the entrance sinks this far into the wall: no gap, and it hugs the door
 const META := &"house_dressing"
 
 ## Houses to dress: nodes in the parent whose name contains one of these.
