@@ -59,13 +59,13 @@
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
 [ext_resource type="PackedScene" uid="uid://b2xyt50ku3keo" path="res://assets/npcs/cat_biscuit.glb" id="biscuit_model"]
+[ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
+[ext_resource type="AudioStream" uid="uid://ci84xm6i6olb1" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
+[ext_resource type="Script" uid="uid://b8mj2xaqcf7na" path="res://world/house_dressing.gd" id="house_dressing_script"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
-[ext_resource type="Script" path="res://world/house_dressing.gd" id="house_dressing_script"]
-[ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
-[ext_resource type="AudioStream" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
@@ -178,7 +178,7 @@ size = Vector3(0.5, 0.65, 0.35)
 
 [node name="Chesburg" type="Node3D" unique_id=1195529557]
 
-[node name="Ambience" type="Node" parent="."]
+[node name="Ambience" type="Node" parent="." unique_id=75010380]
 script = ExtResource("chesburg_ambience_script")
 stream = ExtResource("chesburg_ambience_stream")
 
@@ -961,8 +961,9 @@ transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1303486059]
 
-[node name="HouseDressing" type="Node" parent="Buildings"]
+[node name="HouseDressing" type="Node" parent="Buildings" unique_id=2107741015]
 script = ExtResource("house_dressing_script")
+name_filter = PackedStringArray("house_chesburg")
 
 [node name="house_chesburg_1" parent="Buildings" unique_id=666560511 instance=ExtResource("14_6yx7h")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
@@ -980,13 +981,13 @@ script = ExtResource("47_door_spawn")
 spawn_id = &"house_1_entrance"
 
 [node name="house_chesburg_5" parent="Buildings" unique_id=2135377020 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(1e-07, 0.0, -1.1, 0.0, 0.95, 0.0, 1.1, 0.0, 1e-07, 4.479099, 0, -10.312209)
+transform = Transform3D(1e-07, 0, -1.1, 0, 0.95, 0, 1.1, 0, 1e-07, 4.479099, 0, -10.312209)
 
 [node name="house_chesburg_6" parent="Buildings" unique_id=491103847 instance=ExtResource("14_6yx7h")]
-transform = Transform3D(-2e-07, 0.0, 0.9, 0.0, 1.15, 0.0, -0.9, 0.0, -2e-07, -7.5209017, 0, -20.312206)
+transform = Transform3D(-2e-07, 0, 0.9, 0, 1.15, 0, -0.9, 0, -2e-07, -7.5209017, 0, -20.312206)
 
 [node name="house_chesburg_2" parent="Buildings" unique_id=1116888906 instance=ExtResource("17_qxovf")]
-transform = Transform3D(1.08, 0.0, 0.0, 0.0, 1.1, 0.0, 0.0, 0.0, 1.08, -5.706156, 0, -7.0017056)
+transform = Transform3D(1.08, 0, 0, 0, 1.1, 0, 0, 0, 1.08, -5.706156, 0, -7.0017056)
 
 [node name="house_chesburg_3" parent="Buildings" unique_id=1391076820 instance=ExtResource("24_iolvd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.33178, 8.084409, -24.818865)
@@ -1008,7 +1009,7 @@ script = ExtResource("47_door_spawn")
 spawn_id = &"house_3_entrance"
 
 [node name="house_chesburg_4" parent="Buildings" unique_id=1975904037 instance=ExtResource("28_lybmh")]
-transform = Transform3D(0.92, 0.0, 0.0, 0.0, 0.95, 0.0, 0.0, 0.0, 0.92, 7, 0, -21)
+transform = Transform3D(0.92, 0, 0, 0, 0.95, 0, 0, 0, 0.92, 7, 0, -21)
 
 [node name="nocol_dirt_terrain" parent="Buildings" unique_id=1026005673 instance=ExtResource("10_a5ueg")]
 transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032, -9.378)
@@ -1771,10 +1772,6 @@ facing_offset = 3.14159
 model = ExtResource("yule_model")
 model_height = 1.4
 idle_animation = &"Yule_Idle"
-talk_pop_strength = null
-talk_pop_stretch = null
-talk_pop_squash = null
-talk_pop_min_gap = null
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Yule" unique_id=1946319862]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
@@ -1784,10 +1781,6 @@ shape = SubResource("Shape_YuleBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 11)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/marta.dlg"
-talk_pop_strength = null
-talk_pop_stretch = null
-talk_pop_squash = null
-talk_pop_min_gap = null
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Marta" unique_id=1641745535]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -1801,10 +1794,6 @@ mesh = SubResource("Mesh_ShopBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/brant.dlg"
-talk_pop_strength = null
-talk_pop_stretch = null
-talk_pop_squash = null
-talk_pop_min_gap = null
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Brant" unique_id=1529632905]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -1819,10 +1808,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 12)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/tuppence.dlg"
 head_height = 1.5
-talk_pop_strength = null
-talk_pop_stretch = null
-talk_pop_squash = null
-talk_pop_min_gap = null
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Tuppence" unique_id=1055373293]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -1884,10 +1869,6 @@ model_height = 0.7
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0, -12)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/fenn.dlg"
-talk_pop_strength = null
-talk_pop_stretch = null
-talk_pop_squash = null
-talk_pop_min_gap = null
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Fenn" unique_id=405079515]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
