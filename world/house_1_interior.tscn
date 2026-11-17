@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="2"]
 [ext_resource type="Script" uid="uid://bf0u4pce3srrb" path="res://world/cutaway_wall.gd" id="3"]
 [ext_resource type="PackedScene" uid="uid://dbiov62udfua1" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Bed_07.glb" id="4_4q5kq"]
+[ext_resource type="PackedScene" path="res://world/chest.tscn" id="6_kbm7p"]
 [ext_resource type="Script" uid="uid://c2h4vvhp2fkep" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
@@ -168,3 +169,7 @@ shape = SubResource("BoxShape3D_wgm46")
 [node name="FantasyInterior" type="Node3D" parent="." unique_id=544443956]
 script = ExtResource("fantasy_script")
 skip = PackedStringArray()
+
+[node name="WoodenSwordChest" parent="." unique_id=1664102870 instance=ExtResource("6_kbm7p")]
+transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 3.5799506, 0, 0.5544308)
+chest_id = &"hidden_chess_1"
