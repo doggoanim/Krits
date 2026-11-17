@@ -19,6 +19,10 @@ const RIM := Color(0.32, 0.58, 0.9)
 const PETALS_OUTER := 12
 const PETALS_INNER := 8
 const PETAL_SEGMENTS := 6
+## Heights as a multiple of the strength (metres at strength 1).
+const CROWN_HEIGHT := 0.5
+const JET_HEIGHT := 1.2
+const DROPLET_SPEED := 4.2
 const BIG_STRENGTH := 1.5            ## from here a jet rises in the middle
 
 static var _crown_mesh: ArrayMesh
@@ -58,7 +62,7 @@ static func _crown(root: Node3D, s: float) -> void:
 	crown.material_override = mat
 	root.add_child(crown)
 	var radius := 0.75 * s
-	var height := 0.85 * s
+	var height := CROWN_HEIGHT * s
 	crown.scale = Vector3(radius * 0.5, height * 0.05, radius * 0.5)
 	crown.rotation.y = randf() * TAU
 	var tw := crown.create_tween()
@@ -132,7 +136,7 @@ static func _droplets(root: Node3D, s: float, amount: int, speed_mult: float, si
 	var m := ParticleProcessMaterial.new()
 	m.direction = Vector3.UP
 	m.spread = 48.0
-	var v := 5.5 * sqrt(s) * speed_mult
+	var v := DROPLET_SPEED * sqrt(s) * speed_mult
 	m.initial_velocity_min = v * 0.55
 	m.initial_velocity_max = v
 	m.gravity = Vector3(0.0, -17.0, 0.0)
@@ -176,7 +180,7 @@ static func _jet(root: Node3D, s: float) -> void:
 	jet.material_override = mat
 	jet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(jet)
-	var h := 2.4 * s
+	var h := JET_HEIGHT * s
 	jet.scale = Vector3(s, 0.01, s)
 	jet.position.y = 0.0
 	var tw := jet.create_tween().set_parallel(true)
