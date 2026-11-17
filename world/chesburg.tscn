@@ -1150,14 +1150,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.155, 2.0425, 2.493845)
 script = ExtResource("21_nqvox")
 
 [node name="LaundryLine" type="Node3D" parent="Buildings/Extras_5" unique_id=2067474594]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.838233, 0, 1.943845)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.238233, 0, 1.943845)
 script = ExtResource("21_nqvox")
 kind = 3
-color = Color(1, 1, 1, 1)
 length = 3.4
 
 [node name="WindChimes" type="Node3D" parent="Buildings/Extras_5" unique_id=1358386958]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.32, 2.2324998, 2.735845)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3200006, 2.2324998, 2.5358448)
 script = ExtResource("21_nqvox")
 kind = 7
 
@@ -1179,7 +1178,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.94499993, 2.4725, 2.0404189
 script = ExtResource("21_nqvox")
 
 [node name="Stall" type="Node3D" parent="Buildings/Extras_6" unique_id=1238101890]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.96, 0, 4.6504188)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.96, 0, 4.6504188)
 script = ExtResource("21_nqvox")
 kind = 5
 
@@ -1240,43 +1239,24 @@ kind = 11
 [node name="Extras_4" type="Node3D" parent="Buildings" unique_id=1229210646]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -21)
 
-[node name="Window_L1" type="Node3D" parent="Buildings/Extras_4" unique_id=1095635883]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.794, 1.4725, 2.2881646)
-script = ExtResource("21_nqvox")
-kind = 0
-color = Color(0.82, 0.52, 0.25, 1)
-
-[node name="Window_L2" type="Node3D" parent="Buildings/Extras_4" unique_id=531203460]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.542, 1.4725, 2.2881646)
-script = ExtResource("21_nqvox")
-kind = 0
-color = Color(0.6905, 0.443, 0.2325, 1)
-
-[node name="Window_R1" type="Node3D" parent="Buildings/Extras_4" unique_id=1966083784]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.794, 1.4725, 2.2881646)
-script = ExtResource("21_nqvox")
-kind = 0
-color = Color(0.82, 0.52, 0.25, 1)
-
-[node name="Window_R2" type="Node3D" parent="Buildings/Extras_4" unique_id=11887623]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.542, 1.4725, 2.2881646)
-script = ExtResource("21_nqvox")
-kind = 0
-color = Color(0.6905, 0.443, 0.2325, 1)
-
 [node name="Lantern" type="Node3D" parent="Buildings/Extras_4" unique_id=1252098975]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96599996, 2.0425, 2.0857646)
 script = ExtResource("21_nqvox")
 
 [node name="Bunting" type="Node3D" parent="Buildings/Extras_4" unique_id=730774977]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3701105, 3.4199998, 2.5426235)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3701105, 4.12, 2.1624336)
 script = ExtResource("21_nqvox")
 kind = 2
-color = Color(1, 1, 1, 1)
+length = 5.424033355712891
+
+[node name="Bunting2" type="Node3D" parent="Buildings/Extras_4" unique_id=883262058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9298897, 4.12, 2.1624336)
+script = ExtResource("21_nqvox")
+kind = 2
 length = 5.424033355712891
 
 [node name="CratesAndBarrels" type="Node3D" parent="Buildings/Extras_4" unique_id=1358286338]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.76, 0, 2.8677645)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7600002, 0, 2.6677628)
 script = ExtResource("21_nqvox")
 kind = 6
 
@@ -1291,7 +1271,7 @@ script = ExtResource("21_nqvox")
 kind = 11
 
 [node name="RoofCat" type="Node3D" parent="Buildings/Extras_4" unique_id=1468745388]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 0.78200006)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 2.1819992)
 script = ExtResource("21_nqvox")
 kind = 10
 
