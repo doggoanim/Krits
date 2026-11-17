@@ -1,7 +1,7 @@
 class_name DialogueStage
 extends RefCounted
 ## The in-world half of a conversation: freezes the player, points the
-## camera at whoever is speaking and gets that speaker to turn toward the
+## camera at whoever is speaking (off for now, see FOCUS_CAMERA) and gets that speaker to turn toward the
 ## player — then puts everything back when the conversation ends.
 ##
 ## Everything here is optional. With no player (the main menu's name prompt)
@@ -13,6 +13,10 @@ extends RefCounted
 ##   face_toward(world_pos)         turn to face the player
 ##   restore_facing()               go back to how it was standing
 ##   talk_pop()                     a squash-and-stretch pop, once per spoken word
+
+## The camera used to swing over to the speaker's head during a conversation. It now
+## stays put (the player's own camera control is still locked); set true to bring it back.
+const FOCUS_CAMERA := false
 
 var player: Player
 
@@ -30,7 +34,7 @@ func begin(speaker: Node3D, tree: SceneTree) -> void:
 	player.face(_speaker.global_position - player.global_position)
 	if _speaker.has_method(&"face_toward"):
 		_speaker.face_toward(player.global_position)
-	if player.camera_rig:
+	if FOCUS_CAMERA and player.camera_rig:
 		player.camera_rig.begin_focus(_speaker, _focus_point())
 
 ## One beat of speech (the start of a word): the speaker pops, if it can.
@@ -42,7 +46,7 @@ func end() -> void:
 	if player == null:
 		return
 	if is_instance_valid(player):
-		if player.camera_rig:
+		if FOCUS_CAMERA and player.camera_rig:
 			player.camera_rig.end_focus()
 		player.machine.transition_to(&"Ground")
 	if is_instance_valid(_speaker) and _speaker.has_method(&"restore_facing"):
