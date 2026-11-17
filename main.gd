@@ -297,6 +297,8 @@ func _on_player_died() -> void:
 ## only then does the iris finish shutting (that part is _respawn_after_death()).
 ## All in real time — the hit-stop freeze would otherwise stretch the waits.
 func _play_death_sequence() -> void:
+	if _death_overlay != null:
+		_death_overlay.clear()   # never start a death with the player still lifted onto the top layer by an earlier one
 	_death_cam_hold = Node3D.new()   # the camera stays where it was while the player falls away
 	add_child(_death_cam_hold)
 	_death_cam_hold.global_position = player.global_position
