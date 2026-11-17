@@ -24,6 +24,7 @@ extends Node
 @export var spill_color := Color(1.0, 0.8, 0.5)
 @export var spill_out := 0.7                ## how far in front of the pane the light sits (m)
 @export var active_distance := 45.0         ## windows further than this from the player throw no light
+@export var max_spill_lights := 4           ## at most this many windows (the nearest to the player) throw light at once
 @export_group("")
 @export var fade_seconds := 2.5             ## real seconds a house takes to switch on or off
 
@@ -37,6 +38,7 @@ class House:
 
 var _houses: Array[House] = []
 var _last_step := -1
+var _nearest: Array[OmniLight3D] = []   ## the windows allowed to throw light right now
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -112,6 +114,8 @@ func _process(delta: float) -> void:
 	_last_step = step
 	var t := Choppy.time()
 	var player := get_tree().get_first_node_in_group(&"player") as Node3D
+	if new_step:
+		_pick_nearest(player)
 	for h in _houses:
 		var target := dusk if _awake(h) else 0.0
 		var before := h.level
@@ -121,6 +125,24 @@ func _process(delta: float) -> void:
 		if new_step or h.level != before:   # the flicker is held in poses; fades are smooth
 			h.applied = h.level
 			_apply(h, t, player)
+
+## Only the few windows nearest the player (and within active_distance) throw light; the rest
+## just glow. Every extra light costs the whole scene, so this keeps night time cheap.
+func _pick_nearest(player: Node3D) -> void:
+	_nearest.clear()
+	if player == null:
+		for h in _houses:
+			_nearest.append_array(h.lights)
+		return
+	var ranked: Array[Array] = []
+	for h in _houses:
+		for light in h.lights:
+			var d := player.global_position.distance_to(light.global_position)
+			if d < active_distance:
+				ranked.append([d, light])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	for i in mini(max_spill_lights, ranked.size()):
+		_nearest.append(ranked[i][1])
 
 ## Awake from dusk until its bedtime. After midnight the hour counts on from 24, so a
 ## bedtime of 25.5 means half past one.
@@ -137,6 +159,5 @@ func _apply(h: House, t: float, player: Node3D) -> void:
 		m.emission_energy_multiplier = energy
 		m.emission = tint
 	for light in h.lights:
-		var near := player == null or player.global_position.distance_to(light.global_position) < active_distance
-		light.visible = h.level > 0.02 and near
+		light.visible = h.level > 0.02 and _nearest.has(light)
 		light.light_energy = spill_energy * h.level * (1.0 + wobble)

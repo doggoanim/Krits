@@ -378,6 +378,11 @@ func _build_environment() -> void:
 
 	var env := Environment.new()
 	env.sky = Sky.new()
+	# The painted sky shader reads TIME (drifting clouds, twinkling stars), which makes the AUTOMATIC
+	# process mode re-render the sky's reflection map EVERY frame. The toon look barely uses sky
+	# reflections, so refresh it incrementally and at a small size instead; the visible sky is unaffected.
+	env.sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
+	env.sky.radiance_size = Sky.RADIANCE_SIZE_64
 	env.sky.sky_material = ProceduralSkyMaterial.new()
 	# A flat, near-neutral ambient color (not sourced from the sky) so a vivid
 	# sky doesn't tint the character/props blue — only the sky itself is blue.
