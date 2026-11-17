@@ -20,7 +20,7 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(3.8, 2, 9.2)
+size = Vector3(3.6, 2, 9.0)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1fccd"]
 size = Vector3(4, 0.2, 10.4)

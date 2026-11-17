@@ -19,7 +19,7 @@ uv1_world_triplanar = true
 albedo_color = Color(0.95, 0.88, 0.75, 1)
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(9, 0.2, 7)
+size = Vector3(8.8, 0.2, 6.8)
 
 [sub_resource type="BoxMesh" id="CeilingMesh"]
 size = Vector3(9, 0.2, 7)
