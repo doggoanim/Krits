@@ -66,6 +66,7 @@ uniform float gust = 1.0;
 // world/foliage_wind.gd while the player is moving inside a bush.
 uniform float step_bend = 0.0;
 uniform float rustle = 0.0;
+uniform float prop_height = 1.0;   // this prop's own height in the world (m), so a flower flattens as much as a tall grass blade does
 
 // Per-instance tint applied ONLY to strongly-green texels (leaves), so a tree's
 // trunk keeps its own colour. White = no change. See world/tree_variation.gd.
@@ -95,9 +96,10 @@ void vertex() {
 		vec2 away = wp.xz - foliage_pusher_pos.xz;
 		float near = 1.0 - smoothstep(0.0, foliage_pusher_radius, length(away));
 		near *= 1.0 - smoothstep(0.9, 1.8, abs(root_y - foliage_pusher_pos.y));   // only stepping on what is at your feet
-		float lean = near * step_bend * clamp(wp.y - root_y, 0.0, 1.5);
-		wp.xz += normalize(away + vec2(0.0001)) * lean * 0.8;
-		wp.y -= lean * 0.5;                                                      // pressed down, not just pushed aside
+		float world_h = height * length(MODEL_MATRIX[1].xyz);                  // height above the mesh's own base, so any pivot works
+		float amount = near * step_bend * pow(clamp(world_h / max(prop_height, 0.05), 0.0, 1.0), 1.2);
+		wp.xz += normalize(away + vec2(0.0001)) * amount * clamp(prop_height * 0.8, 0.2, 0.7);
+		wp.y -= amount * prop_height * 0.55;                                    // pressed down, not just pushed aside
 		VERTEX = (inverse(MODEL_MATRIX) * vec4(wp, 1.0)).xyz;
 	}
 }

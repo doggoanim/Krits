@@ -177,6 +177,9 @@ func _detect_kind() -> void:
 	var box := _local_box(_anchor)
 	var scale := _anchor.global_transform.basis.get_scale()
 	reach = clampf(maxf(box.size.x * scale.x, box.size.z * scale.z) * 0.5, 0.4, 1.8)
+	var height := maxf(box.size.y * scale.y, 0.1)
+	for mat in _materials:
+		mat.set_shader_parameter(&"prop_height", height)
 
 ## Bounding box of every mesh under `n`, in n's own space (approximate: ignores rotation of children).
 func _local_box(n: Node3D) -> AABB:
