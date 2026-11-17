@@ -71,20 +71,20 @@ static func overgrown_ledges() -> QuestData:
 	_texts(q)
 	return q
 
-## Side quest: Mrs. Tuppence's cat Biscuit is missing. Find three clues around
+## Side quest: Mrs. Vael's cat Biscuit is missing. Find three clues around
 ## town (fur by the road, paw prints by the well, a stolen bun at the bakery),
 ## which reveal where he's sleeping (the hilltop), and bring him home. Clue and
 ## cat props are QuestProps in the NPCs group of chesburg.tscn.
 static func missing_cat() -> QuestData:
 	var q := _make(&"missing_cat")
-	q.start_flag = &"tuppence_quest_accepted"
+	q.start_flag = &"vael_quest_accepted"
 	q.objectives = [
-		QuestObjective.make(QuestObjective.Kind.FLAG, &"tuppence_quest_accepted"),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"vael_quest_accepted"),
 		QuestObjective.make(QuestObjective.Kind.FLAG, &"cat_clue_1"),
 		QuestObjective.make(QuestObjective.Kind.FLAG, &"cat_clue_2"),
 		QuestObjective.make(QuestObjective.Kind.FLAG, &"cat_clue_3"),
 		QuestObjective.make(QuestObjective.Kind.FLAG, &"cat_found"),
-		QuestObjective.make(QuestObjective.Kind.FLAG, &"tuppence_got_cat"),
+		QuestObjective.make(QuestObjective.Kind.FLAG, &"vael_got_cat"),
 	]
 	q.reward_gold = 90
 	q.reward_items = {&"health_potion": 1, &"shield_restore": 1}

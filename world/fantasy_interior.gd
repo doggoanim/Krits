@@ -11,7 +11,7 @@ extends Node3D
 ## scene view, never saved into the scene, so the .tscn stays clean and this script is the
 ## single place to change the layout.
 
-## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room). SHOP: the shopkeeper's store. CAT_LADY / BAKERY / KIDS_HOME: Mrs. Tuppence's, Marta's and Yule's houses.
+## HOME: the player's cosy cottage. HALL: the mayor's study (a smaller, grander room). SHOP: the shopkeeper's store. CAT_LADY / BAKERY / KIDS_HOME: Mrs. Vael's, Marta's and Yule's houses.
 enum Layout { HOME, HALL, SHOP, CAT_LADY, BAKERY, KIDS_HOME }
 @export var layout := Layout.HOME
 ## Inner floor size (x, z) in metres.
@@ -153,7 +153,7 @@ func _build_shop() -> void:
 func _furniture(file: String) -> Node3D:
 	return InteriorParts.model(FURNITURE + file + ".glb")
 
-## Mrs. Tuppence's house: cosy and cat-crazy. A hearth with her armchair and yarn, a pet bed
+## Mrs. Vael's house: cosy and cat-crazy. A hearth with her armchair and yarn, a pet bed
 ## by the fire (Biscuit comes home to it), a cat tree, cat pictures, a couch, books and tea.
 func _build_cat_lady() -> void:
 	var hx := room_size.x * 0.5

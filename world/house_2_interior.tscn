@@ -60,7 +60,7 @@ height = 1.5
 radius = 0.4
 height = 1.8
 
-[sub_resource type="StandardMaterial3D" id="Mat_Tuppence"]
+[sub_resource type="StandardMaterial3D" id="Mat_Vael"]
 albedo_color = Color(0.7, 0.6, 0.85, 1)
 
 
@@ -163,19 +163,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4)
 script = ExtResource("2")
 spawn_id = &"enter"
 
-[node name="Tuppence" type="StaticBody3D" parent="."]
+[node name="Vael" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, -0.9)
 script = ExtResource("npc_script")
-dialogue_file = "res://dialogue/npcs/tuppence.dlg"
+dialogue_file = "res://dialogue/npcs/vael.dlg"
 head_height = 1.5
 
-[node name="Collision" type="CollisionShape3D" parent="Tuppence"]
+[node name="Collision" type="CollisionShape3D" parent="Vael"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_Npc")
 
-[node name="Mesh" type="MeshInstance3D" parent="Tuppence"]
+[node name="Mesh" type="MeshInstance3D" parent="Vael"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-material_override = SubResource("Mat_Tuppence")
+material_override = SubResource("Mat_Vael")
 mesh = SubResource("Mesh_Npc")
 
 [node name="FantasyInterior" type="Node3D" parent="."]
@@ -187,7 +187,7 @@ room_size = Vector2(7, 7)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, 1)
 script = ExtResource("quest_prop_script")
 kind = 4
-show_when = Array[StringName]([&"tuppence_got_cat"])
+show_when = Array[StringName]([&"vael_got_cat"])
 dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 facing_offset = 3.14159
 model = ExtResource("biscuit_model")

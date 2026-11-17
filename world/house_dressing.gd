@@ -49,7 +49,7 @@ const META := &"house_dressing"
 ## later changes here would silently not apply.)
 const SIGNS := {
 	"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse", "house_chesburg_6": "Shop",
-	"house_chesburg_2": "Tuppence", "house_chesburg_4": "Bakery", "house_chesburg_5": "Yule",
+	"house_chesburg_2": "Vael", "house_chesburg_4": "Bakery", "house_chesburg_5": "Yule",
 }
 ## Houses whose sign is a tall vertical board (letters stacked), and how far it hangs from
 ## the door sideways (metres; + is the viewer's right when facing the house).
