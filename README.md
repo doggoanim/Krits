@@ -379,3 +379,4 @@ Fall speed streaks start later (`FallEffects.streak_start_drop`, 14 m; the stret
 
 ### Water splash
 Redesigned (`player/water_splash_fx.gd`): a crown of pointed water petals that shoots up and slumps, a white foam flash, two crisp ripple rings, round droplets in arcs, and a central jet for big falls. Sizes are `PlayerEffects.WATER_SPLASH_EXIT/ENTER/BIG`; colors are the constants at the top of `WaterSplashFx`. Footstep splashes are unchanged.
+Biscuit (both the hilltop cat and the one at Mrs. Tuppence's) now uses `assets/npcs/cat_biscuit.glb`. A QuestProp with a real `model` keeps its look-here marker; the model's head faces +Z, hence `facing_offset = PI`.

@@ -31,6 +31,12 @@ static func build(kind: QuestProp.Kind) -> Node3D:
 			_marker(root, 1.3)
 	return root
 
+## Just the floating marker, for a QuestProp that has a real model (marker height by kind).
+static func build_marker(kind: QuestProp.Kind) -> Node3D:
+	var root := Node3D.new()
+	_marker(root, 1.0 if kind == QuestProp.Kind.CAT else 0.8)
+	return root
+
 # ------------------------------------------------------------------ helpers
 
 static func _toon(color: Color) -> ShaderMaterial:

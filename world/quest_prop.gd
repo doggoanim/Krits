@@ -45,8 +45,9 @@ func _ready() -> void:
 		return
 	face_player = kind == Kind.CAT
 	head_height = 0.6 if kind == Kind.CAT else 0.3
-	if model == null and kind != Kind.NONE:
-		_visual = QuestPropVisuals.build(kind)
+	if kind != Kind.NONE:
+		# A real `model` is built by NPC; it only needs the look-here marker added.
+		_visual = QuestPropVisuals.build(kind) if model == null else QuestPropVisuals.build_marker(kind)
 		add_child(_visual)
 		_marker = _visual.get_node_or_null(QuestPropVisuals.MARKER_NAME) as Node3D
 		if _marker != null:
@@ -62,7 +63,7 @@ func _process(delta: float) -> void:
 	if _marker != null and _marker.visible:
 		_marker.position.y = _marker_base_y + sin(_t * 2.2) * MARKER_BOB
 		_marker.rotation.y += delta * MARKER_SPIN
-	if kind == Kind.CAT and _visual != null:
+	if kind == Kind.CAT and _visual != null and model == null:
 		_visual.scale.y = 1.0 + sin(_t * 2.0) * IDLE_BREATH   # slow breathing
 
 func _can_interact() -> bool:

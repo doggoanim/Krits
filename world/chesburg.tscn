@@ -62,6 +62,7 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
+[ext_resource type="PackedScene" path="res://assets/npcs/cat_biscuit.glb" id="biscuit_model"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
@@ -1836,6 +1837,9 @@ dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 11.900001, -17.5)
 script = ExtResource("quest_prop_script")
 kind = 4
+model = ExtResource("biscuit_model")
+model_height = 0.7
+facing_offset = 3.14159
 show_when = Array[StringName]([&"cat_clue_1", &"cat_clue_2", &"cat_clue_3"])
 hide_when = &"cat_found"
 dialogue_file = "res://dialogue/npcs/biscuit.dlg"
@@ -1844,6 +1848,9 @@ dialogue_file = "res://dialogue/npcs/biscuit.dlg"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.8, 0, 12.8)
 script = ExtResource("quest_prop_script")
 kind = 4
+model = ExtResource("biscuit_model")
+model_height = 0.7
+facing_offset = 3.14159
 show_when = Array[StringName]([&"tuppence_got_cat"])
 dialogue_file = "res://dialogue/npcs/biscuit_home.dlg"
 
