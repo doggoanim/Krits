@@ -48,6 +48,27 @@ static func ridge(house: Node3D, xz: Vector2, reach := 1.5) -> Dictionary:
 				best["z"] = xz.y + dz * reach
 	return best
 
+## z of the front wall (the "wall" material, +Z side) around x, at door height, in the
+## house's own space; NAN when there is none. Used to put a door canopy flush on the wall.
+static func wall_front(house: Node3D, x: float, half_width := 1.5) -> float:
+	var best := NAN
+	var inverse := house.global_transform.affine_inverse()
+	for m in house.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		if mi.mesh == null or String(mi.name).containsn(COLLISION_NAME):
+			continue
+		var to_house := inverse * mi.global_transform
+		for surface in mi.mesh.get_surface_count():
+			var mat := mi.mesh.surface_get_material(surface)
+			if mat == null or not mat.resource_name.to_lower().contains("wall"):
+				continue
+			var verts: PackedVector3Array = mi.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			for v in verts:
+				var p := to_house * v
+				if absf(p.x - x) <= half_width and p.y > 0.3 and p.y < 2.5 and (is_nan(best) or p.z > best):
+					best = p.z
+	return best
+
 ## The height of triangle (a, b, c)'s plane at xz, or NAN if xz is outside it (seen from above).
 static func _height_in_triangle(xz: Vector2, a: Vector3, b: Vector3, c: Vector3) -> float:
 	var v0 := Vector2(b.x - a.x, b.z - a.z)

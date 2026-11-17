@@ -36,6 +36,7 @@ const CLEARANCE := 1.5          ## roof parts keep this far apart (metres)
 const DOOR_WALL_OFFSET := 0.33  ## from a Door_* node to the wall face in front of it
 const DOOR_FLOOR_DROP := 1.0    ## a Door_* node sits this far above the floor
 const MAX_DOOR_SETBACK := 1.0   ## a door deeper than this behind the footprint isn't dressed (the mayor's)
+const WALL_OVERLAP := 0.05      ## the entrance sinks this far into the wall so no gap shows
 const META := &"house_dressing"
 
 ## Houses to dress: nodes in the parent whose name contains one of these.
@@ -158,7 +159,10 @@ func _add_entrance(house: Node3D, front: float, style: int, shade: float) -> voi
 		x = door.position.x
 		wall = door.position.z + DOOR_WALL_OFFSET
 		floor_y = door.position.y - DOOR_FLOOR_DROP
-	_place(house, HouseParts.entrance(style, shade), Vector3(x, floor_y, wall))
+	var flush := RoofProbe.wall_front(house, x)   # the real wall face, not the eaves or the door node
+	if not is_nan(flush):
+		wall = flush
+	_place(house, HouseParts.entrance(style, shade), Vector3(x, floor_y, wall - WALL_OVERLAP))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
