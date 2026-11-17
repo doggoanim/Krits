@@ -78,6 +78,8 @@ uniform float prop_height = 1.0;   // this prop's own height in the world (m), s
 // trunk keeps its own colour. White = no change. See world/tree_variation.gd.
 uniform vec3 green_tint : source_color = vec3(1.0);
 
+const float MAX_BEND = 1.05;   // radians (about 60 degrees) a fully-trampled prop tips over
+
 void vertex() {
 	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float height = max(VERTEX.y - base_y, 0.0);
@@ -97,16 +99,25 @@ void vertex() {
 	}
 
 	if (step_bend > 0.0 && foliage_pusher_radius > 0.0) {
+		// The whole prop tips over away from the player's feet as one piece, hinged at its base:
+		// the direction and strength come from the prop's ORIGIN, not each vertex, so a flower's
+		// head can't be pushed one way on one side and the other way on the other (which squashed
+		// and wrapped it), and the rotation keeps its length instead of pressing it flat.
 		vec3 wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-		float root_y = MODEL_MATRIX[3].y;
-		vec2 away = wp.xz - foliage_pusher_pos.xz;
+		vec3 base = MODEL_MATRIX[3].xyz;
+		vec2 away = base.xz - foliage_pusher_pos.xz;
 		float near = 1.0 - smoothstep(0.0, foliage_pusher_radius, length(away));
-		near *= 1.0 - smoothstep(0.9, 1.8, abs(root_y - foliage_pusher_pos.y));   // only stepping on what is at your feet
+		near *= 1.0 - smoothstep(0.9, 1.8, abs(base.y - foliage_pusher_pos.y));   // only stepping on what is at your feet
 		float world_h = height * length(MODEL_MATRIX[1].xyz);                  // height above the mesh's own base, so any pivot works
-		float amount = near * step_bend * pow(clamp(world_h / max(prop_height, 0.05), 0.0, 1.0), 1.2);
-		wp.xz += normalize(away + vec2(0.0001)) * amount * clamp(prop_height * 0.8, 0.2, 0.7);
-		wp.y -= amount * prop_height * 0.55;                                    // pressed down, not just pushed aside
-		VERTEX = (inverse(MODEL_MATRIX) * vec4(wp, 1.0)).xyz;
+		float up = clamp(world_h / max(prop_height, 0.05), 0.0, 1.0);
+		float angle = near * step_bend * MAX_BEND * mix(0.55, 1.0, up);       // the tip leans a little further than the stem
+		vec2 dir = away / max(length(away), 0.0001);
+		vec3 axis = normalize(vec3(-dir.y, 0.0, dir.x));                       // horizontal, perpendicular to the lean direction
+		vec3 rel = wp - base;
+		float c = cos(angle);
+		float sn = sin(angle);
+		rel = rel * c + cross(axis, rel) * sn + axis * dot(axis, rel) * (1.0 - c);   // Rodrigues rotation about the hinge
+		VERTEX = (inverse(MODEL_MATRIX) * vec4(base + rel, 1.0)).xyz;
 	}
 }
 
