@@ -30,8 +30,10 @@ const SCATTER_SFX := [
 	"res://sounds/SFX/others/chicken_scatter_1.ogg", "res://sounds/SFX/others/chicken_scatter_2.ogg",
 	"res://sounds/SFX/others/chicken_scatter_3.ogg", "res://sounds/SFX/others/chicken_scatter_4.ogg",
 ]
-const CLUCK_GAP := Vector2(7.0, 18.0)   ## seconds between clucks from the flock
-const CLUCK_DB := -6.0
+const CLUCK_DB := -10.0                 ## each of the two looping cluck beds, at full day
+const CLUCK_RANGE := 16.0
+const CLUCK_FADE := 1.5                ## per second, as the hens wake and roost
+const SILENT_DB := -60.0
 const SCATTER_DB := -2.0
 const SCATTER_GAP_MSEC := 1500          ## one squawk at a time, even when the whole yard bolts
 
@@ -48,16 +50,14 @@ var _hens: Array[Hen] = []
 var _home := Vector3.ZERO
 var _base_y := 0.0   ## every hen stays at this height: they never climb or sink
 var _last_step := -1
-var _cluck_in := 5.0
-var _cluck_takes: Array[AudioStream] = []
+var _cluck_players: Array[AudioStreamPlayer3D] = []
+var _cluck_level := 0.0
 var _scatter_takes: Array[AudioStream] = []
-var _last_cluck := -1
 var _last_scatter := -1
 var _next_scatter_msec := 0
 
 func _ready() -> void:
 	_home = global_position
-	_cluck_takes = SpatialSfx.load_takes(CLUCK_SFX)
 	_scatter_takes = SpatialSfx.load_takes(SCATTER_SFX)
 	_base_y = _ground(_home).y
 	for i in count:
@@ -72,17 +72,15 @@ func _ready() -> void:
 		root.rotation.y = randf() * TAU
 		_hens.append(h)
 	_pose_all()
+	if not Engine.is_editor_hint():
+		_build_cluck_beds()
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var player := get_tree().get_first_node_in_group(&"player") as Node3D
 	var awake := WorldClock.day_amount() > 0.2   # roosting at night
-	if awake:
-		_cluck_in -= delta
-		if _cluck_in <= 0.0:
-			_cluck_in = randf_range(CLUCK_GAP.x, CLUCK_GAP.y)
-			_cluck()
+	_update_cluck_beds(awake, delta)
 	for h in _hens:
 		var root: Node3D = h.rig["root"]
 		root.visible = awake
@@ -150,19 +148,39 @@ func _scatter(h: Hen, from: Vector3) -> void:
 
 # --- sound ---------------------------------------------------------------------
 
-## A hen somewhere in the flock clucks, if the player can be near enough to hear it.
-func _cluck() -> void:
-	if _cluck_takes.is_empty() or _hens.is_empty():
+## The clucking recordings are loops: two quiet beds played from the middle of the flock,
+## fading in when the hens wake and out when they roost. 3D, so you only hear them nearby.
+func _build_cluck_beds() -> void:
+	for stream in SpatialSfx.load_takes(CLUCK_SFX):
+		var s := stream.duplicate() as AudioStream   # a copy, so the loop flag doesn't leak onto the shared resource
+		if s is AudioStreamOggVorbis:
+			(s as AudioStreamOggVorbis).loop = true
+		var p := AudioStreamPlayer3D.new()
+		p.stream = s
+		p.bus = &"SFX"
+		p.volume_db = SILENT_DB
+		p.unit_size = 4.0
+		p.max_distance = CLUCK_RANGE
+		add_child(p)
+		_cluck_players.append(p)
+
+func _update_cluck_beds(awake: bool, delta: float) -> void:
+	if _cluck_players.is_empty():
 		return
-	var peckers: Array[Hen] = []
+	_cluck_level = move_toward(_cluck_level, 1.0 if awake else 0.0, CLUCK_FADE * delta)
+	var centre := Vector3.ZERO
 	for h in _hens:
-		if h.state != State.FLEE:
-			peckers.append(h)
-	if peckers.is_empty():
-		return
-	_last_cluck = SpatialSfx.pick(_cluck_takes.size(), _last_cluck)
-	var h: Hen = peckers[randi() % peckers.size()]
-	SpatialSfx.play(self, _cluck_takes[_last_cluck], _pos(h) + Vector3.UP * 0.3, CLUCK_DB, Vector2(0.92, 1.08), 18.0, 3.0)
+		centre += _pos(h)
+	centre /= maxf(float(_hens.size()), 1.0)
+	for p in _cluck_players:
+		if _cluck_level < 0.02:
+			if p.playing:
+				p.stop()
+			continue
+		if not p.playing:
+			p.play(randf() * maxf(p.stream.get_length() - 0.1, 0.0))   # the two beds never line up
+		p.global_position = centre + Vector3.UP * 0.3
+		p.volume_db = CLUCK_DB + linear_to_db(_cluck_level)
 
 ## A hen bolts: a short squawk from her (rate-limited so the whole yard is not a wall of noise).
 func _squawk(h: Hen) -> void:
