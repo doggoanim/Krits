@@ -58,15 +58,28 @@ const META := &"house_dressing"
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
 
+## Click in the inspector to rebuild everything (e.g. after changing the lists below).
+@export_tool_button("Rebuild dressing") var rebuild_button := _dress_all
+
 func _ready() -> void:
+	# Deferred: in the editor the scene is still being assembled during _ready, so the
+	# houses' meshes and doors may not be in place yet.
+	_dress_all.call_deferred()
+
+func _dress_all() -> void:
 	var holder := get_parent()
-	if holder == null:
+	if holder == null or not is_inside_tree():
 		return
 	var index := 0
+	var signed := 0
 	for child in holder.get_children():
 		if child is Node3D and _matches(child.name):
 			_dress(child as Node3D, index + seed_offset)
+			if signs.has(String(child.name)):
+				signed += 1
 			index += 1
+	if Engine.is_editor_hint():
+		print("HouseDressing: dressed %d houses (%d signs)" % [index, signed])
 
 func _matches(node_name: String) -> bool:
 	for f in name_filter:
@@ -182,6 +195,7 @@ func _add_entrance(house: Node3D, front: float, style: int, shade: float) -> voi
 func _add_sign(house: Node3D, text: String) -> void:
 	var door := _door_of(house)
 	if door == null:
+		push_warning("HouseDressing: %s has no Door_* child, so it gets no sign" % house.name)
 		return
 	var floor_y := door.position.y - DOOR_FLOOR_DROP
 	# the same wall face (and the same sink into it) as the door entrance, so both sit at one distance
