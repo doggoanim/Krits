@@ -399,7 +399,6 @@ func _burst(pos: Vector3, direction: Vector3, spread_deg: float, mat: ParticlePr
 func _build_emitter(mat: ParticleProcessMaterial, amount: int, lifetime: float, one_shot: bool,
 		quad: QuadMesh) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
-	p.fixed_fps = Choppy.particle_fps()   # re-simulated in held steps
 	p.amount = amount
 	p.lifetime = lifetime
 	p.one_shot = one_shot
