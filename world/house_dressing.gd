@@ -207,7 +207,7 @@ func _add_sign(house: Node3D, text: String) -> void:
 	var wall := RoofProbe.wall_front(house, x, 1.5, floor_y + 0.3, floor_y + 2.5)
 	if is_nan(wall):
 		wall = door.position.z + DOOR_WALL_OFFSET
-	_place(house, HouseParts.hanging_sign(text, vertical_SIGNS.has(String(house.name))), Vector3(x, floor_y + float(SIGN_HEIGHTS.get(String(house.name), SIGN_HEIGHT)), wall - WALL_OVERLAP),
+	_place(house, HouseParts.hanging_sign(text, VERTICAL_SIGNS.has(String(house.name))), Vector3(x, floor_y + float(SIGN_HEIGHTS.get(String(house.name), SIGN_HEIGHT)), wall - WALL_OVERLAP),
 			0.0, float(SIGN_SCALES.get(String(house.name), 1.0)))
 
 func _door_of(house: Node3D) -> Node3D:
