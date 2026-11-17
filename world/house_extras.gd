@@ -2,8 +2,7 @@
 class_name HouseExtras
 extends Node
 ## The second dressing pass for the Chesburg houses (HouseDressing does roofs, chimneys,
-## signs and awnings): the everyday things that make a street look lived in — windows with
-## shutters and flower boxes that glow after dusk, a lantern by the door, bunting, laundry,
+## signs and awnings): the everyday things that make a street look lived in — a lantern by the door, bunting, laundry,
 ## a market stall, crates and barrels, a wood pile, wind chimes, a notice board whose
 ## notes follow the quest flags.
 ##
@@ -17,9 +16,6 @@ extends Node
 ## entries in PLAN).
 ##
 ## Keys per house in PLAN (all optional):
-##   windows        [-1, 1]   which sides of the door get a window (-1 left, +1 right, as seen facing the house)
-##   window_pairs   1 / 2     how many windows per side (wide houses take 2)
-##   shutter        Color     shutter paint
 ##   lantern        -1 / 1    side of the door for the hanging lantern
 ##   bunting        true      a string of pennants left of the door
 ##   laundry        true      a clothes line on the right-hand side of the yard
@@ -41,10 +37,6 @@ const PLAN := {
 	"house_chesburg_6": {"lantern": 1, "bunting": true, "stall": 4.4, "barrels": -3.0, "perches": true},
 }
 
-const WINDOW_FIRST := 1.95         ## door -> first window centre (m)
-const WINDOW_STEP := 1.9           ## door -> next window along the wall
-const WINDOW_HEIGHT := 1.55        ## window centre above the floor
-const WINDOW_CLEARANCE := 1.0      ## the wall must continue this far past a window's centre (shutters)
 const WALL_SINK := 0.08            ## wall decorations sink this far into the wall: no gap
 const LANTERN_SINK := 0.3          ## the lantern mounts this far inside the wall, same as the hanging signs (HouseDressing.WALL_OVERLAP)
 const LANTERN_X := 1.05
@@ -147,8 +139,6 @@ func _dress(house: Node3D, plan: Dictionary) -> int:
 		"span": RoofProbe.front_wall_span(house),
 		"count": 0,
 	}
-	if plan.has("windows"):
-		_add_windows(ctx, plan)
 	if plan.has("lantern"):
 		var x: float = ctx["x0"] + float(plan["lantern"]) * LANTERN_X
 		_slot(ctx, "Lantern", PropSlot.Kind.LANTERN, Vector3(x, float(ctx["floor"]) + LANTERN_HEIGHT, _wall(ctx, x) - LANTERN_SINK))
@@ -182,20 +172,14 @@ func _dress(house: Node3D, plan: Dictionary) -> int:
 func _wall(ctx: Dictionary, x: float) -> float:
 	return HouseMount.wall_z(ctx["house"], x, ctx["floor"])
 
-## Is there wall left at x (given the facade's width) for something `half` wide?
-func _fits(ctx: Dictionary, x: float, half: float) -> bool:
-	var span: Vector2 = ctx["span"]
-	return not is_nan(span.x) and x - half >= span.x and x + half <= span.y
-
 ## Adds one PropSlot for the house. `pos` is in the house's own space; the slot lives in the
 ## house's holder, which has the house's position and rotation but no scale, so the position
 ## is stretched by the house's scale here (and a squashed house doesn't squash its props).
-func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3, yaw := 0.0, color := Color(0.3, 0.5, 0.35), length := 4.0) -> void:
+func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3, yaw := 0.0, length := 4.0) -> void:
 	var house: Node3D = ctx["house"]
 	var slot := PropSlot.new()
 	slot.name = slot_name
 	slot.kind = kind
-	slot.color = color
 	slot.length = length
 	slot.position = pos * house.basis.get_scale()
 	slot.rotation.y = yaw
@@ -206,17 +190,6 @@ func _slot(ctx: Dictionary, slot_name: String, kind: PropSlot.Kind, pos: Vector3
 
 # ------------------------------------------------------------------ pieces
 
-func _add_windows(ctx: Dictionary, plan: Dictionary) -> void:
-	var shutter: Color = plan.get("shutter", Color(0.3, 0.5, 0.35))
-	for side in plan["windows"]:
-		for k in int(plan.get("window_pairs", 1)):
-			var x: float = ctx["x0"] + float(side) * (WINDOW_FIRST + WINDOW_STEP * k)
-			if not _fits(ctx, x, WINDOW_CLEARANCE):
-				continue
-			var shade := shutter if k == 0 else shutter.lerp(HouseParts.WOOD_DARK, 0.35)
-			_slot(ctx, "Window_%s%d" % ["L" if side < 0 else "R", k + 1], PropSlot.Kind.WINDOW,
-					Vector3(x, float(ctx["floor"]) + WINDOW_HEIGHT, _wall(ctx, x) - WALL_SINK), 0.0, shade)
-
 func _add_bunting(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]
 	if is_nan(span.x):
@@ -225,14 +198,14 @@ func _add_bunting(ctx: Dictionary) -> void:
 	var x_to: float = ctx["x0"] - 1.5   # stops short of the door, its sign and lantern
 	if x_to - x_from < 1.5:
 		return
-	_slot(ctx, "Bunting", PropSlot.Kind.BUNTING, Vector3(x_from, float(ctx["floor"]) + BUNTING_HEIGHT, _wall(ctx, x_from) + 0.2), 0.0, Color.WHITE, x_to - x_from)
+	_slot(ctx, "Bunting", PropSlot.Kind.BUNTING, Vector3(x_from, float(ctx["floor"]) + BUNTING_HEIGHT, _wall(ctx, x_from) + 0.2), 0.0, x_to - x_from)
 
 func _add_laundry(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]
 	if is_nan(span.y):
 		return
 	# beside the right-hand wall, running back from the front corner
-	_slot(ctx, "LaundryLine", PropSlot.Kind.LAUNDRY_LINE, Vector3(span.y + 0.9, float(ctx["floor"]), _wall(ctx, ctx["x0"]) - 0.8), PI * 0.5, Color.WHITE, 3.4)
+	_slot(ctx, "LaundryLine", PropSlot.Kind.LAUNDRY_LINE, Vector3(span.y + 0.9, float(ctx["floor"]), _wall(ctx, ctx["x0"]) - 0.8), PI * 0.5, 3.4)
 
 func _add_woodpile(ctx: Dictionary) -> void:
 	var span: Vector2 = ctx["span"]

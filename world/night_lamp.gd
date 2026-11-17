@@ -1,13 +1,12 @@
 @tool
 class_name NightLamp
 extends Node
-## Makes a light source follow the time of day: warm window panes, lanterns,
+## Makes a light source follow the time of day: lanterns, campfire-side lights,
 ## and the OmniLights that go with them are dark in daylight and glow once
 ## WorldClock says it is dusk (and flicker a little, like a flame).
 ##
 ## Add it as a child of whatever holds the lamp, then register what it should
-## drive — code that builds the lamp does this (HouseParts.window_lit /
-## lantern), or leave `auto_collect` on and it adopts every OmniLight3D/
+## drive — code that builds the lamp does this (HouseProps.lantern), or leave `auto_collect` on and it adopts every OmniLight3D/
 ## SpotLight3D underneath its parent by itself.
 ##
 ## In the editor it stays in its "day" state (no clock there), so the scene

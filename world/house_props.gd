@@ -1,8 +1,7 @@
 @tool
 class_name HouseProps
 extends RefCounted
-## Everyday town props built from simple shapes with the project's toon look: lit windows
-## with shutters and flower boxes, a hanging lantern, a laundry line, bunting, a market
+## Everyday town props built from simple shapes with the project's toon look: a hanging lantern, a laundry line, bunting, a market
 ## stall, crates and barrels, a wood pile, a notice board and wind chimes. Companion to
 ## HouseParts (roof/door pieces); like it, every builder returns a Node3D the caller
 ## positions, and nothing here knows about houses — see HouseExtras for who gets what.
@@ -19,9 +18,6 @@ const CREAM := Color(0.95, 0.9, 0.78)
 const BUNTING_COLORS: Array[Color] = [ROOF_RED, CREAM, Color(0.25, 0.45, 0.7), Color(0.95, 0.75, 0.25)]
 const LAUNDRY_COLORS: Array[Color] = [
 	Color(0.95, 0.95, 0.9), Color(0.5, 0.65, 0.85), Color(0.9, 0.55, 0.5), Color(0.9, 0.82, 0.45), Color(0.7, 0.8, 0.6),
-]
-const FLOWER_COLORS: Array[Color] = [
-	Color(0.95, 0.4, 0.5), Color(0.98, 0.85, 0.3), Color(0.85, 0.6, 0.95), Color(1.0, 1.0, 0.95),
 ]
 const CHIME_SFX: Array[String] = [
 	"res://sounds/SFX/others/chime_1.ogg", "res://sounds/SFX/others/chime_2.ogg",
@@ -103,51 +99,6 @@ static func _glow_light(parent: Node3D, pos: Vector3, energy: float, range_m: fl
 	l.position = pos
 	parent.add_child(l)
 	return l
-
-# ------------------------------------------------------------------ windows
-
-## A framed window with shutters, a sill and a flower box, centred on the origin (back of the
-## frame on the wall). The pane glows warm after dusk and throws a little light out front.
-static func window_lit(shutter_color: Color, flowers := true, width := 0.9, height := 1.15) -> Node3D:
-	var root := Node3D.new()
-	root.name = "Window"
-	var wood := HouseParts.WOOD_DARK
-	HouseParts.box(root, Vector3(width + 0.22, height + 0.22, 0.08), wood, Vector3(0, 0, 0.04))   # frame
-	var glass := _glow_material(Color(0.22, 0.32, 0.45))
-	var pane := MeshInstance3D.new()
-	var pane_mesh := BoxMesh.new()
-	pane_mesh.size = Vector3(width, height, 0.06)
-	pane.mesh = pane_mesh
-	pane.material_override = glass
-	pane.position = Vector3(0, 0, 0.09)
-	root.add_child(pane)
-	HouseParts.box(root, Vector3(0.05, height, 0.05), wood, Vector3(0, 0, 0.13))                  # mullion
-	HouseParts.box(root, Vector3(width, 0.05, 0.05), wood, Vector3(0, 0.1, 0.13))                 # transom
-	HouseParts.box(root, Vector3(width + 0.4, 0.08, 0.26), HouseParts.WOOD_LIGHT, Vector3(0, -height * 0.5 - 0.15, 0.13))   # sill
-	for sx in [-1.0, 1.0]:                                                                         # shutters, folded back flat on the wall
-		var shutter := HouseParts.box(root, Vector3(0.36, height + 0.12, 0.05), shutter_color, Vector3(sx * (width * 0.5 + 0.34), 0, 0.05))
-		shutter.rotation_degrees.y = sx * 8.0
-		for k in 3:
-			HouseParts.box(root, Vector3(0.28, 0.035, 0.02), shutter_color.darkened(0.25), Vector3(sx * (width * 0.5 + 0.34), (k - 1) * 0.3, 0.085))
-	if flowers:
-		_flower_box(root, width + 0.2, Vector3(0, -height * 0.5 - 0.34, 0.2))
-	var lamp := _lamp_root(root)
-	lamp.add_material(glass, 2.4)
-	lamp.add_light(_glow_light(root, Vector3(0, 0, 1.1), 1.0, 5.0), 1.0)
-	return root
-
-static func _flower_box(parent: Node3D, width: float, pos: Vector3) -> void:
-	var box := Node3D.new()
-	box.name = "FlowerBox"
-	box.position = pos
-	parent.add_child(box)
-	HouseParts.box(box, Vector3(width, 0.18, 0.22), HouseParts.WOOD_LIGHT, Vector3.ZERO)
-	HouseParts.box(box, Vector3(width - 0.06, 0.05, 0.16), Color(0.28, 0.4, 0.2), Vector3(0, 0.1, 0))   # leaves
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(pos.x * 100.0) + 7
-	for i in 6:
-		var x := lerpf(-width * 0.42, width * 0.42, float(i) / 5.0)
-		_sphere(box, 0.065, FLOWER_COLORS[rng.randi() % FLOWER_COLORS.size()], Vector3(x, 0.16 + rng.randf() * 0.04, rng.randf_range(-0.04, 0.04)))
 
 ## A lantern on a wall bracket: origin 0.3 m inside the wall, hangs 0.4 out; mount it sunk 0.3 m into the wall (as the hanging sign is). Glows and lights after dusk.
 static func lantern() -> Node3D:

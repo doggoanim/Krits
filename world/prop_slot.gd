@@ -1,27 +1,23 @@
 @tool
 class_name PropSlot
 extends Node3D
-## One everyday prop on a house (a window, a lantern, bunting, a stall, a cat...). HouseExtras
+## One everyday prop on a house (a lantern, bunting, a stall, a cat...). HouseExtras
 ## creates these the first time and — in the editor — makes them real, saved nodes: select
 ## one in the scene tree and MOVE, ROTATE or DELETE it like anything else, or duplicate it
 ## (Ctrl+D) for another. The slot only stores where it is and what kind it is; the
 ## meshes underneath are rebuilt from `kind` every time the scene loads and are never saved,
 ## so moving a prop never bloats the scene.
 ##
-## Change `kind` / `color` / `length` in the Inspector and it rebuilds itself on the spot.
+## Change `kind` / `length` in the Inspector and it rebuilds itself on the spot.
 
-enum Kind {
-	WINDOW, LANTERN, BUNTING, LAUNDRY_LINE, WOOD_PILE, STALL, CRATES_AND_BARRELS,
+enum Kind {   # explicit numbers: scenes store the number, so removed kinds leave a gap rather than renumbering the rest
+	LANTERN = 1, BUNTING, LAUNDRY_LINE, WOOD_PILE, STALL, CRATES_AND_BARRELS,
 	WIND_CHIMES, NOTICE_BOARD, CHICKENS, ROOF_CAT, BIRD_PERCH,
 }
 
 @export var kind := Kind.LANTERN:
 	set(v):
 		kind = v
-		_rebuild()
-@export var color := Color(0.3, 0.5, 0.35):   ## window: shutter paint
-	set(v):
-		color = v
 		_rebuild()
 @export_range(0.5, 12.0, 0.1) var length := 4.0:   ## bunting / laundry line: how long it is (m)
 	set(v):
@@ -56,8 +52,6 @@ func _rebuild() -> void:
 
 func _make() -> Node3D:
 	match kind:
-		Kind.WINDOW:
-			return HouseProps.window_lit(color, true)
 		Kind.LANTERN:
 			return HouseProps.lantern()
 		Kind.BUNTING:
