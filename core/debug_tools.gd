@@ -4,13 +4,15 @@ extends Node
 ##  F1 green slime  F2 spinner  F3 piercer  F4 trio  F5 big group (6)
 ##  F6 cancel fight  F7 god mode  F9 full heal
 ##  F10 respawn defeated overworld enemies  F11 delete save  F12 add gold
+##  ] (hold) fast-forwards the time of day, [ jumps one hour ahead
 ## Backslash (\) shows/hides the key list.
 ## NOTE: deliberately skips F8 — that's the Godot editor's own global "Stop"
 ## shortcut, which intercepts the keypress before the running game ever sees
 ## it and kicks you straight back to the editor. +100 Gold lives on F12 instead.
 
-const HELP := "\\ Hide help  F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save  F12 +100 Gold"
+const HELP := "\\ Hide help  F1 Green Slime  F2 Spinner  F3 Piercer  F4 Trio  F5 Big group\nF6 Cancel fight  F7 God mode  F9 Heal\nF10 Respawn defeated enemies  F11 Delete save  F12 +100 Gold\n] (hold) Fast-forward time  [ +1 hour"
 const DEBUG_GOLD := 100
+const FAST_FORWARD := 120.0   ## time scale while ] is held: a whole day in about five seconds
 
 var player: Player
 var encounters: EncounterManager
@@ -32,6 +34,12 @@ func _ready() -> void:
 	layer.add_child(_label)
 	_update_label()
 
+func _process(_delta: float) -> void:
+	# Time of day: hold ] to race through it (see WorldClock.time_scale).
+	WorldClock.time_scale = FAST_FORWARD if Input.is_physical_key_pressed(KEY_BRACKETRIGHT) else 1.0
+	if _label.visible:
+		_update_label()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
@@ -42,6 +50,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F4: _fight([EnemyLibrary.green_slime(), EnemyLibrary.spinner(), EnemyLibrary.piercer()])
 		KEY_F5: _fight([EnemyLibrary.green_slime(), EnemyLibrary.green_slime(), EnemyLibrary.spinner(),
 				EnemyLibrary.spinner(), EnemyLibrary.piercer(), EnemyLibrary.piercer()])
+		KEY_BRACKETLEFT: WorldClock.set_hour(WorldClock.hour + 1.0)
 		KEY_BACKSLASH: _label.visible = not _label.visible
 		KEY_F6: _cancel()
 		KEY_F7:
@@ -68,4 +77,4 @@ func _fight(list: Array) -> void:
 	encounters.begin_encounter(roster)   # no overworld enemies: straight to the dissolve
 
 func _update_label() -> void:
-	_label.text = HELP + ("\nGOD MODE ON" if Game.god_mode else "")
+	_label.text = HELP + "\nTime " + WorldClock.time_string() + ("\nGOD MODE ON" if Game.god_mode else "")
