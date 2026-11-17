@@ -172,4 +172,3 @@ skip = PackedStringArray()
 
 [node name="WoodenSwordChest" parent="." unique_id=1664102870 instance=ExtResource("6_kbm7p")]
 transform = Transform3D(3.1391647e-07, 0, -1, 0, 1, 0, 1, 0, 3.1391647e-07, 3.5799506, 0, 0.5544308)
-chest_id = &"hidden_chess_1"
