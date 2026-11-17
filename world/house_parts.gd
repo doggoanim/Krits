@@ -192,11 +192,18 @@ static func weathervane() -> Node3D:
 ## short brackets, with the board hanging from it on two chains, `text` on both faces.
 ## The origin is the rod's height on the wall; +Z points out of the house; the board hangs
 ## below the origin.
-static func hanging_sign(text: String) -> Node3D:
+static func hanging_sign(text: String, vertical := false) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Sign"
 	var board_w := maxf(1.6, text.length() * 0.2 + 0.5)
 	var board_h := 0.75
+	var letters := text
+	var font := 48
+	if vertical:   # a tall narrow board with the letters stacked top to bottom
+		letters = "\n".join(Array(text.to_upper().split("")))
+		font = 36
+		board_w = 0.8
+		board_h = text.length() * 0.27 + 0.3
 	var reach := 0.3            ## how far the plaque stands off the wall
 	var chain := 0.3
 	var rod_w := board_w - 0.1
@@ -215,8 +222,8 @@ static func hanging_sign(text: String) -> Node3D:
 	box(pivot, Vector3(board_w, board_h, 0.13), WOOD_LIGHT, Vector3(0, cy, 0))               # board
 	for side in [1.0, -1.0]:
 		var label := Label3D.new()
-		label.text = text
-		label.font_size = 48
+		label.text = letters
+		label.font_size = font
 		label.pixel_size = 0.007
 		label.modulate = Color(0.2, 0.1, 0.05)
 		label.outline_size = 0
