@@ -1,3 +1,4 @@
+@tool
 class_name HouseParts
 extends RefCounted
 ## Small building pieces made from simple shapes with the project's toon shader: chimneys

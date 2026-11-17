@@ -1,3 +1,4 @@
+@tool
 class_name FireFx
 extends RefCounted
 ## One look for every fire in the game: hand-painted, stylised flames (shading/flame.gdshader)

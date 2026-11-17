@@ -1,3 +1,4 @@
+@tool
 class_name InteriorParts
 extends RefCounted
 ## Fantasy furniture and magic bits for rooms, built from simple shapes with the toon

@@ -1,3 +1,4 @@
+@tool
 class_name ModelUtil
 extends RefCounted
 ## Shared helpers for loading a rigged glTF character model consistently

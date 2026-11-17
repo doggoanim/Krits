@@ -1,3 +1,4 @@
+@tool
 class_name RoofProbe
 extends RefCounted
 ## Reads a house's roof from its own triangles: how high the roof surface is at a spot

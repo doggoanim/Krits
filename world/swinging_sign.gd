@@ -1,3 +1,4 @@
+@tool
 class_name SwingingSign
 extends Node3D
 ## The hanging part of a shop sign (chains, board, lettering) as a pendulum around the
