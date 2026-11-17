@@ -6,8 +6,7 @@ extends Node3D
 ## the perch farthest from you. They sleep (vanish) at night.
 ##
 ## Drop one Birds node anywhere in the level; it builds its flock from CritterParts once the
-## perches exist. Purely decorative: no collision, no sound (the birdsong bed lives in
-## AmbienceLayers).
+## perches exist. Purely decorative: no collision, no sound (the bird sounds are part of the level's grassland ambience).
 
 @export var bird_count := 7
 @export var perch_group := &"bird_perch"

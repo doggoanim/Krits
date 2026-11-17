@@ -410,7 +410,7 @@ Everything that makes Chesburg and the well feel alive is a small, separate piec
 - **Barks** — `NpcBarks` child + `data/barks.cfg`: a line floats above the character when you walk past, by time of day or story flag.
 - **Animals** — `Birds` (flock on the `bird_perch` points, flee when you approach), `RoofCat`, `Chickens`; all built from `CritterParts`.
 - **Wind** — cloth (`cloth_wind.gdshader` + `ClothSway`) and `WindChimes` follow the shared gust field (`WindGusts`), like the grass and signs.
-- **Sound** — `AmbienceLayers` crossfades birdsong (day) and crickets (night); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/birdsong_loop.ogg`, `crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
+- **Sound** — `AmbienceLayers` fades in crickets at night (the day bed, birds included, is the level's grassland ambience); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
 - **Night extras** — `NightOnly` (fireflies only after dark, dust motes only by day), `Campfire` (lit after dark; Brant sits by it in the evening).
 
 ### Stepped (choppy) animation
