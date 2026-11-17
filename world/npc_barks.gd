@@ -79,6 +79,11 @@ func _speak() -> void:
 	var line := pick_line(String(_owner_node.name))
 	if line.is_empty():
 		return
+	say(line)
+
+## Shows `line` above the character for a few seconds (also used by NpcChat for its conversations).
+## Returns how long the line stays up.
+func say(line: String) -> float:
 	_last_bark_msec = Time.get_ticks_msec()
 	_label.text = line
 	_label.global_position = _owner_node.global_position + Vector3.UP * height
@@ -91,6 +96,7 @@ func _speak() -> void:
 	_tween.tween_interval(stay)
 	_tween.tween_property(_label, "modulate:a", 0.0, 0.5)
 	_tween.tween_callback(func() -> void: _label.visible = false)
+	return stay + 0.75
 
 ## A line for `who` right now (flags and time of day), or "" when the file has nothing.
 static func pick_line(who: String) -> String:

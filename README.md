@@ -412,6 +412,10 @@ Everything that makes Chesburg and the well feel alive is a small, separate piec
 - **Wind** — cloth (`cloth_wind.gdshader` + `ClothSway`) and `WindChimes` follow the shared gust field (`WindGusts`), like the grass and signs.
 - **Sound** — `AmbienceLayers` fades in crickets at night (the day bed, birds included, is the level's grassland ambience); `SpatialOneShots` plays a hammer or an axe from a place during working hours. The audio is synthesised: `sounds/Ambience/crickets_loop.ogg`, `sounds/SFX/others/hammer_tink.ogg`, `wood_chop.ogg`, `chime_1-4.ogg`.
 - **Night extras** — `NightOnly` (fireflies only after dark, dust motes only by day), `Campfire` (lit after dark; Brant sits by it in the evening).
+- **Chimney smoke** — `SmokeSchedule` (`world/smoke_schedule.gd`, built into every smoking chimney): cold while the house sleeps, a thin wisp when it wakes, thicker at meal times; each house's hours are the `PROFILES` table at the top of that file (the baker rises early).
+- **Shop life** — `ShopLife` (`world/shop_life.gd`, under `Buildings`): an OPEN / CLOSED board by the shop door flips with the door's hours, and the stall, crates and barrels outside are carried out in the morning and taken in at dusk (`goods_from` / `goods_to`; their collision is off while away).
+- **Neighbour chats** — `NpcChat` (`world/npc_chat.gd`): two NPCs walk to either side of a meeting spot, face each other and trade lines (`data/chats.cfg`) in a window of the day, once both quests are done (`require_flags`). Brant and Fenn meet at `NPCs/Routes/ChatSpot_BrantFenn` from 15:00 to 17:30; move that marker if a path is blocked (the output says so). `NpcSchedule` has `begin_chat` / `end_chat` for this; `NpcBarks.say()` shows the lines.
+- **Jumping fish** — `FishJumps` (`world/fish_jumps.gd`, `Props/LakeFish`): fish leap out of the lake with ripple rings, spray and a soft plip, mostly at dawn and dusk. Point `volume_path` at another lake's WaterVolume to add more.
 
 ### Stepped (choppy) animation
 

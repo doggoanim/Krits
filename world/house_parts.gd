@@ -150,6 +150,7 @@ static func _smoke(at: Vector3) -> CPUParticles3D:
 	p.mesh = quad
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	p.visibility_aabb = AABB(Vector3(-3, -1, -3), Vector3(6, 8, 6))
+	p.add_child(SmokeSchedule.new())   # thin when the house is up, thick at meals, cold at night
 	return p
 
 # ------------------------------------------------------------- roof extras

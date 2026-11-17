@@ -47,6 +47,9 @@ var _anchor_facing := false      ## has arrived at a STAND spot: settle into its
 
 var _bob_step := -1   ## last Choppy step the walk bob was posed on
 
+var _chat_hold := false          ## taken over by an NpcChat: walk to the chat spot and stay, facing the partner
+var _chat_look := Vector3.ZERO   ## the point the NPC faces while chatting
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # keeps running while its NPC is switched off indoors
 	_npc = get_parent() as NPC
@@ -89,6 +92,8 @@ func _refresh(snap: bool) -> void:
 		return
 	_stop = next
 	_resolve_anchor()
+	if _chat_hold and not snap:
+		return   # mid-chat: the new stop is picked up when the chat ends (end_chat())
 	if snap:
 		_snap_to_stop()
 	elif _stop.mode == ScheduleStop.Mode.INSIDE:
@@ -134,6 +139,41 @@ func _snap_to_stop() -> void:
 	_npc.global_position = _ground(_anchor)
 	_npc.rotation.y = _anchor_yaw
 	_wait = randf_range(1.0, 4.0)
+
+# --- chats (see NpcChat) ---------------------------------------------------------
+
+## True when this NPC is out and about (not indoors, not already in a chat) and can be asked
+## to meet someone.
+func can_chat() -> bool:
+	return not _chat_hold and _state != State.HIDDEN and _npc != null and _npc.available
+
+## Walks to `point` and stays there facing `look_at` until end_chat().
+func begin_chat(point: Vector3, look_at: Vector3) -> void:
+	_chat_hold = true
+	_chat_look = look_at
+	_glance = 0.0
+	_walk_to(_ground(point), false)
+
+## True once the NPC has reached the chat spot.
+func chat_ready() -> bool:
+	return _chat_hold and _state == State.IDLE
+
+## Back to the daily routine.
+func end_chat() -> void:
+	if not _chat_hold:
+		return
+	_chat_hold = false
+	_anchor_facing = false
+	if _stop == null:
+		return
+	if _stop.mode == ScheduleStop.Mode.INSIDE:
+		_walk_to(_anchor, true)
+	else:
+		_walk_to(_pick_stand_point(), false)
+
+## A straight, unobstructed walk from where the NPC is now to `point`?
+func can_reach(point: Vector3) -> bool:
+	return _npc != null and _clear_path(_npc.global_position, point)
 
 # --- moving ----------------------------------------------------------------
 
@@ -190,7 +230,7 @@ func _process(delta: float) -> void:
 		return
 	var player := get_tree().get_first_node_in_group(&"player") as Node3D
 	var near_player := player != null and player.global_position.distance_to(_npc.global_position) < notice_radius
-	if near_player:
+	if near_player and not _chat_hold:
 		_look_at(player.global_position, delta)
 		_apply_bob(0.0, delta)
 		return
@@ -227,6 +267,9 @@ func _arrive() -> void:
 
 func _step_idle(delta: float) -> void:
 	_apply_bob(0.0, delta)
+	if _chat_hold:
+		_look_at(_chat_look, delta)   # chatting: stays put, facing the partner
+		return
 	if _stop.mode == ScheduleStop.Mode.STAND and _anchor_facing:
 		_turn_to(_anchor_yaw, delta)   # settle into the spot's own facing
 	_wait -= delta
