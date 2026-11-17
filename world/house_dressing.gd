@@ -46,6 +46,8 @@ const META := &"house_dressing"
 @export var seed_offset := 0
 ## Name signs hung above a house's door: house node name -> text.
 @export var signs := {"house_chesburg_1": "Krits", "house_chesburg_3": "Myr. Arse"}
+## Size of a house's sign (house node name -> scale; 1 if absent).
+@export var sign_scales := {"house_chesburg_3": 0.65}
 ## Chimneys puff smoke.
 @export var chimney_smoke := true
 
@@ -88,12 +90,12 @@ func _clear(house: Node3D) -> void:
 
 ## Adds `part` to the house (no owner: editor-only, never saved), undoing the house's own
 ## scale so a squashed or stretched house doesn't squash its chimney.
-func _place(house: Node3D, part: Node3D, pos: Vector3, yaw := 0.0) -> void:
+func _place(house: Node3D, part: Node3D, pos: Vector3, yaw := 0.0, extra_scale := 1.0) -> void:
 	part.set_meta(META, true)
 	part.position = pos
 	part.rotation.y = yaw
 	var s := house.basis.get_scale()
-	part.scale = Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01))
+	part.scale = Vector3(1.0 / maxf(s.x, 0.01), 1.0 / maxf(s.y, 0.01), 1.0 / maxf(s.z, 0.01)) * extra_scale
 	house.add_child(part)
 
 func _free_spot(taken: Array[Vector2], xz: Vector2) -> bool:
@@ -179,7 +181,8 @@ func _add_sign(house: Node3D, text: String) -> void:
 	var wall := RoofProbe.wall_front(house, door.position.x, 1.5, floor_y + 0.3, floor_y + 2.5)
 	if is_nan(wall):
 		wall = door.position.z + DOOR_WALL_OFFSET
-	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - WALL_OVERLAP))
+	_place(house, HouseParts.hanging_sign(text), Vector3(door.position.x, floor_y + SIGN_HEIGHT, wall - WALL_OVERLAP),
+			0.0, float(sign_scales.get(String(house.name), 1.0)))
 
 func _door_of(house: Node3D) -> Node3D:
 	for child in house.get_children():
