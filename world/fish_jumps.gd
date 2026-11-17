@@ -3,7 +3,7 @@ extends Node
 ## Now and then a fish leaps out of a lake: a small arc, a splash where it leaves and a splash
 ## where it lands (ripple rings, a spray of droplets, a soft plip). Most at dawn and dusk, rare in
 ## the middle of the day and the night. The fish are built from FishModel (the same ones you
-## catch); the arc is simulated smoothly but shown in held poses (see Choppy).
+## catch); the arc itself moves smoothly, while the ripple rings are shown in held poses (see Choppy).
 ##
 ## Point `volume_path` at the lake's WaterVolume (its position, `radius` and `surface_y` give the
 ## pool). Nothing happens while the player is further than `active_distance` from the lake.
@@ -83,8 +83,8 @@ func _process(delta: float) -> void:
 			_land(l)
 			l.fish.queue_free()
 			_leaps.remove_at(i)
-		elif new_step:
-			_pose(l)
+		else:
+			_pose(l)   # the leap is quick, so its arc is drawn smoothly every frame (stepping it looked jittery)
 	if new_step:
 		_age_rings()
 
