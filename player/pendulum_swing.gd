@@ -4,7 +4,7 @@ extends RefCounted
 ## the shield, the hip lantern): motion of the anchor it hangs from, measured
 ## in the anchor's own frame, pulls it off-centre — forward/back speed pitches
 ## it, sideways speed rolls it — so it trails when you run, kicks when you stop
-## and settles back. step() returns (pitch, roll) in radians; apply it as
+## and settles back. step() returns (pitch, roll) in radians, held in stepped poses; apply it as
 ## `pivot.rotation = Vector3(s.x, 0.0, s.y)`.
 
 var strength := 0.06   ## radians of swing per m/s of anchor speed
@@ -14,6 +14,8 @@ var damping := 4.0     ## higher = settles faster, less wobble
 
 var _angle := Vector2.ZERO
 var _velocity := Vector2.ZERO
+var _shown := Vector2.ZERO   ## the pose currently held (see Choppy)
+var _shown_step := -1
 
 func step(local_velocity: Vector3, delta: float) -> Vector2:
 	var target := Vector2(
@@ -22,4 +24,8 @@ func step(local_velocity: Vector3, delta: float) -> Vector2:
 	var accel := (target - _angle) * follow * follow - _velocity * 2.0 * damping
 	_velocity += accel * delta
 	_angle += _velocity * delta
-	return _angle
+	# The spring runs smoothly; what is shown is a held pose that changes once per step.
+	if Choppy.index() != _shown_step:
+		_shown_step = Choppy.index()
+		_shown = _angle
+	return _shown

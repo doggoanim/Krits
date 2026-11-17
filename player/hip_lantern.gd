@@ -161,7 +161,7 @@ func _process(delta: float) -> void:
 	var swing := _pendulum.step(global_basis.inverse() * velocity, delta)
 	_pivot.rotation = Vector3(swing.x, 0.0, swing.y)
 	if _lit and flicker_amount > 0.0:   # a flame wavers a little; two sines so it never settles into a pattern
-		var t := Time.get_ticks_msec() / 1000.0 * flicker_speed
+		var t := Choppy.time() * flicker_speed   # held poses
 		var f := sin(t) * 0.6 + sin(t * 2.3 + 1.7) * 0.4
 		_light.light_energy = light_energy * level_boost * (1.0 + f * flicker_amount)
 	elif _light != null:
