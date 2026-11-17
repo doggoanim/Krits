@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://e8rvqd3sxvy3"]
 
-[ext_resource type="Script" uid="uid://cs21yl2vng0jt" path="res://world/shop_keeper.gd" id="1_shopkeeper"]
 [ext_resource type="Script" uid="uid://c4mis6pkpkvbk" path="res://world/spawnpoint.gd" id="1_spawn"]
 [ext_resource type="Script" uid="uid://cw6em46qlfo02" path="res://world/well_entrance.gd" id="1_well_entrance"]
 [ext_resource type="PackedScene" uid="uid://bqxxfugls4puo" path="res://assets/world/terrain/grass_terrain.glb" id="2_256to"]
@@ -26,6 +25,7 @@
 [ext_resource type="Shader" uid="uid://cr440h5lag4q3" path="res://world/water/water.gdshader" id="18_water2_shader"]
 [ext_resource type="PackedScene" uid="uid://1wp1ik5osfqg" path="res://assets/world/well.glb" id="20_38blh"]
 [ext_resource type="PackedScene" uid="uid://bdjiv52blcoau" path="res://assets/world/nature/tree_stump_2.glb" id="20_jq25j"]
+[ext_resource type="Script" uid="uid://bowbmsr4846ax" path="res://world/prop_slot.gd" id="21_nqvox"]
 [ext_resource type="PackedScene" uid="uid://clkm5ngwo17ku" path="res://assets/world/nature/tree_chesburg_6.glb" id="24_i8mdn"]
 [ext_resource type="PackedScene" uid="uid://dsfqxgni7uamq" path="res://assets/world/house_chesburg_3.glb" id="24_iolvd"]
 [ext_resource type="PackedScene" uid="uid://cjy6rhmkjqyp2" path="res://assets/world/terrain/nocol_rock_terrain.glb" id="25_3y8fk"]
@@ -58,25 +58,25 @@
 [ext_resource type="PackedScene" uid="uid://dag8n5ljmek1r" path="res://assets/world/terrain/nocol_grass_terrain.glb" id="62_7686p"]
 [ext_resource type="Script" uid="uid://cu142potrb7us" path="res://world/butterflies.gd" id="91_butterflies"]
 [ext_resource type="Script" uid="uid://836tt2ujsv4i" path="res://world/tree_variation.gd" id="99_tree_variation"]
+[ext_resource type="Script" uid="uid://c06qcytcwgqab" path="res://world/npc_barks.gd" id="barks_script"]
+[ext_resource type="Script" uid="uid://evxd5miq588r" path="res://world/birds.gd" id="birds_script"]
 [ext_resource type="PackedScene" uid="uid://b2xyt50ku3keo" path="res://assets/npcs/cat_biscuit.glb" id="biscuit_model"]
+[ext_resource type="Script" uid="uid://cgusqjw1k444n" path="res://world/campfire.gd" id="campfire_script"]
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
 [ext_resource type="AudioStream" uid="uid://ci84xm6i6olb1" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="Script" uid="uid://b8mj2xaqcf7na" path="res://world/house_dressing.gd" id="house_dressing_script"]
+[ext_resource type="Script" uid="uid://0cbpy1r6y3yx" path="res://world/house_extras.gd" id="house_extras_script"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
+[ext_resource type="Script" uid="uid://w4i06xqwevvb" path="res://world/ambience_layers.gd" id="layers_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
+[ext_resource type="Script" uid="uid://cl8jns3e7or22" path="res://world/night_only.gd" id="night_only_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
+[ext_resource type="Script" uid="uid://ban461c33ahm0" path="res://world/npc_schedule.gd" id="schedule_script"]
+[ext_resource type="Script" uid="uid://w83wf1mkiod5" path="res://world/schedule_stop.gd" id="stop_script"]
+[ext_resource type="Script" uid="uid://dbjdxjdmuvloq" path="res://world/time_of_day.gd" id="tod_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
-[ext_resource type="Script" path="res://world/time_of_day.gd" id="tod_script"]
-[ext_resource type="Script" path="res://world/ambience_layers.gd" id="layers_script"]
-[ext_resource type="Script" path="res://world/house_extras.gd" id="house_extras_script"]
-[ext_resource type="Script" path="res://world/birds.gd" id="birds_script"]
-[ext_resource type="Script" path="res://world/night_only.gd" id="night_only_script"]
-[ext_resource type="Script" path="res://world/npc_schedule.gd" id="schedule_script"]
-[ext_resource type="Script" path="res://world/schedule_stop.gd" id="stop_script"]
-[ext_resource type="Script" path="res://world/npc_barks.gd" id="barks_script"]
-[ext_resource type="Script" path="res://world/campfire.gd" id="campfire_script"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
 albedo_color = Color(0.30980393, 0.72156864, 0.05882353, 1)
@@ -161,41 +161,24 @@ top_radius = 10.0
 bottom_radius = 10.0
 height = 0.693
 
-[sub_resource type="CapsuleShape3D" id="Shape_ShopBody"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_ShopRobe"]
-albedo_color = Color(0.8117647, 0.6627451, 0.19215687, 1)
-
-[sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
-radius = 0.4
-height = 1.8
-
 [sub_resource type="CapsuleShape3D" id="Shape_YuleBody"]
 radius = 0.35
 height = 1.5
-
-[sub_resource type="BoxShape3D" id="Shape_HikerPack"]
-size = Vector3(1.2, 1.2, 1.2)
-
-[sub_resource type="StandardMaterial3D" id="Mat_HikerPack"]
-albedo_color = Color(0.7, 0.45, 0.25, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_HikerPack"]
-size = Vector3(0.5, 0.65, 0.35)
 
 [sub_resource type="Resource" id="Stop_YuleDay"]
 script = ExtResource("stop_script")
 from_hour = 6.5
 mode = 1
-wander_radius = 3.0
 
 [sub_resource type="Resource" id="Stop_YuleHome"]
 script = ExtResource("stop_script")
 from_hour = 20.0
 mode = 2
 place = NodePath("Buildings/house_chesburg_5/House5EntranceSpawn")
+
+[sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
+radius = 0.4
+height = 1.8
 
 [sub_resource type="Resource" id="Stop_BrantDay"]
 script = ExtResource("stop_script")
@@ -206,13 +189,11 @@ wander_radius = 2.0
 [sub_resource type="Resource" id="Stop_BrantCamp"]
 script = ExtResource("stop_script")
 from_hour = 18.5
-mode = 0
 place = NodePath("NPCs/Routes/BrantByFire")
 
 [sub_resource type="Resource" id="Stop_FennSpot"]
 script = ExtResource("stop_script")
 from_hour = 6.0
-mode = 0
 
 [sub_resource type="Resource" id="Stop_FennStroll"]
 script = ExtResource("stop_script")
@@ -223,7 +204,15 @@ wander_radius = 2.5
 [sub_resource type="Resource" id="Stop_FennBack"]
 script = ExtResource("stop_script")
 from_hour = 14.5
-mode = 0
+
+[sub_resource type="BoxShape3D" id="Shape_HikerPack"]
+size = Vector3(1.2, 1.2, 1.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_HikerPack"]
+albedo_color = Color(0.7, 0.45, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_HikerPack"]
+size = Vector3(0.5, 0.65, 0.35)
 
 [node name="Chesburg" type="Node3D" unique_id=1195529557]
 
@@ -231,10 +220,10 @@ mode = 0
 script = ExtResource("chesburg_ambience_script")
 stream = ExtResource("chesburg_ambience_stream")
 
-[node name="AmbienceLayers" type="Node" parent="."]
+[node name="AmbienceLayers" type="Node" parent="." unique_id=1588047148]
 script = ExtResource("layers_script")
 
-[node name="TimeOfDay" type="Node" parent="."]
+[node name="TimeOfDay" type="Node" parent="." unique_id=2185675]
 script = ExtResource("tod_script")
 
 [node name="Terrain" type="Node3D" parent="." unique_id=523119175]
@@ -1020,7 +1009,7 @@ transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 script = ExtResource("house_dressing_script")
 name_filter = PackedStringArray("house_chesburg")
 
-[node name="HouseExtras" type="Node" parent="Buildings"]
+[node name="HouseExtras" type="Node" parent="Buildings" unique_id=311763749]
 script = ExtResource("house_extras_script")
 name_filter = PackedStringArray("house_chesburg")
 
@@ -1062,9 +1051,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.8000002)
 script = ExtResource("47_door")
 target_level = "res://world/house_6_interior.tscn"
 target_spawn_id = &"enter"
-prompt_text = "Press E to enter"
 open_from = 7.0
 open_to = 21.0
+prompt_text = "Press E to enter"
 
 [node name="House6EntranceSpawn" type="Node3D" parent="Buildings/house_chesburg_6" unique_id=470006002]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.4000006)
@@ -1126,12 +1115,192 @@ transform = Transform3D(1, 0, 0, 0, 0.099999964, 0, 0, 0, 3.78, -9.6, 0.10000032
 [node name="nocol_dirt_terrain2" parent="Buildings" unique_id=1090212037 instance=ExtResource("10_a5ueg")]
 transform = Transform3D(-4.3711385e-08, 0, 6.426, 0, 0.09999996, 0, -0.99999994, 0, -2.808894e-07, 7.0414987, 0.10000032, -24.769499)
 
+[node name="Extras_1" type="Node3D" parent="Buildings" unique_id=2062734962]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.4791, 0, 6.687791)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_1" unique_id=717491344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 2.15, 2.2671316)
+script = ExtResource("21_nqvox")
+
+[node name="WoodPile" type="Node3D" parent="Buildings/Extras_1" unique_id=2065278503]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.3899877, 0, 1.3671315)
+script = ExtResource("21_nqvox")
+kind = 4
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_1" unique_id=1084693759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.513274, -3.1)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_1" unique_id=773919708]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.622246, 0.100000024)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="Chickens" type="Node3D" parent="Buildings/Extras_1" unique_id=1860188396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.9999995, 0, 4.1671305)
+script = ExtResource("21_nqvox")
+kind = 9
+
+[node name="Extras_5" type="Node3D" parent="Buildings" unique_id=1992552632]
+transform = Transform3D(9.090909e-08, 0, -1, 0, 1, 0, 1, 0, 9.090909e-08, 4.479099, 0, -10.312209)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_5" unique_id=1679058500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.155, 2.0425, 2.493845)
+script = ExtResource("21_nqvox")
+
+[node name="LaundryLine" type="Node3D" parent="Buildings/Extras_5" unique_id=2067474594]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.838233, 0, 1.943845)
+script = ExtResource("21_nqvox")
+kind = 3
+color = Color(1, 1, 1, 1)
+length = 3.4
+
+[node name="WindChimes" type="Node3D" parent="Buildings/Extras_5" unique_id=1358386958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.32, 2.2324998, 2.735845)
+script = ExtResource("21_nqvox")
+kind = 7
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_5" unique_id=645213361]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1876106, -3.41)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_5" unique_id=1002703088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 0.11000003)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="Extras_6" type="Node3D" parent="Buildings" unique_id=1530625858]
+transform = Transform3D(-2.2222223e-07, 0, 1, 0, 1, 0, -1, 0, -2.2222223e-07, -7.5209017, 0, -20.312206)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_6" unique_id=831924209]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.94499993, 2.4725, 2.0404189)
+script = ExtResource("21_nqvox")
+
+[node name="Stall" type="Node3D" parent="Buildings/Extras_6" unique_id=1238101890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.96, 0, 4.6504188)
+script = ExtResource("21_nqvox")
+kind = 5
+
+[node name="CratesAndBarrels" type="Node3D" parent="Buildings/Extras_6" unique_id=1425815804]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6999998, 0, 2.8054187)
+script = ExtResource("21_nqvox")
+kind = 6
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_6" unique_id=1571648411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.4902644, -2.7899997)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_6" unique_id=647722148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.615582, 0.09000002)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="Extras_2" type="Node3D" parent="Buildings" unique_id=1969256858]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.706156, 0, -7.0017056)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_2" unique_id=799818138]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.134, 2.3650002, 2.4485023)
+script = ExtResource("21_nqvox")
+
+[node name="NoticeBoard" type="Node3D" parent="Buildings/Extras_2" unique_id=1869394331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.604, 0, 5.3165026)
+script = ExtResource("21_nqvox")
+kind = 8
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_2" unique_id=651625983]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.2709756, -3.348)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_2" unique_id=1230634713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.28447, 0.10800003)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="Extras_3" type="Node3D" parent="Buildings" unique_id=1509126259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.33178, 8.084409, -24.818865)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_3" unique_id=510156589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 3.92, 4.2671313)
+script = ExtResource("21_nqvox")
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_3" unique_id=1066465876]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.392245, -3.1)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_3" unique_id=1346180460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.368458, 0.100000024)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="Extras_4" type="Node3D" parent="Buildings" unique_id=1229210646]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -21)
+
+[node name="Window_L1" type="Node3D" parent="Buildings/Extras_4" unique_id=1095635883]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.794, 1.4725, 2.2881646)
+script = ExtResource("21_nqvox")
+kind = 0
+color = Color(0.82, 0.52, 0.25, 1)
+
+[node name="Window_L2" type="Node3D" parent="Buildings/Extras_4" unique_id=531203460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.542, 1.4725, 2.2881646)
+script = ExtResource("21_nqvox")
+kind = 0
+color = Color(0.6905, 0.443, 0.2325, 1)
+
+[node name="Window_R1" type="Node3D" parent="Buildings/Extras_4" unique_id=1966083784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.794, 1.4725, 2.2881646)
+script = ExtResource("21_nqvox")
+kind = 0
+color = Color(0.82, 0.52, 0.25, 1)
+
+[node name="Window_R2" type="Node3D" parent="Buildings/Extras_4" unique_id=11887623]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.542, 1.4725, 2.2881646)
+script = ExtResource("21_nqvox")
+kind = 0
+color = Color(0.6905, 0.443, 0.2325, 1)
+
+[node name="Lantern" type="Node3D" parent="Buildings/Extras_4" unique_id=1252098975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96599996, 2.0425, 2.0857646)
+script = ExtResource("21_nqvox")
+
+[node name="Bunting" type="Node3D" parent="Buildings/Extras_4" unique_id=730774977]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3701105, 3.4199998, 2.5426235)
+script = ExtResource("21_nqvox")
+kind = 2
+color = Color(1, 1, 1, 1)
+length = 5.424033355712891
+
+[node name="CratesAndBarrels" type="Node3D" parent="Buildings/Extras_4" unique_id=1358286338]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.76, 0, 2.8677645)
+script = ExtResource("21_nqvox")
+kind = 6
+
+[node name="BirdPerch1" type="Node3D" parent="Buildings/Extras_4" unique_id=285683305]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.225733, -2.162)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="BirdPerch2" type="Node3D" parent="Buildings/Extras_4" unique_id=1548091250]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 0.78200006)
+script = ExtResource("21_nqvox")
+kind = 11
+
+[node name="RoofCat" type="Node3D" parent="Buildings/Extras_4" unique_id=1468745388]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2911334, 0.78200006)
+script = ExtResource("21_nqvox")
+kind = 10
+
 [node name="Props" type="Node3D" parent="." unique_id=1770766056]
 
-[node name="Birds" type="Node3D" parent="Props"]
+[node name="Birds" type="Node3D" parent="Props" unique_id=1026983212]
 script = ExtResource("birds_script")
 
-[node name="BrantCampfire" type="Node3D" parent="Props"]
+[node name="BrantCampfire" type="Node3D" parent="Props" unique_id=554473658]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 15.2)
 script = ExtResource("campfire_script")
 
@@ -1442,7 +1611,7 @@ script = ExtResource("41_ambient_motes")
 area_size = Vector3(80, 4, 80)
 mote_count = 50
 
-[node name="DayOnly" type="Node" parent="Props/DustMotes"]
+[node name="DayOnly" type="Node" parent="Props/DustMotes" unique_id=861843025]
 script = ExtResource("night_only_script")
 day_only = true
 
@@ -1456,7 +1625,7 @@ glow_energy = 3.5
 mote_size = 0.035
 drift_speed = 0.3
 
-[node name="NightOnly" type="Node" parent="Props/Fireflies"]
+[node name="NightOnly" type="Node" parent="Props/Fireflies" unique_id=1866259344]
 script = ExtResource("night_only_script")
 
 [node name="WindLines" type="GPUParticles3D" parent="Props" unique_id=1252742016]
@@ -1872,9 +2041,9 @@ blob_count = 16
 
 [node name="NPCs" type="Node3D" parent="." unique_id=298095596]
 
-[node name="Routes" type="Node3D" parent="NPCs"]
+[node name="Routes" type="Node3D" parent="NPCs" unique_id=37565497]
 
-[node name="BrantByFire" type="Marker3D" parent="NPCs/Routes"]
+[node name="BrantByFire" type="Marker3D" parent="NPCs/Routes" unique_id=1482843856]
 transform = Transform3D(-0.48, 0, 0.877, 0, 1, 0, -0.877, 0, -0.48, -1.6, 0, 14.6)
 
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
@@ -1891,13 +2060,13 @@ idle_animation = &"Yule_Idle"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("Shape_YuleBody")
 
-[node name="Schedule" type="Node" parent="NPCs/Yule"]
+[node name="Schedule" type="Node" parent="NPCs/Yule" unique_id=2006824868]
 script = ExtResource("schedule_script")
 stops = Array[ExtResource("stop_script")]([SubResource("Stop_YuleDay"), SubResource("Stop_YuleHome")])
 quest_flag = &"yule_quest_accepted"
 quest_done_flag = &"yule_got_ball"
 
-[node name="Barks" type="Node" parent="NPCs/Yule"]
+[node name="Barks" type="Node" parent="NPCs/Yule" unique_id=1923199322]
 script = ExtResource("barks_script")
 
 [node name="Brant" type="StaticBody3D" parent="NPCs" unique_id=2022950744]
@@ -1913,11 +2082,11 @@ shape = SubResource("Shape_YuleBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="Schedule" type="Node" parent="NPCs/Brant"]
+[node name="Schedule" type="Node" parent="NPCs/Brant" unique_id=740921488]
 script = ExtResource("schedule_script")
 stops = Array[ExtResource("stop_script")]([SubResource("Stop_BrantDay"), SubResource("Stop_BrantCamp")])
 
-[node name="Barks" type="Node" parent="NPCs/Brant"]
+[node name="Barks" type="Node" parent="NPCs/Brant" unique_id=1982006161]
 script = ExtResource("barks_script")
 
 [node name="CatClueFur" type="StaticBody3D" parent="NPCs" unique_id=1636745183]
@@ -1971,11 +2140,11 @@ shape = SubResource("Shape_YuleBody")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="Schedule" type="Node" parent="NPCs/Fenn"]
+[node name="Schedule" type="Node" parent="NPCs/Fenn" unique_id=107902512]
 script = ExtResource("schedule_script")
 stops = Array[ExtResource("stop_script")]([SubResource("Stop_FennSpot"), SubResource("Stop_FennStroll"), SubResource("Stop_FennBack")])
 
-[node name="Barks" type="Node" parent="NPCs/Fenn"]
+[node name="Barks" type="Node" parent="NPCs/Fenn" unique_id=1059502055]
 script = ExtResource("barks_script")
 
 [node name="OvergrownLedges" type="Node3D" parent="." unique_id=1249404075]
