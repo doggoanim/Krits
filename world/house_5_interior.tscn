@@ -162,4 +162,5 @@ spawn_id = &"enter"
 [node name="FantasyInterior" type="Node3D" parent="."]
 script = ExtResource("fantasy_script")
 layout = 5
+skip = PackedStringArray("shelves")
 room_size = Vector2(6, 7)
