@@ -165,17 +165,6 @@ height = 0.693
 radius = 0.35
 height = 1.5
 
-[sub_resource type="Resource" id="Stop_YuleDay"]
-script = ExtResource("stop_script")
-from_hour = 6.5
-mode = 1
-
-[sub_resource type="Resource" id="Stop_YuleHome"]
-script = ExtResource("stop_script")
-from_hour = 20.0
-mode = 2
-place = NodePath("Buildings/house_chesburg_5/House5EntranceSpawn")
-
 [sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
 radius = 0.4
 height = 1.8
@@ -2039,12 +2028,6 @@ idle_animation = &"Yule_Idle"
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Yule" unique_id=1946319862]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("Shape_YuleBody")
-
-[node name="Schedule" type="Node" parent="NPCs/Yule" unique_id=2006824868]
-script = ExtResource("schedule_script")
-stops = Array[ExtResource("stop_script")]([SubResource("Stop_YuleDay"), SubResource("Stop_YuleHome")])
-quest_flag = &"yule_quest_accepted"
-quest_done_flag = &"yule_got_ball"
 
 [node name="Barks" type="Node" parent="NPCs/Yule" unique_id=1923199322]
 script = ExtResource("barks_script")

@@ -55,6 +55,7 @@ static func flame(height: float, width: float, palette: Array = PALETTE_FIRE, to
 static func embers(amount: int, lifetime: float, rise: float, radius: float, size := 0.1) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.name = "Embers"
+	p.fixed_fps = Choppy.particle_fps()   # re-simulated in steps, like the hand-made animations
 	p.amount = amount
 	p.lifetime = lifetime
 	p.local_coords = false

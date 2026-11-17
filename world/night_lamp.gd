@@ -26,6 +26,7 @@ class Lamp:
 var _lamps: Array[Lamp] = []
 var _seed := 0.0
 var _last_amount := -1.0
+var _last_step := -1
 
 func _ready() -> void:
 	_seed = randf() * 100.0
@@ -68,8 +69,12 @@ func add_material(material: StandardMaterial3D, on: float, off := 0.0) -> void:
 func _process(_delta: float) -> void:
 	var amount := WorldClock.lamp_amount()
 	var wobble := 0.0
+	var step := Choppy.index()
 	if amount > 0.0 and flicker > 0.0:
-		var t := Time.get_ticks_msec() / 1000.0 * flicker_speed + _seed
+		if step == _last_step and amount == _last_amount:
+			return   # the flicker is held in poses (see Choppy)
+		_last_step = step
+		var t := Choppy.time() * flicker_speed + _seed
 		wobble = (sin(t) * 0.5 + sin(t * 2.31 + 1.7) * 0.3 + sin(t * 5.1) * 0.2) * flicker
 	elif amount == _last_amount:
 		return   # fully on/off and not flickering: nothing to update

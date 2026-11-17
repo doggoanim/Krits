@@ -45,6 +45,8 @@ var _visual_rest := Vector3.ZERO
 var _bob := 0.0
 var _anchor_facing := false      ## has arrived at a STAND spot: settle into its facing
 
+var _bob_step := -1   ## last Choppy step the walk bob was posed on
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # keeps running while its NPC is switched off indoors
 	_npc = get_parent() as NPC
@@ -254,6 +256,10 @@ func _apply_bob(amount: float, delta: float) -> void:
 	if _visual == null or not is_instance_valid(_visual):
 		return
 	_bob += delta * BOB_RATE * amount
+	var step := Choppy.index()
+	if step == _bob_step and amount > 0.0:
+		return   # hold the current pose until the next step
+	_bob_step = step
 	var k := clampf(amount, 0.0, 1.0)
 	_visual.position = _visual_rest + Vector3(0.0, absf(sin(_bob)) * BOB_HEIGHT * k, 0.0)
-	_visual.rotation.z = lerpf(_visual.rotation.z, sin(_bob) * 0.04 * k, 0.4)
+	_visual.rotation.z = sin(_bob) * 0.04 * k

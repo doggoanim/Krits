@@ -16,6 +16,7 @@ var _was_above := false
 var _cool := 0.0
 var _swing_amount := 0.0
 var _phase := 0.0
+var _shown_step := -1
 
 func _ready() -> void:
 	_swing = get_node_or_null("Swing") as Node3D
@@ -35,8 +36,10 @@ func _process(delta: float) -> void:
 	_was_above = above
 	# sway follows the gust, with a little extra after a ring that dies away
 	_swing_amount = lerpf(_swing_amount, clampf((gust - 0.5) / 1.3, 0.0, 1.0), 1.5 * delta)
-	if _swing != null:
-		_swing.rotation = Vector3(sin(t * 2.1 + _phase) * 0.12, 0.0, sin(t * 1.7 + _phase * 1.3) * 0.16) * (0.25 + _swing_amount * 1.4)
+	var step := Choppy.index()
+	if _swing != null and step != _shown_step:   # shown in held poses (see Choppy)
+		_shown_step = step
+		_swing.rotation = Vector3(sin(Choppy.snap(t) * 2.1 + _phase) * 0.12, 0.0, sin(Choppy.snap(t) * 1.7 + _phase * 1.3) * 0.16) * (0.25 + _swing_amount * 1.4)
 
 func _ring() -> void:
 	var notes := randi_range(2, 4)

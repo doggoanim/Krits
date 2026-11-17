@@ -12,6 +12,7 @@ extends Node3D
 var _fire: Node3D
 var _light: OmniLight3D
 var _seed := 0.0
+var _last_step := -1
 
 func _ready() -> void:
 	_seed = randf() * 50.0
@@ -55,6 +56,8 @@ func _update(force: bool) -> void:
 	if _fire.visible != lit or force:
 		_fire.visible = lit
 		_light.visible = lit
-	if lit:
-		var t := Time.get_ticks_msec() / 1000.0 * 9.0 + _seed
+	var step := Choppy.index()
+	if lit and (step != _last_step or force):   # the flicker is held in poses (see Choppy)
+		_last_step = step
+		var t := Choppy.time() * 9.0 + _seed
 		_light.light_energy = light_energy * amount * (1.0 + (sin(t) * 0.5 + sin(t * 2.3 + 1.0) * 0.3) * 0.15)
