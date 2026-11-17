@@ -8,8 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://cg10075rmmbd1" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Chair_17.glb" id="10_550li"]
 [ext_resource type="PackedScene" uid="uid://d2atpvqxq1a3" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Closet_01.glb" id="11_2gwfi"]
 [ext_resource type="PackedScene" uid="uid://bxfw0ahs7euv8" path="res://assets/blender_stuff/Cute_Furniture_Free_glb/Separate_Assets_glb/Plants_05.glb" id="14_1fccd"]
+[ext_resource type="Script" uid="uid://c2h4vvhp2fkep" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="PackedScene" uid="uid://78s6i6j5jrwu" path="res://assets/npcs/Mayor_Arse.glb" id="mayor_model"]
-[ext_resource type="Script" path="res://world/fantasy_interior.gd" id="fantasy_script"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="npc"]
 
 [sub_resource type="StandardMaterial3D" id="OuterMat"]
@@ -20,11 +20,7 @@ uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="BoxMesh" id="FloorMesh"]
-size = Vector3(4, 0.2, 10.4)
-
-[sub_resource type="BoxMesh" id="CeilingMesh"]
-size = Vector3(4, 0.2, 10.4)
-flip_faces = true
+size = Vector3(4, 2, 10.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1fccd"]
 size = Vector3(4, 0.2, 10.4)
@@ -35,6 +31,10 @@ albedo_texture = ExtResource("3_1fccd")
 uv1_scale = Vector3(0.5, 0.5, 0.5)
 uv1_triplanar = true
 uv1_world_triplanar = true
+
+[sub_resource type="BoxMesh" id="CeilingMesh"]
+flip_faces = true
+size = Vector3(4, 0.2, 10.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mk7mh"]
 size = Vector3(4, 0.2, 10.4)
@@ -85,7 +85,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 collision_layer = 129
 
 [node name="Mesh" type="MeshInstance3D" parent="Floor" unique_id=827068073]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, -0.7)
 material_override = SubResource("OuterMat")
 mesh = SubResource("FloorMesh")
 
@@ -175,8 +175,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.8000002)
 script = ExtResource("1")
 target_level = "res://world/chesburg.tscn"
 target_spawn_id = &"house_3_entrance"
-prompt_text = "Press E to exit"
 required_flag = &"water_quest_accepted"
+prompt_text = "Press E to exit"
 
 [node name="Collision" type="CollisionShape3D" parent="ReturnDoor" unique_id=545707350]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
@@ -193,7 +193,7 @@ script = ExtResource("2")
 spawn_id = &"enter"
 
 [node name="MayorArse" type="StaticBody3D" parent="." unique_id=485061302]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052152872, 0, -4.67456143)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052152872, 0, -4.6745615)
 script = ExtResource("npc")
 dialogue_file = "res://dialogue/npcs/mayor_arse.dlg"
 facing_offset = 3.14159
@@ -223,10 +223,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 3.5100811e-12, 0, 1, -7.1054274e-15, -
 shape = SubResource("BoxShape3D_m7dut")
 
 [node name="Plants_052" parent="." unique_id=123769374 instance=ExtResource("14_1fccd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59999996, 0.8, -4.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59999996, 0.8, -4)
 
-[node name="FantasyInterior" type="Node3D" parent="."]
+[node name="FantasyInterior" type="Node3D" parent="." unique_id=2095017406]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.9)
 script = ExtResource("fantasy_script")
 layout = 1
 room_size = Vector2(3.8, 9.6)
+skip = PackedStringArray()
