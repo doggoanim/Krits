@@ -15,6 +15,7 @@ const STUN_COLOR := Color(0.7, 0.5, 0.25)
 var _active := {&"burn": false, &"slow": false, &"stun": false}
 var _burn: GPUParticles3D
 var _burn_light: OmniLight3D
+var _burn_flames: Node3D   ## painted flame tongues licking up the body (FireFx)
 var _frost: GPUParticles3D
 var _mist: GPUParticles3D
 var _orbit: Node3D
@@ -41,6 +42,7 @@ func set_active(effect: StringName, on: bool) -> void:
 		&"burn":
 			_burn.emitting = on
 			_burn_light.visible = on
+			_burn_flames.visible = on
 		&"slow":
 			_frost.emitting = on
 			_mist.emitting = on
@@ -79,8 +81,16 @@ func _update_tint() -> void:
 func _build_burn() -> void:
 	var mat := _particle_material(Vector3.UP, 20.0, 1.0, 2.4, Vector3(0, 3.0, 0), 0.7, 1.5)
 	mat.color_ramp = _ramp([Color(1.0, 0.95, 0.4), Color(1.0, 0.5, 0.1), Color(0.8, 0.1, 0.05, 0.0)])
-	_burn = _emitter(mat, 26, 0.75, _spark_mesh(Vector3.ONE * 0.16))
+	_burn = _emitter(mat, 26, 0.75, FireFx.spark_mesh(Vector2.ONE * 0.22))
 	add_child(_burn)
+	_burn_flames = Node3D.new()
+	_burn_flames.visible = false
+	add_child(_burn_flames)
+	for i in 3:   # three stylised tongues around the body, each a different size and phase
+		var angle := TAU * float(i) / 3.0 + 0.4
+		var tongue := FireFx.flame(_body_height * (0.55 + 0.1 * i), _radius * 1.5, FireFx.PALETTE_FIRE, 2, float(i) * 2.3)
+		tongue.position = Vector3(cos(angle), 0.0, sin(angle)) * _radius * 0.7 + Vector3(0.0, -_body_height * 0.5, 0.0)
+		_burn_flames.add_child(tongue)
 	_burn_light = OmniLight3D.new()
 	_burn_light.light_color = BURN_COLOR
 	_burn_light.omni_range = 4.0

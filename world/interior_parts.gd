@@ -151,15 +151,12 @@ static func fireplace() -> Node3D:
 	_sphere(root, 0.34, toon_mat(IRON), Vector3(0.7, 1.55, -0.1), 0.85)               # cooking pot
 	var stew := HouseParts.cylinder(root, 0.25, 0.03, Color(0.5, 0.3, 0.15), Vector3(0.7, 1.75, -0.1))
 	stew.material_override = toon_mat(Color(0.55, 0.32, 0.18))
-	var flames := Node3D.new()
-	flames.position = Vector3(0, 0.55, 0)
+	var flames := FireFx.flame(1.5, 1.1, FireFx.PALETTE_FIRE, 4)
+	flames.position = Vector3(0, 0.45, 0.05)
 	root.add_child(flames)
-	_cone(flames, 0.38, 1.1, glow(Color(1.0, 0.45, 0.12)), Vector3(0, 0.55, 0))
-	_cone(flames, 0.24, 0.8, glow(FLAME), Vector3(0.1, 0.4, 0.05))
-	_cone(flames, 0.14, 0.55, glow(Color(1.0, 0.9, 0.5)), Vector3(-0.08, 0.3, 0.08))
-	var sparks := _sparkles(FLAME, 10, 1.6, 0.1, 1.6)
-	sparks.position = Vector3(0, 1.1, 0)
-	root.add_child(sparks)
+	var embers := FireFx.embers(14, 1.8, 1.5, 0.35, 0.09)
+	embers.position = Vector3(0, 1.3, 0.05)
+	root.add_child(embers)
 	_light(root, Color(1.0, 0.58, 0.25), 2.4, 9.0, Vector3(0, 1.4, 1.2), 0.6)
 	solid(root, Vector3(3.6, 3.4, 1.2), Vector3(0, 1.7, 0.1))
 	return root
@@ -305,7 +302,9 @@ static func candle(pos: Vector3, lights := true) -> Node3D:
 	root.name = "Candle"
 	root.position = pos
 	HouseParts.cylinder(root, 0.07, 0.3, PARCHMENT, Vector3(0, 0.15, 0))
-	_cone(root, 0.05, 0.14, glow(FLAME), Vector3(0, 0.37, 0))
+	var flame := FireFx.flame(0.3, 0.16, FireFx.PALETTE_CANDLE, 2, randf() * 6.0)
+	flame.position = Vector3(0, 0.28, 0)
+	root.add_child(flame)
 	if lights:
 		_light(root, FLAME, 0.7, 4.0, Vector3(0, 0.6, 0), 0.15)
 	return root

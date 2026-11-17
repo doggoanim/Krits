@@ -390,3 +390,7 @@ Chesburg's houses are told apart without recolouring (`world/house_dressing.gd`,
 ### Fantasy interiors
 
 `world/fantasy_interior.gd` (a `@tool` node, `FantasyInterior`) dresses a room as a cosy fantasy home from its `room_size`: hearth with a stew pot and flickering fire, bookshelves, pantry shelf, dining table, wardrobe, chest, window, pictures, plants, a candle ring and drifting dust motes. Pieces are built in `world/interior_parts.gd` (`InteriorParts`, shared helpers in `HouseParts`); `skip` leaves parts out. It shows in the editor but is never saved into the scene. `layout` picks HOME (the player's cottage, `house_1_interior.tscn`) or HALL (the mayor's study with side shelves, banners, a shield, candelabras and a runner, `house_3_interior.tscn`; its desk, chair and mayor stay hand-placed in the scene).
+
+### Fire
+
+Every fire shares one look (`world/fire_fx.gd`, `FireFx`): hand-painted, stylised flame cards (`shading/flame.gdshader`: a wobbling teardrop in hard colour bands with brush-streak edges and a dry-brush tip, upright billboards) plus rising ember flecks like the staff's burn (yellow -> orange -> red). Used by the hearth and candles (`world/interior_parts.gd`) and by the burn status on enemies (`combat/status_fx.gd`). Palettes (`PALETTE_FIRE`, `PALETTE_CANDLE`) and the shader's `fatness`, `speed` and `wobble` tune the look.
