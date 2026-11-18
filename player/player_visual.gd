@@ -85,6 +85,8 @@ const BLINK_DURATION := 0.12
 const HURT_EXPRESSION_DURATION := 0.5
 
 var _anim: AnimationPlayer
+var _anim_pending := 0.0     ## time not yet fed to the run clip (it moves in held poses)
+var _anim_step := -1         ## Choppy pose index last applied to the run clip
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
 var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
@@ -203,6 +205,8 @@ func _ready() -> void:
 	for m in _materials:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
+	if _anim != null:
+		_anim.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL   # advanced in _advance_anim()
 	_install_squash_modifier()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
@@ -421,6 +425,25 @@ func anim_phase(anim_name: StringName) -> float:
 func run_phase() -> float:
 	return anim_phase(ANIM_RUN)
 
+## The AnimationPlayer is advanced by hand (see _ready) so the run clip can be played in held
+## poses (Choppy), like the rest of the hand-animated world; every other clip stays smooth.
+## While the run is playing (or blending in/out) the clip only moves on a new pose, by all
+## the time that has passed since the last one.
+func _advance_anim(delta: float) -> void:
+	if _anim == null:
+		return
+	if _anim.current_animation != ANIM_RUN and _last_played_anim != ANIM_RUN:
+		_anim_pending = 0.0
+		_anim.advance(delta)
+		return
+	_anim_pending += delta
+	var step := Choppy.index()
+	if step == _anim_step:
+		return
+	_anim_step = step
+	_anim.advance(_anim_pending)
+	_anim_pending = 0.0
+
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
 	return _hold_t > 0.0
@@ -601,6 +624,7 @@ func absorb_vertical_pop(dy: float) -> void:
 	_step_pop_offset = clampf(_step_pop_offset - dy, -STEP_POP_MAX, STEP_POP_MAX)
 
 func _process(delta: float) -> void:
+	_advance_anim(delta)
 	_update_face(delta)
 	if _step_pop_offset != 0.0:
 		_step_pop_offset = move_toward(_step_pop_offset, 0.0, STEP_POP_DECAY * absf(_step_pop_offset) * delta + 0.01)
