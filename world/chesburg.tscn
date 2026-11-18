@@ -64,21 +64,21 @@
 [ext_resource type="Script" uid="uid://cgusqjw1k444n" path="res://world/campfire.gd" id="campfire_script"]
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
 [ext_resource type="AudioStream" uid="uid://ci84xm6i6olb1" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
+[ext_resource type="Script" uid="uid://clhu2b1lt3n50" path="res://world/fish_jumps.gd" id="fish_jumps_script"]
 [ext_resource type="Script" uid="uid://b8mj2xaqcf7na" path="res://world/house_dressing.gd" id="house_dressing_script"]
 [ext_resource type="Script" uid="uid://0cbpy1r6y3yx" path="res://world/house_extras.gd" id="house_extras_script"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
 [ext_resource type="Script" uid="uid://w4i06xqwevvb" path="res://world/ambience_layers.gd" id="layers_script"]
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="ledge_pickup_script"]
 [ext_resource type="Script" uid="uid://cl8jns3e7or22" path="res://world/night_only.gd" id="night_only_script"]
+[ext_resource type="Script" uid="uid://bsyhtv8wtik4q" path="res://world/npc_chat.gd" id="npc_chat_script"]
 [ext_resource type="Script" uid="uid://ca4h5b2nge2s3" path="res://world/region_gate.gd" id="oz_gate"]
 [ext_resource type="Script" uid="uid://ctt8nqnun36cw" path="res://world/quest_prop.gd" id="quest_prop_script"]
 [ext_resource type="Script" uid="uid://ban461c33ahm0" path="res://world/npc_schedule.gd" id="schedule_script"]
+[ext_resource type="Script" uid="uid://bwhvodqpialir" path="res://world/shop_life.gd" id="shop_life_script"]
 [ext_resource type="Script" uid="uid://w83wf1mkiod5" path="res://world/schedule_stop.gd" id="stop_script"]
 [ext_resource type="Script" uid="uid://dbjdxjdmuvloq" path="res://world/time_of_day.gd" id="tod_script"]
 [ext_resource type="Script" uid="uid://db2vbs67yn6cp" path="res://world/window_glow.gd" id="window_glow_script"]
-[ext_resource type="Script" path="res://world/shop_life.gd" id="shop_life_script"]
-[ext_resource type="Script" path="res://world/npc_chat.gd" id="npc_chat_script"]
-[ext_resource type="Script" path="res://world/fish_jumps.gd" id="fish_jumps_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
@@ -1003,7 +1003,7 @@ transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 2.7, -11.735, 2.7)
 script = ExtResource("house_dressing_script")
 name_filter = PackedStringArray("house_chesburg")
 
-[node name="ShopLife" type="Node" parent="Buildings"]
+[node name="ShopLife" type="Node" parent="Buildings" unique_id=720972559]
 script = ExtResource("shop_life_script")
 door_path = NodePath("../house_chesburg_6/Door_House6")
 goods_paths = Array[NodePath]([NodePath("../Extras_6/Stall"), NodePath("../Extras_6/CratesAndBarrels")])
@@ -1670,7 +1670,7 @@ size = Vector3(20, 0, 20)
 surface_y = 0.3465
 radius = 10.0
 
-[node name="LakeFish" type="Node" parent="Props"]
+[node name="LakeFish" type="Node" parent="Props" unique_id=353634719]
 script = ExtResource("fish_jumps_script")
 volume_path = NodePath("../lake_chesburg/Water2/WaterVolume")
 
@@ -2063,16 +2063,15 @@ blob_count = 16
 [node name="BrantByFire" type="Marker3D" parent="NPCs/Routes" unique_id=1482843856]
 transform = Transform3D(-0.48, 0, 0.877, 0, 1, 0, -0.877, 0, -0.48, -1.6, 0, 14.6)
 
-[node name="ChatSpot_BrantFenn" type="Marker3D" parent="NPCs/Routes"]
+[node name="ChatSpot_BrantFenn" type="Marker3D" parent="NPCs/Routes" unique_id=1391116967]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 0)
 
-[node name="BrantFennChat" type="Node" parent="NPCs"]
+[node name="BrantFennChat" type="Node" parent="NPCs" unique_id=179613961]
 script = ExtResource("npc_chat_script")
 first = NodePath("../Brant")
 second = NodePath("../Fenn")
 spot = NodePath("../Routes/ChatSpot_BrantFenn")
 chat_id = "Brant_Fenn"
-require_flags = PackedStringArray("brant_got_pack", "fenn_got_fish")
 
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0.1, -8.2)
