@@ -40,6 +40,7 @@
 [ext_resource type="Script" uid="uid://14e40ofhtu3q" path="res://world/cave_glimmers.gd" id="wl_glimmers"]
 [ext_resource type="Script" uid="uid://7nv4gjqr47y0" path="res://world/well_lights.gd" id="wl_lights"]
 [ext_resource type="Script" uid="uid://bdwv60cpmjh3n" path="res://world/water_life.gd" id="wl_waterlife"]
+[ext_resource type="Script" path="res://world/prop_slot.gd" id="prop_slot_script"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -12675,6 +12676,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, -23.5, -36)
 light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.8
 omni_range = 3.5
+
+[node name="LandingBucket" type="Node3D" parent="."]
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -1.8, 0.0, -3.3)
+script = ExtResource("prop_slot_script")
+kind = 12
+
+[node name="PathBones" type="Node3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -3.2, -10.0, -24.0)
+script = ExtResource("prop_slot_script")
+kind = 13
+
+[node name="PathBucket" type="Node3D" parent="."]
+transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, 2.0, -10.0, -34.0)
+script = ExtResource("prop_slot_script")
+kind = 12
+
+[node name="ChestCrates" type="Node3D" parent="."]
+transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -13.6, -25.0, -33.6)
+script = ExtResource("prop_slot_script")
+kind = 6
+
+[node name="ChestBones" type="Node3D" parent="."]
+transform = Transform3D(0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, 0.34202, -14.1, -25.0, -39.6)
+script = ExtResource("prop_slot_script")
+kind = 13
 
 [node name="Drips" type="Node3D" parent="." unique_id=920000200]
 

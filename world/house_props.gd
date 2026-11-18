@@ -362,6 +362,39 @@ static func bucket() -> Node3D:
 	c.scale = Vector3(1.0, 0.35, 1.0)
 	return root
 
+## A fallen adventurer's remains: a skull, a few long bones and a ribcage, flat on the ground. Origin on the
+## ground, about 1 m across, not solid. For the well and other dark places.
+static func bone_pile() -> Node3D:
+	var root := Node3D.new()
+	root.name = "BonePile"
+	var bone := Color(0.86, 0.83, 0.72)
+	var skull := HouseParts._part(root, SphereMesh.new(), bone, Vector3(0.28, 0.13, 0.05))
+	(skull.mesh as SphereMesh).radius = 0.13
+	(skull.mesh as SphereMesh).height = 0.26
+	skull.name = "Skull"
+	skull.scale = Vector3(1.0, 0.9, 1.1)
+	for side in [-1.0, 1.0]:   # eye sockets
+		var eye := HouseParts._part(root, SphereMesh.new(), Color(0.08, 0.07, 0.06), Vector3(0.28 + side * 0.05, 0.16, 0.16))
+		(eye.mesh as SphereMesh).radius = 0.03
+		(eye.mesh as SphereMesh).height = 0.06
+		eye.name = "EyeSocket"
+	var jaw := HouseParts.box(root, Vector3(0.16, 0.04, 0.1), bone.darkened(0.08), Vector3(0.28, 0.04, 0.13))
+	jaw.name = "Jaw"
+	for i in 5:   # ribs: arcs lying on their side, getting shorter toward the bottom
+		var rib := TorusMesh.new()
+		rib.inner_radius = 0.2 - i * 0.02
+		rib.outer_radius = rib.inner_radius + 0.03
+		var r := HouseParts._part(root, rib, bone, Vector3(-0.2 - i * 0.1, 0.1, -0.05 + i * 0.015), Vector3(0, 0, 90))
+		r.scale = Vector3(1.0, 1.0, 0.7)
+		r.name = "Rib%d" % i
+	var spine := HouseParts.box(root, Vector3(0.56, 0.05, 0.05), bone, Vector3(-0.42, 0.04, -0.04), Vector3(0, 6, 0))
+	spine.name = "Spine"
+	for b in [[Vector3(0.1, 0.03, -0.32), 38.0, 0.5], [Vector3(0.4, 0.03, -0.18), -20.0, 0.42], [Vector3(-0.5, 0.03, 0.32), 80.0, 0.46]]:
+		var long := HouseParts.cylinder(root, 0.025, b[2], bone, b[0])   # a long bone, laid flat
+		long.rotation_degrees = Vector3(0, b[1], 90)
+		long.name = "LongBone"
+	return root
+
 ## Wind chimes: a ring with hanging tubes that swing and tinkle when a gust rises (WindChimes).
 static func wind_chimes() -> Node3D:
 	var chimes := WindChimes.new()
