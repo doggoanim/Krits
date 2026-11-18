@@ -515,27 +515,27 @@ func jump_launch() -> void:
 	leg_stretch = 0.0
 	_model.scale = Vector3(_base_scale * jump_launch_xz, _base_scale, _base_scale * jump_launch_xz)
 	var squash_t := jump_settle_time * 0.45   # stretched -> compressed
-	var rest_t := jump_settle_time * 0.55     # compressed -> normal (with the overshoot's spring)
+	var rest_t := jump_settle_time * 0.55     # compressed -> normal (eased out, no overshoot: one stretch, one squash)
 	var lag := jump_leg_delay
 	_jump_tween = create_tween().set_parallel(true)
 	# upper body: stretched, then it compresses past normal, then springs home
 	_jump_tween.tween_property(self, "spine_stretch", jump_squash_spine, squash_t) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_jump_tween.tween_property(self, "spine_stretch", 0.0, rest_t) \
-			.set_delay(squash_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_delay(squash_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	# legs: a beat behind — lengthen, then compress too, then home
 	_jump_tween.tween_property(self, "leg_stretch", jump_leg_follow, lag) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_jump_tween.tween_property(self, "leg_stretch", jump_squash_legs, squash_t) \
 			.set_delay(lag).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_jump_tween.tween_property(self, "leg_stretch", 0.0, rest_t) \
-			.set_delay(lag + squash_t).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_delay(lag + squash_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	# whole model: thin while stretched, bulges while compressed, then normal
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(_model, "scale", Vector3(_base_scale * jump_squash_xz, _base_scale, _base_scale * jump_squash_xz), squash_t) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_squash_tween.tween_property(_model, "scale", Vector3.ONE * _base_scale, rest_t) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 ## True while a jump's launch stretch is still settling back to normal. Other
 ## pops (the apex squash) wait for it: they set the model's scale instantly, which
