@@ -1,8 +1,8 @@
 # A tuft of orange fur by the road (The Missing Cat). Format: dialogue/dialogue_parser.gd
-@when cat_clue_1 -> again
+@when cat_clue_2 -> again
 
 == offer ==
-A tuft of [color=#d9772b]orange fur[/color], snagged on the ground. Soft, and smells faintly of fish. [set cat_clue_1]
+A tuft of [color=#d9772b]orange fur[/color], snagged on the ground. Soft, and smells faintly of fish. [set cat_clue_2]
 Biscuit was definitely here.
 
 == again ==

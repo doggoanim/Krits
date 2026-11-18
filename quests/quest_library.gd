@@ -72,7 +72,8 @@ static func overgrown_ledges() -> QuestData:
 	return q
 
 ## Side quest: Mrs. Vael's cat Biscuit is missing. Find three clues around
-## town (fur by the road, paw prints by the well, a stolen bun at the bakery),
+## town, in order (1 paw prints by the well, 2 fur by the road, 3 a stolen bun at the
+## bakery; each clue only appears once the one before it is found),
 ## which reveal where he's sleeping (the hilltop), and bring him home. Clue and
 ## cat props are QuestProps in the NPCs group of chesburg.tscn.
 static func missing_cat() -> QuestData:

@@ -2121,9 +2121,9 @@ script = ExtResource("barks_script")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.1, 6, -8.8)
 script = ExtResource("quest_prop_script")
 kind = 1
-show_when = Array[StringName]([&"vael_quest_accepted"])
+show_when = Array[StringName]([&"cat_clue_1"])
 hide_when = &"vael_got_cat"
-done_flag = &"cat_clue_1"
+done_flag = &"cat_clue_2"
 dialogue_file = "res://dialogue/npcs/cat_clue_fur.dlg"
 
 [node name="CatCluePrints" type="StaticBody3D" parent="NPCs" unique_id=674298881]
@@ -2132,14 +2132,14 @@ script = ExtResource("quest_prop_script")
 kind = 2
 show_when = Array[StringName]([&"vael_quest_accepted"])
 hide_when = &"vael_got_cat"
-done_flag = &"cat_clue_2"
+done_flag = &"cat_clue_1"
 dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 
 [node name="CatClueBun" type="StaticBody3D" parent="NPCs" unique_id=107272031]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.6, 8, -17.2)
 script = ExtResource("quest_prop_script")
 kind = 3
-show_when = Array[StringName]([&"vael_quest_accepted"])
+show_when = Array[StringName]([&"cat_clue_2"])
 hide_when = &"vael_got_cat"
 done_flag = &"cat_clue_3"
 dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
