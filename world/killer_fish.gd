@@ -135,7 +135,7 @@ func _physics_process(delta: float) -> void:
 	if _feast_t > 0.0:
 		_feast_t -= delta
 		_body.set_agitation(1.0)
-		_body.position.y = absf(sin(_age * 14.0)) * 0.3
+		_body.position.y = absf(sin(Choppy.snap(_age) * 14.0)) * 0.3   # held poses
 		_update_rumble(delta)
 		if _feast_t <= 0.0:
 			_vanish()
@@ -196,7 +196,7 @@ func _chase(delta: float) -> void:
 	global_position += velocity * delta   # straight through anything: no water limit, no collision
 	# Out of the pool it bounds along in an arc instead of sliding flat.
 	if not _water.covers_xz(global_position) or global_position.y > _water.surface_world_y() - SURFACE_MARGIN:
-		_body.position.y = absf(sin(_age * 9.0)) * LEAP_ARC * 0.3
+		_body.position.y = absf(sin(Choppy.snap(_age) * 9.0)) * LEAP_ARC * 0.3   # held poses
 	else:
 		_body.position.y = 0.0
 	if _dist_to_player() <= kill_radius:

@@ -30,6 +30,8 @@ var flesh := Color(0.26, 0.1, 0.32)
 var _agitation := 0.0          ## target, set by the owner
 var _agit := 0.0               ## eased toward it
 var _t := 0.0
+var _pending := 0.0            ## time since the last pose was set
+var _pose_step := -1           ## Choppy pose index last applied
 var _core: Node3D              ## everything but the tentacles' roots sway with this
 var _eye_mat: StandardMaterial3D
 var _big_eye: Node3D
@@ -201,9 +203,21 @@ func _add_tentacle(root_pos: Vector3, calm: Vector3, hunt: Vector3, seg_len: flo
 
 # ---------------------------------------------------------------- animation
 
+## Posed in held steps (see Choppy): the writhing only changes on a new pose, so the tentacles
+## snap from pose to pose like the hand-animated characters; the fish's swimming stays smooth.
 func _process(delta: float) -> void:
 	if _core == null:
 		return
+	_pending += delta
+	var step := Choppy.index()
+	if step == _pose_step:
+		return
+	_pose_step = step
+	var dt := _pending
+	_pending = 0.0
+	_pose(dt)
+
+func _pose(delta: float) -> void:
 	_agit = move_toward(_agit, _agitation, delta * 3.0)
 	var rate := lerpf(1.6, 7.0, _agit)
 	_t += delta * rate
