@@ -150,6 +150,7 @@ func _build_scene() -> void:
 	# (plays smoothly like the player's own idle: only the run clip is held, see PlayerVisual)
 
 	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
+	_never_cull(_model)
 	# No outline_hook here — the outline is drawn entirely by
 	# CIRCLE_MASK_SHADER_CODE above, against this render's own alpha, rather
 	# than by giving any mesh a hook callback that builds outline geometry.
@@ -174,6 +175,17 @@ func _build_scene() -> void:
 	world.add_child(cam)
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
+
+## The camera sits right up against the model, and a skinned mesh's bounds come from its rest
+## pose, so mid-idle the torso's bounds could fall outside the view and the whole torso would
+## blink out (showing the frame art behind it). Nothing here is ever worth culling anyway.
+func _never_cull(n: Node) -> void:
+	if n is GeometryInstance3D:
+		var g := n as GeometryInstance3D
+		g.extra_cull_margin = 16384.0
+		g.ignore_occlusion_culling = true
+	for c in n.get_children():
+		_never_cull(c)
 
 func _process(delta: float) -> void:
 	if mirror_player_face:
