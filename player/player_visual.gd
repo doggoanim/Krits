@@ -85,8 +85,8 @@ const BLINK_DURATION := 0.12
 const HURT_EXPRESSION_DURATION := 0.5
 
 var _anim: AnimationPlayer
-var _anim_pending := 0.0     ## time not yet fed to the run clip (it moves in held poses)
-var _anim_step := -1         ## Choppy pose index last applied to the run clip
+var _anim_pending := 0.0     ## time not yet fed to the animations (they move in held poses)
+var _anim_step := -1         ## Choppy pose index last applied to the animations
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
 var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
@@ -425,16 +425,11 @@ func anim_phase(anim_name: StringName) -> float:
 func run_phase() -> float:
 	return anim_phase(ANIM_RUN)
 
-## The AnimationPlayer is advanced by hand (see _ready) so the run clip can be played in held
-## poses (Choppy), like the rest of the hand-animated world; every other clip stays smooth.
-## While the run is playing (or blending in/out) the clip only moves on a new pose, by all
-## the time that has passed since the last one.
+## The AnimationPlayer is advanced by hand (see _ready) so every clip plays in held poses
+## (Choppy), like the rest of the hand-animated world: the pose only changes on a new step,
+## by all the time that has passed since the last one. Movement itself stays smooth.
 func _advance_anim(delta: float) -> void:
 	if _anim == null:
-		return
-	if _anim.current_animation != ANIM_RUN and _last_played_anim != ANIM_RUN:
-		_anim_pending = 0.0
-		_anim.advance(delta)
 		return
 	_anim_pending += delta
 	var step := Choppy.index()
