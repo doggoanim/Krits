@@ -204,7 +204,7 @@ func _ready() -> void:
 		_base_colors[m] = ModelUtil.get_tint(m)
 	_force_looping_clips()
 	if _anim != null:
-		SteppedAnimator.attach(_anim)   # every clip plays in held poses
+		SteppedAnimator.attach(_anim, [ANIM_RUN])   # only the run plays in held poses; everything else is smooth
 	_install_squash_modifier()
 	if _anim == null:
 		push_warning("PlayerVisual: no AnimationPlayer found under the model — animations will not play.")
