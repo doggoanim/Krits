@@ -2,7 +2,7 @@
 class_name HouseProps
 extends RefCounted
 ## Everyday town props built from simple shapes with the project's toon look: a hanging lantern, a laundry line, bunting, a market
-## stall, crates and barrels, a wood pile, a notice board and wind chimes. Companion to
+## stall, crates and barrels, a wood pile, a notice board, a bucket and wind chimes. Companion to
 ## HouseParts (roof/door pieces); like it, every builder returns a Node3D the caller
 ## positions, and nothing here knows about houses — see HouseExtras for who gets what.
 ##
@@ -332,6 +332,34 @@ static func notice_board(notes: Array) -> Node3D:
 		gate.hide_when = StringName(note.get("hide_when", ""))
 		paper.add_child(gate)
 		root.add_child(paper)
+	return root
+
+## A wooden bucket with an iron band, a rope handle, water inside and a coil of rope beside it:
+## origin on the ground, about 0.8 m across. Not solid, so nobody snags on it.
+static func bucket() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Bucket"
+	var staves := CylinderMesh.new()   # a little wider at the top, like a real bucket
+	staves.top_radius = 0.2
+	staves.bottom_radius = 0.16
+	staves.height = 0.34
+	staves.radial_segments = 14
+	HouseParts._part(root, staves, HouseParts.WOOD_LIGHT.darkened(0.1), Vector3(0, 0.17, 0))
+	HouseParts.cylinder(root, 0.188, 0.05, HouseParts.IRON, Vector3(0, 0.1, 0)).name = "BandLow"
+	HouseParts.cylinder(root, 0.2, 0.05, HouseParts.IRON, Vector3(0, 0.29, 0)).name = "BandHigh"
+	HouseParts.cylinder(root, 0.175, 0.02, Color(0.2, 0.38, 0.5), Vector3(0, 0.3, 0)).name = "Water"
+	var handle := TorusMesh.new()   # the rope handle, flopped over to one side
+	handle.inner_radius = 0.17
+	handle.outer_radius = 0.19
+	var h := HouseParts._part(root, handle, Color(0.45, 0.36, 0.24), Vector3(0, 0.36, 0), Vector3(90, 0, 0))
+	h.name = "Handle"
+	h.scale = Vector3(1.0, 1.0, 0.6)
+	var coil := TorusMesh.new()   # a coil of rope on the ground
+	coil.inner_radius = 0.08
+	coil.outer_radius = 0.17
+	var c := HouseParts._part(root, coil, Color(0.5, 0.4, 0.27), Vector3(0.45, 0.03, 0.1))
+	c.name = "RopeCoil"
+	c.scale = Vector3(1.0, 0.35, 1.0)
 	return root
 
 ## Wind chimes: a ring with hanging tubes that swing and tinkle when a gust rises (WindChimes).
