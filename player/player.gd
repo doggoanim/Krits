@@ -104,6 +104,9 @@ var _auto_stuck_t := 0.0
 var fall_peak_y := 0.0   ## highest point since the feet last touched ground — see fall_drop()
 var _air_t := 0.0   ## time since floor contact was last lost; gates the landing squash
 var _pound_jumping := false   ## airborne from a ground-pound jump (heavier ceiling squash); cleared on landing
+
+func is_pound_jumping() -> bool:
+	return _pound_jumping
 const CEILING_SQUASH_MIN_SPEED := 2.0    ## upward speed (m/s) below which a roof touch doesn't squash
 const CEILING_SQUASH_FULL_SPEED := 9.0   ## upward speed that gives the full squash
 var _prev_facing_yaw := 0.0
