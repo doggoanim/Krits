@@ -85,7 +85,6 @@ const BLINK_DURATION := 0.12
 const HURT_EXPRESSION_DURATION := 0.5
 
 var _anim: AnimationPlayer
-var _anim_pending := 0.0     ## time not yet fed to the animations (they move in held poses)
 var _anim_step := -1         ## Choppy pose index last applied to the animations
 var _model: Node3D
 var _materials: Array[ShaderMaterial] = []
@@ -426,18 +425,22 @@ func run_phase() -> float:
 	return anim_phase(ANIM_RUN)
 
 ## The AnimationPlayer is advanced by hand (see _ready) so every clip plays in held poses
-## (Choppy), like the rest of the hand-animated world: the pose only changes on a new step,
-## by all the time that has passed since the last one. Movement itself stays smooth.
-func _advance_anim(delta: float) -> void:
+## (Choppy), like the rest of the hand-animated world. Each new pose advances the clips by
+## exactly STEP_SECONDS per step that went by (not by the frame time that happened to land on
+## the step edge), so the poses are evenly spaced and don't wobble with frame-time noise.
+## Movement itself stays smooth.
+func _advance_anim(_delta: float) -> void:
 	if _anim == null:
 		return
-	_anim_pending += delta
 	var step := Choppy.index()
+	if _anim_step < 0:
+		_anim_step = step
+		return
 	if step == _anim_step:
 		return
+	var steps := mini(step - _anim_step, 4)   # a long hitch doesn't skip the whole cycle
 	_anim_step = step
-	_anim.advance(_anim_pending)
-	_anim_pending = 0.0
+	_anim.advance(Choppy.STEP_SECONDS * steps)
 
 ## True while a play_hold() reaction pose is still protected.
 func is_holding() -> bool:
