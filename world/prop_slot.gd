@@ -84,7 +84,7 @@ const NOTICES := [
 	{"text": "LOST CAT\nBiscuit, ginger\nAsk at Vael's", "hide_when": "cat_found"},
 	{"text": "BISCUIT IS\nHOME!\nThank you!", "show_when": ["cat_found"]},
 	{"text": "BALL LOST\nDOWN THE WELL\n- Yule", "hide_when": "yule_got_ball"},
-	{"text": "PACK STUCK\nON A LEDGE\n- Brant", "hide_when": "brant_got_pack"},
+	{"text": "PACK STUCK\nON A LEDGE\n- Henry", "hide_when": "henry_got_pack"},
 ]
 
 ## Occasional sounds from a prop (never in the editor, where nothing plays).

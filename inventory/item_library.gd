@@ -89,7 +89,7 @@ static func yule_ball() -> ItemData:
 	i.max_stack = 1
 	return i
 
-## Brant the hiker's pack, from the ledge side quest outside town.
+## Henry the hiker's pack, from the ledge side quest outside town.
 static func hiker_pack() -> ItemData:
 	var i := _make(&"hiker_pack", ItemData.Category.KEY,
 		Color(0.7, 0.5, 0.3))

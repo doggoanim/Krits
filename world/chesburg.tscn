@@ -173,16 +173,16 @@ height = 1.5
 radius = 0.4
 height = 1.8
 
-[sub_resource type="Resource" id="Stop_BrantDay"]
+[sub_resource type="Resource" id="Stop_HenryDay"]
 script = ExtResource("stop_script")
 from_hour = 6.0
 mode = 1
 wander_radius = 2.0
 
-[sub_resource type="Resource" id="Stop_BrantCamp"]
+[sub_resource type="Resource" id="Stop_HenryCamp"]
 script = ExtResource("stop_script")
 from_hour = 18.5
-place = NodePath("NPCs/Routes/BrantByFire")
+place = NodePath("NPCs/Routes/HenryByFire")
 
 [sub_resource type="Resource" id="Stop_FennSpot"]
 script = ExtResource("stop_script")
@@ -1279,7 +1279,7 @@ kind = 11
 [node name="Birds" type="Node3D" parent="Props" unique_id=1026983212]
 script = ExtResource("birds_script")
 
-[node name="BrantCampfire" type="Node3D" parent="Props" unique_id=554473658]
+[node name="HenryCampfire" type="Node3D" parent="Props" unique_id=554473658]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 15.2)
 script = ExtResource("campfire_script")
 
@@ -2060,18 +2060,18 @@ blob_count = 16
 
 [node name="Routes" type="Node3D" parent="NPCs" unique_id=37565497]
 
-[node name="BrantByFire" type="Marker3D" parent="NPCs/Routes" unique_id=1482843856]
+[node name="HenryByFire" type="Marker3D" parent="NPCs/Routes" unique_id=1482843856]
 transform = Transform3D(-0.48, 0, 0.877, 0, 1, 0, -0.877, 0, -0.48, -1.6, 0, 14.6)
 
-[node name="ChatSpot_BrantFenn" type="Marker3D" parent="NPCs/Routes" unique_id=1391116967]
+[node name="ChatSpot_HenryFenn" type="Marker3D" parent="NPCs/Routes" unique_id=1391116967]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 0)
 
-[node name="BrantFennChat" type="Node" parent="NPCs" unique_id=179613961]
+[node name="HenryFennChat" type="Node" parent="NPCs" unique_id=179613961]
 script = ExtResource("npc_chat_script")
-first = NodePath("../Brant")
+first = NodePath("../Henry")
 second = NodePath("../Fenn")
-spot = NodePath("../Routes/ChatSpot_BrantFenn")
-chat_id = "Brant_Fenn"
+spot = NodePath("../Routes/ChatSpot_HenryFenn")
+chat_id = "Henry_Fenn"
 
 [node name="Yule" type="StaticBody3D" parent="NPCs" unique_id=945596404]
 transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, 9.2, 0.1, -8.2)
@@ -2090,24 +2090,24 @@ shape = SubResource("Shape_YuleBody")
 [node name="Barks" type="Node" parent="NPCs/Yule" unique_id=1923199322]
 script = ExtResource("barks_script")
 
-[node name="Brant" type="StaticBody3D" parent="NPCs" unique_id=2022950744]
+[node name="Henry" type="StaticBody3D" parent="NPCs" unique_id=2022950744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
 script = ExtResource("yule_npc_script")
-dialogue_file = "res://dialogue/npcs/brant.dlg"
+dialogue_file = "res://dialogue/npcs/henry.dlg"
 
-[node name="Collision" type="CollisionShape3D" parent="NPCs/Brant" unique_id=1529632905]
+[node name="Collision" type="CollisionShape3D" parent="NPCs/Henry" unique_id=1529632905]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_YuleBody")
 
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Brant" unique_id=567638989]
+[node name="Mesh" type="MeshInstance3D" parent="NPCs/Henry" unique_id=567638989]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("Mesh_ShopBody")
 
-[node name="Schedule" type="Node" parent="NPCs/Brant" unique_id=740921488]
+[node name="Schedule" type="Node" parent="NPCs/Henry" unique_id=740921488]
 script = ExtResource("schedule_script")
-stops = Array[ExtResource("stop_script")]([SubResource("Stop_BrantDay"), SubResource("Stop_BrantCamp")])
+stops = Array[ExtResource("stop_script")]([SubResource("Stop_HenryDay"), SubResource("Stop_HenryCamp")])
 
-[node name="Barks" type="Node" parent="NPCs/Brant" unique_id=1982006161]
+[node name="Barks" type="Node" parent="NPCs/Henry" unique_id=1982006161]
 script = ExtResource("barks_script")
 
 [node name="CatClueFur" type="StaticBody3D" parent="NPCs" unique_id=1636745183]
@@ -2175,7 +2175,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 20)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.799999, 41, 4.5)
 script = ExtResource("ledge_pickup_script")
 item_id = &"hiker_pack"
-pickup_id = &"brant_pack"
+pickup_id = &"henry_pack"
 prompt_text = "Press E to take"
 
 [node name="Collision" type="CollisionShape3D" parent="OvergrownLedges/HikerPack" unique_id=1468751729]
