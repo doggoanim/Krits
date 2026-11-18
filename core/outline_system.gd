@@ -42,6 +42,11 @@ extends Node
 ## marked with mark_occludable() (NPCs, enemies) lose it exactly where something solid
 ## is in front of them, so a half-hidden character keeps the outline on its visible half.
 ## This node tells the shader where each character is (centre and size) every frame.
+##
+## A character that is completely behind scenery (three rays from the camera, to its middle,
+## head and feet, all hit something solid) has its meshes taken off the outline layer for as
+## long as that lasts, so no outline can leak through a wall however the shader sorts out which
+## character a ring pixel belongs to (it can mix two characters up when they overlap on screen).
 
 const OUTLINE_LAYER_BIT := 1   ## 0-indexed render layer bit -> VisualInstance3D.layers value 2
 const OUTLINE_LAYER_MASK := 1 << OUTLINE_LAYER_BIT
@@ -49,6 +54,7 @@ const OUTLINE_LAYER_MASK := 1 << OUTLINE_LAYER_BIT
 @export var outline_width_px := 3.0
 @export var outline_color := Color.BLACK
 
+const OCCLUSION_MASK := 1   ## physics layers that hide a character (the world)
 const MAX_CHARS := 16   ## characters the overlay can tell apart at once (must match the shader's MAX_CHARS)
 
 var _viewport: SubViewport
@@ -59,6 +65,8 @@ var _source_cam: Camera3D   ## whatever camera follow() last pointed this at
 ## Every marked mesh: {mesh: VisualInstance3D, body: RID of the character's own collider
 ## (meshes sharing one are one character), occlude: bool}.
 static var _tracked: Array[Dictionary] = []
+
+var _outline_off := {}   ## group key -> true while that character's meshes are off the outline layer (fully hidden)
 
 ## Adds this mesh to the outline pass without touching its normal
 ## visibility/layer 1 membership — `layers` is a bitmask, so a mesh can be
@@ -143,7 +151,7 @@ func _process(_delta: float) -> void:
 ## Tells the overlay shader where each character is: centre and size of all of one
 ## character's meshes together, nearest to the camera first (at most MAX_CHARS).
 func _publish_characters() -> void:
-	var groups := {}   # key -> {box: AABB, occlude: bool}
+	var groups := {}   # key -> {box: AABB, occlude: bool, meshes: Array, body: RID}
 	for i in range(_tracked.size() - 1, -1, -1):
 		var entry := _tracked[i]
 		var raw: Variant = entry["mesh"]
@@ -159,9 +167,11 @@ func _publish_characters() -> void:
 		if groups.has(key):
 			groups[key]["box"] = (groups[key]["box"] as AABB).merge(box)
 			groups[key]["occlude"] = groups[key]["occlude"] and entry["occlude"]
+			(groups[key]["meshes"] as Array).append(mi)
 		else:
-			groups[key] = {"box": box, "occlude": entry["occlude"]}
+			groups[key] = {"box": box, "occlude": entry["occlude"], "meshes": [mi], "body": body}
 	var cam_pos := _source_cam.global_position
+	_hide_fully_occluded(groups, cam_pos)
 	var list: Array = groups.values()
 	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return (a["box"] as AABB).get_center().distance_squared_to(cam_pos) < (b["box"] as AABB).get_center().distance_squared_to(cam_pos))
@@ -178,3 +188,36 @@ func _publish_characters() -> void:
 	_overlay_material.set_shader_parameter(&"char_count", count)
 	_overlay_material.set_shader_parameter(&"char_pos", positions)
 	_overlay_material.set_shader_parameter(&"char_radius", radii)
+
+## Takes the outline layer off every occludable character that is entirely hidden behind scenery,
+## and puts it back as soon as any part of it can be seen again.
+func _hide_fully_occluded(groups: Dictionary, cam_pos: Vector3) -> void:
+	var space := _cam.get_world_3d().direct_space_state
+	var own_bodies: Array[RID] = []   # characters never hide each other here
+	for g: Dictionary in groups.values():
+		if (g["body"] as RID).is_valid():
+			own_bodies.append(g["body"])
+	for key: Variant in groups:
+		var g: Dictionary = groups[key]
+		if not g["occlude"]:
+			continue
+		var box: AABB = g["box"]
+		var c := box.get_center()
+		var half_h := box.size.y * 0.4
+		var hidden := true
+		for p: Vector3 in [c, c + Vector3.UP * half_h, c - Vector3.UP * half_h]:
+			var q := PhysicsRayQueryParameters3D.create(cam_pos, p, OCCLUSION_MASK, own_bodies)
+			if space.intersect_ray(q).is_empty():
+				hidden = false
+				break
+		if hidden == _outline_off.has(key):
+			continue   # nothing changes
+		if hidden:
+			_outline_off[key] = true
+		else:
+			_outline_off.erase(key)
+		for mi: VisualInstance3D in g["meshes"]:
+			if hidden:
+				mi.layers &= ~OUTLINE_LAYER_MASK
+			else:
+				mi.layers |= OUTLINE_LAYER_MASK
