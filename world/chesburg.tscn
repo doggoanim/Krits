@@ -65,6 +65,7 @@
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="chesburg_ambience_script"]
 [ext_resource type="AudioStream" uid="uid://ci84xm6i6olb1" path="res://sounds/Ambience/grassland.ogg" id="chesburg_ambience_stream"]
 [ext_resource type="Script" uid="uid://clhu2b1lt3n50" path="res://world/fish_jumps.gd" id="fish_jumps_script"]
+[ext_resource type="PackedScene" uid="uid://b3a6n6yhe01" path="res://assets/npcs/Henry.glb" id="henry_model"]
 [ext_resource type="Script" uid="uid://b8mj2xaqcf7na" path="res://world/house_dressing.gd" id="house_dressing_script"]
 [ext_resource type="Script" uid="uid://0cbpy1r6y3yx" path="res://world/house_extras.gd" id="house_extras_script"]
 [ext_resource type="Script" uid="uid://boh52rpsowrt4" path="res://world/killer_fish.gd" id="killer_fish_script"]
@@ -80,7 +81,6 @@
 [ext_resource type="Script" uid="uid://dbjdxjdmuvloq" path="res://world/time_of_day.gd" id="tod_script"]
 [ext_resource type="Script" uid="uid://db2vbs67yn6cp" path="res://world/window_glow.gd" id="window_glow_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
-[ext_resource type="PackedScene" uid="uid://b3a6n6yhe01" path="res://assets/npcs/Henry.glb" id="henry_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
@@ -170,10 +170,6 @@ height = 0.693
 radius = 0.35
 height = 1.5
 
-[sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
-radius = 0.4
-height = 1.8
-
 [sub_resource type="Resource" id="Stop_HenryDay"]
 script = ExtResource("stop_script")
 from_hour = 6.0
@@ -186,6 +182,10 @@ script = ExtResource("stop_script")
 from_hour = 18.5
 rest_pose = 2
 place = NodePath("NPCs/Routes/HenryByFire")
+
+[sub_resource type="CapsuleMesh" id="Mesh_ShopBody"]
+radius = 0.4
+height = 1.8
 
 [sub_resource type="Resource" id="Stop_FennSpot"]
 script = ExtResource("stop_script")
