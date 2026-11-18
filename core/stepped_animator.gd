@@ -13,9 +13,11 @@ extends Node
 ## Skipped in the editor (the preview stays smooth, and nothing is saved into the scene).
 
 const MAX_CATCH_UP := 4   ## a long hitch doesn't skip a whole cycle
+const QUICK_START_GAP_MSEC := 250   ## clips restarting faster than this (e.g. jump <-> fall flicker) don't get the instant first pose, which would pop
 
 var _anim: AnimationPlayer
 var _step := -1
+var _last_start_msec := -100000
 
 static func attach(anim: AnimationPlayer) -> SteppedAnimator:
 	if anim == null or Engine.is_editor_hint():
@@ -49,5 +51,10 @@ func _process(_delta: float) -> void:
 func _on_animation_started(_clip: StringName) -> void:
 	if not is_instance_valid(_anim):
 		return
+	var now := Time.get_ticks_msec()
+	var quick := now - _last_start_msec < QUICK_START_GAP_MSEC
+	_last_start_msec = now
+	if quick:
+		return   # clips switching back and forth: let the normal steps carry it, no pop
 	_step = Choppy.index()
 	_anim.advance(Choppy.STEP_SECONDS)
