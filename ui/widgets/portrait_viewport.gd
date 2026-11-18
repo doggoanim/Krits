@@ -147,7 +147,7 @@ func _build_scene() -> void:
 	world.add_child(_model)
 	_model.rotation.y = PlayerVisual.MODEL_FACING_OFFSET + turn
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	SteppedAnimator.attach(_anim)
+	# (plays smoothly like the player's own idle: only the run clip is held, see PlayerVisual)
 
 	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
 	# No outline_hook here — the outline is drawn entirely by
