@@ -226,18 +226,22 @@ func _process(delta: float) -> void:
 		return
 	var talking := DialogueBox.instance != null and DialogueBox.instance.is_active()
 	if talking:
+		_npc.set_pose(NPC.Pose.IDLE)
 		_apply_bob(0.0, delta)
 		return
 	var player := get_tree().get_first_node_in_group(&"player") as Node3D
 	var near_player := player != null and player.global_position.distance_to(_npc.global_position) < notice_radius
 	if near_player and not _chat_hold:
+		_npc.set_pose(NPC.Pose.IDLE)
 		_look_at(player.global_position, delta)
 		_apply_bob(0.0, delta)
 		return
 	match _state:
 		State.WALKING:
+			_npc.set_pose(NPC.Pose.WALK)
 			_step_walk(delta)
 		State.IDLE:
+			_npc.set_pose(NPC.Pose.IDLE if _chat_hold or _stop == null else _stop.rest_pose)
 			_step_idle(delta)
 
 func _step_walk(delta: float) -> void:
@@ -298,6 +302,8 @@ func _turn_to(yaw: float, delta: float) -> void:
 func _apply_bob(amount: float, delta: float) -> void:
 	if _visual == null or not is_instance_valid(_visual):
 		return
+	if _npc.has_walk_clip():
+		return   # the walk clip does the stepping
 	_bob += delta * BOB_RATE * amount
 	var step := Choppy.index()
 	if step == _bob_step and amount > 0.0:

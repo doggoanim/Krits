@@ -80,6 +80,7 @@
 [ext_resource type="Script" uid="uid://dbjdxjdmuvloq" path="res://world/time_of_day.gd" id="tod_script"]
 [ext_resource type="Script" uid="uid://db2vbs67yn6cp" path="res://world/window_glow.gd" id="window_glow_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
+[ext_resource type="PackedScene" uid="uid://b3a6n6yhe01" path="res://assets/npcs/Henry.glb" id="henry_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
@@ -177,11 +178,13 @@ height = 1.8
 script = ExtResource("stop_script")
 from_hour = 6.0
 mode = 1
+rest_pose = 3
 wander_radius = 2.0
 
 [sub_resource type="Resource" id="Stop_HenryCamp"]
 script = ExtResource("stop_script")
 from_hour = 18.5
+rest_pose = 2
 place = NodePath("NPCs/Routes/HenryByFire")
 
 [sub_resource type="Resource" id="Stop_FennSpot"]
@@ -2094,14 +2097,18 @@ script = ExtResource("barks_script")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 14)
 script = ExtResource("yule_npc_script")
 dialogue_file = "res://dialogue/npcs/henry.dlg"
+head_height = 1.5
+facing_offset = 3.14159
+model = ExtResource("henry_model")
+model_height = 1.7
+idle_animation = &"Henry_Idle"
+walk_animation = &"Henry_Walk"
+sit_animation = &"Henry_Sitting"
+look_animation = &"Henry_staring_at_backpack"
 
 [node name="Collision" type="CollisionShape3D" parent="NPCs/Henry" unique_id=1529632905]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("Shape_YuleBody")
-
-[node name="Mesh" type="MeshInstance3D" parent="NPCs/Henry" unique_id=567638989]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_ShopBody")
 
 [node name="Schedule" type="Node" parent="NPCs/Henry" unique_id=740921488]
 script = ExtResource("schedule_script")

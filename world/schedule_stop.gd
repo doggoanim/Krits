@@ -11,6 +11,8 @@ enum Mode {
 
 @export_range(0.0, 24.0, 0.25) var from_hour := 8.0
 @export var mode := Mode.STAND
+## What the NPC does while standing about at this stop (needs the matching clip on the NPC).
+@export var rest_pose := NPC.Pose.IDLE
 ## Where, as a path from the scene root to a Node3D (a Marker3D, or a door's spawn point).
 ## Empty = where the NPC was placed in the scene.
 @export var place: NodePath

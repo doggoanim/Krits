@@ -32,6 +32,14 @@ extends Interactable
 		model_height = v
 		_refresh_editor_preview()
 @export var idle_animation: StringName = &""
+## Optional extra clips for an NPC on a daily routine (NpcSchedule picks the pose; empty = idle).
+@export var walk_animation: StringName = &""    ## while strolling between places
+@export var sit_animation: StringName = &""     ## resting pose of a stop with rest_pose = SIT
+@export var look_animation: StringName = &""    ## resting pose of a stop with rest_pose = LOOK (staring at something)
+
+## What the model is doing, as far as its clips go.
+enum Pose { IDLE, WALK, SIT, LOOK }
+const POSE_BLEND := 0.2
 
 const EDITOR_PREVIEW_NAME := "EditorModelPreview"
 
@@ -48,6 +56,8 @@ var _talk_tween: Tween
 var _talk_last_msec := -100000
 var _talk_rest_scale := Vector3.ONE
 var _model_node: Node3D
+var _anim: AnimationPlayer
+var _pose := -1
 var _rest_yaw := 0.0
 var _turn_tween: Tween
 
@@ -126,9 +136,41 @@ func _build_model() -> void:
 			if clip_name != &"RESET" and clip_name != &"Nothing":
 				clip = clip_name
 				break
+	_anim = anim
+	for extra in [walk_animation, sit_animation, look_animation]:
+		_loop_clip(extra)
 	if clip != &"":
-		anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
-		anim.play(clip)
+		idle_animation = clip
+		set_pose(Pose.IDLE)
+
+## Loops `clip` if the model has it (a single-frame pose has nothing to loop).
+func _loop_clip(clip: StringName) -> void:
+	if _anim == null or clip == &"" or not _anim.has_animation(clip):
+		return
+	var a := _anim.get_animation(clip)
+	if a.length > 0.0:
+		a.loop_mode = Animation.LOOP_LINEAR
+
+## Switches the model to the clip for `pose` (falls back to the idle clip when the pose has none).
+## Safe to call every frame.
+func set_pose(pose: Pose) -> void:
+	if _anim == null or pose == _pose:
+		return
+	var clip := idle_animation
+	match pose:
+		Pose.WALK: clip = walk_animation
+		Pose.SIT: clip = sit_animation
+		Pose.LOOK: clip = look_animation
+	if clip == &"" or not _anim.has_animation(clip):
+		clip = idle_animation
+	_pose = pose
+	_loop_clip(idle_animation)
+	if _anim.has_animation(clip):
+		_anim.play(clip, POSE_BLEND)
+
+## True when the model has its own walk clip (so the code bob isn't needed).
+func has_walk_clip() -> bool:
+	return _anim != null and walk_animation != &"" and _anim.has_animation(walk_animation)
 
 ## Grounded (not mid-air/rolling/diving/etc.), alive, and nothing else
 ## already has a conversation open — same spirit as the checks other
