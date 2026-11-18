@@ -7,9 +7,6 @@
 [ext_resource type="Script" uid="uid://dfd47cc554yqi" path="res://addons/cyclops_level_builder/resources/data_vector_int.gd" id="5_yicfs"]
 [ext_resource type="Script" uid="uid://dmot4k5n7k0w6" path="res://addons/cyclops_level_builder/resources/mesh_vector_data.gd" id="6_ld685"]
 [ext_resource type="Material" uid="uid://38x6l4wyby7r" path="res://assets/materials/sewer_wall.tres" id="7_8grio"]
-[ext_resource type="Script" path="res://world/well_lights.gd" id="wl_lights"]
-[ext_resource type="Script" path="res://world/cave_glimmers.gd" id="wl_glimmers"]
-[ext_resource type="Script" path="res://world/water_life.gd" id="wl_waterlife"]
 [ext_resource type="Script" uid="uid://byy581cvid68a" path="res://world/door_spawn.gd" id="7_yugcs"]
 [ext_resource type="Material" uid="uid://cntvsp5g1dxuv" path="res://assets/materials/sewer_ground.tres" id="8_yicfs"]
 [ext_resource type="PackedScene" uid="uid://3qh41uwbj8kg" path="res://world/water/water.tscn" id="11_fhlm3"]
@@ -40,6 +37,9 @@
 [ext_resource type="Script" uid="uid://c45uyt3m3508f" path="res://world/key_item_pickup.gd" id="well_pickup"]
 [ext_resource type="Script" uid="uid://cbk8fna0e05j5" path="res://world/eject_pit.gd" id="well_pit"]
 [ext_resource type="Script" uid="uid://bv77sg604o5hi" path="res://world/tutorial_popup_trigger.gd" id="well_tut_trigger"]
+[ext_resource type="Script" uid="uid://14e40ofhtu3q" path="res://world/cave_glimmers.gd" id="wl_glimmers"]
+[ext_resource type="Script" uid="uid://7nv4gjqr47y0" path="res://world/well_lights.gd" id="wl_lights"]
+[ext_resource type="Script" uid="uid://bdwv60cpmjh3n" path="res://world/water_life.gd" id="wl_waterlife"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -12363,8 +12363,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.5, -0.3)
 script = ExtResource("well_bats_script")
 
 [node name="SpiritMotes" type="GPUParticles3D" parent="." unique_id=35003688]
-fixed_fps = 12
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.75, -21.5, -7.6)
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(12, 6, 12)
 mote_count = 45
@@ -12733,8 +12733,8 @@ search_height = 0.0
 spot_count = 3
 
 [node name="ShaftDust" type="GPUParticles3D" parent="." unique_id=920000210]
-fixed_fps = 12
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 5, -0.3)
+fixed_fps = 12
 script = ExtResource("well_motes")
 area_size = Vector3(1.6, 8, 1.6)
 mote_count = 30
@@ -12890,13 +12890,13 @@ transform = Transform3D(0.68999976, 0, 0, 0, 1, 0, 0, 0, 1, -45.789513, -24.8206
 script = ExtResource("12_qcdpf")
 size = Vector3(20, 6.98, 20)
 
-[node name="WellLights" type="Node" parent="."]
+[node name="WellLights" type="Node" parent="." unique_id=451568632]
 script = ExtResource("wl_lights")
 
-[node name="CaveGlimmers" type="Node3D" parent="."]
+[node name="CaveGlimmers" type="Node3D" parent="." unique_id=569606818]
 script = ExtResource("wl_glimmers")
 
-[node name="WaterLife" type="Node3D" parent="."]
+[node name="WaterLife" type="Node3D" parent="." unique_id=671791869]
 script = ExtResource("wl_waterlife")
 
 [editable path="Water"]

@@ -2,8 +2,8 @@
 @when cat_clue_1 -> again
 
 == offer ==
-Muddy paw prints, fresh and round, trotting away from the well. [set cat_clue_1]
-Whoever made them was in no hurry at all.
+Paws... From a [color=#d9772b]cat[/color]'s. [set cat_clue_1]
+they point to the [color=#FF671F]Mayor[/color]'s house
 
 == again ==
-The paw prints still lead off toward town.
+The paw prints still point to [color=#FF671F]Mayor[/color]'s house

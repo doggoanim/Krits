@@ -2136,7 +2136,7 @@ done_flag = &"cat_clue_1"
 dialogue_file = "res://dialogue/npcs/cat_clue_prints.dlg"
 
 [node name="CatClueBun" type="StaticBody3D" parent="NPCs" unique_id=107272031]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.6, 8, -17.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.199997, 8, -24.2)
 script = ExtResource("quest_prop_script")
 kind = 3
 show_when = Array[StringName]([&"cat_clue_2"])
@@ -2145,7 +2145,7 @@ done_flag = &"cat_clue_3"
 dialogue_file = "res://dialogue/npcs/cat_clue_bun.dlg"
 
 [node name="Biscuit" type="StaticBody3D" parent="NPCs" unique_id=1388985992]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 11.900001, -17.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 8.900001, -31.5)
 script = ExtResource("quest_prop_script")
 kind = 4
 show_when = Array[StringName]([&"cat_clue_1", &"cat_clue_2", &"cat_clue_3"])

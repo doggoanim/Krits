@@ -2,8 +2,8 @@
 @when cat_clue_2 -> again
 
 == offer ==
-A tuft of [color=#d9772b]orange fur[/color], snagged on the ground. Soft, and smells faintly of fish. [set cat_clue_2]
-Biscuit was definitely here.
+A tuft of [color=#d9772b]orange fur[/color] [set cat_clue_2]
+[color=#d9772b]Biscuit[/color] was definitely here.
 
 == again ==
-Orange fur. Biscuit's, no doubt.
+Must be near
