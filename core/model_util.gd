@@ -20,6 +20,10 @@ const CHARACTER_TEXTURE_FLATTEN := 0.4
 const CHARACTER_LIGHT_LAYER := 4   # layer value 2 belongs to OutlineSystem
 
 const CEL_SHADER := preload("res://shading/toon.gdshader")
+## For materials authored double-sided (glTF doubleSided, i.e. cull mode off), like Krits' shirt:
+## a single-sided shader would cull the inside faces, and from some angles you would see
+## straight through the cloth to what is underneath.
+const CEL_SHADER_DOUBLE_SIDED := preload("res://shading/toon_double_sided.gdshader")
 
 ## Some character materials (krits.glb's among them) are authored with
 ## baseColorFactor deliberately black and the real, often pre-shaded color
@@ -119,7 +123,7 @@ static func _shade_recursive(n: Node, out_materials: Array, out_face_materials: 
 			if mat is BaseMaterial3D:
 				var base := mat as BaseMaterial3D
 				var cel := ShaderMaterial.new()
-				cel.shader = CEL_SHADER
+				cel.shader = CEL_SHADER_DOUBLE_SIDED if base.cull_mode == BaseMaterial3D.CULL_DISABLED else CEL_SHADER
 
 				var color_tex: Texture2D
 				var tint: Color
