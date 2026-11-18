@@ -149,8 +149,8 @@ const SLIME_TINT_STRENGTH := 0.6
 ## jump_launch() and SquashModifier. Amounts are fractions of body height.
 @export var jump_spine_lead := 0.45            ## how far the upper body lifts, instantly, at the launch
 @export var jump_leg_follow := 0.3             ## how much the legs lengthen as they catch up
-@export var jump_leg_delay := 0.12             ## seconds the legs trail behind the upper body
-@export var jump_settle_time := 0.65           ## back to normal proportions
+@export var jump_leg_delay := 0.08             ## seconds the legs trail behind the upper body
+@export var jump_settle_time := 0.42           ## back to normal proportions
 @export var jump_squash_spine := -0.12         ## after the stretch the upper body compresses past normal by this much (the squash)
 @export var jump_squash_legs := -0.08
 @export var jump_squash_xz := 1.08            ## ...and the model bulges wider while compressed
