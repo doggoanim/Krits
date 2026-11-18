@@ -7,6 +7,9 @@ extends Node
 ##
 ##   SteppedAnimator.attach(anim_player)    # once, after finding the AnimationPlayer
 ##
+## The held pose is re-applied every frame (advance by zero), so smooth effects layered on the
+## skeleton, like squash and stretch, always sit on top of the right pose.
+##
 ## Starting a clip is not held: the first pose of the new clip (and the start of its blend) is
 ## shown at once, so changing animation never waits for the next step.
 ##
@@ -41,6 +44,10 @@ func _process(_delta: float) -> void:
 		_step = step
 		return
 	if step == _step:
+		# Same held pose: write it to the skeleton again anyway. Modifiers that run on top of the
+		# animation every frame (the squash and stretch) start from a freshly reset skeleton, so a
+		# frame where the animation wrote nothing would show them on the bare rest pose and pop.
+		_anim.advance(0.0)
 		return
 	var steps := mini(step - _step, MAX_CATCH_UP)
 	_step = step
