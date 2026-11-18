@@ -71,7 +71,7 @@ func _make_wing(mat: Material, side: float) -> MeshInstance3D:
 	return mi
 
 func _process(delta: float) -> void:
-	var t := Time.get_ticks_msec() / 1000.0
+	var t := Choppy.time()   # bob and wing-flap poses are held; the circling itself stays smooth
 	for b in _bats:
 		b["angle"] += float(b["speed"]) * delta
 		var a: float = b["angle"]

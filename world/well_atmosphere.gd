@@ -134,8 +134,9 @@ func _apply_spirit_glow() -> void:
 func _apply_shaft() -> void:
 	if _shaft == null:
 		return
-	var n := 0.5 * sin(_t * 0.7) + 0.3 * sin(_t * 1.9 + 1.3) + 0.2 * sin(_t * 4.1 + 0.4)
+	var t := Choppy.snap(_t)   # held poses
+	var n := 0.5 * sin(t * 0.7) + 0.3 * sin(t * 1.9 + 1.3) + 0.2 * sin(t * 4.1 + 0.4)
 	_shaft.light_energy = _shaft_base_energy * (1.0 + shaft_flicker * n)
 	var sway := deg_to_rad(shaft_sway_degrees)
 	_shaft.basis = _shaft_base_basis * Basis.from_euler(Vector3(
-			sin(_t * 0.31) * sway, 0.0, sin(_t * 0.23 + 1.0) * sway))
+			sin(t * 0.31) * sway, 0.0, sin(t * 0.23 + 1.0) * sway))

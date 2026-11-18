@@ -34,6 +34,7 @@ func setup(data: EnemyData) -> void:
 	add_child(_model)
 	_model.rotation.y = data.model_facing_offset
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	SteppedAnimator.attach(_anim)
 	ModelUtil.fit_height(_model, data.model_height)
 	ModelUtil.apply_cel_shading(_model, _materials, {}, Callable(OutlineSystem, &"mark_occludable"))
 	for m in _materials:

@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 	if amount <= 0.0 or _light == null:
 		return
 	_age += delta
-	_light.light_energy = light_energy * amount * (0.9 + 0.1 * sin(_age * 2.1))
+	_light.light_energy = light_energy * amount * (0.9 + 0.1 * sin(Choppy.snap(_age) * 2.1))
 
 ## Fades the rays to `target` (0 = off, 1 = full) over `duration` seconds.
 func fade_to(target: float, duration := 0.4) -> void:

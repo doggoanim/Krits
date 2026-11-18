@@ -142,6 +142,7 @@ func _build_model() -> void:
 	var players := model.find_children("*", "AnimationPlayer", true, false)
 	if not players.is_empty():
 		_anim = players[0] as AnimationPlayer
+		SteppedAnimator.attach(_anim)
 		# The transitions play once; the idles are single poses.
 		for clip in [ANIM_OPENING, ANIM_CLOSING]:
 			if _anim.has_animation(clip):

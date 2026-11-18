@@ -69,6 +69,7 @@ func _play(model: Node3D, anim: StringName, offset: float) -> void:
 	var player := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if player == null or not player.has_animation(anim):
 		return
+	SteppedAnimator.attach(player)
 	player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
 	player.play(anim)
 	player.seek(offset * 0.7, true)

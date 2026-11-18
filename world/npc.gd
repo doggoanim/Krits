@@ -118,6 +118,7 @@ func _build_model() -> void:
 	var anim := node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if anim == null:
 		return
+	SteppedAnimator.attach(anim)
 	var clip := idle_animation
 	if clip == &"" or not anim.has_animation(clip):
 		clip = &""

@@ -75,6 +75,7 @@ func _play_pose() -> void:
 	if anim == null:
 		push_warning("MenuHero: no AnimationPlayer under the model — it will hold its bind pose.")
 		return
+	SteppedAnimator.attach(anim)
 	var clip := _find_clip(anim)
 	if clip == &"":
 		push_warning("MenuHero: no menu pose found. Clips in the model: %s" % [anim.get_animation_list()])
