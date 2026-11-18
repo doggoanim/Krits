@@ -95,6 +95,9 @@ func _ready() -> void:
 	_viewport.size = Vector2i(render_size, render_size)
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
+	# The model's auto-generated LODs (Krits.glb imports with generate_lods) get picked in this small
+	# render, and the simplified meshes can tear the UVs: the shirt would sometimes lose its texture.
+	_viewport.mesh_lod_threshold = 0.0
 	_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if only_when_visible \
 			else SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)

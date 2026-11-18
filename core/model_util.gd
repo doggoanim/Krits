@@ -148,8 +148,10 @@ static func _shade_recursive(n: Node, out_materials: Array, out_face_materials: 
 					# nothing else is going to supply color (no texture, no
 					# vertex color either) a flat black tint is never
 					# actually intentional, so fall back to white.
+					# (Hair is the exception: plain black hair really is black.)
 					if tint.r < 0.001 and tint.g < 0.001 and tint.b < 0.001 \
-							and not use_vertex_color and base.albedo_texture == null:
+							and not use_vertex_color and base.albedo_texture == null \
+							and not base.resource_name.to_lower().contains("hair"):
 						tint = Color.WHITE
 
 				cel.set_shader_parameter(&"albedo_texture", color_tex)
