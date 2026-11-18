@@ -162,6 +162,10 @@ func _build_scene() -> void:
 		_anim.play(PlayerVisual.ANIM_IDLE)
 
 	var cam := Camera3D.new()
+	# A tight depth range: the default far plane (4000 m) leaves almost no depth precision at
+	# arm's length, so the shirt z-fights with the body surface under it and flashes white.
+	cam.near = 0.1
+	cam.far = 6.0
 	var look_at_pos := Vector3(0.0, Player.STAND_HEIGHT * CAMERA_HEIGHT_FRAC, 0.0)
 	# MODEL_FACING_OFFSET turns the model to face -Z (Godot's forward), so the
 	# camera has to sit on the -Z side to see the front of the face rather
