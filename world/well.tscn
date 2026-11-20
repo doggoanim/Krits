@@ -12702,33 +12702,43 @@ transform = Transform3D(0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, 0.34202, -1
 script = ExtResource("prop_slot_script")
 kind = 13
 
-[node name="LandingRope" type="Node3D" parent="."]
-transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 1.6, 0.0, -2.9)
+[node name="LandingRope" type="Node3D" parent="." unique_id=1327822368]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 0.6, 0, 1.0999999)
 script = ExtResource("prop_slot_script")
 kind = 14
 
-[node name="PathLantern" type="Node3D" parent="."]
-transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, -4.3, -10.0, -26.2)
+[node name="PathLantern" type="Node3D" parent="." unique_id=114024811]
+transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, -4.3, -10, -26.2)
 script = ExtResource("prop_slot_script")
 kind = 16
 
-[node name="PathPots" type="Node3D" parent="."]
-transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2.4, -10.0, -22.8)
+[node name="PathPots" type="Node3D" parent="." unique_id=955025175]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2.4, -10, -22.8)
 script = ExtResource("prop_slot_script")
 kind = 15
 
-[node name="ChestPots" type="Node3D" parent="."]
-transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, -12.1, -25.0, -36.2)
+[node name="ChestPots" type="Node3D" parent="." unique_id=451818730]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, -12.1, -25, -36.2)
 script = ExtResource("prop_slot_script")
 kind = 15
 
-[node name="ChestRope" type="Node3D" parent="."]
-transform = Transform3D(0.34202, 0, 0.939693, 0, 1, 0, -0.939693, 0, 0.34202, -10.1, -25.0, -34.2)
+[node name="ChestRope" type="Node3D" parent="." unique_id=206868102]
+transform = Transform3D(-0.98480797, 0, -0.17364854, 0, 1, 0, 0.17364854, 0, -0.98480797, -15.1, -25, -36.2)
 script = ExtResource("prop_slot_script")
 kind = 14
 
-[node name="ChestLantern" type="Node3D" parent="."]
-transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, -14.1, -25.0, -38.2)
+[node name="ChestLantern" type="Node3D" parent="." unique_id=938360171]
+transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, -10, -25, -34.9)
+script = ExtResource("prop_slot_script")
+kind = 16
+
+[node name="WaterLantern" type="Node3D" parent="." unique_id=78977632]
+transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, -45.6, -26, -29.800001)
+script = ExtResource("prop_slot_script")
+kind = 16
+
+[node name="WaterLantern2" type="Node3D" parent="." unique_id=324312823]
+transform = Transform3D(-0.08715598, 0, 0.9961949, 0, 1, 0, -0.9961949, 0, -0.08715598, -45.199997, -24, -24.2)
 script = ExtResource("prop_slot_script")
 kind = 16
 
