@@ -96,9 +96,6 @@ func _ready() -> void:
 	_viewport.size = Vector2i(render_size, render_size)
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
-	# The model's auto-generated LODs (Krits.glb imports with generate_lods) get picked in this small
-	# render, and the simplified meshes can tear the UVs: the shirt would sometimes lose its texture.
-	_viewport.mesh_lod_threshold = 0.0
 	_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if only_when_visible \
 			else SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
@@ -151,7 +148,6 @@ func _build_scene() -> void:
 	# (plays smoothly like the player's own idle: only the run clip is held, see PlayerVisual)
 
 	ModelUtil.fit_height(_model, Player.STAND_HEIGHT)
-	_never_cull(_model)
 	# No outline_hook here — the outline is drawn entirely by
 	# CIRCLE_MASK_SHADER_CODE above, against this render's own alpha, rather
 	# than by giving any mesh a hook callback that builds outline geometry.
@@ -166,10 +162,6 @@ func _build_scene() -> void:
 		_anim.play(PlayerVisual.ANIM_IDLE)
 
 	var cam := Camera3D.new()
-	# A tight depth range: the default far plane (4000 m) leaves almost no depth precision at
-	# arm's length, so the shirt z-fights with the body surface under it and flashes white.
-	cam.near = 0.1
-	cam.far = 6.0
 	var look_at_pos := Vector3(0.0, Player.STAND_HEIGHT * CAMERA_HEIGHT_FRAC, 0.0)
 	# MODEL_FACING_OFFSET turns the model to face -Z (Godot's forward), so the
 	# camera has to sit on the -Z side to see the front of the face rather
@@ -203,17 +195,6 @@ func _bind_private_textures(materials: Array) -> void:
 func _rebind_textures() -> void:
 	for b: Dictionary in _bindings:
 		(b["material"] as ShaderMaterial).set_shader_parameter(&"albedo_texture", b["texture"])
-
-## The camera sits right up against the model, and a skinned mesh's bounds come from its rest
-## pose, so mid-idle the torso's bounds could fall outside the view and the whole torso would
-## blink out (showing the frame art behind it). Nothing here is ever worth culling anyway.
-func _never_cull(n: Node) -> void:
-	if n is GeometryInstance3D:
-		var g := n as GeometryInstance3D
-		g.extra_cull_margin = 16384.0
-		g.ignore_occlusion_culling = true
-	for c in n.get_children():
-		_never_cull(c)
 
 func _process(delta: float) -> void:
 	_rebind_textures()
