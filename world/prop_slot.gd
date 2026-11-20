@@ -12,7 +12,7 @@ extends Node3D
 
 enum Kind {   # explicit numbers: scenes store the number, so removed kinds leave a gap rather than renumbering the rest
 	LANTERN = 1, BUNTING, LAUNDRY_LINE, WOOD_PILE, STALL, CRATES_AND_BARRELS,
-	WIND_CHIMES, NOTICE_BOARD, CHICKENS, BIRD_PERCH = 11, BUCKET, BONE_PILE,
+	WIND_CHIMES, NOTICE_BOARD, CHICKENS, BIRD_PERCH = 11, BUCKET, BONE_PILE, ROPE_AND_PLANKS, BROKEN_POTS, DROPPED_LANTERN,
 }
 
 @export var kind := Kind.LANTERN:
@@ -115,6 +115,12 @@ func _make() -> Node3D:
 			return HouseProps.bucket()
 		Kind.BONE_PILE:
 			return HouseProps.bone_pile()
+		Kind.ROPE_AND_PLANKS:
+			return HouseProps.rope_and_planks()
+		Kind.BROKEN_POTS:
+			return HouseProps.broken_pots()
+		Kind.DROPPED_LANTERN:
+			return HouseProps.dropped_lantern()
 		Kind.CHICKENS:
 			return Chickens.new()
 		Kind.BIRD_PERCH:

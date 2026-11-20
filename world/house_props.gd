@@ -395,6 +395,94 @@ static func bone_pile() -> Node3D:
 		long.name = "LongBone"
 	return root
 
+## Rope and planks: a coil of old rope, a loose tail of it and a few broken planks, one propped on
+## another. Origin on the ground, about 1.2 m across, not solid. For the well and other dark places.
+static func rope_and_planks() -> Node3D:
+	var root := Node3D.new()
+	root.name = "RopeAndPlanks"
+	var rope := Color(0.5, 0.4, 0.27)
+	for i in 3:   # the coil: a few turns stacked
+		var turn := TorusMesh.new()
+		turn.inner_radius = 0.12 - i * 0.015
+		turn.outer_radius = turn.inner_radius + 0.045
+		var t := HouseParts._part(root, turn, rope, Vector3(0.35, 0.025 + i * 0.04, 0.1))
+		t.name = "Coil%d" % i
+	HouseParts.cylinder(root, 0.02, 0.5, rope, Vector3(0.08, 0.02, 0.28)).rotation_degrees = Vector3(0, 20, 90)   # the loose tail
+	var wood := HouseParts.WOOD_DARK
+	HouseParts.box(root, Vector3(0.9, 0.04, 0.16), wood, Vector3(-0.3, 0.02, -0.1), Vector3(0, 12, 0)).name = "Plank1"
+	HouseParts.box(root, Vector3(0.7, 0.04, 0.15), wood.darkened(0.12), Vector3(-0.2, 0.06, -0.3), Vector3(0, -18, 0)).name = "Plank2"
+	HouseParts.box(root, Vector3(0.6, 0.04, 0.14), wood.lightened(0.08), Vector3(-0.55, 0.12, -0.25), Vector3(0, 35, 14)).name = "Plank3"   # propped up
+	HouseParts.box(root, Vector3(0.05, 0.05, 0.2), HouseParts.IRON, Vector3(-0.72, 0.045, -0.08)).name = "Nail"
+	return root
+
+## A smashed barrel and a broken clay pot with its spilled grain: a ring of fallen staves, a few
+## shards. Origin on the ground, about 1.3 m across, not solid.
+static func broken_pots() -> Node3D:
+	var root := Node3D.new()
+	root.name = "BrokenPots"
+	var wood := HouseParts.WOOD_LIGHT.darkened(0.15)
+	HouseParts.cylinder(root, 0.26, 0.05, wood.darkened(0.15), Vector3(-0.3, 0.025, 0.0)).name = "BarrelBase"
+	for i in 6:   # staves still standing at the back of the base, the rest burst outward
+		var a := TAU * float(i) / 6.0
+		var stave := HouseParts.box(root, Vector3(0.07, 0.4 - i * 0.05, 0.03), wood, Vector3(-0.3 + cos(a) * 0.24, 0.17 - i * 0.02, sin(a) * 0.24), Vector3(0, -rad_to_deg(a), 6.0 + float(i) * 12.0))
+		stave.name = "Stave%d" % i
+	HouseParts.box(root, Vector3(0.5, 0.03, 0.07), wood, Vector3(-0.1, 0.02, 0.42), Vector3(0, 25, 0)).name = "FallenStave"
+	HouseParts.cylinder(root, 0.03, 0.5, HouseParts.IRON, Vector3(-0.5, 0.025, -0.4)).rotation_degrees = Vector3(0, 40, 90)   # a loose hoop piece
+	var clay := Color(0.7, 0.4, 0.26)
+	var pot := SphereMesh.new()
+	pot.radius = 0.18
+	pot.height = 0.32
+	var p := HouseParts._part(root, pot, clay, Vector3(0.45, 0.12, -0.05), Vector3(0, 0, 70))   # tipped on its side
+	p.name = "Pot"
+	var neck := HouseParts.cylinder(root, 0.07, 0.1, clay.darkened(0.1), Vector3(0.6, 0.12, -0.05))
+	neck.rotation_degrees = Vector3(0, 0, 90)
+	neck.name = "PotNeck"
+	HouseParts.cylinder(root, 0.2, 0.012, Color(0.82, 0.72, 0.45), Vector3(0.28, 0.008, 0.1)).name = "SpilledGrain"
+	for i in 4:   # shards
+		HouseParts.box(root, Vector3(0.09, 0.015, 0.06), clay.darkened(0.05 * i), Vector3(0.1 + i * 0.12, 0.012, 0.28 - i * 0.08), Vector3(0, 30.0 + i * 55.0, 0)).name = "Shard%d" % i
+	return root
+
+## A lantern knocked over and still burning: iron cage lying on its side, a warm dim glow and a little
+## light on the floor around it. Origin on the ground, not solid. Meant for places where it is dark.
+static func dropped_lantern() -> Node3D:
+	var root := Node3D.new()
+	root.name = "DroppedLantern"
+	var iron := HouseParts.IRON
+	var body := Node3D.new()
+	body.position = Vector3(0, 0.13, 0)
+	body.rotation_degrees = Vector3(0, 25, 82)   # on its side
+	root.add_child(body)
+	HouseParts.box(body, Vector3(0.26, 0.05, 0.26), iron, Vector3(0, 0.17, 0))
+	HouseParts.box(body, Vector3(0.18, 0.06, 0.18), iron, Vector3(0, 0.22, 0))
+	HouseParts.box(body, Vector3(0.24, 0.04, 0.24), iron, Vector3(0, -0.17, 0))
+	for cx in [-1.0, 1.0]:
+		for cz in [-1.0, 1.0]:
+			HouseParts.box(body, Vector3(0.03, 0.34, 0.03), iron, Vector3(cx * 0.11, 0, cz * 0.11))
+	var flame := StandardMaterial3D.new()
+	flame.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flame.albedo_color = Color(1.0, 0.82, 0.5)
+	var pane := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.17, 0.3, 0.17)
+	pane.mesh = mesh
+	pane.material_override = flame
+	body.add_child(pane)
+	var arc := TorusMesh.new()   # the carry handle
+	arc.inner_radius = 0.1
+	arc.outer_radius = 0.115
+	var handle := HouseParts._part(body, arc, iron, Vector3(0, 0.27, 0), Vector3(90, 0, 0))
+	handle.scale = Vector3(1.0, 1.0, 0.8)
+	handle.name = "Handle"
+	var glow := OmniLight3D.new()
+	glow.name = "Glow"
+	glow.light_color = Color(1.0, 0.7, 0.35)
+	glow.light_energy = 0.9
+	glow.omni_range = 3.5
+	glow.position = Vector3(0, 0.3, 0)
+	glow.shadow_enabled = false
+	root.add_child(glow)
+	return root
+
 ## Wind chimes: a ring with hanging tubes that swing and tinkle when a gust rises (WindChimes).
 static func wind_chimes() -> Node3D:
 	var chimes := WindChimes.new()
