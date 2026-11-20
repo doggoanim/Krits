@@ -26,6 +26,7 @@ enum Kind {   # explicit numbers: scenes store the number, so removed kinds leav
 @export_tool_button("Rebuild") var rebuild_button := _rebuild
 
 const VISUAL := "Visual"
+const MARKER := "EditorMarker"
 const PERCH_GROUP := &"bird_perch"
 const HAMMER_SFX := ["res://sounds/SFX/others/hammer_tink.ogg"]
 const CHOP_SFX := ["res://sounds/SFX/others/wood_chop.ogg"]
@@ -40,6 +41,7 @@ func _rebuild() -> void:
 	if old != null:
 		remove_child(old)
 		old.queue_free()
+	_update_editor_marker()
 	if kind == Kind.BIRD_PERCH:
 		add_to_group(PERCH_GROUP)
 	else:
@@ -49,6 +51,43 @@ func _rebuild() -> void:
 		return
 	visual.name = VISUAL   # no owner: rebuilt on load, never saved
 	add_child(visual)
+
+## In the editor only: a bright dot and the prop's name, drawn through walls and in the dark, so
+## every slot can be found and picked even in a dim cave. Never saved, never in the game.
+func _update_editor_marker() -> void:
+	var old := get_node_or_null(MARKER)
+	if old != null:
+		remove_child(old)
+		old.queue_free()
+	if not Engine.is_editor_hint():
+		return
+	var marker := Node3D.new()
+	marker.name = MARKER
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(1.0, 0.65, 0.1)
+	mat.no_depth_test = true
+	mat.render_priority = 100
+	var dot := SphereMesh.new()
+	dot.radius = 0.08
+	dot.height = 0.16
+	var dot_mi := MeshInstance3D.new()
+	dot_mi.mesh = dot
+	dot_mi.material_override = mat
+	dot_mi.position = Vector3(0, 0.1, 0)
+	dot_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	marker.add_child(dot_mi)
+	var label := Label3D.new()
+	label.text = str(Kind.find_key(kind)).capitalize()
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.fixed_size = true
+	label.pixel_size = 0.0008
+	label.modulate = Color(1.0, 0.8, 0.3)
+	label.outline_size = 8
+	label.position = Vector3(0, 0.35, 0)
+	marker.add_child(label)
+	add_child(marker)   # no owner: never saved
 
 func _make() -> Node3D:
 	match kind:
