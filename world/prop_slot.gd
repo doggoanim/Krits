@@ -53,7 +53,7 @@ func _rebuild() -> void:
 	visual.name = VISUAL   # no owner: rebuilt on load, never saved
 	add_child(visual)
 
-## In the editor only: a bright dot and the prop's name, drawn through walls and in the dark, so
+## In the editor only: a small bright dot, drawn through walls and in the dark, so
 ## every slot can be found and picked even in a dim cave. Never saved, never in the game.
 func _update_editor_marker() -> void:
 	var old := get_node_or_null(MARKER)
@@ -78,16 +78,6 @@ func _update_editor_marker() -> void:
 	dot_mi.position = Vector3(0, 0.1, 0)
 	dot_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	marker.add_child(dot_mi)
-	var label := Label3D.new()
-	label.text = str(Kind.find_key(kind)).capitalize()
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.fixed_size = true
-	label.pixel_size = 0.0008
-	label.modulate = Color(1.0, 0.8, 0.3)
-	label.outline_size = 8
-	label.position = Vector3(0, 0.35, 0)
-	marker.add_child(label)
 	add_child(marker)   # no owner: never saved
 
 func _make() -> Node3D:
