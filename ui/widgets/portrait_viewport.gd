@@ -88,6 +88,7 @@ var _viewport: SubViewport
 var _model: Node3D
 var _anim: AnimationPlayer
 var _face_material: ShaderMaterial   ## null if the model has no "Face*"-named surface
+var _bindings: Array[Dictionary] = []   ## {material, texture}: the portrait's own texture copies (see _bind_private_textures)
 var _synced_expression: StringName = &""   ## last expression copied from the live player (see _sync_face)
 
 func _ready() -> void:
@@ -155,8 +156,10 @@ func _build_scene() -> void:
 	# CIRCLE_MASK_SHADER_CODE above, against this render's own alpha, rather
 	# than by giving any mesh a hook callback that builds outline geometry.
 	var face_materials: Dictionary = {}
-	ModelUtil.apply_cel_shading(_model, [], face_materials)
+	var materials: Array = []
+	ModelUtil.apply_cel_shading(_model, materials, face_materials)
 	_face_material = face_materials.values()[0] if not face_materials.is_empty() else null
+	_bind_private_textures(materials)
 
 	if _anim != null and _anim.has_animation(PlayerVisual.ANIM_IDLE):
 		_anim.get_animation(PlayerVisual.ANIM_IDLE).loop_mode = Animation.LOOP_LINEAR
@@ -176,6 +179,31 @@ func _build_scene() -> void:
 	cam.look_at(look_at_pos, Vector3.UP)
 	cam.current = true
 
+## The body textures (shirt, pants, hair) are shared with the player in the world, the menu hero and the
+## other portrait. In the HUD the shirt would sometimes drop to Godot's "no texture" white for a frame
+## or for good, so this portrait keeps private copies of them and re-binds them every frame
+## (_process): a stale binding can only last one frame. The face is left alone: it swaps expressions.
+func _bind_private_textures(materials: Array) -> void:
+	for m: ShaderMaterial in materials:
+		if m == _face_material:
+			continue
+		var tex := m.get_shader_parameter(&"albedo_texture") as Texture2D
+		if tex == null or tex == ModelUtil.white_texture():
+			continue
+		var img := tex.get_image()
+		if img != null:
+			if img.is_compressed():
+				img.decompress()
+			if not img.has_mipmaps():
+				img.generate_mipmaps()
+			tex = ImageTexture.create_from_image(img)
+		m.set_shader_parameter(&"albedo_texture", tex)
+		_bindings.append({"material": m, "texture": tex})
+
+func _rebind_textures() -> void:
+	for b: Dictionary in _bindings:
+		(b["material"] as ShaderMaterial).set_shader_parameter(&"albedo_texture", b["texture"])
+
 ## The camera sits right up against the model, and a skinned mesh's bounds come from its rest
 ## pose, so mid-idle the torso's bounds could fall outside the view and the whole torso would
 ## blink out (showing the frame art behind it). Nothing here is ever worth culling anyway.
@@ -188,6 +216,7 @@ func _never_cull(n: Node) -> void:
 		_never_cull(c)
 
 func _process(delta: float) -> void:
+	_rebind_textures()
 	if mirror_player_face:
 		_sync_face()
 	else:
