@@ -24,10 +24,62 @@ static func shield_restore() -> ItemData:
 	i.heal_shield = 9999.0
 	return i
 
+## Marta's baking, cheap and filling.
+static func bread_roll() -> ItemData:
+	var i := _make(&"bread_roll", ItemData.Category.CONSUMABLE,
+		Color(0.85, 0.65, 0.35), 6, 2)
+	i.heal_hp = 15.0
+	return i
+
+static func jelly_bun() -> ItemData:
+	var i := _make(&"jelly_bun", ItemData.Category.CONSUMABLE,
+		Color(0.9, 0.35, 0.45), 14, 5)
+	i.heal_hp = 30.0
+	i.heal_shield = 10.0
+	return i
+
+static func shield_salve() -> ItemData:
+	var i := _make(&"shield_salve", ItemData.Category.CONSUMABLE,
+		Color(0.55, 0.8, 0.95), 18, 7)
+	i.heal_shield = 40.0
+	return i
+
+static func greater_health_potion() -> ItemData:
+	var i := _make(&"greater_health_potion", ItemData.Category.CONSUMABLE,
+		Color(1.0, 0.25, 0.4), 80, 32)
+	i.heal_hp = 100.0
+	return i
+
+static func spirit_elixir() -> ItemData:
+	var i := _make(&"spirit_elixir", ItemData.Category.CONSUMABLE,
+		Color(0.6, 1.0, 0.9), 200, 80)
+	i.heal_hp = 150.0
+	i.heal_shield = 9999.0
+	return i
+
 # ---------------------------------------------------------------- materials
 static func slime_goo() -> ItemData:
 	return _make(&"slime_goo", ItemData.Category.MATERIAL,
 		Color(0.45, 0.75, 0.3), 0, 4)
+
+# ---------------------------------------------------------------- loot (enemy drops and finds in the well)
+static func rusty_cog() -> ItemData:   ## spinners
+	return _make(&"rusty_cog", ItemData.Category.MATERIAL, Color(0.6, 0.45, 0.35), 0, 10)
+
+static func piercer_spike() -> ItemData:   ## piercers
+	return _make(&"piercer_spike", ItemData.Category.MATERIAL, Color(0.75, 0.75, 0.8), 0, 12)
+
+static func cave_moss() -> ItemData:
+	return _make(&"cave_moss", ItemData.Category.MATERIAL, Color(0.3, 0.55, 0.3), 0, 4)
+
+static func glow_shard() -> ItemData:   ## chipped from the well's cyan crystals
+	return _make(&"glow_shard", ItemData.Category.MATERIAL, Color(0.4, 0.95, 1.0), 0, 40)
+
+static func old_coin() -> ItemData:
+	return _make(&"old_coin", ItemData.Category.MATERIAL, Color(0.85, 0.7, 0.3), 0, 25)
+
+static func spider_silk() -> ItemData:
+	return _make(&"spider_silk", ItemData.Category.MATERIAL, Color(0.92, 0.93, 0.97), 0, 12)
 
 # ---------------------------------------------------------------- fish (see FishCatalog)
 static func minnow() -> ItemData:
@@ -106,7 +158,8 @@ static func lantern() -> ItemData:
 	return i
 
 static func all_items() -> Array[ItemData]:
-	return [health_potion(), shield_restore(), slime_goo(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi(),
+	return [health_potion(), shield_restore(), bread_roll(), jelly_bun(), shield_salve(), greater_health_potion(), spirit_elixir(),
+		slime_goo(), rusty_cog(), piercer_spike(), cave_moss(), glow_shard(), old_coin(), spider_silk(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi(),
 		bluegill(), carp(), catfish(), pike(), rainbow_trout(), lantern_eel(), moon_puffer(), old_sturgeon()]
 
 static func by_id(id: StringName) -> ItemData:
