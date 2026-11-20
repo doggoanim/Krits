@@ -13,13 +13,14 @@ extends Node3D
 enum Kind {   # explicit numbers: scenes store the number, so removed kinds leave a gap rather than renumbering the rest
 	LANTERN = 1, BUNTING, LAUNDRY_LINE, WOOD_PILE, STALL, CRATES_AND_BARRELS,
 	WIND_CHIMES, NOTICE_BOARD, CHICKENS, BIRD_PERCH = 11, BUCKET, BONE_PILE, ROPE_AND_PLANKS, BROKEN_POTS, DROPPED_LANTERN,
+	WALL_TORCH, WALL_ROPES, WALL_MOSS, WALL_LADDER, STALACTITES, HANGING_ROOTS, COBWEBS, HANGING_LANTERN,   # CaveProps
 }
 
 @export var kind := Kind.LANTERN:
 	set(v):
 		kind = v
 		_rebuild()
-@export_range(0.5, 12.0, 0.1) var length := 4.0:   ## bunting / laundry line: how long it is (m)
+@export_range(0.5, 20.0, 0.1) var length := 4.0:   ## bunting / laundry line: how long it is (m); for CaveProps, how far a rope or chain drops or how big roots and stalactites grow
 	set(v):
 		length = v
 		_rebuild()
@@ -121,6 +122,22 @@ func _make() -> Node3D:
 			return HouseProps.broken_pots()
 		Kind.DROPPED_LANTERN:
 			return HouseProps.dropped_lantern()
+		Kind.WALL_TORCH:
+			return CaveProps.wall_torch()
+		Kind.WALL_ROPES:
+			return CaveProps.wall_ropes(length)
+		Kind.WALL_MOSS:
+			return CaveProps.wall_moss()
+		Kind.WALL_LADDER:
+			return CaveProps.wall_ladder()
+		Kind.STALACTITES:
+			return CaveProps.stalactites(length)
+		Kind.HANGING_ROOTS:
+			return CaveProps.hanging_roots(length)
+		Kind.COBWEBS:
+			return CaveProps.cobwebs()
+		Kind.HANGING_LANTERN:
+			return CaveProps.hanging_lantern(length)
 		Kind.CHICKENS:
 			return Chickens.new()
 		Kind.BIRD_PERCH:
