@@ -28,14 +28,14 @@ static func air_step() -> AbilityData:
 
 static func guard_up() -> AbilityData:
 	var a := _make(&"guard_up",
-		AbilityData.Effect.GUARD, 18.0, 80, Color(1.0, 0.9, 0.4))
+		AbilityData.Effect.GUARD, 18.0, 0, Color(1.0, 0.9, 0.4))
 	a.duration = 2.5
 	a.stamina_cost = 35.0
 	return a
 
 static func shockwave() -> AbilityData:
 	var a := _make(&"shockwave",
-		AbilityData.Effect.SHOCKWAVE, 10.0, 120, Color(0.8, 0.55, 1.0))
+		AbilityData.Effect.SHOCKWAVE, 10.0, 0, Color(0.8, 0.55, 1.0))
 	a.amount = 3.0   # x your damage stat
 	a.radius = 9.0
 	a.stamina_cost = 50.0
@@ -43,7 +43,7 @@ static func shockwave() -> AbilityData:
 
 static func orb_stack() -> AbilityData:
 	var a := _make(&"orb_stack",
-		AbilityData.Effect.ORB_STACK, 14.0, 100, Color(1.0, 0.7, 0.3))
+		AbilityData.Effect.ORB_STACK, 14.0, 0, Color(1.0, 0.7, 0.3))
 	a.amount = 10.0        # extra orbs stacked on the nearest orb...
 	a.staff_amount = 2.0   # ...but only 2 with a staff
 	a.stamina_cost = 80.0
@@ -57,7 +57,8 @@ static func fishing() -> AbilityData:
 static func all_abilities() -> Array[AbilityData]:
 	return [heal(), air_step(), guard_up(), shockwave(), orb_stack(), fishing()]
 
-## A new game starts with fishing; the rest are learned from shops or the story.
+## A new game starts with fishing; the rest are earned through quests and the story, not bought (a
+## price of 0 keeps an ability out of every shop; give one a price to put it on sale again).
 static func starting() -> Array[AbilityData]:
 	return [fishing()]
 

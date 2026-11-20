@@ -365,7 +365,7 @@ Biscuit (both the hilltop cat and the one at Mrs. Vael's) now uses `assets/npcs/
 
 ## Hotbar and abilities
 - `abilities/`: `AbilityData` (effect, cooldown, stamina cost, price), `AbilityLibrary` (catalog: Heal, Air Step, Guard Up, Shockwave, Orb Stack; each spends stamina, see `PlayerStats`), `AbilityRunner.activate()` does the effect.
-- `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; learn new abilities in shops.
+- `inventory/hotbar.gd` (`Game.hotbar`, saved per slot): 6 slots — keys **1-3 abilities, 4-6 consumables** (fixed keys, not rebindable). Assign from the inventory (**Tab**) Items/Abilities tabs; abilities are earned through quests and the story, not sold in shops (an ability with a `price` above 0 would show up in shops again).
 - `ui/widgets/hotbar_bar.tscn`: the HUD strip (cooldown wipe, item counts); a display-only copy sits at the bottom of the inventory screen.
 
 ## Gore and death
