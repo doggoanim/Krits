@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://clp3wyeg4gtqe" path="res://world/world_enemy.gd" id="27_odmq1"]
 [ext_resource type="Resource" uid="uid://va83yaa50p61" path="res://world/well_lighting.tres" id="lvlenv_cfg"]
 [ext_resource type="Script" uid="uid://dnqb1fevwjobc" path="res://world/level_environment.gd" id="lvlenv_script"]
+[ext_resource type="Script" uid="uid://bowbmsr4846ax" path="res://world/prop_slot.gd" id="prop_slot_script"]
 [ext_resource type="PackedScene" path="res://world/water_spirit.tscn" id="water_spirit_scene"]
 [ext_resource type="Script" uid="uid://jd44f5eu0hho" path="res://world/level_ambience.gd" id="well_ambience_script"]
 [ext_resource type="AudioStream" uid="uid://jbaxxwgc2o27" path="res://sounds/Ambience/water_dungeon.ogg" id="well_ambience_stream"]
@@ -40,7 +41,6 @@
 [ext_resource type="Script" uid="uid://14e40ofhtu3q" path="res://world/cave_glimmers.gd" id="wl_glimmers"]
 [ext_resource type="Script" uid="uid://7nv4gjqr47y0" path="res://world/well_lights.gd" id="wl_lights"]
 [ext_resource type="Script" uid="uid://bdwv60cpmjh3n" path="res://world/water_life.gd" id="wl_waterlife"]
-[ext_resource type="Script" path="res://world/prop_slot.gd" id="prop_slot_script"]
 
 [sub_resource type="Resource" id="Resource_6mgso"]
 script = ExtResource("3_yugcs")
@@ -12677,28 +12677,28 @@ light_color = Color(1, 0.7, 0.35, 1)
 light_energy = 0.8
 omni_range = 3.5
 
-[node name="LandingBucket" type="Node3D" parent="."]
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -1.8, 0.0, -3.3)
+[node name="LandingBucket" type="Node3D" parent="." unique_id=2078748410]
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -1.3999999, 0, -1.4999998)
 script = ExtResource("prop_slot_script")
 kind = 12
 
-[node name="PathBones" type="Node3D" parent="."]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -3.2, -10.0, -24.0)
+[node name="PathBones" type="Node3D" parent="." unique_id=1163035181]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -3.2, -10, -24)
 script = ExtResource("prop_slot_script")
 kind = 13
 
-[node name="PathBucket" type="Node3D" parent="."]
-transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, 2.0, -10.0, -34.0)
+[node name="PathBucket" type="Node3D" parent="." unique_id=384848745]
+transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, 4.3, -10, -35.7)
 script = ExtResource("prop_slot_script")
 kind = 12
 
-[node name="ChestCrates" type="Node3D" parent="."]
-transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -13.6, -25.0, -33.6)
+[node name="ChestCrates" type="Node3D" parent="." unique_id=1322463444]
+transform = Transform3D(-0.9961949, 0, 0.08715601, 0, 1, 0, -0.08715601, 0, -0.9961949, -11.8, -25, -34.6)
 script = ExtResource("prop_slot_script")
 kind = 6
 
-[node name="ChestBones" type="Node3D" parent="."]
-transform = Transform3D(0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, 0.34202, -14.1, -25.0, -39.6)
+[node name="ChestBones" type="Node3D" parent="." unique_id=280151118]
+transform = Transform3D(0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, 0.34202, -11.3, -25, -37)
 script = ExtResource("prop_slot_script")
 kind = 13
 

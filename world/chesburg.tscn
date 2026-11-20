@@ -1306,18 +1306,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4198782, 1.2, -5.3904057)
 script = ExtResource("47_door_spawn")
 spawn_id = &"well_eject"
 
-[node name="WellBucketEast" type="Node3D" parent="Props"]
+[node name="WellBucketEast" type="Node3D" parent="Props" unique_id=810830276]
 transform = Transform3D(0.906308, 0, -0.422618, 0, 1, 0, 0.422618, 0, 0.906308, 5.2699, 0.04, -4.4904)
 script = ExtResource("21_nqvox")
 kind = 12
 
-[node name="WellBucketWest" type="Node3D" parent="Props"]
+[node name="WellBucketWest" type="Node3D" parent="Props" unique_id=554366047]
 transform = Transform3D(-0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, -0.766044, 1.5199, 0.04, -4.9904)
 script = ExtResource("21_nqvox")
 kind = 12
 
-[node name="WellCrates" type="Node3D" parent="Props"]
-transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, 2.8199, 0.04, -7.6904)
+[node name="WellCrates" type="Node3D" parent="Props" unique_id=1282119064]
+transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, 1.9479214, 0.04, -5.8794184)
 script = ExtResource("21_nqvox")
 kind = 6
 
