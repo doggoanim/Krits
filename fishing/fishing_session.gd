@@ -318,11 +318,13 @@ func _celebrate(id: StringName, item: ItemData) -> void:
 	fish.queue_free()
 	_shake(0.3)
 	_player.visual.squash_stretch(1.2, 0.88)
+	var record := Game.fish_log.record(id, _size)
 	ItemGet.give(id, 1, Callable(), _size)
 	var size_word := FishCatalog.size_word(_size)
 	var title := ("%s %s" % [size_word, item.display_name] if size_word != "" else item.display_name) if item else String(id)
 	# name (with its size word), then its rarity and length under it
-	_end("Caught: %s!\n%s · %s" % [title, FishCatalog.rarity_text(id), FishCatalog.length_text(id, _size)], &"", OUTRO_LENGTH[PlayerVisual.ANIM_FISH_SUCCESS] - CATCH_TIME)   # let the landing clip finish
+	var note := "\nNew species!" if record["first"] else ("\nNew record!" if record["biggest"] else ("\nSmallest yet!" if record["smallest"] else ""))
+	_end("Caught: %s!\n%s · %s%s" % [title, FishCatalog.rarity_text(id), FishCatalog.length_text(id, _size), note], &"", OUTRO_LENGTH[PlayerVisual.ANIM_FISH_SUCCESS] - CATCH_TIME)   # let the landing clip finish
 
 func _on_player_hurt(_from: Vector3) -> void:
 	_end("")

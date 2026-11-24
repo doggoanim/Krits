@@ -174,6 +174,7 @@ func _ready() -> void:
 	var ui := UiRoot.new()
 	add_child(ui)
 	ui.travel_menu.is_in_combat = func() -> bool: return encounters.busy
+	ui.fish_journal.is_in_combat = func() -> bool: return encounters.busy
 
 	Events.encounter_returned.connect(_on_encounter_returned)
 	Events.player_died.connect(_on_player_died)

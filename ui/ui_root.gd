@@ -6,6 +6,7 @@ extends CanvasLayer
 
 const HUD_SCENE := preload("res://ui/hud.tscn")
 const HOTBAR_SCENE := preload("res://ui/widgets/hotbar_bar.tscn")
+const FISH_JOURNAL_SCENE := preload("res://ui/fish_journal.tscn")
 const TRAVEL_MENU_SCENE := preload("res://ui/travel_menu.tscn")
 const INVENTORY_MENU_SCENE := preload("res://ui/inventory_menu.tscn")
 const SHOP_MENU_SCENE := preload("res://ui/shop_menu.tscn")
@@ -16,6 +17,7 @@ const TUTORIAL_POPUP_SCRIPT := preload("res://ui/widgets/tutorial_popup.gd")
 const SAVE_INDICATOR_SCENE := preload("res://ui/widgets/save_indicator.tscn")
 
 var travel_menu: TravelMenu
+var fish_journal: FishJournal
 
 func _ready() -> void:
 	add_child(HUD_SCENE.instantiate())
@@ -24,6 +26,8 @@ func _ready() -> void:
 	add_child(INVENTORY_MENU_SCENE.instantiate())   # hotkey I — see InventoryMenu
 	travel_menu = TRAVEL_MENU_SCENE.instantiate() as TravelMenu
 	add_child(travel_menu)
+	fish_journal = FISH_JOURNAL_SCENE.instantiate() as FishJournal
+	add_child(fish_journal)   # hotkey J — see FishJournal
 	add_child(SHOP_MENU_SCENE.instantiate())   # no toggle_action — opened by a ShopKeeper, see ShopMenu
 	add_child(PAUSE_MENU_SCENE.instantiate())   # Esc — see PauseMenu
 	add_child(SAVE_INDICATOR_SCENE.instantiate())   # "Saving..." badge — see SaveIndicator

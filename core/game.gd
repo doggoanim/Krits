@@ -16,6 +16,7 @@ var stats := PlayerStats.new()
 var inventory := Inventory.new()
 var hotbar := Hotbar.new()
 var story_flags := {}
+var fish_log := FishLog.new()   ## every fish caught: counts and biggest / smallest sizes (see FishLog)
 var quests := QuestLog.new()   ## which quests are done; progress is derived from flags + the bag (see QuestLog)
 var unlocked_spawns: Array[StringName] = []
 var last_spawn: StringName = &""
@@ -74,6 +75,7 @@ func delete_save(slot := -1) -> void:
 	stats = PlayerStats.new()
 	inventory = Inventory.new()
 	hotbar = Hotbar.new()
+	fish_log = FishLog.new()
 	story_flags.clear()
 	quests.completed.clear()
 	quests.reset_baseline()
@@ -116,7 +118,7 @@ func start_new_game(slot: int, new_name: String) -> void:
 func save() -> void:
 	var data := {
 		"player_name": player_name,
-		"stats": stats.to_dict(), "inventory": inventory.to_dict(), "hotbar": hotbar.to_dict(), "flags": story_flags, "quests": quests.to_dict(),
+		"stats": stats.to_dict(), "inventory": inventory.to_dict(), "hotbar": hotbar.to_dict(), "flags": story_flags, "quests": quests.to_dict(), "fish_log": fish_log.to_dict(),
 		"spawns": unlocked_spawns.map(func(s): return String(s)),
 		"last_spawn": String(last_spawn),
 	}
@@ -138,6 +140,7 @@ func load_game() -> bool:
 	hotbar.from_dict(parsed.get("hotbar", {}))
 	story_flags = parsed.get("flags", {})
 	quests.from_dict(parsed.get("quests", {}))
+	fish_log.from_dict(parsed.get("fish_log", {}))
 	unlocked_spawns.clear()
 	for s in parsed.get("spawns", []): unlocked_spawns.append(StringName(s))
 	last_spawn = StringName(parsed.get("last_spawn", ""))
