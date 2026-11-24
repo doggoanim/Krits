@@ -2,7 +2,7 @@
 class_name Seat
 extends Interactable
 ## A bench or log you can sit on. Press interact to sit (the player settles in facing the way
-## the seat faces), time speeds up and your health slowly comes back; press interact again, or
+## the seat faces), time speeds up and your health slowly comes back; press Jump, or
 ## get hurt, and you stand. `requires_fire` (a log by a campfire) only lets you sit while the
 ## fire next to it is lit.
 ##
@@ -22,6 +22,7 @@ enum Kind { BENCH, LOG }
 
 var _visual: Node3D
 var _sitting := false
+var _just_sat := false   ## skips the jump check on the frame you sat down
 var _sitter: Player   ## who is seated (kept apart from `player`, which clears when the area is left)
 var _fire: Campfire
 
@@ -53,7 +54,7 @@ func _can_interact() -> bool:
 	if player == null or player.dead or Game.in_combat or MenuBase.open_menu != null:
 		return false
 	if _sitting:
-		return true
+		return false   # no prompt while seated: Jump gets you up
 	if requires_fire and not _fire_lit():
 		return false
 	return player.machine.current_name == &"Ground"
@@ -62,15 +63,13 @@ func _fire_lit() -> bool:
 	return _fire != null and is_instance_valid(_fire) and _fire.is_lit()
 
 func _interact() -> void:
-	if _sitting:
-		_stand(true)
-	else:
+	if not _sitting:
 		_sit()
 
 func _sit() -> void:
 	_sitting = true
+	_just_sat = true
 	_sitter = player
-	_verb = "Stand up"
 	player.enter_cinematic()
 	player.global_position = global_position + global_basis.y * sit_height
 	player.face(global_basis.z)
@@ -78,11 +77,10 @@ func _sit() -> void:
 	player.visual.play(PlayerVisual.ANIM_CROUCH_IDLE)
 	WorldClock.rest_scale = rest_time_scale
 	Events.player_hurt.connect(_on_hurt)
-	Events.notice.emit("Resting...")
+	Events.notice.emit("Resting... press Jump to get up")
 
 func _stand(announce: bool) -> void:
 	_sitting = false
-	_verb = _verb_from("Press E to sit")
 	WorldClock.rest_scale = 1.0
 	if Events.player_hurt.is_connected(_on_hurt):
 		Events.player_hurt.disconnect(_on_hurt)
@@ -98,6 +96,10 @@ func _process(delta: float) -> void:
 	super(delta)
 	if not _sitting or Engine.is_editor_hint():
 		return
+	if Input.is_action_just_pressed(&"jump") and not _just_sat:
+		_stand(true)
+		return
+	_just_sat = false
 	if requires_fire and not _fire_lit():
 		_stand(true)   # the fire died down
 		return

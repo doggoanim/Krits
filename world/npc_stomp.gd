@@ -17,6 +17,7 @@ static func attach(target: Node3D) -> NpcStomp:
 	return stomp
 
 func _setup(box: AABB) -> void:
+	squash = Vector2(1.25, 0.62)
 	_ensure_barks(box.end.y)
 
 ## Characters without a Barks child get a silent one (chance 0) just for stomp lines.
@@ -36,10 +37,8 @@ func _barks() -> NpcBarks:
 	return null
 
 func _react(_player: Player) -> void:
-	if _parent is NPC:
-		(_parent as NPC).talk_pop()
-	else:
-		squash_pop(squash_target)
+	# A big cartoon squash and stretch on the model (not the body, so the collision stays put).
+	squash_pop((_parent as NPC).get_visual() if _parent is NPC else squash_target)
 	var barks := _barks()
 	if barks != null:
 		var line := NpcBarks.pick_stomp_line(String(_parent.name))

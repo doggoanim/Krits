@@ -261,6 +261,7 @@ static func crates_and_barrels() -> Node3D:
 	shape.position = Vector3(0.85, 0.45, 0.3)
 	body.add_child(shape)
 	root.add_child(body)
+	Smashable.make(body, &"prop_crate")   # smash it with a pound, dive or roll
 	return root
 
 ## A stack of split logs with a chopping stump and axe: origin on the ground, the pile runs along +X.

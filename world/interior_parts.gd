@@ -448,6 +448,7 @@ static func crate(size := 0.8) -> Node3D:
 	for sx in [-1.0, 1.0]:
 		HouseParts.box(root, Vector3(0.1, size + 0.07, size + 0.07), WOOD_DARK, Vector3(sx * (size * 0.5 - 0.06), size * 0.5, 0))
 	solid(root, Vector3(size, size, size), Vector3(0, size * 0.5, 0))
+	Smashable.make(root.get_node("Collision") as StaticBody3D, &"prop_crate")
 	return root
 
 ## A barrel with iron hoops.
@@ -464,6 +465,7 @@ static func barrel() -> Node3D:
 		HouseParts.cylinder(root, 0.43, 0.07, IRON, Vector3(0, hy, 0))
 	HouseParts.cylinder(root, 0.38, 0.03, WOOD_DARK, Vector3(0, 1.0, 0))   # lid
 	solid(root, Vector3(0.9, 1.0, 0.9), Vector3(0, 0.5, 0))
+	Smashable.make(root.get_node("Collision") as StaticBody3D, &"prop_barrel", Color(0.6, 0.42, 0.26))
 	return root
 
 ## A tied grain sack.

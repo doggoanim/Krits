@@ -97,7 +97,8 @@ func squash_pop(target: Node3D) -> void:
 		rest = target.scale
 		target.set_meta(&"stomp_rest_scale", rest)
 	var down := Vector3(squash.x, squash.y, squash.x)
+	var up := Vector3(2.0 - squash.x, lerpf(1.0, 1.0 / squash.y, 0.5), 2.0 - squash.x)   # springs past upright, thin and tall
 	_squash_tween = create_tween()
 	_squash_tween.tween_property(target, "scale", rest * down, 0.07).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_squash_tween.tween_property(target, "scale", rest * Vector3(1.0 / squash.x, 1.0 / squash.y * 0.9 + 0.1, 1.0 / squash.x), 0.12).set_trans(Tween.TRANS_SINE)
+	_squash_tween.tween_property(target, "scale", rest * up, 0.12).set_trans(Tween.TRANS_SINE)
 	_squash_tween.tween_property(target, "scale", rest, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
