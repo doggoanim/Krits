@@ -29,6 +29,7 @@ var _critter: Node3D
 var _t := randf() * 10.0
 var _excite := 0.0
 var _cool := 0.0
+var _last_step := -1
 
 func _init() -> void:
 	collision_layer = 0
@@ -74,7 +75,10 @@ func _process(delta: float) -> void:
 	_t += delta
 	_cool = maxf(_cool - delta, 0.0)
 	_excite = maxf(_excite - delta * 0.8, 0.0)
-	CritterVisuals.animate(_critter, NAMES[species], _t, minf(_excite, 1.0))
+	var step := Choppy.index()
+	if step != _last_step:   # held poses, like every other animal (see Choppy)
+		_last_step = step
+		CritterVisuals.animate(_critter, NAMES[species], Choppy.snap(_t), snappedf(minf(_excite, 1.0), 0.25))
 
 func _interact() -> void:
 	_cool = COOLDOWN
