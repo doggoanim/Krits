@@ -53,6 +53,8 @@ extends Area3D
 ## instead of the normal one — see _on_body_entered()/
 ## PlayerEffects.burst_water_splash()'s/PlayerAudio.play_water_splash()'s
 ## own `big` params.
+## Which fish live here (FishCatalog `areas`): &"river", &"lake", &"well"...
+@export var fish_area: StringName = &"river"
 @export var big_splash_fall_speed := 15.0
 
 ## Every WaterVolume currently in the tree, for the static at() lookup below

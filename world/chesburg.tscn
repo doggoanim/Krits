@@ -82,6 +82,11 @@
 [ext_resource type="Script" uid="uid://db2vbs67yn6cp" path="res://world/window_glow.gd" id="window_glow_script"]
 [ext_resource type="PackedScene" uid="uid://81wxfed5n0k3" path="res://assets/npcs/Yule.glb" id="yule_model"]
 [ext_resource type="Script" uid="uid://cqm40rgc7tlpf" path="res://world/npc.gd" id="yule_npc_script"]
+[ext_resource type="Script" path="res://world/play_prop.gd" id="ip_play_prop"]
+[ext_resource type="Script" path="res://world/kickable_prop.gd" id="ip_kickable"]
+[ext_resource type="Script" path="res://world/pettable.gd" id="ip_pettable"]
+[ext_resource type="Script" path="res://world/seat.gd" id="ip_seat"]
+[ext_resource type="Script" path="res://world/town_bell.gd" id="ip_town_bell"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m7dut"]
 albedo_color = Color(0.30980393, 0.72156864, 0.05882353, 1)
@@ -1684,6 +1689,7 @@ mesh = SubResource("CylinderMesh_o8fgi")
 
 [node name="WaterVolume" type="Area3D" parent="Props/lake_chesburg/Water2" unique_id=-1117962783]
 script = ExtResource("46_water_volume")
+fish_area = &"lake"
 size = Vector3(20, 0, 20)
 surface_y = 0.3465
 radius = 10.0
@@ -2287,3 +2293,143 @@ spawn_id = &"from_field"
 
 [editable path="Terrain/rock_terrain62"]
 [editable path="Terrain/rock_terrain83"]
+
+[node name="Interactives" type="Node3D" parent="Props"]
+
+[node name="TownBell" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+script = ExtResource("ip_town_bell")
+
+[node name="LogEast" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.4, 0, 15.2)
+script = ExtResource("ip_seat")
+kind = 1
+requires_fire = true
+fire_path = NodePath("../../HenryCampfire")
+
+[node name="LogSouth" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.5, 0, 17)
+script = ExtResource("ip_seat")
+kind = 1
+requires_fire = true
+fire_path = NodePath("../../HenryCampfire")
+
+[node name="BenchWell" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.38075, 0, -0.92468, 0, 1, 0, 0.92468, 0, -0.38075, 0, 0.1, -4)
+script = ExtResource("ip_seat")
+kind = 0
+
+[node name="BenchLake" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.33587, 0, 0.94191, 0, 1, 0, -0.94191, 0, -0.33587, -14, 0, -12)
+script = ExtResource("ip_seat")
+kind = 0
+
+[node name="PetCat" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.86603, 0, -0.5, 0, 1, 0, 0.5, 0, 0.86603, -4, 0, 2)
+script = ExtResource("ip_pettable")
+species = 0
+
+[node name="PetHen" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.93969, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.93969, 12, 0, 2)
+script = ExtResource("ip_pettable")
+species = 1
+
+[node name="PetBird" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.5, 0, -0.86603, 0, 1, 0, 0.86603, 0, 0.5, 6, 0.1, -2)
+script = ExtResource("ip_pettable")
+species = 2
+
+[node name="PetKoi" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -17.56, 1.62, -16.6)
+script = ExtResource("ip_pettable")
+species = 3
+
+[node name="Smash1" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 2)
+script = ExtResource("ip_play_prop")
+kind = 0
+
+[node name="Smash2" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.79864, 0, -0.60182, 0, 1, 0, 0.60182, 0, 0.79864, -14, 0, 2)
+script = ExtResource("ip_play_prop")
+kind = 0
+
+[node name="Smash3" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.27564, 0, -0.96126, 0, 1, 0, 0.96126, 0, 0.27564, -16, 0, 2)
+script = ExtResource("ip_play_prop")
+kind = 1
+
+[node name="Smash4" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.35837, 0, -0.93358, 0, 1, 0, 0.93358, 0, -0.35837, 6, 0, -6)
+script = ExtResource("ip_play_prop")
+kind = 1
+
+[node name="Smash5" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.84805, 0, -0.52992, 0, 1, 0, 0.52992, 0, -0.84805, 8, 0, -6)
+script = ExtResource("ip_play_prop")
+kind = 2
+
+[node name="Smash6" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.99619, 0, 0.08716, 0, 1, 0, -0.08716, 0, -0.99619, 10, 0, -6)
+script = ExtResource("ip_play_prop")
+kind = 0
+
+[node name="Smash7" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.74314, 0, 0.66913, 0, 1, 0, -0.66913, 0, -0.74314, -10, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 2
+
+[node name="Smash8" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.19081, 0, 0.98163, 0, 1, 0, -0.98163, 0, -0.19081, -8, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 1
+
+[node name="Smash9" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.43837, 0, 0.89879, 0, 1, 0, -0.89879, 0, 0.43837, -6, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 0
+
+[node name="Smash10" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.89101, 0, 0.45399, 0, 1, 0, -0.45399, 0, 0.89101, 10, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 0
+
+[node name="Smash11" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.98481, 0, -0.17365, 0, 1, 0, 0.17365, 0, 0.98481, 12, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 1
+
+[node name="Smash12" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.682, 0, -0.73135, 0, 1, 0, 0.73135, 0, 0.682, 14, 0, 10)
+script = ExtResource("ip_play_prop")
+kind = 2
+
+[node name="Shroom1" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 4)
+script = ExtResource("ip_play_prop")
+kind = 3
+
+[node name="Shroom2" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(0.34202, 0, -0.93969, 0, 1, 0, 0.93969, 0, 0.34202, -12, 0, 16)
+script = ExtResource("ip_play_prop")
+kind = 3
+
+[node name="Shroom3" type="StaticBody3D" parent="Props/Interactives"]
+transform = Transform3D(-0.76604, 0, -0.64279, 0, 1, 0, 0.64279, 0, -0.76604, 4, 0, 12)
+script = ExtResource("ip_play_prop")
+kind = 3
+
+[node name="KickBall" type="RigidBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.1, -2)
+script = ExtResource("ip_kickable")
+kind = 0
+
+[node name="KickBucket1" type="RigidBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.1, -10)
+script = ExtResource("ip_kickable")
+kind = 1
+
+[node name="KickBucket2" type="RigidBody3D" parent="Props/Interactives"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.1, -10)
+script = ExtResource("ip_kickable")
+kind = 1

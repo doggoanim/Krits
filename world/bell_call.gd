@@ -22,6 +22,7 @@ const BLEND_SPEED := 6.0
 const CALLING_FLAG := &"bell_calling"
 const DONE_FLAG := &"entered_mayor_house"
 const POINT_GROUP := &"bell_point"
+const GROUP := &"bell_call"   ## so a TownBell the player rings can find this and ring through the same muffled bus
 const SHOCKWAVE := preload("res://world/bell_shockwave.gd")
 
 var _player: AudioStreamPlayer
@@ -31,6 +32,7 @@ var _indoors := false
 var _blend := 1.0   ## 1 = fully muffled (indoors), 0 = open air
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_setup_bus()
 	_player = AudioStreamPlayer.new()
 	_player.stream = BELL_SFX
@@ -59,13 +61,17 @@ func stop() -> void:
 func set_indoors(indoors: bool) -> void:
 	_indoors = indoors
 
-func ring() -> void:
+## Plays the bell. The shockwave bursts from `at` (default: the level's bell_point).
+func ring(at := Vector3.INF) -> void:
 	_player.play()
-	var point := get_tree().get_first_node_in_group(POINT_GROUP) as Node3D
-	if point != null:
-		var wave: Node3D = SHOCKWAVE.new()
-		point.get_tree().current_scene.add_child(wave)
-		wave.global_position = point.global_position
+	if at == Vector3.INF:
+		var point := get_tree().get_first_node_in_group(POINT_GROUP) as Node3D
+		if point == null:
+			return
+		at = point.global_position
+	var wave: Node3D = SHOCKWAVE.new()
+	get_tree().current_scene.add_child(wave)
+	wave.global_position = at
 
 func _process(delta: float) -> void:
 	_blend = move_toward(_blend, 1.0 if _indoors else 0.0, BLEND_SPEED * delta)

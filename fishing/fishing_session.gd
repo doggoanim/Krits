@@ -136,7 +136,7 @@ func _begin(player: Player, water: WaterVolume, spot: Vector3) -> void:
 	_player = player
 	_water = water
 	_spot = spot
-	_catch = FishCatalog.roll()
+	_catch = FishCatalog.roll(water.fish_area, WorldClock.period())
 	_size = FishCatalog.roll_size()
 	_timer = randf_range(WAIT_TIME.x, WAIT_TIME.y)
 	player.enter_cinematic()

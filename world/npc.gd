@@ -72,6 +72,7 @@ func _ready() -> void:
 		_refresh_editor_preview()
 		return
 	super()
+	add_to_group(&"npc")
 	NpcStomp.attach(self)
 	if not dialogue_file.is_empty():
 		_script = DialogueParser.load_file(dialogue_file)

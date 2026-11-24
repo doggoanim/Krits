@@ -118,6 +118,15 @@ static func moon_puffer() -> ItemData:
 static func old_sturgeon() -> ItemData:
 	return _make(&"old_sturgeon", ItemData.Category.MATERIAL, Color(0.45, 0.55, 0.5), 0, 220)
 
+static func blind_cavefish() -> ItemData:
+	return _make(&"blind_cavefish", ItemData.Category.MATERIAL, Color(0.95, 0.88, 0.88), 0, 14)
+
+static func glow_guppy() -> ItemData:
+	return _make(&"glow_guppy", ItemData.Category.MATERIAL, Color(0.45, 0.95, 0.9), 0, 26)
+
+static func spirit_koi() -> ItemData:
+	return _make(&"spirit_koi", ItemData.Category.MATERIAL, Color(0.7, 0.88, 1.0), 0, 180)
+
 # ---------------------------------------------------------------- key items
 static func key() -> ItemData:
 	var i := _make(&"key", ItemData.Category.KEY,
@@ -160,7 +169,8 @@ static func lantern() -> ItemData:
 static func all_items() -> Array[ItemData]:
 	return [health_potion(), shield_restore(), bread_roll(), jelly_bun(), shield_salve(), greater_health_potion(), spirit_elixir(),
 		slime_goo(), rusty_cog(), piercer_spike(), cave_moss(), glow_shard(), old_coin(), spider_silk(), key(), water_spirits(), lantern(), yule_ball(), hiker_pack(), minnow(), perch(), silver_trout(), golden_koi(),
-		bluegill(), carp(), catfish(), pike(), rainbow_trout(), lantern_eel(), moon_puffer(), old_sturgeon()]
+		bluegill(), carp(), catfish(), pike(), rainbow_trout(), lantern_eel(), moon_puffer(), old_sturgeon(),
+		blind_cavefish(), glow_guppy(), spirit_koi()]
 
 static func by_id(id: StringName) -> ItemData:
 	for item in all_items():

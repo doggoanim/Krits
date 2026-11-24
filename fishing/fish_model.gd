@@ -41,6 +41,11 @@ const SPECS := {
 			"belly": Color(1.0, 0.98, 0.9), "extras": ["spikes", "big_eyes"]},
 	&"old_sturgeon": {"len": 0.88, "h": 0.28, "w": 0.26, "pattern": "", "belly": Color(0.85, 0.85, 0.75),
 			"extras": ["snout", "plates", "whiskers"]},
+	&"blind_cavefish": {"len": 0.78, "h": 0.26, "w": 0.22, "pattern": "", "belly": Color(1.0, 0.95, 0.95), "fin": Color(0.95, 0.85, 0.85)},
+	&"glow_guppy": {"len": 0.7, "h": 0.3, "w": 0.2, "pattern": "spots", "accent": Color(0.4, 1.0, 0.9),
+			"fin": Color(0.5, 0.9, 1.0), "extras": ["long_fin"]},
+	&"spirit_koi": {"len": 0.82, "h": 0.34, "w": 0.26, "pattern": "patches", "accent": Color(0.6, 0.85, 1.0),
+			"fin": Color(0.75, 0.9, 1.0), "belly": Color(0.95, 0.98, 1.0), "extras": ["whiskers", "long_fin"]},
 }
 const DEFAULT_SPEC := {"len": 0.8, "h": 0.38, "w": 0.24, "pattern": ""}
 

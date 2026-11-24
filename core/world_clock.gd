@@ -19,6 +19,9 @@ signal hour_changed(hour: int)   ## the whole hour just ticked over (0..23)
 @export var start_hour := 9.0
 @export var frozen := false           ## true = time stands still (cutscenes, tests)
 var time_scale := 1.0
+## Extra speed-up on top of time_scale that gameplay asks for (a Seat while you rest). Kept apart
+## because DebugTools rewrites time_scale every frame.
+var rest_scale := 1.0
 
 ## Current time in hours, 0.0 <= hour < 24.0 (13.5 = 13:30).
 var hour := 9.0
@@ -39,7 +42,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if frozen:
 		return
-	hour = fposmod(hour + delta * time_scale * 24.0 / maxf(day_length, 1.0), 24.0)
+	hour = fposmod(hour + delta * time_scale * rest_scale * 24.0 / maxf(day_length, 1.0), 24.0)
 	var whole := int(hour)
 	if whole != _last_hour:
 		_last_hour = whole

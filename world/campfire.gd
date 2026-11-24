@@ -47,6 +47,10 @@ func _ready() -> void:
 		return
 	_update(true)
 
+## True while the fire is burning (always, or once it's dark enough for lamps).
+func is_lit() -> bool:
+	return always_lit or WorldClock.lamp_amount() > 0.05
+
 func _process(_delta: float) -> void:
 	_update(false)
 

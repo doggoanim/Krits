@@ -6,34 +6,60 @@ extends RefCounted
 ##   weight      relative chance of being the catch
 ##   speed       how fast the fish darts about in the reel-in minigame (bar widths per second)
 ##   zone        width of the catch zone you steer, as a fraction of the bar (smaller = harder)
+##   areas       optional: only caught in these water areas (WaterVolume.fish_area); no key = anywhere
+##   times       optional: only caught in these parts of the day (WorldClock.period()); no key = any time
 ##   length      metres long at the normal size (a caught fish is this x its random size, see roll_size())
 
 const FISH: Array[Dictionary] = [
 	{"id": &"minnow", "weight": 40.0, "speed": 0.35, "zone": 0.30, "length": 0.25},
-	{"id": &"perch", "weight": 30.0, "speed": 0.5, "zone": 0.25, "length": 0.4},
-	{"id": &"silver_trout", "weight": 16.0, "speed": 0.7, "zone": 0.21, "length": 0.5},
-	{"id": &"golden_koi", "weight": 5.0, "speed": 0.95, "zone": 0.17, "length": 0.55},
-	{"id": &"bluegill", "weight": 14.0, "speed": 0.4, "zone": 0.28, "length": 0.35},
-	{"id": &"carp", "weight": 10.0, "speed": 0.45, "zone": 0.26, "length": 0.6},
-	{"id": &"catfish", "weight": 6.0, "speed": 0.6, "zone": 0.23, "length": 0.65},
-	{"id": &"pike", "weight": 4.0, "speed": 0.8, "zone": 0.2, "length": 0.8},
-	{"id": &"rainbow_trout", "weight": 3.0, "speed": 0.75, "zone": 0.19, "length": 0.55},
-	{"id": &"lantern_eel", "weight": 1.5, "speed": 0.9, "zone": 0.16, "length": 0.9},
-	{"id": &"moon_puffer", "weight": 1.0, "speed": 0.95, "zone": 0.15, "length": 0.4},
-	{"id": &"old_sturgeon", "weight": 0.5, "speed": 1.1, "zone": 0.12, "length": 1.0},
+	{"id": &"perch", "weight": 30.0, "speed": 0.5, "zone": 0.25, "length": 0.4, "areas": [&"lake", &"river"]},
+	{"id": &"silver_trout", "weight": 16.0, "speed": 0.7, "zone": 0.21, "length": 0.5, "areas": [&"river"], "times": [&"morning", &"evening"]},
+	{"id": &"golden_koi", "weight": 5.0, "speed": 0.95, "zone": 0.17, "length": 0.55, "areas": [&"lake"], "times": [&"day", &"morning"]},
+	{"id": &"bluegill", "weight": 14.0, "speed": 0.4, "zone": 0.28, "length": 0.35, "areas": [&"lake", &"river"], "times": [&"morning", &"day"]},
+	{"id": &"carp", "weight": 10.0, "speed": 0.45, "zone": 0.26, "length": 0.6, "areas": [&"lake"]},
+	{"id": &"catfish", "weight": 6.0, "speed": 0.6, "zone": 0.23, "length": 0.65, "areas": [&"river", &"lake"], "times": [&"evening", &"night"]},
+	{"id": &"pike", "weight": 4.0, "speed": 0.8, "zone": 0.2, "length": 0.8, "areas": [&"river"]},
+	{"id": &"rainbow_trout", "weight": 3.0, "speed": 0.75, "zone": 0.19, "length": 0.55, "areas": [&"river"], "times": [&"morning"]},
+	{"id": &"lantern_eel", "weight": 1.5, "speed": 0.9, "zone": 0.16, "length": 0.9, "areas": [&"river", &"lake", &"well"], "times": [&"night"]},
+	{"id": &"moon_puffer", "weight": 1.0, "speed": 0.95, "zone": 0.15, "length": 0.4, "areas": [&"lake"], "times": [&"night"]},
+	{"id": &"old_sturgeon", "weight": 0.5, "speed": 1.1, "zone": 0.12, "length": 1.0, "areas": [&"river"], "times": [&"morning", &"night"]},
+	{"id": &"blind_cavefish", "weight": 40.0, "speed": 0.4, "zone": 0.28, "length": 0.3, "areas": [&"well"]},
+	{"id": &"glow_guppy", "weight": 25.0, "speed": 0.6, "zone": 0.22, "length": 0.2, "areas": [&"well"]},
+	{"id": &"spirit_koi", "weight": 2.0, "speed": 1.0, "zone": 0.14, "length": 0.7, "areas": [&"well"], "times": [&"night", &"evening"]},
 ]
 
-## A random catch, weighted.
-static func roll() -> Dictionary:
+## A random catch for `area` (a WaterVolume.fish_area) at `period` (WorldClock.period()),
+## weighted. A fish with no `areas` / `times` can turn up anywhere / any time. With no argument
+## every fish counts.
+static func roll(area: StringName = &"", period: StringName = &"") -> Dictionary:
+	var pool := available(area, period)
 	var total := 0.0
-	for f in FISH:
+	for f in pool:
 		total += float(f["weight"])
 	var pick := randf() * total
-	for f in FISH:
+	for f in pool:
 		pick -= float(f["weight"])
 		if pick <= 0.0:
 			return f
-	return FISH[0]
+	return pool[0]
+
+## The fish that can be caught in `area` at `period` (never empty: falls back to the fish that
+## live anywhere).
+static func available(area: StringName = &"", period: StringName = &"") -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for f in FISH:
+		var areas: Array = f.get("areas", [])
+		var times: Array = f.get("times", [])
+		if area != &"" and not areas.is_empty() and not areas.has(area):
+			continue
+		if period != &"" and not times.is_empty() and not times.has(period):
+			continue
+		out.append(f)
+	if out.is_empty():
+		for f in FISH:
+			if not f.has("areas") and not f.has("times"):
+				out.append(f)
+	return out
 
 ## How rare a fish is, as the N in "1 in N" (its share of the total catch
 ## weight, rounded to a whole number; at least 1).
