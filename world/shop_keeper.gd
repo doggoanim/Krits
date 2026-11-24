@@ -9,6 +9,10 @@ extends Interactable
 ## "small_backpack"). Leave empty to sell everything that has a price.
 @export var stock: PackedStringArray = PackedStringArray()
 
+func _ready() -> void:
+	super()
+	NpcStomp.attach(self)
+
 func _can_interact() -> bool:
 	return (player != null and not player.dead
 		and player.machine.current_name == &"Ground"

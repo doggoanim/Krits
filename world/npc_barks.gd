@@ -118,6 +118,16 @@ static func pick_line(who: String) -> String:
 	var options := source.split("|", false)
 	return options[randi() % options.size()].strip_edges()
 
+## A line for being stomped on: the character's own `stomp` key, else the shared [Stomp] section.
+static func pick_stomp_line(who: String) -> String:
+	var cfg := _load()
+	for section in [who, "Stomp"]:
+		if cfg.has_section(section) and cfg.has_section_key(section, "stomp"):
+			var options := String(cfg.get_value(section, "stomp")).split("|", false)
+			if not options.is_empty():
+				return options[randi() % options.size()].strip_edges()
+	return ""
+
 static func _load() -> ConfigFile:
 	if _cfg == null:
 		_cfg = ConfigFile.new()

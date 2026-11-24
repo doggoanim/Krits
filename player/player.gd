@@ -1179,6 +1179,15 @@ func bounce_off_orb(combo := 1, toward: Variant = null, assist := ORB_ARC_ASSIST
 	audio.play_orb_attack(combo)
 	machine.transition_to(&"Air")
 
+## A hop off something's head (NpcStomp): a plain upward pop, a fraction (`lift`) of the orb
+## bounce, keeping half the sideways speed. No attack pose or orb sound; the head plays its own.
+func bounce_off_head(lift := 0.85) -> void:
+	set_hvel(get_hvel() * 0.5)
+	velocity.y = config.orb_bounce_velocity * lift
+	can_dive = true
+	visual.jump_launch()
+	machine.transition_to(&"Air")
+
 const ORB_ARC_ASSIST := 0.35      ## fraction of the full arc to the target that a bounce actually pushes you along — a nudge, not autopilot
 const ORB_ARC_MAX_SPEED := 8.0    ## horizontal speed cap for that nudge
 
