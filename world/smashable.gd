@@ -106,14 +106,23 @@ func _smash(p: Player) -> void:
 	var center := global_transform * box.get_center()
 	var parent := get_parent() as Node3D
 	if parent != null:
-		VFX.shatter(parent, center, rubble, 1.1)
-		VFX.shatter(parent, center + Vector3.UP * 0.2, rubble.lightened(0.15), 0.8)
 		VFX.smoke_puff(parent, center, 0.8)
+	var push := _push_dir(p, center)
+	Debris.burst(self, AABB(center - box.size * 0.5, box.size), rubble, wooden, push)
 	PropSfx.play_at(self, PropSfx.WOOD_CHOP if wooden else PropSfx.TINK, center, break_pitch if wooden else Vector2(1.5, 1.9))
 	if p.camera_rig:
 		p.camera_rig.shake(0.2)
 	_give_drops()
 	_remove()
+
+## Which way the pieces are thrown: onward with a dive or roll, straight out and up for a pound.
+func _push_dir(p: Player, center: Vector3) -> Vector3:
+	var h := p.get_hvel()
+	if h.length() > 2.0:
+		return h.normalized() * clampf(h.length() / 10.0, 0.5, 1.6)
+	var away := center - p.global_position
+	away.y = 0.0
+	return away.normalized() * 0.6
 
 ## What happens to the thing itself. Default (a retrofitted block): hide the meshes around it
 ## and stop colliding. PlayProp overrides this to delete itself.
